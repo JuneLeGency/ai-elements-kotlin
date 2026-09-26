@@ -156,4 +156,13 @@
     <plurals name="ai_show_all_frames">
         <item quantity="other">显示全部 %d 帧</item>
     </plurals>
+    <string name="ai_subagent">子 Agent</string>
+    <string name="ai_subagent_task">任务</string>
+    <string name="ai_subagent_thinking">思考中…</string>
+    <string name="ai_subagent_calling">正在调用 %1$s</string>
+    <string name="ai_subagent_writing">撰写中…</string>
+    <string name="ai_subagent_waiting">启动中…</string>
+    <string name="ai_subagent_steps">%1$d 步</string>
+    <string name="ai_skill">技能</string>
+    <string name="ai_tool_via">来自 %1$s</string>
 </resources>

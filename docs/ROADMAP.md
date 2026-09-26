@@ -36,19 +36,19 @@ UI = this library.
 
 | Item | Library / spec | Status |
 |---|---|---|
-| AI SDK 6 UI Message Stream: full `UIMessage` history, tool approval (`tool-approval-request` → `approval-responded`), client-side tools, preliminary output, `UIMessage` sub-agent output, metadata | AI SDK 6 | 🟡 live ✅ (LiveHarnessServerTest: delegate, plan, skill, approval approve/deny); fixtures pending |
-| AG-UI 1.0: frontend tools, interrupts + `resume`, `SUBAGENT_*`, state / activity (JSON Patch), steps, `RUN_FINISHED.usage` | AG-UI 1.0, official `kotlin-core` types, `kotlin-json-patch` | 🟡 live ✅ (5/5 incl. frontend tool and interrupts); fixtures pending |
+| AI SDK 6 UI Message Stream: full `UIMessage` history, tool approval (`tool-approval-request` → `approval-responded`), client-side tools, preliminary output, `UIMessage` sub-agent output, metadata | AI SDK 6 | ✅ live (LiveHarnessServerTest) + recorded fixtures (RecordedProtocolTest) |
+| AG-UI 1.0: frontend tools, interrupts + `resume`, `SUBAGENT_*`, state / activity (JSON Patch), steps, `RUN_FINISHED.usage` | AG-UI 1.0, official `kotlin-core` types, `kotlin-json-patch` | ✅ live 5/5 + recorded fixtures incl. official-encoder SUBAGENT/STATE_DELTA/ACTIVITY/usage |
 | ✅ decoding on the official `com.ag-ui.community:kotlin-core` types. ⬜ upstream PR for `SUBAGENT_*` / `ACTIVITY_*` and the kotlinx-datetime 0.7 fix (#2772) | ag-ui Kotlin SDK | ⬜ |
-| MCP 2026-07-28 stateless + legacy session fallback, `Mcp-Method` / `Mcp-Name` / `x-mcp-header`, progress, OAuth discovery (RFC 9728 / 8414 / 7591 / 8707) | hand-written (official Kotlin SDK stops at 2025-11-25); switch when it ships 2026-07-28 | 🟡 written, tests pending |
+| MCP 2026-07-28 stateless + legacy session fallback, `Mcp-Method` / `Mcp-Name` / `x-mcp-header`, progress, OAuth discovery (RFC 9728 / 8414 / 7591 / 8707) | hand-written (official Kotlin SDK stops at 2025-11-25); switch when it ships 2026-07-28 | ✅ live vs official `mcp` 2.2 (stateless) and `mcp` 1.x (legacy fallback) + unit tests; OAuth discovery untested live |
 | A2A 1.0 (0.3 compatible) as provider and as sub-agent | official `a2a-java-sdk` + its Android HTTP client | ✅ live 3/3 against the official Python `a2a-sdk` |
 
 ### W2 · Agent capabilities (Harness parity)
 
 | Capability | Contract (same as Pydantic AI Harness) | Status |
 |---|---|---|
-| Sub-agents | `delegate_task(agent_name, task)`, static roster instruction | 🟡 core done, tests pending |
-| Skills | Agent Skills `SKILL.md`; `load_capability(id)` → `# Skill: <name>` | 🟡 core done, tests pending |
-| MCP tools | `<server>__<tool>`, approval unless `readOnlyHint` | 🟡 |
+| Sub-agents | `delegate_task(agent_name, task)`, static roster instruction | ✅ unit tests (nested run, shared approver); on-device real-model run pending |
+| Skills | Agent Skills `SKILL.md`; `load_capability(id)` → `# Skill: <name>` | ✅ unit tests (parse rules, zip install, zip slip) |
+| MCP tools | `<server>__<tool>`, approval unless `readOnlyHint` | ✅ live (McpToolset across servers, failure isolation) |
 | Planning | `write_plan`, `read_plan`, `add_task`, `update_task_status(es)`, `remove_task` | ⬜ harness module |
 | FileSystem | `read_file`, `write_file`, `edit_file`, `list_directory`, `search_files`, `find_files`, `create_directory`, `file_info` | ⬜ harness module |
 | Shell | `run_command`, `start_command`, `check_command`, `stop_command` | ⬜ harness + sandbox |
@@ -86,14 +86,14 @@ reference only, never copied).
 | MCP server (official `mcp` 2.2, both eras) at `/mcp` | ✅ verified with curl |
 | A2A agent (official `a2a-sdk` 1.1, 1.0 + 0.3 compat) at `/a2a` | ✅ |
 | Keyword-scripted offline model exercising every capability (for fixtures and E2E) | ✅ |
-| Real-model runs through a proxy | ⬜ needs the user's authorization for an upstream key |
+| Real-model runs | ⬜ proxy upstreams are dead (435 / revoked); `CODEX_AUTH_FILE` option added — waiting for the user to start it with the authorized account |
 
 ### W4 · UI elements
 
 | Item | Status |
 |---|---|
-| `Subagent` element (nested run, live activity, nested approvals) for `delegate_task` / AG-UI subagents / AI SDK `UIMessage` outputs | ⬜ |
-| Tool titles (`title`), preliminary output, skill and MCP badges in `ToolCall` | ⬜ |
+| `Subagent` element (nested run, live activity, nested approvals) for `delegate_task` / AG-UI subagents / AI SDK `UIMessage` outputs | ✅ component tests 10/10 on emulator; Gallery sample |
+| Tool titles (`title`), preliminary output, skill and MCP badges in `ToolCall` | ✅ |
 | AG-UI state / activity rendering (`state.plan` → `Plan`) | ⬜ |
 | A2A agent card view (extend `Agent`) | ⬜ |
 

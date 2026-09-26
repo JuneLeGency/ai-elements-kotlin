@@ -85,14 +85,9 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
                     Icon(Icons.Outlined.Build, null, Modifier.size(AiSize.compactIcon), scheme.onTertiaryContainer)
                 }
                 Column(Modifier.weight(1f)) {
+                    ToolTitle(part)
                     Text(
-                        part.name,
-                        style = MaterialTheme.typography.titleSmall.copy(fontFamily = LocalCodeFontFamily.current),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        text = part.input.compactJson().ifBlank { "…" },
+                        text = subtitle(part),
                         style = MaterialTheme.typography.bodySmall,
                         color = scheme.onSurfaceVariant,
                         maxLines = 1,
@@ -109,7 +104,7 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
             }
             if (part.state == ToolState.APPROVAL_REQUESTED) {
                 Confirmation(
-                    title = stringResource(R.string.ai_allow_tool, part.name),
+                    title = stringResource(R.string.ai_allow_tool, part.displayName),
                     description = part.input.compactJson().ifBlank { stringResource(R.string.ai_no_arguments) },
                     onApprove = onApproval?.let { { it(true) } },
                     onDeny = onApproval?.let { { it(false) } },
@@ -134,9 +129,44 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
     }
 }
 
+/**
+ * The tool's name line: its title when it has one (e.g. "Convert units" with an
+ * MCP server chip), a Skill chip for skill loads, else the raw name in code type.
+ */
+@Composable
+private fun ToolTitle(part: ToolPart) {
+    val (title, badge) = when {
+        part.name == LOAD_CAPABILITY -> (part.title ?: part.name) to stringResource(R.string.ai_skill)
+        part.title != null && " · " in part.title!! -> part.title!!.substringBefore(" · ") to part.title!!.substringAfter(" · ")
+        else -> part.displayName to null
+    }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            title,
+            style = if (part.title == null) MaterialTheme.typography.titleSmall.copy(fontFamily = LocalCodeFontFamily.current) else MaterialTheme.typography.titleSmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false),
+        )
+        badge?.let {
+            Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = MaterialTheme.shapes.extraSmall) {
+                Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSecondaryContainer, maxLines = 1, modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp))
+            }
+        }
+    }
+}
+
+/** Live progress while a long tool reports it, else the arguments. */
+private fun subtitle(part: ToolPart): String =
+    if (part.preliminary && part.isStreaming && !part.output.isNullOrBlank()) part.output!!.lineSequence().last { it.isNotBlank() }
+    else part.input.compactJson().ifBlank { "…" }
+
+/** Pydantic AI's deferred-capability loader (skills). */
+private const val LOAD_CAPABILITY = "load_capability"
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun StatusPill(state: ToolState) {
+internal fun StatusPill(state: ToolState) {
     val scheme = MaterialTheme.colorScheme
     val (label, container, content) = when (state) {
         ToolState.INPUT_STREAMING, ToolState.INPUT_AVAILABLE -> Triple(stringResource(R.string.ai_tool_running), scheme.secondaryContainer, scheme.onSecondaryContainer)

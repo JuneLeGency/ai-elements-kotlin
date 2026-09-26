@@ -162,4 +162,13 @@
         <item quantity="one">Show %d frame</item>
         <item quantity="other">Show all %d frames</item>
     </plurals>
+    <string name="ai_subagent">Sub-agent</string>
+    <string name="ai_subagent_task">Task</string>
+    <string name="ai_subagent_thinking">Thinking…</string>
+    <string name="ai_subagent_calling">Calling %1$s</string>
+    <string name="ai_subagent_writing">Writing…</string>
+    <string name="ai_subagent_waiting">Starting…</string>
+    <string name="ai_subagent_steps">%1$d steps</string>
+    <string name="ai_skill">Skill</string>
+    <string name="ai_tool_via">via %1$s</string>
 </resources>

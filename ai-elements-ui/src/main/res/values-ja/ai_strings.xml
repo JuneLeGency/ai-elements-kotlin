@@ -156,4 +156,13 @@
     <plurals name="ai_show_all_frames">
         <item quantity="other">全 %d フレームを表示</item>
     </plurals>
+    <string name="ai_subagent">サブエージェント</string>
+    <string name="ai_subagent_task">タスク</string>
+    <string name="ai_subagent_thinking">考え中…</string>
+    <string name="ai_subagent_calling">%1$s を呼び出し中</string>
+    <string name="ai_subagent_writing">作成中…</string>
+    <string name="ai_subagent_waiting">開始中…</string>
+    <string name="ai_subagent_steps">%1$d ステップ</string>
+    <string name="ai_skill">スキル</string>
+    <string name="ai_tool_via">%1$s 経由</string>
 </resources>

@@ -33,6 +33,10 @@ import dev.ai.elements.ui.chat.Question
 import dev.ai.elements.ui.chat.QuestionAnswer
 import dev.ai.elements.ui.chat.QuestionOption
 import dev.ai.elements.ui.chat.ToolCall
+import dev.ai.elements.ui.chat.ToolPartView
+import dev.ai.elements.core.model.Message
+import dev.ai.elements.core.model.Role
+import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.ui.code.EnvironmentVariable
 import dev.ai.elements.ui.code.EnvironmentVariables
 import dev.ai.elements.ui.theme.AiElementsTheme
@@ -172,6 +176,27 @@ class ElementsTest {
         // The text is one paragraph with a link per segment: tap the second one.
         compose.onNode(hasText("Second sentence.", substring = true)).performTouchInputOnText("Second")
         assertEquals(listOf(2_000L), seeks)
+    }
+
+    @Test fun subagent_opensForNestedApproval_andAnswersWithTheNestedCallId() {
+        val approvals = mutableListOf<Pair<String, Boolean>>()
+        val nested = Message("sub", Role.ASSISTANT, listOf(ToolPart("inner-1", "notes__save_note", ToolState.APPROVAL_REQUESTED, "{}", title = "Save note · Notes")))
+        val call = ToolPart("call-1", "delegate_task", ToolState.INPUT_AVAILABLE, """{"agent_name":"researcher","task":"Save a note"}""", title = "researcher", subagent = nested)
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) { ToolPartView(call, onToolApproval = { id, ok -> approvals += id to ok }) }
+        }
+        compose.onNodeWithTag("subagent-researcher").assertExists()
+        // Opened by itself: the task and the nested confirmation are visible.
+        compose.onNodeWithText("Save a note").assertExists()
+        compose.onNodeWithText(s(R.string.ai_approve)).performClick()
+        assertEquals(listOf("inner-1" to true), approvals)
+    }
+
+    @Test fun subagent_collapsedSummaryShowsTheAnswer() {
+        val nested = Message("sub", Role.ASSISTANT, listOf(TextPart("t", "**AG-UI** streams agent events.")))
+        val call = ToolPart("call-2", "delegate_task", ToolState.OUTPUT_AVAILABLE, """{"agent_name":"researcher","task":"Explain"}""", output = "AG-UI streams agent events.", title = "researcher", subagent = nested)
+        compose.setContent { AiElementsTheme(dynamicColor = false) { ToolPartView(call) } }
+        compose.onNodeWithTag("subagent-activity", useUnmergedTree = true).assertTextEquals("AG-UI streams agent events.")
     }
 }
 

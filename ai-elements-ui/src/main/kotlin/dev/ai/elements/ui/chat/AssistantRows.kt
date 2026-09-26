@@ -126,7 +126,7 @@ internal fun AssistantRowItem(
                 is AssistantRow.BlockRow -> CitationLinks(row.citations) { MarkdownBlock(row.text) }
                 is AssistantRow.PartRow -> when (val part = row.part) {
                     is ReasoningPart -> Reasoning(part)
-                    is ToolPart -> ToolCall(part, onApproval = onToolApproval?.let { cb -> { approved -> cb(part.id, approved) } })
+                    is ToolPart -> ToolPartView(part, onToolApproval = onToolApproval)
                     is DataPart -> DataPartView(part)
                     is FilePart -> FileAttachment(part)
                     is TextPart, is SourcePart -> Unit

@@ -75,6 +75,7 @@ import dev.ai.elements.ui.chat.StepStatus
 import dev.ai.elements.ui.chat.Suggestions
 import dev.ai.elements.ui.chat.Task
 import dev.ai.elements.ui.chat.ToolCall
+import dev.ai.elements.ui.chat.ToolPartView
 import dev.ai.elements.ui.code.WebPreview
 import dev.ai.elements.ui.workflow.WorkflowCanvas
 import dev.ai.elements.ui.chat.WorkflowStep
@@ -182,6 +183,32 @@ private val sampleAssistant = Message(
     ),
 )
 
+/** A delegation to a researcher sub-agent, live (with a nested tool awaiting approval) or finished. */
+private fun sampleDelegation(running: Boolean): ToolPart {
+    val nested = Message(
+        "g-sub", Role.ASSISTANT,
+        listOf(
+            ReasoningPart("g-sub-r", "The user wants AG-UI in two sentences; check the docs first.", durationMs = 1800),
+            ToolPart("g-sub-t", "search_docs", ToolState.OUTPUT_AVAILABLE, """{"query":"AG-UI"}""", output = "[1] AG-UI protocol: an open, event-based protocol…"),
+            ToolPart(
+                "g-sub-t2", "notes__save_note",
+                if (running) ToolState.APPROVAL_REQUESTED else ToolState.OUTPUT_AVAILABLE,
+                """{"title":"AG-UI","content":"Event-based agent ↔ UI protocol"}""",
+                output = if (running) null else "Saved note “AG-UI”.",
+                title = "Save note · Notes",
+            ),
+        ) + if (running) emptyList() else listOf(TextPart("g-sub-x", "**AG-UI** is an open, event-based protocol that streams an agent's text, tool calls and state to any UI.")),
+    )
+    return ToolPart(
+        if (running) "g-d1" else "g-d2", "delegate_task",
+        if (running) ToolState.INPUT_AVAILABLE else ToolState.OUTPUT_AVAILABLE,
+        """{"agent_name":"researcher","task":"Explain the AG-UI protocol in two sentences and save a note about it."}""",
+        output = if (running) null else nested.text,
+        title = "researcher",
+        subagent = nested,
+    )
+}
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private val GallerySamples: List<Pair<String, @Composable () -> Unit>> = listOf<Pair<String, @Composable () -> Unit>>(
     "Messages" to {
@@ -201,6 +228,15 @@ private val GallerySamples: List<Pair<String, @Composable () -> Unit>> = listOf<
             ToolCall(ToolPart("g-t1", "get_current_time", ToolState.INPUT_AVAILABLE, """{"timezone":"Asia/Tokyo"}"""))
             ToolCall(ToolPart("g-t2", "calculate", ToolState.OUTPUT_AVAILABLE, """{"expression":"6*7"}""", output = "42"))
             ToolCall(ToolPart("g-t3", "fetch_url", ToolState.OUTPUT_ERROR, """{"url":"https://x"}""", errorText = "Timed out"))
+            // MCP tool with a title, reporting progress; a skill load.
+            ToolCall(ToolPart("g-t6", "notes__count_slowly", ToolState.INPUT_AVAILABLE, """{"to":5}""", output = "Counted 3 60%", title = "Count slowly · Notes", preliminary = true))
+            ToolCall(ToolPart("g-t7", "load_capability", ToolState.OUTPUT_AVAILABLE, """{"id":"mermaid-diagrams"}""", output = "# Skill: mermaid-diagrams", title = "mermaid-diagrams"))
+        }
+    },
+    "Sub-agents (delegate_task)" to {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            ToolPartView(sampleDelegation(running = true), onToolApproval = { _, _ -> })
+            ToolPartView(sampleDelegation(running = false))
         }
     },
     "Confirmation (tool approval)" to {
