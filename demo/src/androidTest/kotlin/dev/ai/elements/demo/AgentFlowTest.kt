@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import dev.ai.elements.ui.R as UiR
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.ai.elements.core.config.ProviderKind
@@ -48,6 +49,9 @@ class AgentFlowTest {
     private val ollama = args.getString("ollama") ?: "http://10.0.2.2:11434"
     private val agentServer = args.getString("agentServer") ?: "http://10.0.2.2:8788"
     private var scenario: ActivityScenario<MainActivity>? = null
+
+    /** UI text in the device's language (tests also run on non-English devices). */
+    private fun s(id: Int) = context.getString(id)
 
     private fun launchWith(profile: ProviderProfile) {
         context.getSharedPreferences("ai_elements_providers", Context.MODE_PRIVATE).edit().clear().commit()
@@ -85,7 +89,7 @@ class AgentFlowTest {
         awaitTurnEnd(20_000)
         // Replies are virtualized: bring each slice into view before asserting on it.
         scrollTo(hasTestTag("tool-calculate"))
-        compose.onNodeWithText("Done").assertExists()
+        compose.onNodeWithText(s(UiR.string.ai_tool_done)).assertExists()
         scrollTo(hasTestTag("mermaid"))
         scrollTo(hasTestTag("context-usage"))
     }
@@ -98,13 +102,13 @@ class AgentFlowTest {
         compose.onNodeWithTag("approve").performClick()
         awaitTurnEnd(20_000)
         scrollTo(hasTestTag("tool-copy_to_clipboard"))
-        compose.onNodeWithText("Done").assertExists()
+        compose.onNodeWithText(s(UiR.string.ai_tool_done)).assertExists()
 
         send("Copy that again to the clipboard")
         awaitConfirmation()
         compose.onNodeWithTag("deny").performClick()
         compose.waitUntil(20_000) { compose.onAllNodesWithTag("regenerate").fetchSemanticsNodes().size == 1 }
-        scrollTo(hasText("Denied"))
+        scrollTo(hasText(s(UiR.string.ai_tool_denied)))
     }
 
     @Test

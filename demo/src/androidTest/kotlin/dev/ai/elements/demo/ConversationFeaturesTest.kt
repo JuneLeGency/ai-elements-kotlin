@@ -23,6 +23,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import dev.ai.elements.ui.R as UiR
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.ai.elements.core.config.ProviderKind
 import dev.ai.elements.core.config.ProviderProfile
@@ -48,6 +49,9 @@ class ConversationFeaturesTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private var scenario: ActivityScenario<MainActivity>? = null
+
+    /** UI text in the device's language (tests also run on non-English devices). */
+    private fun s(id: Int) = context.getString(id)
 
     @Before
     fun launch() {
@@ -141,9 +145,9 @@ class ConversationFeaturesTest {
             throw it
         }
         compose.onNode(isDialog()).assertExists()
-        compose.waitUntilAtLeastOneExists(hasText("Prompt"), 5_000)
+        compose.waitUntilAtLeastOneExists(hasText(s(UiR.string.ai_graph_prompt)), 5_000)
         screenshot("03-run-graph", dialog = true)
-        compose.onNodeWithContentDescription("Close").performClick()
+        compose.onNodeWithContentDescription(s(UiR.string.ai_close)).performClick()
 
         // Checkpoint: rewind to the first turn.
         compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("checkpoint-restore"))

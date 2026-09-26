@@ -18,6 +18,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import dev.ai.elements.ui.R as UiR
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.ai.elements.core.config.ProviderKind
 import dev.ai.elements.core.config.ProviderProfile
@@ -51,6 +52,9 @@ class StreamingScrollTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private var scenario: ActivityScenario<MainActivity>? = null
+
+    /** UI text in the device's language (tests also run on non-English devices). */
+    private fun s(id: Int) = context.getString(id)
 
     @Before
     fun launch() {
@@ -133,7 +137,7 @@ class StreamingScrollTest {
         }
 
         // C. Jump to latest, then it follows again.
-        compose.onNodeWithContentDescription("Scroll to latest").performClick()
+        compose.onNodeWithContentDescription(s(UiR.string.ai_scroll_to_latest)).performClick()
         pump(800)
         if (streaming()) assertFollowing("C")
         compose.mainClock.autoAdvance = true
