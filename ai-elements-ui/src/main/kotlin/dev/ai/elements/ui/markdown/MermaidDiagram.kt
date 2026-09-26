@@ -41,10 +41,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.compactIconButton
 import dev.ai.elements.ui.theme.isDark
 import kotlinx.coroutines.delay
@@ -98,7 +100,7 @@ fun MermaidDiagram(
                     shapes = IconButtonDefaults.shapes(),
                     modifier = Modifier.compactIconButton(),
                 ) {
-                    Icon(Icons.Outlined.OpenInFull, "Open diagram full screen", Modifier.size(16.dp))
+                    Icon(Icons.Outlined.OpenInFull, stringResource(R.string.ai_open_diagram_full), Modifier.size(16.dp))
                 }
             }
             if (!complete) {
@@ -108,7 +110,7 @@ fun MermaidDiagram(
                     modifier = Modifier.fillMaxWidth().height(120.dp).padding(16.dp),
                 ) {
                     LoadingIndicator(Modifier.size(40.dp))
-                    Text("Drawing diagram…", style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.ai_drawing_diagram), style = MaterialTheme.typography.bodyMedium)
                 }
             } else when (renderer) {
                 MermaidRenderer.WebView -> MermaidWebView(
@@ -146,7 +148,7 @@ fun MermaidDiagram(
                         onClick = { fullscreen = false },
                         shapes = IconButtonDefaults.shapes(),
                         modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
-                    ) { Icon(Icons.Outlined.Close, "Close") }
+                    ) { Icon(Icons.Outlined.Close, stringResource(R.string.ai_close)) }
                 }
             }
         }
@@ -192,13 +194,13 @@ private fun MermaidWebView(code: String, fitWidth: Boolean, modifier: Modifier, 
         cacheKey = cacheKey,
         fitWidth = fitWidth,
         modifier = modifier,
-        contentDescription = "Mermaid diagram",
+        contentDescription = stringResource(R.string.ai_mermaid_diagram),
         onClick = onClick,
-        onClickLabel = "Open diagram",
+        onClickLabel = stringResource(R.string.ai_open_diagram),
     ) { message ->
         Column(modifier) {
             Text(
-                "Diagram error: ${message.take(160)}",
+                stringResource(R.string.ai_diagram_error, message.take(160)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(horizontal = 8.dp),

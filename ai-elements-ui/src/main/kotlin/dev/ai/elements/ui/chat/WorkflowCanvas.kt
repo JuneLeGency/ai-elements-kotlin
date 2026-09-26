@@ -40,6 +40,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -61,7 +62,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -79,11 +82,12 @@ import dev.ai.elements.core.model.SourcePart
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSpacing
+import kotlin.math.roundToInt
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
-import kotlin.math.roundToInt
 
 enum class NodeTone { PRIMARY, SECONDARY, TERTIARY, ERROR, NEUTRAL }
 
@@ -251,10 +255,10 @@ fun WorkflowCanvas(
                     offset = (offset - center) * (newScale / scale) + center
                     scale = newScale
                 }
-                FilledTonalIconButton(onClick = { zoomBy(1.25f) }, shapes = IconButtonDefaults.shapes()) { Icon(Icons.Outlined.Add, "Zoom in") }
-                FilledTonalIconButton(onClick = { zoomBy(0.8f) }, shapes = IconButtonDefaults.shapes()) { Icon(Icons.Outlined.Remove, "Zoom out") }
+                FilledTonalIconButton(onClick = { zoomBy(1.25f) }, shapes = IconButtonDefaults.shapes()) { Icon(Icons.Outlined.Add, stringResource(R.string.ai_zoom_in)) }
+                FilledTonalIconButton(onClick = { zoomBy(0.8f) }, shapes = IconButtonDefaults.shapes()) { Icon(Icons.Outlined.Remove, stringResource(R.string.ai_zoom_out)) }
                 FilledTonalIconButton(onClick = { fit() }, shapes = IconButtonDefaults.shapes(), modifier = Modifier.testTag("canvas-fit")) {
-                    Icon(Icons.Outlined.FitScreen, "Fit to screen")
+                    Icon(Icons.Outlined.FitScreen, stringResource(R.string.ai_fit_screen))
                 }
             }
         }
@@ -303,14 +307,43 @@ private fun NodeCard(node: CanvasNode, onClick: (() -> Unit)?, modifier: Modifie
     }
 }
 
+/** Node titles for [agentRunGraph]; [rememberAgentRunLabels] reads them from resources. */
+@Immutable
+data class AgentRunLabels(
+    val prompt: String = "Prompt",
+    val thinking: String = "Thinking",
+    val answer: String = "Answer",
+    val file: String = "File",
+    val empty: String = "No steps yet",
+    val sources: (count: Int) -> String = { "$it sources" },
+)
+
+@Composable
+fun rememberAgentRunLabels(): AgentRunLabels {
+    val resources = LocalResources.current
+    val prompt = stringResource(R.string.ai_graph_prompt)
+    val thinking = stringResource(R.string.ai_graph_thinking)
+    val answer = stringResource(R.string.ai_graph_answer)
+    val file = stringResource(R.string.ai_graph_file)
+    val empty = stringResource(R.string.ai_graph_empty)
+    return remember(resources, prompt, thinking, answer, file, empty) {
+        AgentRunLabels(prompt, thinking, answer, file, empty) { resources.getQuantityString(R.plurals.ai_graph_sources, it, it) }
+    }
+}
+
 /**
  * Lays an agent run out as a graph: prompt → reasoning / plan → tool calls
  * (parallel calls side by side) → answer → sources. Consecutive tool calls
  * form one row; every node in a row connects to every node in the next.
  */
-fun agentRunGraph(message: Message, prompt: String?, nodeSize: DpSize = DpSize(200.dp, 64.dp)): Pair<List<CanvasNode>, List<CanvasEdge>> {
+fun agentRunGraph(
+    message: Message,
+    prompt: String?,
+    nodeSize: DpSize = DpSize(200.dp, 64.dp),
+    labels: AgentRunLabels = AgentRunLabels(),
+): Pair<List<CanvasNode>, List<CanvasEdge>> {
     val rows = mutableListOf<List<CanvasNode>>()
-    prompt?.let { rows += listOf(CanvasNode("prompt", "Prompt", it.lineSequence().first(), icon = Icons.Outlined.Person, tone = NodeTone.NEUTRAL)) }
+    prompt?.let { rows += listOf(CanvasNode("prompt", labels.prompt, it.lineSequence().first(), icon = Icons.Outlined.Person, tone = NodeTone.NEUTRAL)) }
     var toolRow = mutableListOf<CanvasNode>()
     fun flushTools() {
         if (toolRow.isNotEmpty()) rows += toolRow.toList()
@@ -320,7 +353,7 @@ fun agentRunGraph(message: Message, prompt: String?, nodeSize: DpSize = DpSize(2
         if (part !is ToolPart) flushTools()
         when (part) {
             is ReasoningPart -> rows += listOf(
-                CanvasNode(part.id, "Thinking", part.durationMs?.let { "${(it + 500) / 1000}s" } ?: "…", icon = Icons.Outlined.Psychology,
+                CanvasNode(part.id, labels.thinking, part.durationMs?.let { "${(it + 500) / 1000}s" } ?: "…", icon = Icons.Outlined.Psychology,
                     tone = NodeTone.SECONDARY, status = if (part.isStreaming) StepStatus.ACTIVE else StepStatus.COMPLETE),
             )
             is ToolPart -> toolRow += CanvasNode(
@@ -330,7 +363,7 @@ fun agentRunGraph(message: Message, prompt: String?, nodeSize: DpSize = DpSize(2
                 status = if (part.isStreaming) StepStatus.ACTIVE else StepStatus.COMPLETE,
             )
             is TextPart -> if (part.text.isNotBlank()) rows += listOf(
-                CanvasNode(part.id, "Answer", part.text.lineSequence().firstOrNull { it.isNotBlank() }?.trim('#', ' ')?.take(48),
+                CanvasNode(part.id, labels.answer, part.text.lineSequence().firstOrNull { it.isNotBlank() }?.trim('#', ' ')?.take(48),
                     icon = Icons.Outlined.Subject, status = if (part.isStreaming) StepStatus.ACTIVE else StepStatus.COMPLETE),
             )
             is DataPart -> rows += listOf(
@@ -342,16 +375,16 @@ fun agentRunGraph(message: Message, prompt: String?, nodeSize: DpSize = DpSize(2
                     tone = NodeTone.NEUTRAL,
                 ),
             )
-            is FilePart -> rows += listOf(CanvasNode(part.id, "File", part.mediaType, icon = Icons.Outlined.Image, tone = NodeTone.NEUTRAL))
+            is FilePart -> rows += listOf(CanvasNode(part.id, labels.file, part.mediaType, icon = Icons.Outlined.Image, tone = NodeTone.NEUTRAL))
             is SourcePart -> Unit
         }
     }
     flushTools()
     val sources = message.parts.filterIsInstance<SourcePart>()
     if (sources.isNotEmpty()) {
-        rows += listOf(CanvasNode("sources", "${sources.size} sources", sources.joinToString { host(it.url) }, icon = Icons.Outlined.Link, tone = NodeTone.NEUTRAL))
+        rows += listOf(CanvasNode("sources", labels.sources(sources.size), sources.joinToString { host(it.url) }, icon = Icons.Outlined.Link, tone = NodeTone.NEUTRAL))
     }
-    if (rows.isEmpty()) rows += listOf(CanvasNode("empty", "No steps yet", icon = Icons.Outlined.AutoAwesome))
+    if (rows.isEmpty()) rows += listOf(CanvasNode("empty", labels.empty, icon = Icons.Outlined.AutoAwesome))
 
     val gapX = 24.dp
     val rowStep = nodeSize.height + 56.dp

@@ -56,10 +56,12 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.FilePart
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.compactIconButton
 
 /**
@@ -82,7 +84,7 @@ fun PromptInput(
     onStop: () -> Unit,
     busy: Boolean,
     modifier: Modifier = Modifier,
-    placeholder: String = "Ask anything",
+    placeholder: String = stringResource(R.string.ai_prompt_placeholder),
     attachments: List<FilePart> = emptyList(),
     onAddAttachment: (() -> Unit)? = null,
     onRemoveAttachment: (FilePart) -> Unit = {},
@@ -149,7 +151,7 @@ fun PromptInput(
                             onClick = onAddAttachment,
                             shapes = IconButtonDefaults.shapes(),
                             modifier = Modifier.compactIconButton().testTag("add-attachment"),
-                        ) { Icon(Icons.Outlined.AddPhotoAlternate, "Attach image") }
+                        ) { Icon(Icons.Outlined.AddPhotoAlternate, stringResource(R.string.ai_attach_image)) }
                     }
                     toolbar()
                 }
@@ -220,9 +222,9 @@ private fun SubmitButton(mode: SubmitMode, enabled: Boolean, onClick: () -> Unit
                     SubmitMode.STOP -> Icons.Outlined.Stop
                 },
                 contentDescription = when (target) {
-                    SubmitMode.SEND -> "Send"
-                    SubmitMode.QUEUE -> "Add to queue"
-                    SubmitMode.STOP -> "Stop"
+                    SubmitMode.SEND -> stringResource(R.string.ai_send)
+                    SubmitMode.QUEUE -> stringResource(R.string.ai_add_to_queue)
+                    SubmitMode.STOP -> stringResource(R.string.ai_stop)
                 },
                 tint = content,
             )

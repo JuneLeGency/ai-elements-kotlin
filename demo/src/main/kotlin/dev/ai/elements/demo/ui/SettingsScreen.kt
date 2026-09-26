@@ -1,7 +1,8 @@
 package dev.ai.elements.demo.ui
 
-import androidx.compose.ui.graphics.Color
 import android.os.Build
+import androidx.activity.compose.LocalActivity
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.CloudQueue
 import androidx.compose.material.icons.outlined.Computer
@@ -31,6 +33,7 @@ import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Hub
 import androidx.compose.material.icons.outlined.Key
+import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.OfflineBolt
 import androidx.compose.material.icons.outlined.PhoneAndroid
@@ -72,22 +75,29 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ai.elements.core.config.ProviderKind
 import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.demo.ChatViewModel
+import dev.ai.elements.demo.R
+import dev.ai.elements.demo.data.AppLanguage
+import dev.ai.elements.demo.data.AppLocale
 import dev.ai.elements.demo.data.DiagramSize
 import dev.ai.elements.demo.data.ThemeMode
 import dev.ai.elements.ui.theme.AiSize
-import kotlinx.coroutines.launch
 import java.util.UUID
+import kotlinx.coroutines.launch
 
 /**
  * Settings as an M3 list-detail: providers on the left, the selected one's
@@ -129,7 +139,7 @@ fun SettingsScreen(viewModel: ChatViewModel, twoPane: Boolean) {
                 } else {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            "Select a provider to edit its endpoint, model and API key.",
+                            stringResource(R.string.select_provider_hint),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(32.dp),
@@ -153,19 +163,23 @@ private fun SettingsList(
 ) {
     val appearance by viewModel.settings.appearance.collectAsStateWithLifecycle()
     var addMenu by remember { mutableStateOf(false) }
+    val customName = stringResource(R.string.custom_provider)
+    val noNetwork = stringResource(R.string.no_network_needed)
+    val keySet = stringResource(R.string.key_set)
+    val noKey = stringResource(R.string.no_key)
 
-    Scaffold(containerColor = Color.Transparent, topBar = { TopAppBar(title = { Text("Settings") }, colors = transparentAppBarColors()) }) { padding ->
+    Scaffold(containerColor = Color.Transparent, topBar = { TopAppBar(title = { Text(stringResource(R.string.settings)) }, colors = transparentAppBarColors()) }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding)) {
-            item { SectionHeader("Appearance") }
+            item { SectionHeader(stringResource(R.string.appearance)) }
             item {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
                     modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
                 ) {
                     val modes = listOf(
-                        Triple(ThemeMode.SYSTEM, "System", Icons.Outlined.PhoneAndroid),
-                        Triple(ThemeMode.LIGHT, "Light", Icons.Outlined.LightMode),
-                        Triple(ThemeMode.DARK, "Dark", Icons.Outlined.DarkMode),
+                        Triple(ThemeMode.SYSTEM, stringResource(R.string.theme_system), Icons.Outlined.PhoneAndroid),
+                        Triple(ThemeMode.LIGHT, stringResource(R.string.theme_light), Icons.Outlined.LightMode),
+                        Triple(ThemeMode.DARK, stringResource(R.string.theme_dark), Icons.Outlined.DarkMode),
                     )
                     modes.forEachIndexed { index, (mode, label, icon) ->
                         ToggleButton(
@@ -189,24 +203,25 @@ private fun SettingsList(
                     ListItem(
                         checked = appearance.dynamicColor,
                         onCheckedChange = { viewModel.settings.update(appearance.copy(dynamicColor = it)) },
-                        supportingContent = { Text("Use colors from your wallpaper") },
+                        supportingContent = { Text(stringResource(R.string.dynamic_color_desc)) },
                         trailingContent = { Switch(checked = appearance.dynamicColor, onCheckedChange = null) },
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    ) { Text("Dynamic color") }
+                    ) { Text(stringResource(R.string.dynamic_color)) }
                 }
             }
+            item { LanguageItem() }
             item {
                 ListItem(
                     checked = appearance.nativeMermaid,
                     onCheckedChange = { viewModel.settings.update(appearance.copy(nativeMermaid = it)) },
-                    supportingContent = { Text("Draw diagrams with Compose instead of a WebView (experimental)") },
+                    supportingContent = { Text(stringResource(R.string.native_mermaid_desc)) },
                     trailingContent = { Switch(checked = appearance.nativeMermaid, onCheckedChange = null) },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp).testTag("native-mermaid"),
-                ) { Text("Native Mermaid renderer") }
+                ) { Text(stringResource(R.string.native_mermaid)) }
             }
             item {
                 Text(
-                    "Diagram size",
+                    stringResource(R.string.diagram_size),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(start = 28.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
                 )
@@ -214,7 +229,7 @@ private fun SettingsList(
                     horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
                     modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
                 ) {
-                    val sizes = listOf(DiagramSize.SMALL to "Small", DiagramSize.MEDIUM to "Medium", DiagramSize.LARGE to "Large")
+                    val sizes = listOf(DiagramSize.SMALL to stringResource(R.string.size_small), DiagramSize.MEDIUM to stringResource(R.string.size_medium), DiagramSize.LARGE to stringResource(R.string.size_large))
                     sizes.forEachIndexed { index, (size, label) ->
                         ToggleButton(
                             checked = appearance.diagramSize == size,
@@ -232,11 +247,11 @@ private fun SettingsList(
 
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    SectionHeader("Agent providers", Modifier.weight(1f))
+                    SectionHeader(stringResource(R.string.agent_providers), Modifier.weight(1f))
                     Box {
                         TextButton(onClick = { addMenu = true }, modifier = Modifier.padding(end = 8.dp)) {
                             Icon(Icons.Outlined.Add, null, Modifier.size(AiSize.compactIcon))
-                            Text("Add", Modifier.padding(start = 4.dp))
+                            Text(stringResource(R.string.add), Modifier.padding(start = 4.dp))
                         }
                         DropdownMenu(expanded = addMenu, onDismissRequest = { addMenu = false }) {
                             ProviderKind.entries.filter { it != ProviderKind.MOCK }.forEach { kind ->
@@ -247,7 +262,7 @@ private fun SettingsList(
                                         addMenu = false
                                         val profile = ProviderProfile(
                                             id = "custom-" + UUID.randomUUID().toString().take(8),
-                                            name = "Custom ${kind.label}",
+                                            name = String.format(customName, kind.label),
                                             kind = kind,
                                             baseUrl = when (kind) {
                                                 ProviderKind.AGENT_SERVER, ProviderKind.AG_UI -> "http://10.0.2.2:8788"
@@ -275,8 +290,8 @@ private fun SettingsList(
                     supportingContent = {
                         Text(
                             buildString {
-                                append(if (profile.kind.label == profile.name) "No network needed" else profile.kind.label)
-                                if (profile.kind.needsKey) append(if (hasKey) " · key set" else " · no key")
+                                append(if (profile.kind.label == profile.name) noNetwork else profile.kind.label)
+                                if (profile.kind.needsKey) append(if (hasKey) keySet else noKey)
                             },
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -287,7 +302,7 @@ private fun SettingsList(
                     },
                     trailingContent = {
                         if (profile.id == selectedId) {
-                            Icon(Icons.Outlined.CheckCircle, "Active", tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.Outlined.CheckCircle, stringResource(R.string.active), tint = MaterialTheme.colorScheme.primary)
                         }
                     },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("settings-provider-${profile.id}"),
@@ -295,7 +310,7 @@ private fun SettingsList(
             }
             item {
                 Text(
-                    "10.0.2.2 is the Android emulator's alias for your computer. On a physical device, use your computer's LAN IP instead.",
+                    stringResource(R.string.emulator_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(16.dp),
@@ -334,9 +349,9 @@ private fun ProviderEditor(
         topBar = {
             TopAppBar(
                 colors = transparentAppBarColors(),
-                title = { Text(draft.name.ifBlank { "Provider" }, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                title = { Text(draft.name.ifBlank { stringResource(R.string.provider) }, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
-                    if (showBack) IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Back") }
+                    if (showBack) IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.back)) }
                 },
                 actions = {
                     TextButton(onClick = ::save, enabled = dirty, modifier = Modifier.testTag("provider-save")) { Text("Save") }
@@ -358,13 +373,13 @@ private fun ProviderEditor(
             Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = MaterialTheme.shapes.large) {
                 Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Icon(draft.kind.icon, null)
-                    Text(draft.kind.description, style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(draft.kind.description), style = MaterialTheme.typography.bodyMedium)
                 }
             }
             OutlinedTextField(
                 value = draft.name,
                 onValueChange = { draft = draft.copy(name = it) },
-                label = { Text("Name") },
+                label = { Text(stringResource(R.string.name)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -372,7 +387,7 @@ private fun ProviderEditor(
                 OutlinedTextField(
                     value = draft.baseUrl,
                     onValueChange = { draft = draft.copy(baseUrl = it.trim()) },
-                    label = { Text("Base URL") },
+                    label = { Text(stringResource(R.string.base_url)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                     modifier = Modifier.fillMaxWidth().testTag("provider-base-url"),
@@ -381,12 +396,12 @@ private fun ProviderEditor(
                     OutlinedTextField(
                         value = draft.model,
                         onValueChange = { draft = draft.copy(model = it.trim()) },
-                        label = { Text("Model") },
-                        placeholder = { if (draft.kind.serverSideAgent) Text("server default") },
+                        label = { Text(stringResource(R.string.model)) },
+                        placeholder = { if (draft.kind.serverSideAgent) Text(stringResource(R.string.server_default)) },
                         singleLine = true,
                         trailingIcon = {
                             if (testResult?.getOrNull()?.isNotEmpty() == true) {
-                                IconButton(onClick = { modelMenu = true }) { Icon(Icons.Outlined.Hub, "Pick a model") }
+                                IconButton(onClick = { modelMenu = true }) { Icon(Icons.Outlined.Hub, stringResource(R.string.pick_model)) }
                             }
                         },
                         modifier = Modifier.fillMaxWidth().testTag("provider-model"),
@@ -400,17 +415,17 @@ private fun ProviderEditor(
                 OutlinedTextField(
                     value = apiKey,
                     onValueChange = { apiKey = it },
-                    label = { Text(if (draft.kind.needsKey) "API key" else "API key (optional)") },
+                    label = { Text(if (draft.kind.needsKey) stringResource(R.string.api_key) else stringResource(R.string.api_key_optional)) },
                     singleLine = true,
                     leadingIcon = { Icon(Icons.Outlined.Key, null) },
                     trailingIcon = {
                         IconButton(onClick = { showKey = !showKey }) {
-                            Icon(if (showKey) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility, "Show key")
+                            Icon(if (showKey) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility, stringResource(R.string.show_key))
                         }
                     },
                     visualTransformation = if (showKey) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    supportingText = { Text("Stored encrypted with the Android Keystore.") },
+                    supportingText = { Text(stringResource(R.string.key_stored)) },
                     modifier = Modifier.fillMaxWidth().testTag("provider-api-key"),
                 )
             }
@@ -418,13 +433,13 @@ private fun ProviderEditor(
                 ListItem(
                     checked = draft.useTools,
                     onCheckedChange = { draft = draft.copy(useTools = it) },
-                    supportingContent = { Text("get_current_time, calculate, copy_to_clipboard (asks first)") },
+                    supportingContent = { Text(stringResource(R.string.on_device_tools_desc)) },
                     trailingContent = { Switch(checked = draft.useTools, onCheckedChange = null) },
-                ) { Text("On-device tools") }
+                ) { Text(stringResource(R.string.on_device_tools)) }
                 OutlinedTextField(
                     value = draft.systemPrompt,
                     onValueChange = { draft = draft.copy(systemPrompt = it) },
-                    label = { Text("System prompt") },
+                    label = { Text(stringResource(R.string.system_prompt)) },
                     minLines = 3,
                     maxLines = 8,
                     modifier = Modifier.fillMaxWidth(),
@@ -442,14 +457,14 @@ private fun ProviderEditor(
                     },
                     enabled = !testing,
                     modifier = Modifier.testTag("provider-test"),
-                ) { Text("Test connection") }
+                ) { Text(stringResource(R.string.test_connection)) }
                 Button(
                     onClick = {
                         save()
                         store.select(draft.id)
                     },
                     modifier = Modifier.testTag("provider-use"),
-                ) { Text("Save & use") }
+                ) { Text(stringResource(R.string.save_use)) }
                 if (testing) LoadingIndicator(Modifier.size(32.dp))
             }
             testResult?.let { result ->
@@ -462,8 +477,8 @@ private fun ProviderEditor(
                     Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Icon(if (ok) Icons.Outlined.CheckCircle else Icons.Outlined.ErrorOutline, null)
                         Text(
-                            if (ok) "Connected · ${result.getOrThrow().size} model(s) available"
-                            else result.exceptionOrNull()?.message ?: "Failed",
+                            if (ok) pluralStringResource(R.plurals.connected_models, result.getOrThrow().size, result.getOrThrow().size)
+                            else result.exceptionOrNull()?.message ?: stringResource(R.string.failed),
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
@@ -475,12 +490,12 @@ private fun ProviderEditor(
                     TextButton(onClick = {
                         store.reset(profile.id)
                         draft = ProviderProfile.Presets.first { it.id == profile.id }
-                    }) { Text("Reset to defaults") }
+                    }) { Text(stringResource(R.string.reset_defaults)) }
                 } else {
                     TextButton(
                         onClick = { store.remove(profile.id); onClose() },
                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                    ) { Text("Delete provider") }
+                    ) { Text(stringResource(R.string.delete_provider)) }
                 }
             }
         }
@@ -508,14 +523,47 @@ private val ProviderKind.icon: ImageVector
         ProviderKind.OLLAMA -> Icons.Outlined.Computer
     }
 
-private val ProviderKind.description: String
+@get:StringRes
+private val ProviderKind.description: Int
     get() = when (this) {
-        ProviderKind.MOCK -> "Scripted offline agent: reasoning, a real on-device tool call, Markdown and Mermaid. No network."
-        ProviderKind.AGENT_SERVER -> "A server-side agent (e.g. server/main.py with PydanticAI) at {base}/api/chat, streaming the Vercel AI SDK UI Message Stream (v5) or Data Stream (v4). Tools run on the server."
-        ProviderKind.AG_UI -> "An AG-UI agent at {base}/api/agui (PydanticAI, LangGraph, CrewAI, Mastra…). Tools run on the server."
-        ProviderKind.OPENAI -> "Any OpenAI-compatible /chat/completions endpoint. The agent loop and tools run on this device."
-        ProviderKind.OPENAI_RESPONSES -> "OpenAI Responses API (/responses), stateless with encrypted reasoning. The agent loop and tools run on this device."
-        ProviderKind.ANTHROPIC -> "Anthropic Messages API (/v1/messages). The agent loop and tools run on this device."
-        ProviderKind.GEMINI -> "Google Gemini native API (streamGenerateContent) with thought summaries. The agent loop and tools run on this device."
-        ProviderKind.OLLAMA -> "Ollama native API (/api/chat) with thinking. The agent loop and tools run on this device."
+        ProviderKind.MOCK -> R.string.kind_mock
+        ProviderKind.AGENT_SERVER -> R.string.kind_agent_server
+        ProviderKind.AG_UI -> R.string.kind_ag_ui
+        ProviderKind.OPENAI -> R.string.kind_openai
+        ProviderKind.OPENAI_RESPONSES -> R.string.kind_openai_responses
+        ProviderKind.ANTHROPIC -> R.string.kind_anthropic
+        ProviderKind.GEMINI -> R.string.kind_gemini
+        ProviderKind.OLLAMA -> R.string.kind_ollama
     }
+
+/** Per-app language: follow the system or pick one of the shipped translations. */
+@Composable
+private fun LanguageItem() {
+    val activity = LocalActivity.current ?: return
+    var current by remember { mutableStateOf(AppLocale.current(activity)) }
+    var menu by remember { mutableStateOf(false) }
+    Box {
+        ListItem(
+            onClick = { menu = true },
+            supportingContent = { Text(current.autonym ?: stringResource(R.string.language_system)) },
+            leadingContent = { Icon(Icons.Outlined.Language, null) },
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("language"),
+        ) { Text(stringResource(R.string.language)) }
+        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, offset = DpOffset(24.dp, 0.dp)) {
+            AppLanguage.entries.forEach { language ->
+                DropdownMenuItem(
+                    text = { Text(language.autonym ?: stringResource(R.string.language_system)) },
+                    trailingIcon = if (language == current) ({ Icon(Icons.Outlined.Check, null) }) else null,
+                    onClick = {
+                        menu = false
+                        if (language != current) {
+                            current = language
+                            AppLocale.set(activity, language)
+                        }
+                    },
+                    modifier = Modifier.testTag("language-${language.name.lowercase()}"),
+                )
+            }
+        }
+    }
+}

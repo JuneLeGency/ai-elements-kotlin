@@ -2,6 +2,7 @@ package dev.ai.elements.demo.ui
 
 import android.text.format.DateFormat
 import android.text.format.DateUtils
+import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,12 +50,14 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.Role
+import dev.ai.elements.demo.R
 import dev.ai.elements.demo.data.Conversation
 import dev.ai.elements.ui.theme.AiSize
 import java.util.Calendar
@@ -93,13 +96,13 @@ internal fun HistoryPane(
             ExtendedFloatingActionButton(
                 onClick = onNew,
                 icon = { Icon(Icons.Outlined.EditNote, null) },
-                text = { Text("New chat") },
+                text = { Text(stringResource(R.string.new_chat)) },
                 modifier = Modifier.padding(start = 4.dp),
             )
             Spacer(Modifier.weight(1f))
             if (conversations.size > 3 && !searching) {
                 IconButton(onClick = { searching = true }, shapes = IconButtonDefaults.shapes(), modifier = Modifier.testTag("history-search-open")) {
-                    Icon(Icons.Outlined.Search, "Search chats")
+                    Icon(Icons.Outlined.Search, stringResource(R.string.search_chats))
                 }
             }
         }
@@ -112,11 +115,11 @@ internal fun HistoryPane(
                 onSearch = {},
                 expanded = false,
                 onExpandedChange = {},
-                placeholder = { Text("Search chats") },
+                placeholder = { Text(stringResource(R.string.search_chats)) },
                 leadingIcon = { Icon(Icons.Outlined.Search, null) },
                 trailingIcon = {
                     IconButton(onClick = { query.edit { replace(0, length, "") }; searching = false }) {
-                        Icon(Icons.Outlined.Close, "Close search")
+                        Icon(Icons.Outlined.Close, stringResource(R.string.close_search))
                     }
                 },
                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).focusRequester(focus).testTag("history-search"),
@@ -124,7 +127,7 @@ internal fun HistoryPane(
         }
         if (filtered.isEmpty()) {
             Text(
-                if (conversations.isEmpty()) "Your conversations will appear here." else "No matching chats.",
+                if (conversations.isEmpty()) stringResource(R.string.history_empty) else stringResource(R.string.history_no_match),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(16.dp),
@@ -134,7 +137,7 @@ internal fun HistoryPane(
             filtered.groupBy { dateGroup(it.updatedAt, now) }.forEach { (group, rows) ->
                 item(key = "header-$group", contentType = "header") {
                     Text(
-                        group.label,
+                        stringResource(group.label),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
@@ -158,6 +161,7 @@ internal fun HistoryPane(
 @Composable
 private fun HistoryRow(row: ChatSummary, selected: Boolean, time: String, onOpen: () -> Unit, onDelete: () -> Unit) {
     var menu by remember { mutableStateOf(false) }
+    val deleteLabel = stringResource(R.string.delete)
     val colors = MaterialTheme.colorScheme
     Box {
         Surface(
@@ -168,19 +172,19 @@ private fun HistoryRow(row: ChatSummary, selected: Boolean, time: String, onOpen
                 .fillMaxWidth()
                 .heightIn(min = AiSize.touchTarget)
                 .semantics {
-                    customActions = listOf(CustomAccessibilityAction("Delete") { onDelete(); true })
+                    customActions = listOf(CustomAccessibilityAction(deleteLabel) { onDelete(); true })
                 }
                 .testTag("history-row"),
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
                 modifier = Modifier
-                    .combinedClickable(onClick = onOpen, onLongClick = { menu = true }, onLongClickLabel = "More options")
+                    .combinedClickable(onClick = onOpen, onLongClick = { menu = true }, onLongClickLabel = stringResource(R.string.more_options))
                     .padding(horizontal = 16.dp, vertical = 10.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        row.title,
+                        row.title.ifBlank { stringResource(R.string.new_chat) },
                         style = MaterialTheme.typography.titleSmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -206,7 +210,7 @@ private fun HistoryRow(row: ChatSummary, selected: Boolean, time: String, onOpen
         }
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
             DropdownMenuItem(
-                text = { Text("Delete") },
+                text = { Text(stringResource(R.string.delete)) },
                 leadingIcon = { Icon(Icons.Outlined.DeleteOutline, null, Modifier.size(AiSize.compactIcon)) },
                 onClick = { menu = false; onDelete() },
             )
@@ -241,12 +245,23 @@ private fun plainPreview(markdown: String): String =
         .lineSequence()
         .map { it.trim() }
         .filterNot { it.startsWith("#") } // headings repeat across replies; the first sentence says more
-        .map { it.trimStart('>', '-', '*', '|', ' ').replace(Regex("[*_`]|\\[(\\d+)]"), "") }
+        .map { it.trimStart('>', '-', '*', '|', ' ').stripInlineMarkdown() }
         .firstOrNull { it.isNotBlank() && !it.all { ch -> ch == '-' || ch == '|' || ch == ':' || ch == ' ' } }
         .orEmpty()
         .take(120)
 
-private enum class DateGroup(val label: String) { TODAY("Today"), YESTERDAY("Yesterday"), WEEK("Previous 7 days"), EARLIER("Earlier") }
+/** Drop emphasis/code markers, citation markers and backslash escapes; keep a spaced `*` (as in `2 * 3`). */
+private fun String.stripInlineMarkdown(): String =
+    replace(Regex("""\[\d+]|`|\*\*|__"""), "")
+        .replace(Regex("""(?<=^|\s)[*_](?=\S)|(?<=\S)[*_](?=\s|$|\p{Punct})"""), "")
+        .replace(Regex("""\\(\p{Punct})"""), "$1")
+
+private enum class DateGroup(@StringRes val label: Int) {
+    TODAY(R.string.group_today),
+    YESTERDAY(R.string.group_yesterday),
+    WEEK(R.string.group_week),
+    EARLIER(R.string.group_earlier),
+}
 
 private fun startOfDay(millis: Long, daysAgo: Int = 0): Long = Calendar.getInstance().run {
     timeInMillis = millis

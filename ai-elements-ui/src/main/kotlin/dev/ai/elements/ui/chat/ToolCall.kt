@@ -42,11 +42,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
 import kotlinx.serialization.json.Json
@@ -100,15 +102,15 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
                 StatusPill(part.state)
                 Icon(
                     Icons.Outlined.ExpandMore,
-                    contentDescription = if (open) "Collapse" else "Expand",
+                    contentDescription = if (open) stringResource(R.string.ai_collapse) else stringResource(R.string.ai_expand),
                     tint = scheme.onSurfaceVariant,
                     modifier = Modifier.rotate(if (open) 180f else 0f),
                 )
             }
             if (part.state == ToolState.APPROVAL_REQUESTED) {
                 Confirmation(
-                    title = "Allow ${part.name}?",
-                    description = part.input.compactJson().ifBlank { "No arguments" },
+                    title = stringResource(R.string.ai_allow_tool, part.name),
+                    description = part.input.compactJson().ifBlank { stringResource(R.string.ai_no_arguments) },
                     onApprove = onApproval?.let { { it(true) } },
                     onDeny = onApproval?.let { { it(false) } },
                     modifier = Modifier.padding(top = 12.dp),
@@ -120,11 +122,11 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
                 exit = shrinkVertically(MaterialTheme.motionScheme.fastSpatialSpec()) + fadeOut(),
             ) {
                 Column(Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Section("Input", part.input.prettyJson().ifBlank { "{}" })
+                    Section(stringResource(R.string.ai_tool_input), part.input.prettyJson().ifBlank { "{}" })
                     when {
-                        part.state == ToolState.OUTPUT_DENIED -> Section("Output", "Denied by user", scheme.error)
-                        part.errorText != null -> Section("Error", part.errorText!!, scheme.error)
-                        part.output != null -> Section("Output", part.output!!.prettyJson())
+                        part.state == ToolState.OUTPUT_DENIED -> Section(stringResource(R.string.ai_tool_output), stringResource(R.string.ai_denied_by_user), scheme.error)
+                        part.errorText != null -> Section(stringResource(R.string.ai_tool_error), part.errorText!!, scheme.error)
+                        part.output != null -> Section(stringResource(R.string.ai_tool_output), part.output!!.prettyJson())
                     }
                 }
             }
@@ -137,11 +139,11 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
 private fun StatusPill(state: ToolState) {
     val scheme = MaterialTheme.colorScheme
     val (label, container, content) = when (state) {
-        ToolState.INPUT_STREAMING, ToolState.INPUT_AVAILABLE -> Triple("Running", scheme.secondaryContainer, scheme.onSecondaryContainer)
-        ToolState.OUTPUT_AVAILABLE -> Triple("Done", scheme.primaryContainer, scheme.onPrimaryContainer)
-        ToolState.APPROVAL_REQUESTED -> Triple("Approval", scheme.tertiaryContainer, scheme.onTertiaryContainer)
-        ToolState.OUTPUT_ERROR -> Triple("Error", scheme.errorContainer, scheme.onErrorContainer)
-        ToolState.OUTPUT_DENIED -> Triple("Denied", scheme.errorContainer, scheme.onErrorContainer)
+        ToolState.INPUT_STREAMING, ToolState.INPUT_AVAILABLE -> Triple(stringResource(R.string.ai_tool_running), scheme.secondaryContainer, scheme.onSecondaryContainer)
+        ToolState.OUTPUT_AVAILABLE -> Triple(stringResource(R.string.ai_tool_done), scheme.primaryContainer, scheme.onPrimaryContainer)
+        ToolState.APPROVAL_REQUESTED -> Triple(stringResource(R.string.ai_tool_approval), scheme.tertiaryContainer, scheme.onTertiaryContainer)
+        ToolState.OUTPUT_ERROR -> Triple(stringResource(R.string.ai_tool_error), scheme.errorContainer, scheme.onErrorContainer)
+        ToolState.OUTPUT_DENIED -> Triple(stringResource(R.string.ai_tool_denied), scheme.errorContainer, scheme.onErrorContainer)
     }
     Surface(color = container, contentColor = content, shape = MaterialTheme.shapes.extraLarge) {
         Row(

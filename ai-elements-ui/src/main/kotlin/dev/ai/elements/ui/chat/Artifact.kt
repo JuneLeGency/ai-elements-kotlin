@@ -34,10 +34,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import dev.ai.elements.ui.R
 
 /**
  * A generated artifact — a document, code file, chart… (AI Elements
@@ -102,10 +104,10 @@ fun WebPreview(
         Column {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(4.dp)) {
                 IconButton(onClick = { webView?.takeIf { it.canGoBack() }?.goBack() }, shapes = IconButtonDefaults.shapes()) {
-                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Back", Modifier.size(20.dp))
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.ai_back), Modifier.size(20.dp))
                 }
                 IconButton(onClick = { webView?.reload() }, shapes = IconButtonDefaults.shapes()) {
-                    Icon(Icons.Outlined.Refresh, "Reload", Modifier.size(20.dp))
+                    Icon(Icons.Outlined.Refresh, stringResource(R.string.ai_reload), Modifier.size(20.dp))
                 }
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceContainerHighest,
@@ -124,7 +126,7 @@ fun WebPreview(
                     onClick = { runCatching { uriHandler.openUri(currentUrl) } },
                     enabled = html == null,
                     shapes = IconButtonDefaults.shapes(),
-                ) { Icon(Icons.AutoMirrored.Outlined.OpenInNew, "Open in browser", Modifier.size(20.dp)) }
+                ) { Icon(Icons.AutoMirrored.Outlined.OpenInNew, stringResource(R.string.ai_open_in_browser), Modifier.size(20.dp)) }
             }
             if (progress in 1..99) {
                 LinearWavyProgressIndicator(progress = { progress / 100f }, modifier = Modifier.fillMaxWidth())

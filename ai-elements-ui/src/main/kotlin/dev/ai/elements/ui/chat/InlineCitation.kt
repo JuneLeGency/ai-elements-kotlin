@@ -29,9 +29,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.SourcePart
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
 import java.net.URI
 
@@ -72,7 +74,7 @@ fun CitationSheet(sources: List<SourcePart>, onDismiss: () -> Unit) {
             Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text("Sources", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
+            Text(stringResource(R.string.ai_sources), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
             sources.forEach { source ->
                 Surface(
                     onClick = { runCatching { uriHandler.openUri(source.url) } },
@@ -99,7 +101,7 @@ fun CitationSheet(sources: List<SourcePart>, onDismiss: () -> Unit) {
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        Icon(Icons.AutoMirrored.Outlined.OpenInNew, "Open", Modifier.size(AiSize.compactIcon))
+                        Icon(Icons.AutoMirrored.Outlined.OpenInNew, stringResource(R.string.ai_open), Modifier.size(AiSize.compactIcon))
                     }
                 }
             }

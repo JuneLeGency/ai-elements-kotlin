@@ -44,9 +44,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.QueuedMessage
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.compactIconButton
 import java.net.URLEncoder
@@ -65,14 +67,14 @@ fun BranchSelector(index: Int, count: Int, onSelect: (Int) -> Unit, modifier: Mo
             enabled = enabled && index > 0,
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.compactIconButton().testTag("branch-previous"),
-        ) { Icon(Icons.Outlined.ChevronLeft, "Previous version") }
+        ) { Icon(Icons.Outlined.ChevronLeft, stringResource(R.string.ai_previous_version)) }
         Text("${index + 1} / $count", style = MaterialTheme.typography.labelMedium, modifier = Modifier.testTag("branch-label"))
         IconButton(
             onClick = { onSelect(index + 1) },
             enabled = enabled && index < count - 1,
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.compactIconButton().testTag("branch-next"),
-        ) { Icon(Icons.Outlined.ChevronRight, "Next version") }
+        ) { Icon(Icons.Outlined.ChevronRight, stringResource(R.string.ai_next_version)) }
     }
 }
 
@@ -81,25 +83,25 @@ fun BranchSelector(index: Int, count: Int, onSelect: (Int) -> Unit, modifier: Mo
  * a "Restore" action that rewinds the conversation to here, after confirming.
  */
 @Composable
-fun Checkpoint(onRestore: () -> Unit, modifier: Modifier = Modifier, label: String = "Checkpoint") {
+fun Checkpoint(onRestore: () -> Unit, modifier: Modifier = Modifier, label: String = stringResource(R.string.ai_checkpoint)) {
     var confirm by remember { mutableStateOf(false) }
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         HorizontalDivider(Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
         Icon(Icons.Outlined.BookmarkBorder, null, Modifier.size(16.dp), MaterialTheme.colorScheme.onSurfaceVariant)
         Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        TextButton(onClick = { confirm = true }, modifier = Modifier.testTag("checkpoint-restore")) { Text("Restore") }
+        TextButton(onClick = { confirm = true }, modifier = Modifier.testTag("checkpoint-restore")) { Text(stringResource(R.string.ai_restore)) }
         HorizontalDivider(Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
     }
     if (confirm) {
         AlertDialog(
             onDismissRequest = { confirm = false },
             icon = { Icon(Icons.Outlined.BookmarkBorder, null) },
-            title = { Text("Restore checkpoint?") },
-            text = { Text("Messages after this point will be removed from the conversation.") },
+            title = { Text(stringResource(R.string.ai_restore_checkpoint_title)) },
+            text = { Text(stringResource(R.string.ai_restore_checkpoint_text)) },
             confirmButton = {
-                TextButton(onClick = { confirm = false; onRestore() }, modifier = Modifier.testTag("checkpoint-confirm")) { Text("Restore") }
+                TextButton(onClick = { confirm = false; onRestore() }, modifier = Modifier.testTag("checkpoint-confirm")) { Text(stringResource(R.string.ai_restore)) }
             },
-            dismissButton = { TextButton(onClick = { confirm = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { confirm = false }) { Text(stringResource(R.string.ai_cancel)) } },
         )
     }
 }
@@ -131,11 +133,11 @@ fun Queue(
                 ) {
                     Icon(Icons.Outlined.Schedule, null, Modifier.size(16.dp), MaterialTheme.colorScheme.primary)
                     Text(
-                        if (paused) "Queued · paused (${items.size})" else "Queued (${items.size})",
+                        if (paused) stringResource(R.string.ai_queued_paused, items.size) else stringResource(R.string.ai_queued, items.size),
                         style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.weight(1f),
                     )
-                    TextButton(onClick = { open = !open }) { Text(if (open) "Hide" else "Show") }
+                    TextButton(onClick = { open = !open }) { Text(if (open) stringResource(R.string.ai_hide) else stringResource(R.string.ai_show)) }
                 }
                 if (open) items.forEach { item ->
                     Row(
@@ -151,11 +153,11 @@ fun Queue(
                         )
                         if (paused) {
                             IconButton(onClick = { onSendNow(item) }, modifier = Modifier.compactIconButton().testTag("queue-send")) {
-                                Icon(Icons.AutoMirrored.Outlined.Send, "Send now", Modifier.size(AiSize.compactIcon))
+                                Icon(Icons.AutoMirrored.Outlined.Send, stringResource(R.string.ai_send_now), Modifier.size(AiSize.compactIcon))
                             }
                         }
                         IconButton(onClick = { onRemove(item) }, modifier = Modifier.compactIconButton().testTag("queue-remove")) {
-                            Icon(Icons.Outlined.Close, "Remove from queue", Modifier.size(AiSize.compactIcon))
+                            Icon(Icons.Outlined.Close, stringResource(R.string.ai_remove_from_queue), Modifier.size(AiSize.compactIcon))
                         }
                     }
                 }
@@ -190,10 +192,10 @@ fun OpenInChat(prompt: String, modifier: Modifier = Modifier, targets: List<Open
             onClick = { open = true },
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.compactIconButton().testTag("open-in"),
-        ) { Icon(Icons.AutoMirrored.Outlined.OpenInNew, "Open in…", Modifier.size(AiSize.compactIcon)) }
+        ) { Icon(Icons.AutoMirrored.Outlined.OpenInNew, stringResource(R.string.ai_open_in_menu), Modifier.size(AiSize.compactIcon)) }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             Text(
-                "Open in",
+                stringResource(R.string.ai_open_in),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -210,7 +212,7 @@ fun OpenInChat(prompt: String, modifier: Modifier = Modifier, targets: List<Open
             }
             HorizontalDivider()
             DropdownMenuItem(
-                text = { Text("Share…") },
+                text = { Text(stringResource(R.string.ai_share)) },
                 leadingIcon = { Icon(Icons.Outlined.Share, null) },
                 onClick = {
                     open = false

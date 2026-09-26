@@ -34,8 +34,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.ReasoningPart
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
 
@@ -65,14 +67,14 @@ fun Reasoning(part: ReasoningPart, modifier: Modifier = Modifier) {
                     Icon(Icons.Outlined.Psychology, null, Modifier.size(AiSize.compactIcon), MaterialTheme.colorScheme.primary)
                 }
                 ShimmerText(
-                    text = if (part.isStreaming) "Thinking…" else thoughtLabel(part.durationMs),
+                    text = if (part.isStreaming) stringResource(R.string.ai_thinking) else thoughtLabel(part.durationMs),
                     active = part.isStreaming,
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.weight(1f),
                 )
                 Icon(
                     Icons.Outlined.ExpandMore,
-                    contentDescription = if (open) "Collapse" else "Expand",
+                    contentDescription = if (open) stringResource(R.string.ai_collapse) else stringResource(R.string.ai_expand),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.rotate(rotation),
                 )
@@ -98,7 +100,8 @@ fun Reasoning(part: ReasoningPart, modifier: Modifier = Modifier) {
     }
 }
 
+@Composable
 private fun thoughtLabel(durationMs: Long?): String {
-    val seconds = ((durationMs ?: 0) + 500) / 1000
-    return if (seconds < 1) "Thought for a moment" else "Thought for ${seconds}s"
+    val seconds = (((durationMs ?: 0) + 500) / 1000).toInt()
+    return if (seconds < 1) stringResource(R.string.ai_thought_moment) else stringResource(R.string.ai_thought_seconds, seconds)
 }

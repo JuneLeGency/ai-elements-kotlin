@@ -15,9 +15,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.SourcePart
+import dev.ai.elements.ui.R
 
 /** "Used N sources" with a row of link chips (AI Elements `<Sources>`). */
 @Composable
@@ -26,7 +28,7 @@ fun Sources(sources: List<SourcePart>, modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
     Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
-            "Used ${sources.size} source${if (sources.size == 1) "" else "s"}",
+            pluralStringResource(R.plurals.ai_used_sources, sources.size, sources.size),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

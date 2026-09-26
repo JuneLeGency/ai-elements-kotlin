@@ -1,6 +1,5 @@
 package dev.ai.elements.demo.ui
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,6 +36,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.QueuedMessage
@@ -51,6 +52,7 @@ import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
 import dev.ai.elements.core.model.Usage
+import dev.ai.elements.demo.R
 import dev.ai.elements.ui.chat.Artifact
 import dev.ai.elements.ui.chat.BranchSelector
 import dev.ai.elements.ui.chat.CanvasEdge
@@ -85,7 +87,7 @@ import kotlinx.serialization.json.Json
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GalleryScreen() {
-    Scaffold(containerColor = Color.Transparent, topBar = { TopAppBar(title = { Text("Components") }, colors = transparentAppBarColors()) }) { padding ->
+    Scaffold(containerColor = Color.Transparent, topBar = { TopAppBar(title = { Text(stringResource(R.string.nav_components)) }, colors = transparentAppBarColors()) }) { padding ->
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Adaptive(360.dp),
             contentPadding = PaddingValues(16.dp),

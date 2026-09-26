@@ -11,9 +11,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.DataPart
+import dev.ai.elements.ui.R
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -43,20 +45,20 @@ fun DataPartView(
     val data = part.data as? JsonObject
     when (part.name) {
         "plan" -> if (data != null) Plan(
-            title = data.string("title") ?: "Plan",
+            title = data.string("title") ?: stringResource(R.string.ai_plan),
             description = data.string("description").orEmpty(),
             steps = data.steps("steps"),
             streaming = data["streaming"]?.jsonPrimitive?.booleanOrNull ?: false,
             modifier = modifier.testTag("data-plan"),
         ) else JsonCard(part, modifier)
         "task" -> if (data != null) Task(
-            title = data.string("title") ?: "Task",
+            title = data.string("title") ?: stringResource(R.string.ai_task),
             items = data.steps("items"),
             modifier = modifier.testTag("data-task"),
         ) else JsonCard(part, modifier)
         "chain-of-thought" -> if (data != null) ChainOfThought(
             steps = data.steps("steps"),
-            title = data.string("title") ?: "Chain of thought",
+            title = data.string("title") ?: stringResource(R.string.ai_chain_of_thought),
             modifier = modifier.testTag("data-chain-of-thought"),
         ) else JsonCard(part, modifier)
         else -> JsonCard(part, modifier)

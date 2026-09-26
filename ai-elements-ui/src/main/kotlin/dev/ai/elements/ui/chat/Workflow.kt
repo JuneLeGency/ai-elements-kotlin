@@ -42,8 +42,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSpacing
 
 /** Progress of a plan / task / chain-of-thought step. */
@@ -62,7 +64,7 @@ data class WorkflowStep(
  * timeline of steps with status, descriptions and result badges.
  */
 @Composable
-fun ChainOfThought(steps: List<WorkflowStep>, modifier: Modifier = Modifier, title: String = "Chain of thought") {
+fun ChainOfThought(steps: List<WorkflowStep>, modifier: Modifier = Modifier, title: String = stringResource(R.string.ai_chain_of_thought)) {
     Collapsible(title, Icons.Outlined.Route, streaming = steps.any { it.status == StepStatus.ACTIVE }, modifier = modifier) {
         steps.forEachIndexed { index, step -> TimelineStep(step, isLast = index == steps.lastIndex) }
     }
@@ -152,9 +154,9 @@ private fun Badges(badges: List<String>) {
 private fun StatusIcon(status: StepStatus, modifier: Modifier = Modifier) {
     val scheme = MaterialTheme.colorScheme
     when (status) {
-        StepStatus.COMPLETE -> Icon(Icons.Outlined.CheckCircle, "Done", modifier.size(18.dp), scheme.primary)
+        StepStatus.COMPLETE -> Icon(Icons.Outlined.CheckCircle, stringResource(R.string.ai_step_done), modifier.size(18.dp), scheme.primary)
         StepStatus.ACTIVE -> LoadingIndicator(modifier.size(18.dp))
-        StepStatus.PENDING -> Icon(Icons.Outlined.RadioButtonUnchecked, "Pending", modifier.size(18.dp), scheme.outline)
+        StepStatus.PENDING -> Icon(Icons.Outlined.RadioButtonUnchecked, stringResource(R.string.ai_step_pending), modifier.size(18.dp), scheme.outline)
     }
 }
 
@@ -189,7 +191,7 @@ private fun Collapsible(
                         Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
-                Icon(Icons.Outlined.ExpandMore, if (open) "Collapse" else "Expand", Modifier.rotate(rotation))
+                Icon(Icons.Outlined.ExpandMore, if (open) stringResource(R.string.ai_collapse) else stringResource(R.string.ai_expand), Modifier.rotate(rotation))
             }
             AnimatedVisibility(
                 visible = open,

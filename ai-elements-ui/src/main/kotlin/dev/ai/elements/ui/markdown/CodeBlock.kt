@@ -27,11 +27,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiType
 import dev.ai.elements.ui.theme.compactIconButton
@@ -91,7 +93,7 @@ fun CodeBlock(
                 ) {
                     Icon(
                         if (copied) Icons.Outlined.Check else Icons.Outlined.ContentCopy,
-                        contentDescription = "Copy code",
+                        contentDescription = stringResource(R.string.ai_copy_code),
                         modifier = Modifier.size(AiSize.compactIcon),
                     )
                 }

@@ -3,6 +3,7 @@ package dev.ai.elements.demo.data
 import android.content.Context
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import java.io.File
 
 @Serializable
 data class Conversation(
@@ -65,6 +65,6 @@ class ConversationRepository(context: Context) {
     companion object {
         fun titleFor(messages: List<Message>): String =
             messages.firstOrNull { it.role == Role.USER }?.text?.lineSequence()?.firstOrNull()?.take(60)?.trim()
-                ?.ifBlank { null } ?: "New chat"
+                .orEmpty() // blank until the first message; the UI shows "New chat"
     }
 }

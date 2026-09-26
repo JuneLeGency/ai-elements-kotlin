@@ -1,14 +1,21 @@
 package dev.ai.elements.ui.markdown
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.LruCache
+import android.view.PixelCopy
+import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -27,15 +34,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.viewinterop.AndroidView
+import dev.ai.elements.ui.R
+import kotlin.coroutines.resume
+import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
 
 /**
  * A transparent WebView that renders a self-contained page (bundled JS such as
@@ -72,12 +89,16 @@ internal fun AutoHeightWebView(
     BoxWithConstraints(modifier) {
         // Width is part of the key: a rotation or pane resize re-renders at the new width.
         val key = "$cacheKey|${constraints.maxWidth}"
+        val timedOut = stringResource(R.string.ai_webview_timeout)
+        val outdatedWebView = stringResource(R.string.ai_webview_outdated)
         val cached = if (fitWidth) snapshotCache[key] else null
         var snapshot by remember(key) { mutableStateOf(cached) }
         var state by remember(key) {
             mutableStateOf<RenderState>(heightCache[key]?.let { RenderState.Rendered(it) } ?: RenderState.Loading)
         }
         val webView = remember(key) { arrayOfNulls<WebView>(1) }
+        // Window bounds of the live WebView, clipped by every ancestor (the list viewport, panes).
+        val host = remember(key) { arrayOfNulls<LayoutCoordinates>(1) }
 
         val shot = snapshot
         if (shot != null) {
@@ -95,16 +116,27 @@ internal fun AutoHeightWebView(
 
         LaunchedEffect(key) {
             delay(RENDER_TIMEOUT_MS)
-            if (state == RenderState.Loading) state = RenderState.Failed("Timed out — this device's WebView may be too old")
+            if (state == RenderState.Loading) state = RenderState.Failed(timedOut)
         }
         val rendered = state as? RenderState.Rendered
         if (fitWidth && rendered != null) {
             LaunchedEffect(key, rendered) {
                 val view = webView[0] ?: return@LaunchedEffect
+                // Until it is captured (e.g. while scrolled partly out of view) the live WebView stays.
+                // Frames around a resize (placeholder → measured height) can be drawn at a stale
+                // scale, so only two identical consecutive captures count as the settled render.
+                var previous: ImageBitmap? = null
                 repeat(SNAPSHOT_ATTEMPTS) {
                     delay(SNAPSHOT_SETTLE_MS) // let the new height lay out and paint
                     view.awaitVisualState()
-                    val bitmap = view.capture()
+                    val captured = if (Build.VERSION.SDK_INT >= 26) {
+                        host[0]?.fullyVisibleRectInWindow()?.let { view.pixelCopy(it) }
+                    } else {
+                        view.capture()
+                    }
+                    val settled = previous?.takeIf { captured != null && it.asAndroidBitmap().sameAs(captured.asAndroidBitmap()) }
+                    previous = captured
+                    val bitmap = settled
                     if (bitmap != null) {
                         snapshotCache.put(key, bitmap)
                         snapshot = bitmap
@@ -117,11 +149,12 @@ internal fun AutoHeightWebView(
         (state as? RenderState.Failed)?.let {
             // A bundle that never defined its global means the WebView could not even parse it.
             val outdated = "is not defined" in it.message || "SyntaxError" in it.message
-            failure(if (outdated) "this device's Android System WebView is too old — update it to render" else it.message)
+            failure(if (outdated) outdatedWebView else it.message)
             return@BoxWithConstraints
         }
         Box(
-            modifier = if (fitWidth) Modifier.fillMaxWidth().height(rendered?.heightDp?.dp ?: placeholderHeight) else Modifier.fillMaxSize(),
+            modifier = (if (fitWidth) Modifier.fillMaxWidth().height(rendered?.heightDp?.dp ?: placeholderHeight) else Modifier.fillMaxSize())
+                .onGloballyPositioned { host[0] = it },
             contentAlignment = Alignment.Center,
         ) {
             AndroidView(
@@ -129,7 +162,7 @@ internal fun AutoHeightWebView(
                 update = { view ->
                     if (view.tag != html) {
                         view.tag = html
-                        view.loadDataWithBaseURL(ASSET_BASE, html, "text/html", "utf-8", null)
+                        view.loadWhenSized(html)
                     }
                 },
                 onRelease = { view ->
@@ -148,7 +181,7 @@ internal fun AutoHeightWebView(
 
 @SuppressLint("SetJavaScriptEnabled")
 private fun createWebView(
-    context: android.content.Context,
+    context: Context,
     html: String,
     fitWidth: Boolean,
     key: String,
@@ -181,7 +214,27 @@ private fun createWebView(
         "Bridge",
     )
     tag = html
-    loadDataWithBaseURL(ASSET_BASE, html, "text/html", "utf-8", null)
+    loadWhenSized(html)
+}
+
+/**
+ * Loads [html] once the view has a real size. A WebView created inside a lazy
+ * layout is first laid out at 0×0; a page that loads (and lays out) at zero
+ * width can keep a stale page scale once the view is resized, which showed as
+ * an enlarged corner of the diagram in the inline card, intermittently.
+ */
+private fun WebView.loadWhenSized(html: String) {
+    if (width > 0 && height > 0) {
+        loadDataWithBaseURL(ASSET_BASE, html, "text/html", "utf-8", null)
+        return
+    }
+    addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+        override fun onLayoutChange(v: View, l: Int, t: Int, r: Int, b: Int, ol: Int, ot: Int, or: Int, ob: Int) {
+            if (r - l <= 0 || b - t <= 0) return
+            v.removeOnLayoutChangeListener(this)
+            if (v.tag == html) (v as WebView).loadDataWithBaseURL(ASSET_BASE, html, "text/html", "utf-8", null)
+        }
+    })
 }
 
 /** Suspends until the WebView's current DOM state is ready to be drawn. */
@@ -196,7 +249,48 @@ private suspend fun WebView.awaitVisualState() = suspendCancellableCoroutine { c
     )
 }
 
-/** Draws the WebView into a bitmap; null if it isn't laid out or painted nothing yet. */
+/**
+ * The window rect of [this] if no ancestor clips any of it (a list viewport,
+ * a pane, the screen edge), else null. PixelCopy reads the composited window,
+ * so a partly hidden view would capture whatever covers it.
+ */
+private fun LayoutCoordinates.fullyVisibleRectInWindow(): Rect? {
+    if (!isAttached) return null
+    val visible = boundsInWindow()
+    val whole = Rect(positionInWindow(), size.toSize())
+    val fully = visible.width >= whole.width - 1f && visible.height >= whole.height - 1f && !visible.isEmpty
+    return if (fully) visible else null
+}
+
+/**
+ * Copies the WebView's on-screen pixels (Android 8+). Unlike [capture], this
+ * doesn't depend on the WebView's software-draw path, which on some ROMs
+ * (seen on MIUI with WebView 153) renders at the wrong scale — an enlarged
+ * corner of the diagram instead of the whole thing.
+ */
+@RequiresApi(26)
+private suspend fun WebView.pixelCopy(rect: Rect): ImageBitmap? {
+    val window = context.findActivity()?.window ?: return null
+    delay(2 * FRAME_MS) // let the painted DOM reach the screen
+    val src = android.graphics.Rect(rect.left.roundToInt(), rect.top.roundToInt(), rect.right.roundToInt(), rect.bottom.roundToInt())
+    if (src.width() <= 0 || src.height() <= 0) return null
+    val bitmap = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888)
+    return suspendCancellableCoroutine { cont ->
+        PixelCopy.request(
+            window, src, bitmap,
+            { result -> if (cont.isActive) cont.resume(if (result == PixelCopy.SUCCESS) bitmap.asImageBitmap() else null) },
+            Handler(Looper.getMainLooper()),
+        )
+    }
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+/** Draws the WebView into a bitmap (Android 7); null if it isn't laid out or painted nothing yet. */
 private fun WebView.capture(): ImageBitmap? {
     if (width <= 0 || height <= 0) return null
     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -221,8 +315,10 @@ private val snapshotCache = object : LruCache<String, ImageBitmap>((Runtime.getR
     override fun sizeOf(key: String, value: ImageBitmap) = value.width * value.height * 4
 }
 
-private const val SNAPSHOT_ATTEMPTS = 5
+/** ~6s of retries: covers a diagram that renders while scrolled partly out of view. */
+private const val SNAPSHOT_ATTEMPTS = 40
 private const val SNAPSHOT_SETTLE_MS = 150L
+private const val FRAME_MS = 17L
 
 private sealed interface RenderState {
     data object Loading : RenderState

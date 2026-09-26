@@ -23,8 +23,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.Usage
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
 import java.util.Locale
@@ -68,11 +70,11 @@ fun ContextUsage(
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Token usage", style = MaterialTheme.typography.titleSmall)
-                UsageRow("Input", usage.inputTokens)
-                UsageRow("Output", usage.outputTokens)
-                UsageRow("Total", usage.totalTokens)
-                contextWindow?.let { UsageRow("Context window", it) }
+                Text(stringResource(R.string.ai_token_usage), style = MaterialTheme.typography.titleSmall)
+                UsageRow(stringResource(R.string.ai_usage_input), usage.inputTokens)
+                UsageRow(stringResource(R.string.ai_usage_output), usage.outputTokens)
+                UsageRow(stringResource(R.string.ai_usage_total), usage.totalTokens)
+                contextWindow?.let { UsageRow(stringResource(R.string.ai_usage_context_window), it) }
             }
         }
     }
@@ -86,8 +88,12 @@ private fun UsageRow(label: String, value: Int) {
     }
 }
 
-private fun compact(tokens: Int): String = when {
-    tokens >= 1_000_000 -> String.format(Locale.US, "%.1fM tokens", tokens / 1_000_000f)
-    tokens >= 1_000 -> String.format(Locale.US, "%.1fk tokens", tokens / 1_000f)
-    else -> "$tokens tokens"
-}
+@Composable
+private fun compact(tokens: Int): String = stringResource(
+    R.string.ai_tokens,
+    when {
+        tokens >= 1_000_000 -> String.format(Locale.US, "%.1fM", tokens / 1_000_000f)
+        tokens >= 1_000 -> String.format(Locale.US, "%.1fk", tokens / 1_000f)
+        else -> tokens.toString()
+    },
+)

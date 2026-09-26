@@ -1,9 +1,6 @@
 package dev.ai.elements.demo.ui
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -20,8 +17,11 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Widgets
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
@@ -31,17 +31,20 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.demo.ChatViewModel
+import dev.ai.elements.demo.R
 
-enum class Destination(val label: String, val icon: ImageVector, val selectedIcon: ImageVector) {
-    CHAT("Chat", Icons.AutoMirrored.Outlined.Chat, Icons.AutoMirrored.Filled.Chat),
-    COMPONENTS("Components", Icons.Outlined.Widgets, Icons.Filled.Widgets),
-    SETTINGS("Settings", Icons.Outlined.Settings, Icons.Filled.Settings),
+enum class Destination(@StringRes val label: Int, val icon: ImageVector, val selectedIcon: ImageVector) {
+    CHAT(R.string.nav_chat, Icons.AutoMirrored.Outlined.Chat, Icons.AutoMirrored.Filled.Chat),
+    COMPONENTS(R.string.nav_components, Icons.Outlined.Widgets, Icons.Filled.Widgets),
+    SETTINGS(R.string.nav_settings, Icons.Outlined.Settings, Icons.Filled.Settings),
 }
 
 /** Size buckets used across screens (M3 window size classes). */
@@ -80,7 +83,7 @@ fun DemoApp(viewModel: ChatViewModel) {
                         selected = dest == destination,
                         onClick = { destination = dest },
                         icon = { Icon(if (dest == destination) dest.selectedIcon else dest.icon, null) },
-                        label = { Text(dest.label) },
+                        label = { Text(stringResource(dest.label)) },
                         modifier = Modifier.testTag("nav-${dest.name.lowercase()}"),
                     )
                 }

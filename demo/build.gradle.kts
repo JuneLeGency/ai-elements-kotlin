@@ -21,6 +21,11 @@ android {
         compose = true
     }
 
+    // Lists the shipped translations for Android 13+ per-app language settings.
+    androidResources {
+        generateLocaleConfig = true
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true

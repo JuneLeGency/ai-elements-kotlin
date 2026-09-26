@@ -22,8 +22,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
 
@@ -58,11 +60,11 @@ fun Confirmation(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End), modifier = Modifier.fillMaxWidth()) {
                     OutlinedButton(onClick = onDeny, shapes = ButtonDefaults.shapes(), modifier = Modifier.testTag("deny")) {
                         Icon(Icons.Outlined.Close, null, Modifier.size(ButtonDefaults.IconSize))
-                        Text("Deny", Modifier.padding(start = ButtonDefaults.IconSpacing))
+                        Text(stringResource(R.string.ai_deny), Modifier.padding(start = ButtonDefaults.IconSpacing))
                     }
                     Button(onClick = onApprove, shapes = ButtonDefaults.shapes(), modifier = Modifier.testTag("approve")) {
                         Icon(Icons.Outlined.Check, null, Modifier.size(ButtonDefaults.IconSize))
-                        Text("Approve", Modifier.padding(start = ButtonDefaults.IconSpacing))
+                        Text(stringResource(R.string.ai_approve), Modifier.padding(start = ButtonDefaults.IconSpacing))
                     }
                 }
             }

@@ -34,16 +34,18 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.backend.DefaultHttpClient
 import dev.ai.elements.core.model.FilePart
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
+import okhttp3.Request
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.Request
 
 /**
  * An image from a [FilePart] (AI Elements `<Image>`): decodes `data:` URLs and
@@ -71,7 +73,7 @@ fun FileImage(
     }
     Box(sized.background(MaterialTheme.colorScheme.surfaceContainerHighest), contentAlignment = Alignment.Center) {
         if (image != null) {
-            Image(image, file.filename ?: "Image", Modifier.matchParentSize(), contentScale = contentScale)
+            Image(image, file.filename ?: stringResource(R.string.ai_image), Modifier.matchParentSize(), contentScale = contentScale)
         } else {
             Icon(Icons.Outlined.BrokenImage, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -124,14 +126,14 @@ fun AttachmentStrip(
                         .align(Alignment.TopEnd)
                         .offset(x = 12.dp, y = (-12).dp)
                         .size(AiSize.touchTarget)
-                        .clickable(onClickLabel = "Remove attachment") { onRemove(file) }
+                        .clickable(onClickLabel = stringResource(R.string.ai_remove_attachment)) { onRemove(file) }
                         .testTag("remove-attachment"),
                 ) {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier.size(20.dp).clip(MaterialTheme.shapes.extraLarge).background(MaterialTheme.colorScheme.inverseSurface),
                     ) {
-                        Icon(Icons.Outlined.Close, "Remove attachment", Modifier.size(AiSpacing.l), MaterialTheme.colorScheme.inverseOnSurface)
+                        Icon(Icons.Outlined.Close, stringResource(R.string.ai_remove_attachment), Modifier.size(AiSpacing.l), MaterialTheme.colorScheme.inverseOnSurface)
                     }
                 }
             }

@@ -33,7 +33,7 @@ class MockAgentBackend(
         val prompt = history.lastOrNull { it.role == Role.USER }?.text.orEmpty()
         val math = extractExpression(prompt)
         val wantsCopy = tools.any { it.name == "copy_to_clipboard" } &&
-            listOf("copy", "clipboard", "复制", "剪贴板").any { prompt.contains(it, ignoreCase = true) }
+            listOf("copy", "clipboard", "复制", "剪贴板", "複製", "剪貼簿", "コピー", "クリップボード").any { prompt.contains(it, ignoreCase = true) }
 
         // A live plan (AI SDK `data-plan` part): re-emitted with the same id as steps progress.
         val planId = "plan-${UUID.randomUUID()}"
@@ -89,7 +89,7 @@ class MockAgentBackend(
         plan(2)
         val textId = "text-${UUID.randomUUID()}"
         val body = answer(prompt, toolName, result) +
-            if (prompt.contains("long", ignoreCase = true)) longTail() else ""
+            if (listOf("long", "长", "長").any { prompt.contains(it, ignoreCase = true) }) longTail() else ""
         streamText(body) { emit(ChatEvent.TextDelta(textId, it)) }
         emit(ChatEvent.TextEnd(textId))
         plan(3)
@@ -111,7 +111,7 @@ class MockAgentBackend(
     private fun answer(prompt: String, tool: String, result: String) = """
         |## Offline agent demo
         |
-        |You said: *${prompt.replace("*", "").take(120)}*. The agent called **`$tool`** and got `$result`.
+        |You said: *${prompt.take(120).escapeMarkdown()}*. The agent called **`$tool`** and got `$result`.
         |
         |### What just happened
         |1. **Reasoning** streamed into the collapsible *Thinking* block.
@@ -163,3 +163,6 @@ class MockAgentBackend(
         }
     }
 }
+
+/** Backslash-escape Markdown punctuation so echoed user text renders literally (e.g. `1234 * 5678`). */
+private fun String.escapeMarkdown(): String = replace(Regex("""([\\`*_\[\]<>#|])"""), """\\$1""")

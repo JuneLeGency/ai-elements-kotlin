@@ -37,14 +37,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.ChatState
 import dev.ai.elements.core.model.ChatStatus
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSpacing
-import kotlinx.coroutines.launch
 import java.util.IdentityHashMap
+import kotlinx.coroutines.launch
 
 /**
  * The scrolling message list (AI Elements `<Conversation>`).
@@ -161,7 +163,7 @@ fun Conversation(
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp),
         ) {
             SmallFloatingActionButton(onClick = { scope.launch { stick.jumpToLatest(animated = true) } }) {
-                Icon(Icons.Outlined.KeyboardArrowDown, "Scroll to latest")
+                Icon(Icons.Outlined.KeyboardArrowDown, stringResource(R.string.ai_scroll_to_latest))
             }
         }
     }
@@ -181,8 +183,8 @@ private fun ErrorCard(error: String, onRetry: () -> Unit, onDismiss: () -> Unit,
                 Text(error, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
             }
             Row(Modifier.align(Alignment.End)) {
-                TextButton(onClick = onDismiss) { Text("Dismiss") }
-                TextButton(onClick = onRetry) { Text("Retry") }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.ai_dismiss)) }
+                TextButton(onClick = onRetry) { Text(stringResource(R.string.ai_retry)) }
             }
         }
     }

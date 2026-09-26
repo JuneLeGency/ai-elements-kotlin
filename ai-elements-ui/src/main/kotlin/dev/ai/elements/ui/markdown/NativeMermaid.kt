@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -31,6 +32,7 @@ import com.swithun.cmpmermaid.compose.MermaidDiagram as CmpMermaidDiagram
 import com.swithun.cmpmermaid.core.GMResult
 import com.swithun.cmpmermaid.core.MermaidTheme
 import com.swithun.cmpmermaid.core.SceneColor
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.isDark
 
 /** How [MermaidDiagram] draws diagrams. */
@@ -103,7 +105,7 @@ internal fun NativeMermaidView(code: String, fill: Boolean, modifier: Modifier, 
     error?.let { message ->
         Column(modifier) {
             Text(
-                "Diagram error: ${message.take(160)}",
+                stringResource(R.string.ai_diagram_error, message.take(160)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(horizontal = 8.dp),
@@ -117,6 +119,7 @@ internal fun NativeMermaidView(code: String, fill: Boolean, modifier: Modifier, 
         return
     }
     val sizing = LocalMermaidSizing.current
+    val openLabel = stringResource(R.string.ai_open_diagram)
     BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
         val size = natural?.takeIf { it.first > 0f && it.second > 0f }
         // One call site, so the scene laid out at the placeholder size is reused once sized.
@@ -125,7 +128,7 @@ internal fun NativeMermaidView(code: String, fill: Boolean, modifier: Modifier, 
         } else {
             val (w, h) = fitted(size.first * sizing.scale, size.second * sizing.scale, maxWidth, sizing.maxInlineHeight)
             Modifier.size(w, h).then(
-                onClick?.let { Modifier.clickable(onClickLabel = "Open diagram", role = Role.Button, onClick = it) } ?: Modifier,
+                onClick?.let { Modifier.clickable(onClickLabel = openLabel, role = Role.Button, onClick = it) } ?: Modifier,
             )
         }
         diagram(sized)

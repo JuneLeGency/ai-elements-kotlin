@@ -47,6 +47,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -59,6 +61,7 @@ import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.SourcePart
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
+import dev.ai.elements.ui.R
 import dev.ai.elements.ui.markdown.MarkdownContent
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
@@ -186,19 +189,19 @@ internal fun MessageActions(
             onClick = { clipboard.setText(AnnotatedString(message.text)) },
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.compactIconButton(),
-        ) { Icon(Icons.Outlined.ContentCopy, "Copy", Modifier.size(AiSize.compactIcon)) }
+        ) { Icon(Icons.Outlined.ContentCopy, stringResource(R.string.ai_copy), Modifier.size(AiSize.compactIcon)) }
         if (onRegenerate != null) {
             IconButton(
                 onClick = onRegenerate,
                 shapes = IconButtonDefaults.shapes(),
                 modifier = Modifier.compactIconButton().testTag("regenerate"),
-            ) { Icon(Icons.Outlined.Refresh, "Regenerate", Modifier.size(AiSize.compactIcon)) }
+            ) { Icon(Icons.Outlined.Refresh, stringResource(R.string.ai_regenerate), Modifier.size(AiSize.compactIcon)) }
         }
         IconButton(
             onClick = { showGraph = true },
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.compactIconButton().testTag("run-graph"),
-        ) { Icon(Icons.Outlined.AccountTree, "View agent run", Modifier.size(AiSize.compactIcon)) }
+        ) { Icon(Icons.Outlined.AccountTree, stringResource(R.string.ai_view_agent_run), Modifier.size(AiSize.compactIcon)) }
         if (!prompt.isNullOrBlank()) OpenInChat(prompt)
         message.usage?.takeIf { it.totalTokens > 0 }?.let { ContextUsage(it, Modifier.padding(start = 4.dp)) }
     }
@@ -209,20 +212,21 @@ internal fun MessageActions(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AgentRunDialog(message: Message, prompt: String?, onDismiss: () -> Unit) {
-    val (nodes, edges) = remember(message) { agentRunGraph(message, prompt) }
+    val labels = rememberAgentRunLabels()
+    val (nodes, edges) = remember(message, labels) { agentRunGraph(message, prompt, labels = labels) }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
         Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
             Column(Modifier.systemBarsPadding()) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 20.dp, end = 8.dp, top = 8.dp)) {
                     Column(Modifier.weight(1f)) {
-                        Text("Agent run", style = MaterialTheme.typography.titleLarge)
+                        Text(stringResource(R.string.ai_agent_run), style = MaterialTheme.typography.titleLarge)
                         Text(
-                            "${nodes.size} steps · pinch to zoom, drag to pan",
+                            pluralStringResource(R.plurals.ai_agent_run_subtitle, nodes.size, nodes.size),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    IconButton(onClick = onDismiss, shapes = IconButtonDefaults.shapes()) { Icon(Icons.Outlined.Close, "Close") }
+                    IconButton(onClick = onDismiss, shapes = IconButtonDefaults.shapes()) { Icon(Icons.Outlined.Close, stringResource(R.string.ai_close)) }
                 }
                 WorkflowCanvas(nodes, edges, Modifier.fillMaxSize().padding(top = 8.dp))
             }

@@ -1,6 +1,6 @@
 package dev.ai.elements.demo.ui
 
-import androidx.compose.ui.graphics.Color
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -56,16 +56,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.minimumInteractiveComponentSize
-import androidx.compose.material3.rememberBottomSheetState
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,9 +73,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -84,6 +87,7 @@ import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Suggestion
 import dev.ai.elements.demo.ChatViewModel
+import dev.ai.elements.demo.R
 import dev.ai.elements.demo.data.Conversation
 import dev.ai.elements.demo.data.imageAttachment
 import dev.ai.elements.ui.chat.ChatEmptyState
@@ -95,14 +99,21 @@ import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
 import kotlinx.coroutines.launch
 
-private val DemoSuggestions = listOf(
-    Suggestion("Explain how an AI agent loop works, with a Mermaid sequence diagram", "Agent loop diagram"),
-    Suggestion("What time is it in Tokyo right now?", "What time is it in Tokyo?"),
-    Suggestion("Calculate (1234 * 5678) / 9 and show the steps in a table", "Calculate with a tool"),
-    Suggestion("Write a Kotlin data class for a chat message and explain each field in a table", "Kotlin + table"),
-    Suggestion("Copy the text 'Hello from AI Elements' to my clipboard", "Clipboard (needs approval)"),
-    Suggestion("Write a long answer so I can test streaming and scrolling", "Long streaming answer"),
-)
+/** Starter prompts, in the UI language (the model answers in kind). */
+@Composable
+private fun demoSuggestions(): List<Suggestion> {
+    val resources = LocalResources.current
+    return remember(resources) {
+        listOf(
+            R.string.sugg_agent_loop_prompt to R.string.sugg_agent_loop,
+            R.string.sugg_time_prompt to R.string.sugg_time,
+            R.string.sugg_calc_prompt to R.string.sugg_calc,
+            R.string.sugg_kotlin_prompt to R.string.sugg_kotlin,
+            R.string.sugg_clipboard_prompt to R.string.sugg_clipboard,
+            R.string.sugg_long_prompt to R.string.sugg_long,
+        ).map { (prompt, label) -> Suggestion(resources.getString(prompt), resources.getString(label)) }
+    }
+}
 
 /**
  * Chat with its conversation history.
@@ -172,6 +183,8 @@ fun ChatScreen(
         )
     } else {
         val drawer = rememberDrawerState(DrawerValue.Closed)
+        // Back closes the open drawer before it leaves the screen.
+        BackHandler(enabled = drawer.isOpen || drawer.isAnimationRunning) { scope.launch { drawer.close() } }
         ModalNavigationDrawer(
             drawerState = drawer,
             drawerContent = {
@@ -238,13 +251,13 @@ private fun ChatPane(
             if (!hideTopBar) TopAppBar(
                 navigationIcon = {
                     if (showMenu) IconButton(onClick = onMenu, shapes = IconButtonDefaults.shapes()) {
-                        Icon(Icons.Outlined.Menu, "Conversations")
+                        Icon(Icons.Outlined.Menu, stringResource(R.string.conversations))
                     }
                 },
                 title = { ProviderButton(provider, onClick = { providerSheet = true }) },
                 actions = {
                     IconButton(onClick = viewModel::newChat, shapes = IconButtonDefaults.shapes(), modifier = Modifier.testTag("new-chat")) {
-                        Icon(Icons.Outlined.EditNote, "New chat")
+                        Icon(Icons.Outlined.EditNote, stringResource(R.string.new_chat))
                     }
                 },
                 colors = transparentAppBarColors(),
@@ -262,9 +275,9 @@ private fun ChatPane(
             Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 if (state.messages.isEmpty() && !state.isBusy) {
                     ChatEmptyState(
-                        title = "What shall we explore?",
+                        title = stringResource(R.string.empty_title),
                         subtitle = listOf(provider.name, provider.kind.label).distinct().joinToString(" · "),
-                        suggestions = DemoSuggestions,
+                        suggestions = demoSuggestions(),
                         onSelect = { submit(it.text) },
                         showHero = !compactHeight,
                         modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -296,7 +309,7 @@ private fun ChatPane(
                 onSubmit = { submit(input) },
                 onStop = viewModel::stop,
                 busy = state.isBusy,
-                placeholder = "Message ${provider.name}",
+                placeholder = stringResource(R.string.message_placeholder, provider.name),
                 attachments = attachments,
                 onAddAttachment = {
                     pickImages.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
@@ -340,7 +353,7 @@ private fun ProviderButton(provider: ProviderProfile, onClick: () -> Unit) {
             Column(Modifier.weight(1f, fill = false)) {
                 Text(provider.name, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
-                    provider.model.ifBlank { "server default model" },
+                    provider.model.ifBlank { stringResource(R.string.server_default_model) },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -363,7 +376,7 @@ private fun ProviderSheet(
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberBottomSheetState(SheetValue.Hidden, setOf(SheetValue.Hidden, SheetValue.Expanded))) {
         Text(
-            "Agent provider",
+            stringResource(R.string.agent_provider),
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
         )
@@ -373,7 +386,7 @@ private fun ProviderSheet(
                     selected = profile.id == selectedId,
                     onClick = { onSelect(profile.id) },
                     supportingContent = {
-                        Text("${profile.kind.label} · ${profile.model.ifBlank { "default" }}", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text("${profile.kind.label} · ${profile.model.ifBlank { stringResource(R.string.default_model) }}", maxLines = 1, overflow = TextOverflow.Ellipsis)
                     },
                     leadingContent = { RadioButton(selected = profile.id == selectedId, onClick = null) },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("provider-${profile.id}"),
@@ -382,7 +395,7 @@ private fun ProviderSheet(
             item {
                 TextButton(onClick = onManage, modifier = Modifier.padding(16.dp)) {
                     Icon(Icons.Outlined.Tune, null, Modifier.size(AiSize.compactIcon))
-                    Text("  Manage providers & API keys")
+                    Text("  " + stringResource(R.string.manage_providers))
                 }
             }
         }
@@ -422,7 +435,7 @@ private fun ModelChip(viewModel: ChatViewModel, provider: ProviderProfile) {
             ) {
                 Icon(Icons.Outlined.Memory, null, Modifier.size(16.dp))
                 Text(
-                    provider.model.ifBlank { "default" },
+                    provider.model.ifBlank { stringResource(R.string.default_model) },
                     style = MaterialTheme.typography.labelLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -437,12 +450,12 @@ private fun ModelChip(viewModel: ChatViewModel, provider: ProviderProfile) {
                     LoadingIndicator(Modifier.size(32.dp))
                 }
                 error != null -> Text(
-                    "Couldn't list models:\n$error",
+                    stringResource(R.string.list_models_failed, error.toString()),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(16.dp).widthIn(max = 280.dp),
                 )
-                models.isEmpty() -> Text("No models reported", Modifier.padding(16.dp))
+                models.isEmpty() -> Text(stringResource(R.string.no_models), Modifier.padding(16.dp))
             }
             models.forEach { model ->
                 DropdownMenuItem(
