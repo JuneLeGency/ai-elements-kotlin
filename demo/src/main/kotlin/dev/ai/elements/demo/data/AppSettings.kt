@@ -7,7 +7,15 @@ import kotlinx.coroutines.flow.asStateFlow
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
-data class Appearance(val themeMode: ThemeMode = ThemeMode.SYSTEM, val dynamicColor: Boolean = true)
+enum class DiagramSize { SMALL, MEDIUM, LARGE }
+
+data class Appearance(
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val dynamicColor: Boolean = true,
+    /** Draw Mermaid with Compose Canvas (cmp-mermaid) instead of the WebView. */
+    val nativeMermaid: Boolean = false,
+    val diagramSize: DiagramSize = DiagramSize.MEDIUM,
+)
 
 class AppSettings(context: Context) {
     private val prefs = context.getSharedPreferences("ai_elements_demo", Context.MODE_PRIVATE)
@@ -16,6 +24,8 @@ class AppSettings(context: Context) {
         Appearance(
             themeMode = runCatching { ThemeMode.valueOf(prefs.getString("theme", null)!!) }.getOrDefault(ThemeMode.SYSTEM),
             dynamicColor = prefs.getBoolean("dynamic_color", true),
+            nativeMermaid = prefs.getBoolean("native_mermaid", false),
+            diagramSize = runCatching { DiagramSize.valueOf(prefs.getString("diagram_size", null)!!) }.getOrDefault(DiagramSize.MEDIUM),
         ),
     )
     val appearance: StateFlow<Appearance> = _appearance.asStateFlow()
@@ -25,6 +35,8 @@ class AppSettings(context: Context) {
         prefs.edit()
             .putString("theme", appearance.themeMode.name)
             .putBoolean("dynamic_color", appearance.dynamicColor)
+            .putBoolean("native_mermaid", appearance.nativeMermaid)
+            .putString("diagram_size", appearance.diagramSize.name)
             .apply()
     }
 }

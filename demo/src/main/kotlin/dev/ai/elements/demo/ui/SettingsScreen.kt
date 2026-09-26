@@ -83,7 +83,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ai.elements.core.config.ProviderKind
 import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.demo.ChatViewModel
-import dev.ai.elements.demo.data.Appearance
+import dev.ai.elements.demo.data.DiagramSize
 import dev.ai.elements.demo.data.ThemeMode
 import dev.ai.elements.ui.theme.AiSize
 import kotlinx.coroutines.launch
@@ -188,11 +188,45 @@ private fun SettingsList(
                 item {
                     ListItem(
                         checked = appearance.dynamicColor,
-                        onCheckedChange = { viewModel.settings.update(Appearance(appearance.themeMode, it)) },
+                        onCheckedChange = { viewModel.settings.update(appearance.copy(dynamicColor = it)) },
                         supportingContent = { Text("Use colors from your wallpaper") },
                         trailingContent = { Switch(checked = appearance.dynamicColor, onCheckedChange = null) },
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                     ) { Text("Dynamic color") }
+                }
+            }
+            item {
+                ListItem(
+                    checked = appearance.nativeMermaid,
+                    onCheckedChange = { viewModel.settings.update(appearance.copy(nativeMermaid = it)) },
+                    supportingContent = { Text("Draw diagrams with Compose instead of a WebView (experimental)") },
+                    trailingContent = { Switch(checked = appearance.nativeMermaid, onCheckedChange = null) },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp).testTag("native-mermaid"),
+                ) { Text("Native Mermaid renderer") }
+            }
+            item {
+                Text(
+                    "Diagram size",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(start = 28.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+                    modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
+                ) {
+                    val sizes = listOf(DiagramSize.SMALL to "Small", DiagramSize.MEDIUM to "Medium", DiagramSize.LARGE to "Large")
+                    sizes.forEachIndexed { index, (size, label) ->
+                        ToggleButton(
+                            checked = appearance.diagramSize == size,
+                            onCheckedChange = { viewModel.settings.update(appearance.copy(diagramSize = size)) },
+                            shapes = when (index) {
+                                0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                sizes.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                            },
+                            modifier = Modifier.weight(1f).testTag("diagram-size-${size.name.lowercase()}"),
+                        ) { Text(label) }
+                    }
                 }
             }
 

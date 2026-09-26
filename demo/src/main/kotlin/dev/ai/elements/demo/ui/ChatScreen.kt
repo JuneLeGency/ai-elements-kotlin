@@ -31,8 +31,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDropDown
-import androidx.compose.material.icons.outlined.ChatBubbleOutline
-import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Menu
@@ -42,7 +40,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -52,7 +49,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
@@ -60,7 +56,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberDrawerState
@@ -98,7 +93,6 @@ import dev.ai.elements.ui.chat.PromptInput
 import dev.ai.elements.ui.chat.Queue
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
-import dev.ai.elements.ui.theme.compactIconButton
 import kotlinx.coroutines.launch
 
 private val DemoSuggestions = listOf(
@@ -458,54 +452,6 @@ private fun ModelChip(viewModel: ChatViewModel, provider: ProviderProfile) {
                         open = false
                     },
                     trailingIcon = if (model == provider.model) ({ RadioButton(selected = true, onClick = null) }) else null,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun HistoryPane(
-    conversations: List<Conversation>,
-    currentId: String,
-    onNew: () -> Unit,
-    onOpen: (String) -> Unit,
-    onDelete: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier.fillMaxHeight().padding(horizontal = 12.dp)) {
-        ExtendedFloatingActionButton(
-            onClick = onNew,
-            icon = { Icon(Icons.Outlined.EditNote, null) },
-            text = { Text("New chat") },
-            modifier = Modifier.padding(vertical = 16.dp, horizontal = 4.dp),
-        )
-        Text(
-            "Recent",
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        )
-        if (conversations.isEmpty()) {
-            Text(
-                "Your conversations will appear here.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(16.dp),
-            )
-        }
-        LazyColumn {
-            items(conversations, key = { it.id }) { conversation ->
-                NavigationDrawerItem(
-                    label = { Text(conversation.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                    selected = conversation.id == currentId,
-                    onClick = { onOpen(conversation.id) },
-                    icon = { Icon(Icons.Outlined.ChatBubbleOutline, null) },
-                    badge = {
-                        IconButton(onClick = { onDelete(conversation.id) }, modifier = Modifier.compactIconButton()) {
-                            Icon(Icons.Outlined.DeleteOutline, "Delete", Modifier.size(AiSize.compactIcon))
-                        }
-                    },
                 )
             }
         }

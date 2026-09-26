@@ -177,7 +177,7 @@ private fun Collapsible(
         shape = MaterialTheme.shapes.large,
         modifier = modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.padding(16.dp)) {
+        Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
                 Box(
                     contentAlignment = Alignment.Center,
@@ -196,7 +196,7 @@ private fun Collapsible(
                 enter = expandVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) + fadeIn(),
                 exit = shrinkVertically(MaterialTheme.motionScheme.fastSpatialSpec()) + fadeOut(),
             ) {
-                Column(Modifier.padding(top = AiSpacing.l).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
+                Column(Modifier.padding(top = AiSpacing.m).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
                     content()
                 }
             }

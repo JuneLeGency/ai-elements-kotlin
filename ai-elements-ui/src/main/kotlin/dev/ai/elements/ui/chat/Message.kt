@@ -62,6 +62,7 @@ import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.ui.markdown.MarkdownContent
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
+import dev.ai.elements.ui.theme.AiType
 import dev.ai.elements.ui.theme.compactIconButton
 
 /**
@@ -103,14 +104,14 @@ private fun UserBubble(text: String, modifier: Modifier) {
     Surface(
         color = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomEnd = 6.dp, bottomStart = 24.dp),
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomEnd = 6.dp, bottomStart = 20.dp),
         modifier = modifier.testTag("user-message"),
     ) {
         SelectionContainer {
             Text(
                 text,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(horizontal = AiSpacing.l, vertical = 12.dp),
+                style = AiType.body,
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
             )
         }
     }
@@ -156,15 +157,15 @@ fun AssistantAvatar(active: Boolean, modifier: Modifier = Modifier) {
         )
         angle
     } else 0f
-    Box(modifier.size(32.dp), contentAlignment = Alignment.Center) {
+    Box(modifier.size(AiSize.avatar), contentAlignment = Alignment.Center) {
         Box(
             Modifier
-                .size(32.dp)
+                .size(AiSize.avatar)
                 .graphicsLayer { rotationZ = rotation }
                 .clip(MaterialShapes.SoftBurst.toShape())
                 .background(MaterialTheme.colorScheme.primary),
         )
-        Icon(Icons.Outlined.AutoAwesome, null, Modifier.size(16.dp), MaterialTheme.colorScheme.onPrimary)
+        Icon(Icons.Outlined.AutoAwesome, null, Modifier.size(14.dp), MaterialTheme.colorScheme.onPrimary)
     }
 }
 

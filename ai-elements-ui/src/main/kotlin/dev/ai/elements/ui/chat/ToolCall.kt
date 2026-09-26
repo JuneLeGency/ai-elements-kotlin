@@ -71,12 +71,12 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
         shape = MaterialTheme.shapes.large,
         modifier = modifier.fillMaxWidth().testTag("tool-${part.name}"),
     ) {
-        Column(Modifier.padding(12.dp)) {
+        Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(AiSize.avatar)
                         .clip(MaterialShapes.Cookie6Sided.toShape())
                         .background(scheme.tertiaryContainer),
                 ) {

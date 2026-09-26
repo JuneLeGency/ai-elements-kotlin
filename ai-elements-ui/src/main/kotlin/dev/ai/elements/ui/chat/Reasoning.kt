@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.ReasoningPart
+import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
 
 /**
@@ -56,12 +57,12 @@ fun Reasoning(part: ReasoningPart, modifier: Modifier = Modifier) {
         shape = MaterialTheme.shapes.large,
         modifier = modifier.fillMaxWidth().testTag("reasoning"),
     ) {
-        Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
                 if (part.isStreaming) {
-                    LoadingIndicator(Modifier.size(24.dp))
+                    LoadingIndicator(Modifier.size(20.dp))
                 } else {
-                    Icon(Icons.Outlined.Psychology, null, Modifier.size(20.dp), MaterialTheme.colorScheme.primary)
+                    Icon(Icons.Outlined.Psychology, null, Modifier.size(AiSize.compactIcon), MaterialTheme.colorScheme.primary)
                 }
                 ShimmerText(
                     text = if (part.isStreaming) "Thinking…" else thoughtLabel(part.durationMs),

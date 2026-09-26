@@ -85,7 +85,6 @@ import kotlinx.serialization.json.Json
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GalleryScreen() {
-    if (System.getProperty("cmp") != "off") { MermaidCompareScreen(Modifier.padding(top = 48.dp)); return }
     Scaffold(containerColor = Color.Transparent, topBar = { TopAppBar(title = { Text("Components") }, colors = transparentAppBarColors()) }) { padding ->
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Adaptive(360.dp),

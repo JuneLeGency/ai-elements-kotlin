@@ -19,6 +19,9 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import dev.ai.elements.ui.theme.AiSpacing
+import dev.ai.elements.ui.theme.AiType
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.compose.elements.MarkdownCodeBlock
@@ -60,7 +63,7 @@ fun MarkdownContent(
 ) {
     val blocks = remember(markdown, citations) { markdownBlocks(markdown, citations) }
     CitationLinks(citations) {
-        Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(AiSpacing.m)) {
             blocks.forEachIndexed { index, block ->
                 val text = if (streaming && index == blocks.lastIndex) MarkdownStreaming.repairTail(block) else block
                 key(index) { MarkdownBlock(text) }
@@ -95,7 +98,7 @@ internal fun CitationLinks(citations: List<SourcePart>, content: @Composable () 
 internal fun MarkdownBlock(content: String) {
     val type = MaterialTheme.typography
     val scheme = MaterialTheme.colorScheme
-    val code = type.bodyMedium.copy(fontFamily = FontFamily.Monospace)
+    val body = AiType.body
     val components = remember {
         markdownComponents(
             codeFence = { model ->
@@ -125,17 +128,21 @@ internal fun MarkdownBlock(content: String) {
             tableBackground = scheme.surfaceContainerLow,
         ),
         typography = markdownTypography(
-            h1 = type.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
-            h2 = type.titleLarge.copy(fontWeight = FontWeight.SemiBold),
-            h3 = type.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-            h4 = type.titleSmall,
-            h5 = type.titleSmall,
-            h6 = type.titleSmall,
-            text = type.bodyLarge,
-            code = code,
-            inlineCode = type.bodyLarge.copy(fontFamily = FontFamily.Monospace, color = scheme.tertiary),
-            quote = type.bodyLarge.copy(color = scheme.onSurfaceVariant),
-            table = type.bodyMedium,
+            h1 = AiType.h1,
+            h2 = AiType.h2,
+            h3 = AiType.h3,
+            h4 = AiType.h4,
+            h5 = AiType.h4,
+            h6 = AiType.h4,
+            text = body,
+            code = AiType.code,
+            inlineCode = body.copy(fontFamily = FontFamily.Monospace, fontSize = 14.sp, color = scheme.tertiary),
+            quote = body.copy(color = scheme.onSurfaceVariant),
+            bullet = body,
+            list = body,
+            ordered = body,
+            paragraph = body,
+            table = AiType.small,
             textLink = TextLinkStyles(
                 style = SpanStyle(
                     color = scheme.primary,
@@ -144,8 +151,8 @@ internal fun MarkdownBlock(content: String) {
                 ),
             ),
         ),
-        padding = markdownPadding(block = 0.dp, listIndent = 12.dp),
-        dimens = markdownDimens(codeBackgroundCornerSize = 16.dp, tableCornerSize = 16.dp, tableCellWidth = 200.dp),
+        padding = markdownPadding(block = 0.dp, listIndent = 8.dp, listItemTop = 2.dp, listItemBottom = 2.dp),
+        dimens = markdownDimens(codeBackgroundCornerSize = 12.dp, tableCornerSize = 12.dp, tableCellWidth = 160.dp, tableCellPadding = 10.dp),
         components = components,
         retainState = true,
         modifier = Modifier.fillMaxWidth(),

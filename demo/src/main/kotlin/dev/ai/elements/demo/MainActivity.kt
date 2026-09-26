@@ -15,6 +15,12 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ai.elements.demo.data.ThemeMode
 import dev.ai.elements.demo.ui.DemoApp
+import androidx.compose.runtime.CompositionLocalProvider
+import dev.ai.elements.ui.markdown.LocalMermaidRenderer
+import dev.ai.elements.ui.markdown.LocalMermaidSizing
+import dev.ai.elements.ui.markdown.MermaidRenderer
+import dev.ai.elements.ui.markdown.MermaidSizing
+import dev.ai.elements.demo.data.DiagramSize
 import dev.ai.elements.ui.theme.AiElementsTheme
 
 class MainActivity : ComponentActivity() {
@@ -37,7 +43,15 @@ class MainActivity : ComponentActivity() {
                 onDispose {}
             }
             AiElementsTheme(darkTheme = dark, dynamicColor = appearance.dynamicColor) {
-                DemoApp(viewModel)
+                val renderer = if (appearance.nativeMermaid) MermaidRenderer.Native else MermaidRenderer.WebView
+                val sizing = when (appearance.diagramSize) {
+                    DiagramSize.SMALL -> MermaidSizing.Small
+                    DiagramSize.MEDIUM -> MermaidSizing.Medium
+                    DiagramSize.LARGE -> MermaidSizing.Large
+                }
+                CompositionLocalProvider(LocalMermaidRenderer provides renderer, LocalMermaidSizing provides sizing) {
+                    DemoApp(viewModel)
+                }
             }
             // The window background only covers startup; once Compose has drawn,
             // it paints every pixel itself, so drop the extra full-screen layer.

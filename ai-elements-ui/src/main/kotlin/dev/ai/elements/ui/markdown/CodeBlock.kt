@@ -30,9 +30,11 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dev.ai.elements.ui.theme.AiSize
+import dev.ai.elements.ui.theme.AiType
+import dev.ai.elements.ui.theme.compactIconButton
 import dev.ai.elements.ui.theme.isDark
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.BoldHighlight
@@ -66,13 +68,13 @@ fun CodeBlock(
 
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        shape = MaterialTheme.shapes.large,
-        modifier = modifier.fillMaxWidth().padding(vertical = 6.dp),
+        shape = MaterialTheme.shapes.medium,
+        modifier = modifier.fillMaxWidth().padding(vertical = 4.dp),
     ) {
         Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 2.dp),
             ) {
                 Text(
                     text = language?.takeIf { it.isNotBlank() } ?: "text",
@@ -80,26 +82,29 @@ fun CodeBlock(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
                 )
-                IconButton(onClick = {
-                    clipboard.setText(AnnotatedString(code))
-                    copied = true
-                }) {
+                IconButton(
+                    onClick = {
+                        clipboard.setText(AnnotatedString(code))
+                        copied = true
+                    },
+                    modifier = Modifier.compactIconButton(),
+                ) {
                     Icon(
                         if (copied) Icons.Outlined.Check else Icons.Outlined.ContentCopy,
                         contentDescription = "Copy code",
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier.size(AiSize.compactIcon),
                     )
                 }
             }
             SelectionContainer {
                 Text(
                     text = highlighted,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+                    style = AiType.code,
                     color = MaterialTheme.colorScheme.onSurface,
                     softWrap = false,
                     modifier = Modifier
                         .horizontalScroll(rememberScrollState())
-                        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                        .padding(start = 14.dp, end = 14.dp, bottom = 12.dp),
                 )
             }
         }

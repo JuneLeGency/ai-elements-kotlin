@@ -51,8 +51,10 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.json.JsonPrimitive
 
 /**
- * Renders Mermaid source as a diagram using the bundled, offline `mermaid.js`
- * inside a transparent WebView that sizes itself to the rendered SVG.
+ * Renders Mermaid source as a diagram. By default with the bundled, offline
+ * `mermaid.js` inside a transparent WebView that sizes itself to the rendered
+ * SVG; provide [LocalMermaidRenderer] = [MermaidRenderer.Native] to draw it
+ * with Compose Canvas instead.
  *
  * Mermaid is themed from the current Material color scheme. Tap to open a
  * full-screen, pinch-zoomable viewer. Invalid syntax falls back to the source.
@@ -67,12 +69,13 @@ fun MermaidDiagram(
     complete: Boolean = true,
 ) {
     val code = source.trim()
+    val renderer = LocalMermaidRenderer.current
     var fullscreen by remember { mutableStateOf(false) }
 
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = MaterialTheme.shapes.large,
-        modifier = modifier.fillMaxWidth().padding(vertical = 6.dp).testTag("mermaid"),
+        shape = MaterialTheme.shapes.medium,
+        modifier = modifier.fillMaxWidth().padding(vertical = 4.dp).testTag("mermaid"),
     ) {
         // No animateContentSize here: inside a lazy list it would report an animating
         // size to the list while the snapshot draws at full size.
@@ -80,7 +83,7 @@ fun MermaidDiagram(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 4.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 2.dp),
             ) {
                 Icon(Icons.Outlined.AccountTree, null, Modifier.size(16.dp), MaterialTheme.colorScheme.primary)
                 Text(
@@ -107,10 +110,16 @@ fun MermaidDiagram(
                     LoadingIndicator(Modifier.size(40.dp))
                     Text("Drawing diagram…", style = MaterialTheme.typography.bodyMedium)
                 }
-            } else {
-                MermaidWebView(
+            } else when (renderer) {
+                MermaidRenderer.WebView -> MermaidWebView(
                     code = code,
                     fitWidth = true,
+                    onClick = { fullscreen = true },
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                )
+                MermaidRenderer.Native -> NativeMermaidView(
+                    code = code,
+                    fill = false,
                     onClick = { fullscreen = true },
                     modifier = Modifier.fillMaxWidth().padding(8.dp),
                 )
@@ -125,7 +134,14 @@ fun MermaidDiagram(
         ) {
             Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
                 Box(Modifier.systemBarsPadding()) {
-                    MermaidWebView(code = code, fitWidth = false, modifier = Modifier.fillMaxSize())
+                    when (renderer) {
+                        MermaidRenderer.WebView -> MermaidWebView(code = code, fitWidth = false, modifier = Modifier.fillMaxSize())
+                        MermaidRenderer.Native -> NativeMermaidView(
+                            code = code,
+                            fill = true,
+                            modifier = Modifier.fillMaxSize().padding(top = 64.dp, start = 12.dp, end = 12.dp, bottom = 12.dp),
+                        )
+                    }
                     FilledTonalIconButton(
                         onClick = { fullscreen = false },
                         shapes = IconButtonDefaults.shapes(),
@@ -141,12 +157,14 @@ fun MermaidDiagram(
 private fun MermaidWebView(code: String, fitWidth: Boolean, modifier: Modifier, onClick: (() -> Unit)? = null) {
     val dark = MaterialTheme.isDark
     val colors = MaterialTheme.colorScheme
-    val cacheKey = "mermaid|$dark|$fitWidth|$code"
+    val sizing = LocalMermaidSizing.current
+    val cacheKey = "mermaid|$dark|$fitWidth|$sizing|$code"
     val html = remember(cacheKey) {
         buildHtml(
             code = code,
             dark = dark,
             fitWidth = fitWidth,
+            sizing = sizing,
             vars = mapOf(
                 "primaryColor" to colors.primaryContainer,
                 "primaryTextColor" to colors.onPrimaryContainer,
@@ -192,7 +210,7 @@ private fun MermaidWebView(code: String, fitWidth: Boolean, modifier: Modifier, 
 
 private fun Color.hex() = "#%06X".format(toArgb() and 0xFFFFFF)
 
-private fun buildHtml(code: String, dark: Boolean, fitWidth: Boolean, vars: Map<String, Color>): String {
+private fun buildHtml(code: String, dark: Boolean, fitWidth: Boolean, sizing: MermaidSizing, vars: Map<String, Color>): String {
     val themeVars = vars.entries.joinToString(",") { (k, v) -> "\"$k\":\"${v.hex()}\"" }
     // JSON-encode the source and neutralise any closing script tag inside it.
     val source = JsonPrimitive(code).toString().replace("</", "<\\/")
@@ -223,6 +241,12 @@ private fun buildHtml(code: String, dark: Boolean, fitWidth: Boolean, vars: Map<
               const { svg } = await mermaid.render('d' + Date.now(), $source);
               const c = document.getElementById('c');
               c.innerHTML = svg;
+              const el = c.querySelector('svg'), vb = el && el.viewBox && el.viewBox.baseVal;
+              if ($fitWidth && vb && vb.width && vb.height) {
+                // Inline size: scaled natural width, shrunk so the height fits; never wider than the column.
+                const w = Math.min(vb.width * ${sizing.scale}, ${sizing.maxInlineHeight.value} * vb.width / vb.height);
+                el.style.maxWidth = 'min(100%, ' + w + 'px)';
+              }
               aiReportHeight(c);
             } catch (e) {
               Bridge.onError(String((e && e.message) || e));
