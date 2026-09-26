@@ -15,6 +15,8 @@ Upstream model (any OpenAI-compatible endpoint, e.g. CLIProxyAPI):
     AGENT_API_KEY    upstream key (never sent to the app)
     AGENT_MODEL      default model id; the client may override with ?model=
                      use "demo" for an offline scripted model (no key needed)
+    CODEX_AUTH_FILE  optional Codex CLI auth.json: `gpt-5*` models then run on that ChatGPT
+                     subscription (read-only; the login is never refreshed)
 
 Run:  uv run uvicorn main:app --host 0.0.0.0 --port 8788
 """
@@ -23,6 +25,7 @@ from __future__ import annotations
 
 import ast
 import asyncio
+import json
 import operator
 import os
 from collections.abc import AsyncIterator
@@ -51,7 +54,9 @@ from pydantic_ai_harness.planning import (
 from pydantic_ai.messages import ModelMessage, ModelResponse, RetryPromptPart, TextPart, ToolCallPart, ToolReturn, ToolReturnPart
 from pydantic_ai.models import Model
 from pydantic_ai.models.function import AgentInfo, DeltaToolCall, FunctionModel
-from pydantic_ai.models.openai import OpenAIChatModel
+from openai import AsyncOpenAI
+from pydantic_ai.models.openai import OpenAIChatModel, OpenAIResponsesModel, OpenAIResponsesModelSettings
+from pydantic_ai.models.wrapper import WrapperModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.ui.ag_ui import AGUIAdapter
 from pydantic_ai.ui.vercel_ai import VercelAIAdapter
@@ -63,6 +68,8 @@ from mcp_server import mcp
 BASE_URL = os.environ.get("AGENT_BASE_URL", os.environ.get("CLIPROXY_BASE_URL", "http://localhost:8317/v1"))
 API_KEY = os.environ.get("AGENT_API_KEY", os.environ.get("CLIPROXY_API_KEY", ""))
 DEFAULT_MODEL = os.environ.get("AGENT_MODEL", os.environ.get("CLIPROXY_MODEL", "demo"))
+# Optional: a Codex CLI login (auth.json) to run `gpt-5*` models on a ChatGPT subscription.
+CODEX_AUTH_FILE = os.environ.get("CODEX_AUTH_FILE")
 
 INSTRUCTIONS = """\
 You are a helpful assistant inside an Android chat app that renders GitHub-flavoured
@@ -337,9 +344,37 @@ def _demo_sync(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
     return ModelResponse(parts=[TextPart(f"AG-UI streams agent events to user interfaces. (Scripted answer; the tool said: {str(result)[:120]})")])
 
 
+class StreamingOnly(WrapperModel):
+    """Serve non-streamed requests (e.g. sub-agent runs) by streaming, for backends that only stream."""
+
+    async def request(self, messages, model_settings, model_request_parameters):
+        async with self.wrapped.request_stream(messages, model_settings, model_request_parameters) as stream:
+            async for _ in stream:
+                pass
+            return stream.get()
+
+
+def codex_model(name: str) -> Model:
+    """A ChatGPT (Codex) subscription through its Responses endpoint.
+
+    Reads the Codex CLI login from `CODEX_AUTH_FILE` on each call and never refreshes it
+    (refreshing would sign the CLI out); the token never leaves this process.
+    """
+    tokens = json.loads(Path(CODEX_AUTH_FILE).read_text())["tokens"]
+    client = AsyncOpenAI(
+        base_url="https://chatgpt.com/backend-api/codex",
+        api_key=tokens["access_token"],
+        default_headers={"OpenAI-Beta": "responses=experimental", "originator": "codex_cli_rs", "chatgpt-account-id": tokens["account_id"]},
+    )
+    model = OpenAIResponsesModel(name, provider=OpenAIProvider(openai_client=client), settings=OpenAIResponsesModelSettings(openai_store=False))
+    return StreamingOnly(model)
+
+
 def resolve_model(name: str) -> Model:
     if name == "demo":
         return FunctionModel(_demo_sync, stream_function=_demo_stream, model_name="demo")
+    if CODEX_AUTH_FILE and (name.startswith("gpt-5") or name.startswith("codex")):
+        return codex_model(name)
     provider = OpenAIProvider(base_url=BASE_URL, api_key=API_KEY or "not-needed")
     return OpenAIChatModel(name, provider=provider)
 

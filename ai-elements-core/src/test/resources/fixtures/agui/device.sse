@@ -1,0 +1,14 @@
+data: {"type":"RUN_STARTED","timestamp":1790464496075,"threadId":"t","runId":"r1"}
+
+data: {"type":"TEXT_MESSAGE_START","timestamp":1790464496093,"messageId":"cdb5d0c8-b888-4755-a3a0-a276b920fa7e"}
+
+data: {"type":"TEXT_MESSAGE_END","timestamp":1790464496093,"messageId":"cdb5d0c8-b888-4755-a3a0-a276b920fa7e"}
+
+data: {"type":"TOOL_CALL_START","timestamp":1790464496093,"toolCallId":"pyd_ai_342589725c5946f190a308dcb29ecc17","toolCallName":"get_device_info","parentMessageId":"cdb5d0c8-b888-4755-a3a0-a276b920fa7e"}
+
+data: {"type":"TOOL_CALL_ARGS","timestamp":1790464496093,"toolCallId":"pyd_ai_342589725c5946f190a308dcb29ecc17","delta":"{}"}
+
+data: {"type":"TOOL_CALL_END","timestamp":1790464496093,"toolCallId":"pyd_ai_342589725c5946f190a308dcb29ecc17"}
+
+data: {"type":"RUN_FINISHED","timestamp":1790464496116,"threadId":"t","runId":"r1","outcome":{"type":"success"}}
+

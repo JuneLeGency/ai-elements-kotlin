@@ -111,3 +111,4 @@ internal fun JsonObject.int(key: String): Int? =
     runCatching { this[key]?.jsonPrimitive?.intOrNull }.getOrNull()
 
 internal fun JsonObject.obj(key: String): JsonObject? = this[key] as? JsonObject
+

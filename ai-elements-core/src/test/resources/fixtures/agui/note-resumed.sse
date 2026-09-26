@@ -1,0 +1,146 @@
+data: {"type":"RUN_STARTED","timestamp":1790464494428,"threadId":"t","runId":"r2"}
+
+data: {"type":"TOOL_CALL_RESULT","timestamp":1790464494454,"messageId":"a128b6a9-6eb4-4edf-9fc4-a7a31d56d8cf","toolCallId":"pyd_ai_e43f3b9d94644197a299d716b2157584","content":"Saved note “Demo”. 1 note(s) in total.","role":"tool"}
+
+data: {"type":"TEXT_MESSAGE_START","timestamp":1790464494478,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494479,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"## Agent run"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494500,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":" complete\n\nT"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494523,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"he request w"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494544,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"ent **app → "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494567,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"agent server"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494599,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":" → PydanticA"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494623,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"I agent → to"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494654,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"ol → model**"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494677,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":" and\nback as"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494700,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":" a UI Messag"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494722,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"e Stream. Th"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494747,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"e tool repor"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494770,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"ted: `Saved "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494795,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"note “Demo”."}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494816,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":" 1 note(s) i"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494837,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"n total.`.\n\n"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494859,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"| Stage | Pr"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494881,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"otocol |\n|--"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494903,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"-|---|\n| App"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494925,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":" → server | "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494947,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"`POST /api/c"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494970,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"hat` (AI SDK"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494992,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":" `UIMessage["}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495014,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"]`) |\n| Serv"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495038,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"er → app | S"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495062,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"SE UI Messag"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495085,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"e Stream v1 "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495107,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"|\n| Agent → "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495130,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"tools | Pyda"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495153,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"nticAI funct"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495175,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"ion tools |\n"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495198,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"\n```mermaid\n"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495222,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"sequenceDiag"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495245,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"ram\n    part"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495268,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"icipant App "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495301,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"as Android a"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495325,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"pp\n    parti"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495350,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"cipant S as "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495373,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"Agent server"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495395,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"\n    partici"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495418,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"pant A as Py"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495440,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"danticAI age"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495462,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"nt\n    parti"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495485,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"cipant T as "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495506,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"get_current_"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495528,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"time\n    App"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495548,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"->>S: POST /"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495570,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"api/chat\n   "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495598,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":" S->>A: run("}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495626,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"messages)\n  "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495648,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"  A->>T: cal"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495679,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"l()\n    T-->"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495705,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":">A: Saved no"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495725,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"te “Demo”. 1"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495746,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":" note(s) in "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495769,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"total.\n    A"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495791,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"-->>S: text "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495813,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"deltas\n    S"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495835,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"-->>App: SSE"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495857,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":" text-delta\n"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495878,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"```\n\n```kotl"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495911,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"in\nval contr"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495933,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"oller = Chat"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495953,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"Controller(b"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464495984,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"ackend)\ncont"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464496007,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"roller.send("}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464496031,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"\"Hello\")\n```"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464496056,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d","delta":"\n"}
+
+data: {"type":"TEXT_MESSAGE_END","timestamp":1790464496057,"messageId":"a04d010a-895b-4b00-9557-ae1bb69f7d6d"}
+
+data: {"type":"RUN_FINISHED","timestamp":1790464496061,"threadId":"t","runId":"r2","outcome":{"type":"success"}}
+

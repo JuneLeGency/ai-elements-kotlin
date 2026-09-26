@@ -1,0 +1,158 @@
+data: {"type":"start"}
+
+data: {"type":"tool-input-available","toolCallId":"pyd_ai_c9d8dd345fde40c3b534c9f306dfa418","toolName":"save_note","input":{"title":"Demo","content":"Saved from the scripted demo model."}}
+
+data: {"type":"tool-output-available","toolCallId":"pyd_ai_c9d8dd345fde40c3b534c9f306dfa418","output":"Saved note “Demo”. 1 note(s) in total."}
+
+data: {"type":"start-step"}
+
+data: {"type":"text-start","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"## Agent run","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":" complete\n\nT","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"he request w","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"ent **app → ","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"agent server","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":" → PydanticA","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"I agent → to","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"ol → model**","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":" and\nback as","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":" a UI Messag","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"e Stream. Th","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"e tool repor","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"ted: `Saved ","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"note “Demo”.","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":" 1 note(s) i","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"n total.`.\n\n","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"| Stage | Pr","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"otocol |\n|--","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"-|---|\n| App","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":" → server | ","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"`POST /api/c","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"hat` (AI SDK","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":" `UIMessage[","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"]`) |\n| Serv","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"er → app | S","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"SE UI Messag","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"e Stream v1 ","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"|\n| Agent → ","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"tools | Pyda","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"nticAI funct","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"ion tools |\n","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"\n```mermaid\n","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"sequenceDiag","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"ram\n    part","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"icipant App ","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"as Android a","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"pp\n    parti","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"cipant S as ","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"Agent server","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"\n    partici","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"pant A as Py","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"danticAI age","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"nt\n    parti","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"cipant T as ","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"get_current_","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"time\n    App","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"->>S: POST /","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"api/chat\n   ","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":" S->>A: run(","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"messages)\n  ","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"  A->>T: cal","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"l()\n    T-->","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":">A: Saved no","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"te “Demo”. 1","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":" note(s) in ","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"total.\n    A","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"-->>S: text ","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"deltas\n    S","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"-->>App: SSE","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":" text-delta\n","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"```\n\n```kotl","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"in\nval contr","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"oller = Chat","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"Controller(b","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"ackend)\ncont","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"roller.send(","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"\"Hello\")\n```","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-delta","delta":"\n","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"text-end","id":"24f0e494-c133-46f8-9c7e-bbfe61013857"}
+
+data: {"type":"message-metadata","messageMetadata":{"usage":{"inputTokens":50,"outputTokens":169}}}
+
+data: {"type":"message-metadata","messageMetadata":{"pydantic_ai":{"timestamp":"2026-09-26T23:15:03.067988Z"}}}
+
+data: {"type":"finish-step"}
+
+data: {"type":"finish"}
+
+data: [DONE]
+

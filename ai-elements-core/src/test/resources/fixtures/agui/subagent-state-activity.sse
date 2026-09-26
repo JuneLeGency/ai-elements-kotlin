@@ -1,0 +1,36 @@
+data: {"type":"RUN_STARTED","threadId":"t","runId":"r"}
+
+data: {"type":"TEXT_MESSAGE_START","messageId":"m1","role":"assistant"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","messageId":"m1","delta":"Delegating."}
+
+data: {"type":"TEXT_MESSAGE_END","messageId":"m1"}
+
+data: {"type":"TOOL_CALL_START","toolCallId":"call-1","toolCallName":"delegate_task","parentMessageId":"m1"}
+
+data: {"type":"TOOL_CALL_ARGS","toolCallId":"call-1","delta":"{\"agent_name\":\"researcher\",\"task\":\"Explain AG-UI\"}"}
+
+data: {"type":"TOOL_CALL_END","toolCallId":"call-1"}
+
+data: {"type":"SUBAGENT_STARTED","subagentRunId":"sub-1","name":"researcher","description":"Researches topics","parentToolCallId":"call-1"}
+
+data: {"type":"TEXT_MESSAGE_START","subagentRunId":"sub-1","messageId":"s1","role":"assistant"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","subagentRunId":"sub-1","messageId":"s1","delta":"AG-UI streams agent events."}
+
+data: {"type":"TEXT_MESSAGE_END","subagentRunId":"sub-1","messageId":"s1"}
+
+data: {"type":"SUBAGENT_FINISHED","subagentRunId":"sub-1","result":"AG-UI streams agent events."}
+
+data: {"type":"TOOL_CALL_RESULT","messageId":"r1","toolCallId":"call-1","content":"AG-UI streams agent events.","role":"tool"}
+
+data: {"type":"STATE_SNAPSHOT","snapshot":{"plan":{"title":"Plan","steps":[{"label":"Research","status":"active"}]}}}
+
+data: {"type":"STATE_DELTA","delta":[{"op":"replace","path":"/plan/steps/0/status","value":"complete"}]}
+
+data: {"type":"ACTIVITY_SNAPSHOT","messageId":"act-1","activityType":"search","content":{"query":"AG-UI","results":0}}
+
+data: {"type":"ACTIVITY_DELTA","messageId":"act-1","activityType":"search","patch":[{"op":"replace","path":"/results","value":3}]}
+
+data: {"type":"RUN_FINISHED","threadId":"t","runId":"r","outcome":{"type":"success"},"usage":[{"inputTokens":120,"outputTokens":40}]}
+

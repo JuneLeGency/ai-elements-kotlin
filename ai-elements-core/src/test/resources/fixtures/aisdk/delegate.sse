@@ -1,0 +1,180 @@
+data: {"type":"start"}
+
+data: {"type":"start-step"}
+
+data: {"type":"tool-input-start","toolCallId":"pyd_ai_79ebcc3a9b244d18a9794d2af1e9e23d","toolName":"delegate_task"}
+
+data: {"type":"tool-input-delta","toolCallId":"pyd_ai_79ebcc3a9b244d18a9794d2af1e9e23d","inputTextDelta":"{\"agent_name\":\"researcher\",\"task\":\"Explain the AG-UI protocol in two sentences.\"}"}
+
+data: {"type":"tool-input-available","toolCallId":"pyd_ai_79ebcc3a9b244d18a9794d2af1e9e23d","toolName":"delegate_task","input":{"agent_name":"researcher","task":"Explain the AG-UI protocol in two sentences."}}
+
+data: {"type":"tool-output-available","toolCallId":"pyd_ai_79ebcc3a9b244d18a9794d2af1e9e23d","output":"AG-UI streams agent events to user interfaces. (Scripted answer; the tool said: [1] PydanticAI UI adapters: PydanticAI agents can stream to frontends through UI adapters for the Vercel AI protocol and)"}
+
+data: {"type":"finish-step"}
+
+data: {"type":"start-step"}
+
+data: {"type":"text-start","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"## Agent run","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":" complete\n\nT","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"he request w","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"ent **app → ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"agent server","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":" → PydanticA","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"I agent → to","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"ol → model**","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":" and\nback as","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":" a UI Messag","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"e Stream. Th","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"e tool repor","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"ted: `AG-UI ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"streams agen","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"t events to ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"user interfa","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"ces. (Script","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"ed answer; t","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"he tool said","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":": `.\n\n| Stag","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"e | Protocol","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":" |\n|---|---|","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"\n| App → ser","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"ver | `POST ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"/api/chat` (","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"AI SDK `UIMe","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"ssage[]`) |\n","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"| Server → a","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"pp | SSE UI ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"Message Stre","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"am v1 |\n| Ag","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"ent → tools ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"| PydanticAI","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":" function to","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"ols |\n\n```me","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"rmaid\nsequen","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"ceDiagram\n  ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"  participan","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"t App as And","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"roid app\n   ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":" participant","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":" S as Agent ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"server\n    p","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"articipant A","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":" as Pydantic","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"AI agent\n   ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":" participant","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":" T as get_cu","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"rrent_time\n ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"   App->>S: ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"POST /api/ch","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"at\n    S->>A","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":": run(messag","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"es)\n    A->>","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"T: call()\n  ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"  T-->>A: AG","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"-UI streams ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"agent events","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":" to user int","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"erfaces. (Sc","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"ripted answe","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"r; the tool ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"said: \n    A","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"-->>S: text ","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"deltas\n    S","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"-->>App: SSE","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":" text-delta\n","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"```\n\n```kotl","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"in\nval contr","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"oller = Chat","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"Controller(b","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"ackend)\ncont","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"roller.send(","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"\"Hello\")\n```","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-delta","delta":"\n","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"text-end","id":"ffb5e8b2-e944-4d28-bbcf-c6c8829e40f3"}
+
+data: {"type":"message-metadata","messageMetadata":{"usage":{"inputTokens":291,"outputTokens":236}}}
+
+data: {"type":"message-metadata","messageMetadata":{"pydantic_ai":{"timestamp":"2026-09-26T23:14:57.820161Z"}}}
+
+data: {"type":"finish-step"}
+
+data: {"type":"finish"}
+
+data: [DONE]
+

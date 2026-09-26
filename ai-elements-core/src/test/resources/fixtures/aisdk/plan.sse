@@ -1,0 +1,166 @@
+data: {"type":"start"}
+
+data: {"type":"start-step"}
+
+data: {"type":"tool-input-start","toolCallId":"pyd_ai_bf3d8ce3dc8c48848fff0b82748803c3","toolName":"write_plan"}
+
+data: {"type":"tool-input-delta","toolCallId":"pyd_ai_bf3d8ce3dc8c48848fff0b82748803c3","inputTextDelta":"{\"items\":[{\"content\":\"Read the question\",\"active_form\":\"Reading the question\",\"status\":\"completed\"},{\"content\":\"Look up the docs\",\"active_form\":\"Looking up the docs\",\"status\":\"in_progress\"},{\"content\":\"Write the answer\",\"active_form\":\"Writing the answer\",\"status\":\"pending\"}]}"}
+
+data: {"type":"tool-input-available","toolCallId":"pyd_ai_bf3d8ce3dc8c48848fff0b82748803c3","toolName":"write_plan","input":{"items":[{"content":"Read the question","active_form":"Reading the question","status":"completed"},{"content":"Look up the docs","active_form":"Looking up the docs","status":"in_progress"},{"content":"Write the answer","active_form":"Writing the answer","status":"pending"}]}}
+
+data: {"type":"data-plan","id":"plan","data":{"title":"Plan","description":"1/3 steps done","streaming":true,"steps":[{"label":"Read the question","status":"complete"},{"label":"Looking up the docs","status":"active"},{"label":"Write the answer","status":"pending"}]}}
+
+data: {"type":"data-plan","id":"plan","data":{"title":"Plan","description":"1/3 steps done","streaming":true,"steps":[{"label":"Read the question","status":"complete"},{"label":"Looking up the docs","status":"active"},{"label":"Write the answer","status":"pending"}]}}
+
+data: {"type":"data-plan","id":"plan","data":{"title":"Plan","description":"1/3 steps done","streaming":true,"steps":[{"label":"Read the question","status":"complete"},{"label":"Looking up the docs","status":"active"},{"label":"Write the answer","status":"pending"}]}}
+
+data: {"type":"tool-output-available","toolCallId":"pyd_ai_bf3d8ce3dc8c48848fff0b82748803c3","output":"Plan updated: 3 step(s).\n\n1. [x] Read the question\n2. [~] Look up the docs\n3. [ ] Write the answer\n(1/3 completed)"}
+
+data: {"type":"finish-step"}
+
+data: {"type":"start-step"}
+
+data: {"type":"text-start","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"## Agent run","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":" complete\n\nT","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"he request w","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"ent **app → ","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"agent server","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":" → PydanticA","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"I agent → to","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"ol → model**","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":" and\nback as","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":" a UI Messag","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"e Stream. Th","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"e tool repor","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"ted: `Plan u","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"pdated: 3 st","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"ep(s).`.\n\n| ","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"Stage | Prot","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"ocol |\n|---|","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"---|\n| App →","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":" server | `P","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"OST /api/cha","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"t` (AI SDK `","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"UIMessage[]`","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":") |\n| Server","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":" → app | SSE","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":" UI Message ","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"Stream v1 |\n","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"| Agent → to","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"ols | Pydant","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"icAI functio","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"n tools |\n\n`","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"``mermaid\nse","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"quenceDiagra","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"m\n    partic","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"ipant App as","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":" Android app","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"\n    partici","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"pant S as Ag","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"ent server\n ","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"   participa","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"nt A as Pyda","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"nticAI agent","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"\n    partici","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"pant T as ge","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"t_current_ti","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"me\n    App->","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":">S: POST /ap","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"i/chat\n    S","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"->>A: run(me","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"ssages)\n    ","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"A->>T: call(","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":")\n    T-->>A","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":": Plan updat","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"ed: 3 step(s","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":").\n    A-->>","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"S: text delt","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"as\n    S-->>","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"App: SSE tex","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"t-delta\n```\n","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"\n```kotlin\nv","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"al controlle","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"r = ChatCont","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"roller(backe","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"nd)\ncontroll","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"er.send(\"Hel","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-delta","delta":"lo\")\n```\n","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"text-end","id":"cc34afe6-e563-4b09-a482-f788f4212369"}
+
+data: {"type":"message-metadata","messageMetadata":{"usage":{"inputTokens":100,"outputTokens":207}}}
+
+data: {"type":"message-metadata","messageMetadata":{"pydantic_ai":{"timestamp":"2026-09-26T23:14:59.630192Z"}}}
+
+data: {"type":"finish-step"}
+
+data: {"type":"finish"}
+
+data: [DONE]
+

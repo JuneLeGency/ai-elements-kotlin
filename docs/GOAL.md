@@ -43,6 +43,12 @@ Harness」两种形态，真实链路全部跑通，并在模拟器、手机和�
 
 两种形态共用同一套 UI 组件与 `ChatController`，在 Demo 里可以按会话切换。
 
+**开发者接入体验**同样是目标的一部分：
+- 一个 BOM（`ai-elements-bom`）统一版本；按需引入 artifact，可选能力不强加依赖。
+- README 里每种形态都有 5 分钟上手示例（纯前端连 AI SDK / AG-UI / A2A；内置 Harness 连模型 API），代码可以直接复制运行。
+- 一行接入的便捷 API：例如 `rememberChat(backend)`、`Capabilities(...)` 组合、`ProviderProfile` 预设；默认值安全且好看。
+- 完整 KDoc 加 Dokka 站点；`samples/` 放最小示例工程；Demo 就是最佳实践参考。
+
 ---
 
 ## 3. 模块与包分层（目标形态）
@@ -193,7 +199,7 @@ dev.ai.elements.core
 
 ## 9. 可直接用于 `/goal` 的摘要
 
-> 按 docs/GOAL.md 推进：打造最优秀的开源 Kotlin Compose AI Elements 库和 Demo。只用公开协议
+> 按 docs/GOAL.md 推进：打造最优秀的开源 Kotlin Compose AI Elements / Agent 库和 Demo，覆盖前后端体验、支持独立前端、开发者便捷接入、分包合理。只用公开协议
 > （AI SDK 6 / AG-UI 1.0 / MCP 2026-07-28 / A2A 1.0 / Agent Skills），先查生态、用官方 SDK、不造轮子；
 > 服务端基于 Pydantic AI + Harness 最新版，端侧能力与 Harness 同构；支持「纯前端」（类 Codex/Claude App）和
 > 「内置 Kotlin Harness」（独立 group，多个 artifact，覆盖 OpenMinis 能力，重新实现）两种形态；

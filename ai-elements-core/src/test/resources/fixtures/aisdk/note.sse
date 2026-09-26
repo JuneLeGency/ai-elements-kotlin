@@ -1,0 +1,22 @@
+data: {"type":"start"}
+
+data: {"type":"start-step"}
+
+data: {"type":"tool-input-start","toolCallId":"pyd_ai_c9d8dd345fde40c3b534c9f306dfa418","toolName":"save_note"}
+
+data: {"type":"tool-input-delta","toolCallId":"pyd_ai_c9d8dd345fde40c3b534c9f306dfa418","inputTextDelta":"{\"title\":\"Demo\",\"content\":\"Saved from the scripted demo model.\"}"}
+
+data: {"type":"tool-input-available","toolCallId":"pyd_ai_c9d8dd345fde40c3b534c9f306dfa418","toolName":"save_note","input":{"title":"Demo","content":"Saved from the scripted demo model."}}
+
+data: {"type":"message-metadata","messageMetadata":{"usage":{"inputTokens":50,"outputTokens":11}}}
+
+data: {"type":"message-metadata","messageMetadata":{"pydantic_ai":{"timestamp":"2026-09-26T23:15:02.973797Z"}}}
+
+data: {"type":"tool-approval-request","approvalId":"pyd_ai_c9d8dd345fde40c3b534c9f306dfa418","toolCallId":"pyd_ai_c9d8dd345fde40c3b534c9f306dfa418"}
+
+data: {"type":"finish-step"}
+
+data: {"type":"finish"}
+
+data: [DONE]
+

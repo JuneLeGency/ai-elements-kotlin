@@ -1,0 +1,180 @@
+data: {"type":"start"}
+
+data: {"type":"start-step"}
+
+data: {"type":"tool-input-start","toolCallId":"pyd_ai_94b058d45ae74b3fbe6f1c33bcb3f3e8","toolName":"load_capability","providerMetadata":{"pydantic_ai":{"tool_kind":"capability-load"}}}
+
+data: {"type":"tool-input-delta","toolCallId":"pyd_ai_94b058d45ae74b3fbe6f1c33bcb3f3e8","inputTextDelta":"{\"id\":\"mermaid-diagrams\"}"}
+
+data: {"type":"tool-input-available","toolCallId":"pyd_ai_94b058d45ae74b3fbe6f1c33bcb3f3e8","toolName":"load_capability","input":{"id":"mermaid-diagrams"},"providerMetadata":{"pydantic_ai":{"tool_kind":"capability-load"}}}
+
+data: {"type":"tool-output-available","toolCallId":"pyd_ai_94b058d45ae74b3fbe6f1c33bcb3f3e8","output":{"instructions":"# Skill: mermaid-diagrams\n\n# Mermaid diagrams for small screens\n\nPick the diagram type from what the user needs to see:\n\n| Need | Type |\n|---|---|\n| Steps and decisions | `flowchart TD` |\n| Who talks to whom, in order | `sequenceDiagram` |\n| Lifecycle of one thing | `stateDiagram-v2` |\n| Data model | `erDiagram` |\n| Dates | `timeline` |\n\nRules that keep diagrams readable on a 360 dp wide screen:\n\n1. Prefer top-down (`TD`) over left-right; phones are tall, not wide.\n2. At most about 12 nodes. Split bigger flows into two diagrams with a sentence between them.\n3. Node labels of one to four words. Put detail in the prose, not the node.\n4. Quote labels that contain punctuation: `A[\"Parse (JSON)\"]`.\n5. In sequence diagrams, give participants short aliases: `participant S as Server`.\n6. Never use HTML, click handlers or `%%{init}%%` theme overrides; the app themes diagrams itself.\n\nAlways wrap the diagram in a fenced block with the `mermaid` language tag, then explain the key path in one or two sentences below it."}}
+
+data: {"type":"finish-step"}
+
+data: {"type":"start-step"}
+
+data: {"type":"text-start","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"## Agent run","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":" complete\n\nT","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"he request w","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"ent **app → ","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"agent server","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":" → PydanticA","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"I agent → to","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"ol → model**","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":" and\nback as","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":" a UI Messag","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"e Stream. Th","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"e tool repor","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"ted: `{'inst","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"ructions': '","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"# Skill: mer","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"maid-diagram","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"s\\n\\n# Merma","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"id diagrams ","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"for small sc","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"re`.\n\n| Stag","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"e | Protocol","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":" |\n|---|---|","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"\n| App → ser","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"ver | `POST ","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"/api/chat` (","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"AI SDK `UIMe","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"ssage[]`) |\n","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"| Server → a","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"pp | SSE UI ","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"Message Stre","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"am v1 |\n| Ag","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"ent → tools ","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"| PydanticAI","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":" function to","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"ols |\n\n```me","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"rmaid\nsequen","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"ceDiagram\n  ","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"  participan","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"t App as And","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"roid app\n   ","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":" participant","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":" S as Agent ","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"server\n    p","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"articipant A","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":" as Pydantic","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"AI agent\n   ","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":" participant","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":" T as get_cu","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"rrent_time\n ","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"   App->>S: ","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"POST /api/ch","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"at\n    S->>A","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":": run(messag","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"es)\n    A->>","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"T: call()\n  ","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"  T-->>A: {'","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"instructions","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"': '# Skill:","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":" mermaid-dia","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"grams\\n\\n# M","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"ermaid diagr","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"ams for smal","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"l scre\n    A","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"-->>S: text ","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"deltas\n    S","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"-->>App: SSE","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":" text-delta\n","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"```\n\n```kotl","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"in\nval contr","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"oller = Chat","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"Controller(b","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"ackend)\ncont","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"roller.send(","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"\"Hello\")\n```","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-delta","delta":"\n","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"text-end","id":"c91e617a-3850-4c70-8f14-2bb7f0832eb3"}
+
+data: {"type":"message-metadata","messageMetadata":{"usage":{"inputTokens":100,"outputTokens":182}}}
+
+data: {"type":"message-metadata","messageMetadata":{"pydantic_ai":{"timestamp":"2026-09-26T23:15:01.155277Z"}}}
+
+data: {"type":"finish-step"}
+
+data: {"type":"finish"}
+
+data: [DONE]
+

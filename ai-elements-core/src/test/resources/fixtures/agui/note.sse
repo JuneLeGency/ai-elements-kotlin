@@ -1,0 +1,14 @@
+data: {"type":"RUN_STARTED","timestamp":1790464494386,"threadId":"t","runId":"r1"}
+
+data: {"type":"TEXT_MESSAGE_START","timestamp":1790464494410,"messageId":"554fd2fd-253d-4ac7-bf61-ea01ab1b4fbc"}
+
+data: {"type":"TEXT_MESSAGE_END","timestamp":1790464494410,"messageId":"554fd2fd-253d-4ac7-bf61-ea01ab1b4fbc"}
+
+data: {"type":"TOOL_CALL_START","timestamp":1790464494410,"toolCallId":"pyd_ai_e43f3b9d94644197a299d716b2157584","toolCallName":"save_note","parentMessageId":"554fd2fd-253d-4ac7-bf61-ea01ab1b4fbc"}
+
+data: {"type":"TOOL_CALL_ARGS","timestamp":1790464494410,"toolCallId":"pyd_ai_e43f3b9d94644197a299d716b2157584","delta":"{\"title\":\"Demo\",\"content\":\"Saved from the scripted demo model.\"}"}
+
+data: {"type":"TOOL_CALL_END","timestamp":1790464494410,"toolCallId":"pyd_ai_e43f3b9d94644197a299d716b2157584"}
+
+data: {"type":"RUN_FINISHED","timestamp":1790464494413,"threadId":"t","runId":"r1","outcome":{"type":"interrupt","interrupts":[{"id":"int-pyd_ai_e43f3b9d94644197a299d716b2157584","reason":"tool_call","message":"Approve save_note({\"title\":\"Demo\",\"content\":\"Saved from the scripted demo model.\"})?","toolCallId":"pyd_ai_e43f3b9d94644197a299d716b2157584","responseSchema":{"properties":{"approved":{"type":"boolean"},"editedArgs":{"type":"object"},"reason":{"type":"string"}},"required":["approved"],"type":"object"}}]}}
+

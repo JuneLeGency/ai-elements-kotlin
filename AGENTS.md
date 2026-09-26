@@ -14,7 +14,7 @@ crosses a process boundary must follow one of them, exactly as specified:
 | Agent ↔ UI streaming | Vercel **AI SDK** UI Message Stream (v5/v6), v4 Data Stream | `core/backend/UiMessageStreamBackend.kt` |
 | Agent ↔ UI streaming | **AG-UI** 1.x (events, subagents, interrupts/resume, state, activities) | `core/backend/AgUiBackend.kt` |
 | Tools and context from servers | **MCP** 2026-07-28 Streamable HTTP, with fallback to the 2025-xx session revisions | `core/mcp/` |
-| Agent ↔ agent | **A2A** 1.0 JSON-RPC binding, with 0.3 compatibility | `core/a2a/` |
+| Agent ↔ agent | **A2A** 1.0 JSON-RPC binding, with 0.3 compatibility | `ai-elements-a2a` (official `a2a-java-sdk`) |
 | Skills | **Agent Skills** (`SKILL.md` + YAML frontmatter) | `core/skills/` |
 | Sign-in | OAuth 2.1 / RFC 6749, 7636, 8252, 8628, 8414, 9728, 7591, 8707 | `core/auth/`, `core/mcp/McpAuth.kt` |
 | Model APIs | OpenAI Chat Completions / Responses, Anthropic Messages, Gemini, Ollama | `core/backend/` |

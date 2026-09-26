@@ -1,0 +1,172 @@
+data: {"type":"RUN_STARTED","timestamp":1790464492619,"threadId":"t","runId":"r1"}
+
+data: {"type":"TEXT_MESSAGE_START","timestamp":1790464492638,"messageId":"a1dbf3a2-70c7-447f-9db7-df43f149ec61"}
+
+data: {"type":"TEXT_MESSAGE_END","timestamp":1790464492638,"messageId":"a1dbf3a2-70c7-447f-9db7-df43f149ec61"}
+
+data: {"type":"TOOL_CALL_START","timestamp":1790464492638,"toolCallId":"pyd_ai_dd11dc0a3657491b96c12b9742348c72","toolCallName":"load_capability","parentMessageId":"a1dbf3a2-70c7-447f-9db7-df43f149ec61"}
+
+data: {"type":"REASONING_ENCRYPTED_VALUE","timestamp":1790464492638,"subtype":"tool-call","entityId":"pyd_ai_dd11dc0a3657491b96c12b9742348c72","encryptedValue":"{\"pydantic_ai\": {\"tool_kind\": \"capability-load\"}}"}
+
+data: {"type":"TOOL_CALL_ARGS","timestamp":1790464492638,"toolCallId":"pyd_ai_dd11dc0a3657491b96c12b9742348c72","delta":"{\"id\":\"mermaid-diagrams\"}"}
+
+data: {"type":"TOOL_CALL_END","timestamp":1790464492638,"toolCallId":"pyd_ai_dd11dc0a3657491b96c12b9742348c72"}
+
+data: {"type":"TOOL_CALL_RESULT","timestamp":1790464492640,"messageId":"ea9b7256-3eba-478a-9714-76a6bd572e80","toolCallId":"pyd_ai_dd11dc0a3657491b96c12b9742348c72","content":"{\"instructions\":\"# Skill: mermaid-diagrams\\n\\n# Mermaid diagrams for small screens\\n\\nPick the diagram type from what the user needs to see:\\n\\n| Need | Type |\\n|---|---|\\n| Steps and decisions | `flowchart TD` |\\n| Who talks to whom, in order | `sequenceDiagram` |\\n| Lifecycle of one thing | `stateDiagram-v2` |\\n| Data model | `erDiagram` |\\n| Dates | `timeline` |\\n\\nRules that keep diagrams readable on a 360 dp wide screen:\\n\\n1. Prefer top-down (`TD`) over left-right; phones are tall, not wide.\\n2. At most about 12 nodes. Split bigger flows into two diagrams with a sentence between them.\\n3. Node labels of one to four words. Put detail in the prose, not the node.\\n4. Quote labels that contain punctuation: `A[\\\"Parse (JSON)\\\"]`.\\n5. In sequence diagrams, give participants short aliases: `participant S as Server`.\\n6. Never use HTML, click handlers or `%%{init}%%` theme overrides; the app themes diagrams itself.\\n\\nAlways wrap the diagram in a fenced block with the `mermaid` language tag, then explain the key path in one or two sentences below it.\"}","role":"tool"}
+
+data: {"type":"TEXT_MESSAGE_START","timestamp":1790464492662,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492662,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"## Agent run"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492683,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":" complete\n\nT"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492703,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"he request w"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492726,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"ent **app → "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492747,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"agent server"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492773,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":" → PydanticA"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492797,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"I agent → to"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492822,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"ol → model**"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492845,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":" and\nback as"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492868,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":" a UI Messag"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492891,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"e Stream. Th"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492912,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"e tool repor"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492937,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"ted: `{'inst"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492960,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"ructions': '"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464492982,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"# Skill: mer"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493004,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"maid-diagram"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493026,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"s\\n\\n# Merma"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493048,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"id diagrams "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493078,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"for small sc"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493105,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"re`.\n\n| Stag"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493127,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"e | Protocol"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493155,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":" |\n|---|---|"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493178,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"\n| App → ser"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493200,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"ver | `POST "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493223,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"/api/chat` ("}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493243,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"AI SDK `UIMe"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493264,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"ssage[]`) |\n"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493287,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"| Server → a"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493308,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"pp | SSE UI "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493330,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"Message Stre"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493353,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"am v1 |\n| Ag"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493375,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"ent → tools "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493398,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"| PydanticAI"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493419,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":" function to"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493441,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"ols |\n\n```me"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493467,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"rmaid\nsequen"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493490,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"ceDiagram\n  "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493513,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"  participan"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493540,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"t App as And"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493563,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"roid app\n   "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493585,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":" participant"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493608,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":" S as Agent "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493630,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"server\n    p"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493652,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"articipant A"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493674,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":" as Pydantic"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493695,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"AI agent\n   "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493724,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":" participant"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493748,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":" T as get_cu"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493770,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"rrent_time\n "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493796,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"   App->>S: "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493822,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"POST /api/ch"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493852,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"at\n    S->>A"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493875,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":": run(messag"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493896,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"es)\n    A->>"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493919,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"T: call()\n  "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493943,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"  T-->>A: {'"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493966,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"instructions"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464493988,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"': '# Skill:"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494010,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":" mermaid-dia"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494034,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"grams\\n\\n# M"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494055,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"ermaid diagr"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494077,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"ams for smal"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494098,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"l scre\n    A"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494121,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"-->>S: text "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494142,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"deltas\n    S"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494163,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"-->>App: SSE"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494186,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":" text-delta\n"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494209,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"```\n\n```kotl"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494231,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"in\nval contr"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494253,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"oller = Chat"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494282,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"Controller(b"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494308,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"ackend)\ncont"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494329,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"roller.send("}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494351,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"\"Hello\")\n```"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790464494373,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5","delta":"\n"}
+
+data: {"type":"TEXT_MESSAGE_END","timestamp":1790464494373,"messageId":"19a59726-0307-49b2-b3f1-4803792ee2d5"}
+
+data: {"type":"RUN_FINISHED","timestamp":1790464494376,"threadId":"t","runId":"r1","outcome":{"type":"success"}}
+
