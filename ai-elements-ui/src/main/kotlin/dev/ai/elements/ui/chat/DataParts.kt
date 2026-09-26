@@ -1,0 +1,102 @@
+package dev.ai.elements.ui.chat
+
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.dp
+import dev.ai.elements.core.model.DataPart
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
+
+/**
+ * Renders an agent-streamed `data-*` part. Built-in shapes:
+ *
+ * - `data-plan` `{title, description?, streaming?, steps: [{label, status?}]}` → [Plan]
+ * - `data-task` `{title, items: [{label, status?, files?: [..]}]}` → [Task]
+ * - `data-chain-of-thought` `{title?, steps: [{label, description?, status?, badges?}]}` → [ChainOfThought]
+ *
+ * `status` is `pending` | `active` | `complete`. Anything else falls back to
+ * a JSON card; pass [renderers] to map your own part names.
+ */
+@Composable
+fun DataPartView(
+    part: DataPart,
+    modifier: Modifier = Modifier,
+    renderers: Map<String, @Composable (DataPart) -> Unit> = emptyMap(),
+) {
+    renderers[part.name]?.let { it(part); return }
+    val data = part.data as? JsonObject
+    when (part.name) {
+        "plan" -> if (data != null) Plan(
+            title = data.string("title") ?: "Plan",
+            description = data.string("description").orEmpty(),
+            steps = data.steps("steps"),
+            streaming = data["streaming"]?.jsonPrimitive?.booleanOrNull ?: false,
+            modifier = modifier.testTag("data-plan"),
+        ) else JsonCard(part, modifier)
+        "task" -> if (data != null) Task(
+            title = data.string("title") ?: "Task",
+            items = data.steps("items"),
+            modifier = modifier.testTag("data-task"),
+        ) else JsonCard(part, modifier)
+        "chain-of-thought" -> if (data != null) ChainOfThought(
+            steps = data.steps("steps"),
+            title = data.string("title") ?: "Chain of thought",
+            modifier = modifier.testTag("data-chain-of-thought"),
+        ) else JsonCard(part, modifier)
+        else -> JsonCard(part, modifier)
+    }
+}
+
+@Composable
+private fun JsonCard(part: DataPart, modifier: Modifier) {
+    Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, shape = MaterialTheme.shapes.large, modifier = modifier.fillMaxWidth()) {
+        Column(Modifier.padding(12.dp)) {
+            Text("data-${part.name}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                prettyJson.encodeToString(JsonElement.serializer(), part.data),
+                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                softWrap = false,
+                modifier = Modifier.padding(top = 6.dp).horizontalScroll(rememberScrollState()),
+            )
+        }
+    }
+}
+
+private val prettyJson = Json { prettyPrint = true }
+
+private fun JsonObject.string(key: String): String? = (this[key] as? JsonPrimitive)?.contentOrNull
+
+private fun JsonObject.steps(key: String): List<WorkflowStep> =
+    (this[key] as? JsonArray).orEmpty().mapNotNull { element ->
+        when (element) {
+            is JsonPrimitive -> element.contentOrNull?.let { WorkflowStep(it) }
+            is JsonObject -> WorkflowStep(
+                label = element.string("label") ?: element.string("title") ?: return@mapNotNull null,
+                description = element.string("description"),
+                status = when (element.string("status")?.lowercase()) {
+                    "complete", "completed", "done" -> StepStatus.COMPLETE
+                    "active", "in_progress", "running" -> StepStatus.ACTIVE
+                    else -> StepStatus.PENDING
+                },
+                badges = ((element["badges"] ?: element["files"]) as? JsonArray).orEmpty()
+                    .mapNotNull { (it as? JsonPrimitive)?.contentOrNull },
+            )
+            else -> null
+        }
+    }

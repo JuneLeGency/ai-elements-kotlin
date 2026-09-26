@@ -17,11 +17,17 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
+/** A prompt sent while the agent was busy, waiting its turn (AI Elements `<Queue>`). */
+data class QueuedMessage(val id: String, val text: String, val attachments: List<FilePart> = emptyList())
+
 /** Immutable snapshot rendered by the UI. */
 data class ChatState(
     val messages: List<Message> = emptyList(),
     val status: ChatStatus = ChatStatus.READY,
     val error: String? = null,
+    val queue: List<QueuedMessage> = emptyList(),
+    /** True after stop/error: queued prompts wait for the user instead of auto-sending. */
+    val queuePaused: Boolean = false,
 ) {
     val isBusy: Boolean get() = status == ChatStatus.SUBMITTED || status == ChatStatus.STREAMING
 }
@@ -29,6 +35,10 @@ data class ChatState(
 /**
  * Owns one conversation and drives a [ChatBackend], the Kotlin counterpart of
  * the AI SDK `useChat()` hook.
+ *
+ * Beyond send/stop it supports a message queue (send while busy), reply
+ * versions (regenerate keeps the old answer as a branch) and checkpoints
+ * (rewind the conversation to an earlier turn).
  *
  * @param backend resolved on every turn, so switching provider/model applies to
  *   the next message without losing the conversation. It receives the
@@ -59,16 +69,31 @@ class ChatController(
     }
 
     /**
-     * Append a user message (text and/or [attachments]) and stream the reply.
-     * Returns false when busy or empty.
+     * Send a user message (text and/or [attachments]). While a reply is
+     * streaming the message is queued and sent when the turn finishes.
+     * Returns false only when there is nothing to send.
      */
     fun send(text: String, attachments: List<FilePart> = emptyList()): Boolean {
         val prompt = text.trim()
-        if ((prompt.isEmpty() && attachments.isEmpty()) || _state.value.isBusy) return false
-        val parts = attachments + listOfNotNull(prompt.takeIf { it.isNotEmpty() }?.let { TextPart(newId(), it) })
-        val user = Message(newId(), Role.USER, parts, clock())
-        run(_state.value.messages + user)
+        if (prompt.isEmpty() && attachments.isEmpty()) return false
+        if (_state.value.isBusy) {
+            _state.update { it.copy(queue = it.queue + QueuedMessage(newId(), prompt, attachments)) }
+            return true
+        }
+        run(_state.value.messages + userMessage(prompt, attachments))
         return true
+    }
+
+    fun removeQueued(id: String) {
+        _state.update { it.copy(queue = it.queue.filterNot { q -> q.id == id }) }
+    }
+
+    /** Send a queued prompt now (when idle), e.g. after the queue paused on stop/error. */
+    fun sendQueuedNow(id: String) {
+        val item = _state.value.queue.firstOrNull { it.id == id } ?: return
+        if (_state.value.isBusy) return
+        _state.update { it.copy(queue = it.queue - item, queuePaused = false, error = null) }
+        run(_state.value.messages + userMessage(item.text, item.attachments))
     }
 
     /** Answer a tool approval request (AI Elements `<Confirmation>`). */
@@ -76,15 +101,43 @@ class ChatController(
         pendingApprovals.getOrPut(toolCallId) { CompletableDeferred() }.complete(approved)
     }
 
-    /** Drop the last assistant reply (if any) and ask again. */
+    /** Ask again; the previous reply is kept as another version of the answer. */
     fun regenerate() {
         if (_state.value.isBusy) return
-        val history = _state.value.messages.dropLastWhile { it.role == Role.ASSISTANT }
+        val messages = _state.value.messages
+        val previous = messages.lastOrNull()?.takeIf { it.role == Role.ASSISTANT }
+        val history = messages.dropLastWhile { it.role == Role.ASSISTANT }
         if (history.isEmpty()) return
-        run(history)
+        run(history, previousVersions = previous?.versions.orEmpty())
     }
 
-    /** Abort the in-flight turn, keeping whatever has streamed so far. */
+    /** Show another version of an assistant reply (AI Elements `<Branch>`). */
+    fun selectVersion(messageId: String, index: Int) {
+        if (_state.value.isBusy) return
+        _state.update { st ->
+            st.copy(
+                messages = st.messages.map { m ->
+                    if (m.id != messageId) return@map m
+                    val all = m.versions
+                    val chosen = all.getOrNull(index) ?: return@map m
+                    chosen.copy(alternatives = all - chosen)
+                },
+            )
+        }
+    }
+
+    /**
+     * Rewind the conversation to just after [messageId] (AI Elements
+     * `<Checkpoint>`); later messages are dropped.
+     */
+    fun restoreCheckpoint(messageId: String) {
+        if (_state.value.isBusy) return
+        val index = _state.value.messages.indexOfFirst { it.id == messageId }
+        if (index < 0) return
+        _state.update { it.copy(messages = it.messages.take(index + 1), status = ChatStatus.READY, error = null) }
+    }
+
+    /** Abort the in-flight turn, keeping whatever has streamed so far. Queued prompts pause. */
     fun stop() {
         val running = job ?: return
         job = null
@@ -92,7 +145,11 @@ class ChatController(
         pendingApprovals.values.forEach { it.cancel() }
         pendingApprovals.clear()
         _state.update { st ->
-            st.copy(messages = st.messages.finishLastAssistant(), status = ChatStatus.READY)
+            st.copy(
+                messages = st.messages.finishLastAssistant(),
+                status = ChatStatus.READY,
+                queuePaused = st.queue.isNotEmpty(),
+            )
         }
     }
 
@@ -106,9 +163,14 @@ class ChatController(
         _state.update { if (it.status == ChatStatus.ERROR) it.copy(status = ChatStatus.READY, error = null) else it }
     }
 
-    private fun run(history: List<Message>) {
-        _state.value = ChatState(messages = history, status = ChatStatus.SUBMITTED)
-        var assistant = Message(newId(), Role.ASSISTANT, createdAt = clock())
+    private fun userMessage(text: String, attachments: List<FilePart>): Message {
+        val parts = attachments + listOfNotNull(text.takeIf { it.isNotEmpty() }?.let { TextPart(newId(), it) })
+        return Message(newId(), Role.USER, parts, clock())
+    }
+
+    private fun run(history: List<Message>, previousVersions: List<Message> = emptyList()) {
+        _state.update { it.copy(messages = history, status = ChatStatus.SUBMITTED, error = null, queuePaused = false) }
+        var assistant = Message(newId(), Role.ASSISTANT, createdAt = clock(), alternatives = previousVersions)
         var inBandError: String? = null
 
         job = scope.launch {
@@ -120,7 +182,7 @@ class ChatController(
                     }
                     assistant = assistant.reduce(event, clock())
                     if (assistant.parts.isNotEmpty()) {
-                        _state.value = ChatState(history + assistant, ChatStatus.STREAMING)
+                        _state.update { it.copy(messages = history + assistant, status = ChatStatus.STREAMING) }
                     }
                 }
                 complete(history, assistant, inBandError)
@@ -135,13 +197,27 @@ class ChatController(
     private fun complete(history: List<Message>, assistant: Message, error: String?) {
         job = null
         val finished = assistant.finishStreaming(clock())
-        val messages = if (finished.parts.isEmpty()) history else history + finished
         val failure = error ?: "The provider returned an empty response.".takeIf { finished.parts.isEmpty() }
-        _state.value = ChatState(
-            messages = messages,
-            status = if (failure == null) ChatStatus.READY else ChatStatus.ERROR,
-            error = failure,
-        )
+        // A failed regenerate must not lose the earlier versions.
+        val reply = when {
+            finished.parts.isNotEmpty() -> finished
+            finished.alternatives.isNotEmpty() -> finished.alternatives.last().copy(alternatives = finished.alternatives.dropLast(1))
+            else -> null
+        }
+        _state.update { st ->
+            st.copy(
+                messages = history + listOfNotNull(reply),
+                status = if (failure == null) ChatStatus.READY else ChatStatus.ERROR,
+                error = failure,
+                queuePaused = failure != null && st.queue.isNotEmpty(),
+            )
+        }
+        // Successful turn: the next queued prompt goes out automatically.
+        val next = _state.value.queue.firstOrNull()
+        if (failure == null && next != null) {
+            _state.update { it.copy(queue = it.queue.drop(1)) }
+            run(_state.value.messages + userMessage(next.text, next.attachments))
+        }
     }
 
     private fun List<Message>.finishLastAssistant(): List<Message> {

@@ -2,6 +2,7 @@ package dev.ai.elements.core.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 /** Who produced a [Message]. Mirrors the AI SDK `UIMessage.role`. */
 @Serializable
@@ -34,7 +35,20 @@ data class Message(
     val parts: List<Part> = emptyList(),
     val createdAt: Long = 0L,
     val usage: Usage? = null,
+    /**
+     * Other versions of this reply (AI Elements `<Branch>`): regenerating keeps
+     * the previous answer here instead of discarding it. Oldest first.
+     */
+    val alternatives: List<Message> = emptyList(),
 ) {
+    /** All versions in creation order, this one included. */
+    val versions: List<Message>
+        get() = (alternatives + copy(alternatives = emptyList())).sortedBy { it.createdAt }
+
+    /** 0-based position of this version within [versions]. */
+    val versionIndex: Int
+        get() = versions.indexOfFirst { it.id == id }
+
     /** Concatenated text of all [TextPart]s. */
     val text: String
         get() = parts.filterIsInstance<TextPart>().joinToString("\n\n") { it.text }
@@ -130,6 +144,21 @@ data class FilePart(
     /** Base64 payload of a `data:` URL, or null for remote URLs. */
     val base64Data: String? get() = if (url.startsWith("data:")) url.substringAfter("base64,", "").ifEmpty { null } else null
 }
+
+/**
+ * Structured, app-defined data streamed by the agent — the AI SDK `data-*`
+ * parts (e.g. `data-plan`, `data-task`). A later part with the same [id]
+ * replaces the earlier one, so agents can update it live.
+ *
+ * @property name the type without the `data-` prefix.
+ */
+@Serializable
+@SerialName("data")
+data class DataPart(
+    override val id: String,
+    val name: String,
+    val data: JsonElement,
+) : Part
 
 /** A prompt suggestion chip. */
 data class Suggestion(val text: String, val label: String = text)

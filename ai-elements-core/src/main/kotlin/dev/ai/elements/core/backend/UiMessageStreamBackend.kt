@@ -100,7 +100,15 @@ class UiMessageStreamBackend(
             fun str(key: String) = chunk[key]?.jsonPrimitive?.contentOrNull
             val id = str("id").orEmpty()
             val toolCallId = str("toolCallId").orEmpty()
-            return when (str("type")) {
+            val type = str("type").orEmpty()
+            if (type.startsWith("data-")) {
+                val data = chunk["data"] ?: return null
+                return ChatEvent.Data(id.ifEmpty { type }, type.removePrefix("data-"), data)
+            }
+            return when (type) {
+                "message-metadata" -> chunk.obj("messageMetadata")?.obj("usage")?.let {
+                    ChatEvent.Usage(it.int("inputTokens") ?: 0, it.int("outputTokens") ?: 0)
+                }
                 "text-delta" -> ChatEvent.TextDelta(id, str("delta").orEmpty())
                 "text-end" -> ChatEvent.TextEnd(id)
                 "reasoning-delta" -> ChatEvent.ReasoningDelta(id, str("delta").orEmpty())

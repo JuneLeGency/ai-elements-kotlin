@@ -31,6 +31,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddPhotoAlternate
 import androidx.compose.material.icons.outlined.ArrowUpward
+import androidx.compose.material.icons.outlined.PlaylistAdd
 import androidx.compose.material.icons.outlined.Stop
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -62,6 +63,8 @@ import dev.ai.elements.core.model.FilePart
  * @param attachments pending files shown above the field (removable).
  * @param onAddAttachment shows an add button when non-null.
  * @param toolbar extra controls on the left of the toolbar (e.g. a model chip).
+ * @param allowQueue while [busy], a non-empty prompt can still be submitted
+ *   (to be queued by the controller); an empty one shows the stop button.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -76,9 +79,15 @@ fun PromptInput(
     attachments: List<FilePart> = emptyList(),
     onAddAttachment: (() -> Unit)? = null,
     onRemoveAttachment: (FilePart) -> Unit = {},
+    allowQueue: Boolean = false,
     toolbar: @Composable RowScope.() -> Unit = {},
 ) {
-    val canSend = (value.isNotBlank() || attachments.isNotEmpty()) && !busy
+    val hasInput = value.isNotBlank() || attachments.isNotEmpty()
+    val mode = when {
+        busy && allowQueue && hasInput -> SubmitMode.QUEUE
+        busy -> SubmitMode.STOP
+        else -> SubmitMode.SEND
+    }
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         shape = RoundedCornerShape(28.dp),
@@ -124,15 +133,22 @@ fun PromptInput(
                     }
                     toolbar()
                 }
-                SubmitButton(busy = busy, enabled = canSend || busy, onClick = if (busy) onStop else onSubmit)
+                SubmitButton(
+                    mode = mode,
+                    enabled = mode == SubmitMode.STOP || hasInput,
+                    onClick = if (mode == SubmitMode.STOP) onStop else onSubmit,
+                )
             }
         }
     }
 }
 
+private enum class SubmitMode { SEND, QUEUE, STOP }
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun SubmitButton(busy: Boolean, enabled: Boolean, onClick: () -> Unit) {
+private fun SubmitButton(mode: SubmitMode, enabled: Boolean, onClick: () -> Unit) {
+    val busy = mode == SubmitMode.STOP
     val scheme = MaterialTheme.colorScheme
     val rotation = if (busy) {
         val angle by rememberInfiniteTransition(label = "stop").animateFloat(
@@ -156,8 +172,14 @@ private fun SubmitButton(busy: Boolean, enabled: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .size(48.dp)
             .clip(CircleShape)
-            .clickable(enabled = enabled, role = Role.Button, onClickLabel = if (busy) "Stop" else "Send", onClick = onClick)
-            .testTag(if (busy) "stop-button" else "send-button"),
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .testTag(
+                when (mode) {
+                    SubmitMode.SEND -> "send-button"
+                    SubmitMode.QUEUE -> "queue-button"
+                    SubmitMode.STOP -> "stop-button"
+                },
+            ),
     ) {
         Box(
             Modifier
@@ -167,13 +189,21 @@ private fun SubmitButton(busy: Boolean, enabled: Boolean, onClick: () -> Unit) {
                 .background(container),
         )
         AnimatedContent(
-            targetState = busy,
+            targetState = mode,
             transitionSpec = { (scaleIn() + fadeIn()) togetherWith (scaleOut() + fadeOut()) },
             label = "submit-icon",
-        ) { isBusy ->
+        ) { target ->
             Icon(
-                if (isBusy) Icons.Outlined.Stop else Icons.Outlined.ArrowUpward,
-                contentDescription = if (isBusy) "Stop" else "Send",
+                when (target) {
+                    SubmitMode.SEND -> Icons.Outlined.ArrowUpward
+                    SubmitMode.QUEUE -> Icons.Outlined.PlaylistAdd
+                    SubmitMode.STOP -> Icons.Outlined.Stop
+                },
+                contentDescription = when (target) {
+                    SubmitMode.SEND -> "Send"
+                    SubmitMode.QUEUE -> "Add to queue"
+                    SubmitMode.STOP -> "Stop"
+                },
                 tint = content,
             )
         }

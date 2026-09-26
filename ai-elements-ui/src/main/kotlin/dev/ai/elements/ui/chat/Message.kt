@@ -40,6 +40,18 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material.icons.outlined.AccountTree
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.ReasoningPart
@@ -47,20 +59,26 @@ import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.SourcePart
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
-import dev.ai.elements.core.model.Usage
 import dev.ai.elements.ui.markdown.MarkdownContent
 
-/** Renders any [Message]: a bubble for the user, a full-width part list for the assistant. */
+/**
+ * Renders any [Message]: a bubble for the user, a full-width part list for the assistant.
+ *
+ * @param prompt the user prompt this reply answers (enables "Open in…").
+ * @param onSelectVersion switch between reply versions (enables the branch selector).
+ */
 @Composable
 fun MessageItem(
     message: Message,
     modifier: Modifier = Modifier,
+    prompt: String? = null,
     onRegenerate: (() -> Unit)? = null,
     onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)? = null,
+    onSelectVersion: ((index: Int) -> Unit)? = null,
 ) {
     when (message.role) {
         Role.USER -> UserMessage(message, modifier)
-        Role.ASSISTANT -> AssistantMessage(message, modifier, onRegenerate, onToolApproval)
+        Role.ASSISTANT -> AssistantMessage(message, modifier, prompt, onRegenerate, onToolApproval, onSelectVersion)
     }
 }
 
@@ -99,24 +117,28 @@ private fun UserBubble(text: String, modifier: Modifier) {
 fun AssistantMessage(
     message: Message,
     modifier: Modifier = Modifier,
+    prompt: String? = null,
     onRegenerate: (() -> Unit)? = null,
     onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)? = null,
+    onSelectVersion: ((index: Int) -> Unit)? = null,
 ) {
     val streaming = message.isStreaming
+    val sources = message.parts.filterIsInstance<SourcePart>()
     Row(modifier.fillMaxWidth().testTag("assistant-message"), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         AssistantAvatar(active = streaming)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             message.parts.forEach { part ->
                 when (part) {
-                    is TextPart -> if (part.text.isNotBlank()) MarkdownContent(part.text)
+                    is TextPart -> if (part.text.isNotBlank()) MarkdownContent(part.text, citations = sources)
                     is ReasoningPart -> Reasoning(part)
                     is ToolPart -> ToolCall(part, onApproval = onToolApproval?.let { cb -> { approved -> cb(part.id, approved) } })
                     is FilePart -> FileAttachment(part)
+                    is DataPart -> DataPartView(part)
                     is SourcePart -> Unit
                 }
             }
-            Sources(message.parts.filterIsInstance<SourcePart>())
-            if (!streaming && message.text.isNotBlank()) MessageActions(message.text, message.usage, onRegenerate)
+            Sources(sources)
+            if (!streaming && message.parts.isNotEmpty()) MessageActions(message, prompt, onRegenerate, onSelectVersion)
         }
     }
 }
@@ -144,13 +166,20 @@ fun AssistantAvatar(active: Boolean, modifier: Modifier = Modifier) {
 }
 
 @Suppress("DEPRECATION")
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
 @Composable
-private fun MessageActions(text: String, usage: Usage?, onRegenerate: (() -> Unit)?) {
+private fun MessageActions(
+    message: Message,
+    prompt: String?,
+    onRegenerate: (() -> Unit)?,
+    onSelectVersion: ((Int) -> Unit)?,
+) {
     val clipboard = LocalClipboardManager.current
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-        IconButton(
-            onClick = { clipboard.setText(AnnotatedString(text)) },
+    var showGraph by remember { mutableStateOf(false) }
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), itemVerticalAlignment = Alignment.CenterVertically) {
+        if (onSelectVersion != null) BranchSelector(message.versionIndex, message.versions.size, onSelectVersion)
+        if (message.text.isNotBlank()) IconButton(
+            onClick = { clipboard.setText(AnnotatedString(message.text)) },
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.size(36.dp),
         ) { Icon(Icons.Outlined.ContentCopy, "Copy", Modifier.size(18.dp)) }
@@ -161,6 +190,38 @@ private fun MessageActions(text: String, usage: Usage?, onRegenerate: (() -> Uni
                 modifier = Modifier.size(36.dp).testTag("regenerate"),
             ) { Icon(Icons.Outlined.Refresh, "Regenerate", Modifier.size(18.dp)) }
         }
-        usage?.takeIf { it.totalTokens > 0 }?.let { ContextUsage(it, Modifier.padding(start = 4.dp)) }
+        IconButton(
+            onClick = { showGraph = true },
+            shapes = IconButtonDefaults.shapes(),
+            modifier = Modifier.size(36.dp).testTag("run-graph"),
+        ) { Icon(Icons.Outlined.AccountTree, "View agent run", Modifier.size(18.dp)) }
+        if (!prompt.isNullOrBlank()) OpenInChat(prompt)
+        message.usage?.takeIf { it.totalTokens > 0 }?.let { ContextUsage(it, Modifier.padding(start = 4.dp)) }
+    }
+    if (showGraph) AgentRunDialog(message, prompt, onDismiss = { showGraph = false })
+}
+
+/** Full-screen [WorkflowCanvas] of one agent run. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun AgentRunDialog(message: Message, prompt: String?, onDismiss: () -> Unit) {
+    val (nodes, edges) = remember(message) { agentRunGraph(message, prompt) }
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
+        Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
+            Column(Modifier.systemBarsPadding()) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 20.dp, end = 8.dp, top = 8.dp)) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Agent run", style = MaterialTheme.typography.titleLarge)
+                        Text(
+                            "${nodes.size} steps · pinch to zoom, drag to pan",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    IconButton(onClick = onDismiss, shapes = IconButtonDefaults.shapes()) { Icon(Icons.Outlined.Close, "Close") }
+                }
+                WorkflowCanvas(nodes, edges, Modifier.fillMaxSize().padding(top = 8.dp))
+            }
+        }
     }
 }

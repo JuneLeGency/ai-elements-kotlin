@@ -56,6 +56,10 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
     fun send(text: String, attachments: List<FilePart> = emptyList()): Boolean = chat.send(text, attachments)
     fun respondToApproval(toolCallId: String, approved: Boolean) = chat.respondToApproval(toolCallId, approved)
     fun stop() = chat.stop()
+    fun selectVersion(messageId: String, index: Int) = chat.selectVersion(messageId, index)
+    fun restoreCheckpoint(messageId: String) = chat.restoreCheckpoint(messageId)
+    fun removeQueued(id: String) = chat.removeQueued(id)
+    fun sendQueuedNow(id: String) = chat.sendQueuedNow(id)
     fun regenerate() = chat.regenerate()
     fun dismissError() = chat.dismissError()
 

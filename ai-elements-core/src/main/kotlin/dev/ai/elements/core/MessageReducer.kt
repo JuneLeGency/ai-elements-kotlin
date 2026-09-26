@@ -1,5 +1,6 @@
 package dev.ai.elements.core
 
+import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Part
@@ -54,6 +55,10 @@ fun Message.reduce(event: ChatEvent, now: Long): Message = when (event) {
 
     is ChatEvent.File -> upsert<FilePart>(event.id, { FilePart(event.id, event.mediaType, event.url) }) { it }
 
+    is ChatEvent.Data -> upsert<DataPart>(event.id, { DataPart(event.id, event.name, event.data) }) {
+        it.copy(name = event.name, data = event.data)
+    }
+
     is ChatEvent.Usage -> copy(usage = (usage ?: Usage()) + Usage(event.inputTokens, event.outputTokens))
 
     is ChatEvent.SourceUrl ->
@@ -70,7 +75,7 @@ fun Message.finishStreaming(now: Long): Message = copy(
             is TextPart -> if (part.isStreaming) part.copy(isStreaming = false) else part
             is ReasoningPart -> if (part.isStreaming) part.finish(now) else part
             is ToolPart -> if (part.isStreaming) part.copy(state = ToolState.OUTPUT_ERROR, errorText = part.errorText ?: "Interrupted") else part
-            is SourcePart, is FilePart -> part
+            is SourcePart, is FilePart, is DataPart -> part
         }
     },
 )

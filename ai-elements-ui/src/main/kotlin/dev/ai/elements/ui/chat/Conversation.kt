@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
@@ -65,9 +64,19 @@ fun Conversation(
     onRetry: () -> Unit = onRegenerate,
     onDismissError: () -> Unit = {},
     onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)? = null,
+    onSelectVersion: ((messageId: String, index: Int) -> Unit)? = null,
+    onRestoreCheckpoint: ((messageId: String) -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
     val messages = state.messages.asReversed()
+    // The prompt each reply answers, for "Open in…".
+    val prompts = remember(state.messages) {
+        var lastPrompt: String? = null
+        state.messages.associate { m ->
+            if (m.role == Role.USER) lastPrompt = m.text
+            m.id to lastPrompt
+        }
+    }
     val lastAssistantId = state.messages.lastOrNull()?.takeIf { it.role == Role.ASSISTANT }?.id
 
     // Jump to the newest message whenever the user sends one.
@@ -100,13 +109,27 @@ fun Conversation(
                     }
                 }
             }
-            itemsIndexed(messages, key = { _, m -> m.id }, contentType = { _, m -> m.role }) { _, message ->
-                MessageItem(
-                    message = message,
-                    onRegenerate = if (message.id == lastAssistantId && !state.isBusy) onRegenerate else null,
-                    onToolApproval = onToolApproval,
-                    modifier = Modifier.widthIn(max = maxContentWidth).fillMaxWidth().animateItem(),
-                )
+            messages.forEachIndexed { index, message ->
+                // Reversed list: index 0 is the newest message. A checkpoint sits
+                // below every finished turn that has later messages.
+                if (onRestoreCheckpoint != null && index > 0 && message.role == Role.ASSISTANT && !state.isBusy) {
+                    item(key = "checkpoint-${message.id}", contentType = "checkpoint") {
+                        Checkpoint(
+                            onRestore = { onRestoreCheckpoint(message.id) },
+                            modifier = Modifier.widthIn(max = maxContentWidth).animateItem(),
+                        )
+                    }
+                }
+                item(key = message.id, contentType = message.role) {
+                    MessageItem(
+                        message = message,
+                        prompt = prompts[message.id],
+                        onRegenerate = if (message.id == lastAssistantId && !state.isBusy) onRegenerate else null,
+                        onToolApproval = onToolApproval,
+                        onSelectVersion = onSelectVersion?.takeIf { !state.isBusy }?.let { cb -> { i -> cb(message.id, i) } },
+                        modifier = Modifier.widthIn(max = maxContentWidth).fillMaxWidth().animateItem(),
+                    )
+                }
             }
         }
 

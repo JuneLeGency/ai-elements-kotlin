@@ -97,6 +97,10 @@ internal class AgUiParser {
                 ChatEvent.ToolInputAvailable(toolCallId, toolNames[toolCallId].orEmpty(), toolArgs[toolCallId]?.toString().orEmpty().ifBlank { "{}" }),
             )
             "TOOL_CALL_RESULT" -> listOf(ChatEvent.ToolOutput(toolCallId, event.str("content") ?: event["content"].toString()))
+            // Non-standard but common: servers report token usage as a CUSTOM event.
+            "CUSTOM" -> if (event.str("name") == "usage") {
+                listOfNotNull(event.obj("value")?.let { ChatEvent.Usage(it.int("inputTokens") ?: 0, it.int("outputTokens") ?: 0) })
+            } else emptyList()
             "RUN_ERROR" -> listOf(ChatEvent.Error(event.str("message") ?: "Agent run failed"))
             "RUN_FINISHED" -> listOf(ChatEvent.Finish)
             else -> emptyList()

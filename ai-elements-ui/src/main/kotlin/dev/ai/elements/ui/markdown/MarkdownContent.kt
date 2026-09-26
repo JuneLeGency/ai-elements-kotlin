@@ -3,7 +3,18 @@ package dev.ai.elements.ui.markdown
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import dev.ai.elements.core.model.SourcePart
+import dev.ai.elements.ui.chat.CitationPreprocessor
+import dev.ai.elements.ui.chat.CitationSheet
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -28,6 +39,9 @@ import org.intellij.markdown.MarkdownTokenTypes
  * - LaTeX: `$$…$$` / `\[…\]` render with KaTeX ([MathBlock]), inline `$…$`
  *   becomes Unicode math (see [LatexPreprocessor]).
  *
+ * - `[n]` references become [InlineCitation]-style links into [citations]
+ *   (the message's sources), opening a sheet with the cited sources.
+ *
  * Safe to call with a growing string while streaming: the previous render is
  * kept on screen while the new text is parsed.
  */
@@ -35,6 +49,7 @@ import org.intellij.markdown.MarkdownTokenTypes
 fun MarkdownContent(
     markdown: String,
     modifier: Modifier = Modifier,
+    citations: List<SourcePart> = emptyList(),
 ) {
     val type = MaterialTheme.typography
     val scheme = MaterialTheme.colorScheme
@@ -59,7 +74,22 @@ fun MarkdownContent(
             checkbox = { MarkdownCheckBox(it.content, it.node, it.typography.text) },
         )
     }
-    val content = remember(markdown) { LatexPreprocessor.process(markdown) }
+    val content = remember(markdown, citations) {
+        LatexPreprocessor.process(CitationPreprocessor.process(markdown, citations))
+    }
+    // Citation links open the cited sources in a sheet; other links go to the browser.
+    val platformUriHandler = LocalUriHandler.current
+    var cited by remember { mutableStateOf<List<SourcePart>>(emptyList()) }
+    val uriHandler = remember(platformUriHandler, citations) {
+        object : UriHandler {
+            override fun openUri(uri: String) {
+                if (uri.startsWith(CitationPreprocessor.SCHEME)) cited = CitationPreprocessor.resolve(uri, citations)
+                else runCatching { platformUriHandler.openUri(uri) }
+            }
+        }
+    }
+    if (cited.isNotEmpty()) CitationSheet(cited, onDismiss = { cited = emptyList() })
+    CompositionLocalProvider(LocalUriHandler provides uriHandler) {
     Markdown(
         content = content,
         colors = markdownColor(
@@ -80,6 +110,13 @@ fun MarkdownContent(
             inlineCode = type.bodyLarge.copy(fontFamily = FontFamily.Monospace, color = scheme.tertiary),
             quote = type.bodyLarge.copy(color = scheme.onSurfaceVariant),
             table = type.bodyMedium,
+            textLink = TextLinkStyles(
+                style = SpanStyle(
+                    color = scheme.primary,
+                    fontWeight = FontWeight.Medium,
+                    background = scheme.primary.copy(alpha = 0.10f),
+                ),
+            ),
         ),
         padding = markdownPadding(block = 4.dp, listIndent = 12.dp),
         dimens = markdownDimens(codeBackgroundCornerSize = 16.dp, tableCornerSize = 16.dp, tableCellWidth = 200.dp),
@@ -87,4 +124,5 @@ fun MarkdownContent(
         retainState = true,
         modifier = modifier.fillMaxWidth(),
     )
+    }
 }

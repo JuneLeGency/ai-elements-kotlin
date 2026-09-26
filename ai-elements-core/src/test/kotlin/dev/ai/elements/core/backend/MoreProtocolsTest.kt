@@ -283,4 +283,22 @@ class MoreProtocolsTest {
         assertTrue(requests[2], requests[2].contains(""""images":["AAAA"]"""))
         assertTrue(requests[3], requests[3].contains(""""inlineData":{"mimeType":"image/png","data":"AAAA"}"""))
     }
+
+    @Test
+    fun uiStream_dataPartsAndUsageMetadata() {
+        respond(
+            """
+            data: {"type":"data-plan","id":"p1","data":{"title":"Plan","steps":[]}}
+
+            data: {"type":"message-metadata","messageMetadata":{"usage":{"inputTokens":12,"outputTokens":34}}}
+
+            data: {"type":"finish"}
+            """,
+        )
+        val events = UiMessageStreamBackend("$base/api/chat").events()
+        val data = events.filterIsInstance<ChatEvent.Data>().single()
+        assertEquals("p1", data.id)
+        assertEquals("plan", data.name)
+        assertTrue(events.contains(ChatEvent.Usage(12, 34)))
+    }
 }

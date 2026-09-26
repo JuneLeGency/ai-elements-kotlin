@@ -43,6 +43,9 @@ sealed interface ChatEvent {
     /** A model-generated file (e.g. an image). */
     data class File(val id: String, val mediaType: String, val url: String) : ChatEvent
 
+    /** An AI SDK `data-*` part; same id replaces. */
+    data class Data(val id: String, val name: String, val data: kotlinx.serialization.json.JsonElement) : ChatEvent
+
     /** Token usage of one model call; summed per turn. */
     data class Usage(val inputTokens: Int, val outputTokens: Int) : ChatEvent
 

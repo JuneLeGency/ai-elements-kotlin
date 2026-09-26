@@ -41,6 +41,26 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Usage
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.DpOffset
+import dev.ai.elements.core.QueuedMessage
+import dev.ai.elements.core.model.DataPart
+import dev.ai.elements.ui.chat.BranchSelector
+import dev.ai.elements.ui.chat.CanvasEdge
+import dev.ai.elements.ui.chat.CanvasNode
+import dev.ai.elements.ui.chat.Checkpoint
+import dev.ai.elements.ui.chat.DataPartView
+import dev.ai.elements.ui.chat.InlineCitation
+import dev.ai.elements.ui.chat.NodeTone
+import dev.ai.elements.ui.chat.OpenInChat
+import dev.ai.elements.ui.chat.Queue
+import dev.ai.elements.ui.chat.WorkflowCanvas
+import androidx.compose.foundation.layout.fillMaxWidth
+import kotlinx.serialization.json.Json
 import dev.ai.elements.ui.chat.Artifact
 import dev.ai.elements.ui.chat.ChainOfThought
 import dev.ai.elements.ui.chat.ContextUsage
@@ -141,6 +161,12 @@ private const val PieSample = """pie title Tokens by part
     "Text" : 62
     "Reasoning" : 28
     "Tool I/O" : 10"""
+
+private val GallerySources = listOf(
+    SourcePart("s1", "https://elements.ai-sdk.dev", "AI Elements"),
+    SourcePart("s2", "https://m3.material.io/blog/building-with-m3-expressive", "M3 Expressive"),
+    SourcePart("s3", "https://developer.android.com/develop/ui/compose/designsystems/material3", "Material 3 in Compose"),
+)
 
 private val sampleAssistant = Message(
     id = "gallery-a",
@@ -243,6 +269,67 @@ private val GallerySamples: List<Pair<String, @Composable () -> Unit>> = listOf(
     },
     "Image" to {
         FileAttachment(FilePart("g-img", "image/png", SampleImageDataUrl), imageHeight = 160.dp)
+    },
+    "Branch" to {
+        var version by remember { mutableStateOf(1) }
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(listOf("A concise answer.", "A longer, more detailed answer.", "A playful answer!")[version])
+            BranchSelector(version, 3, onSelect = { version = it })
+        }
+    },
+    "Checkpoint" to { Checkpoint(onRestore = {}) },
+    "Queue" to {
+        Queue(
+            items = listOf(
+                QueuedMessage("q1", "Also add a dark theme"),
+                QueuedMessage("q2", "Then write the release notes"),
+            ),
+            paused = true,
+            onRemove = {},
+            onSendNow = {},
+        )
+    },
+    "Inline citation" to {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            MarkdownContent(
+                "AI Elements ships chat components [1], styled here with M3 Expressive [2][3].",
+                citations = GallerySources,
+            )
+            InlineCitation(GallerySources)
+        }
+    },
+    "Open in chat" to {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Continue this prompt elsewhere", Modifier.weight(1f))
+            OpenInChat("Explain Material 3 Expressive in three bullet points")
+        }
+    },
+    "Data parts (data-plan, data-task)" to {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            DataPartView(
+                DataPart(
+                    "d1", "plan",
+                    Json.parseToJsonElement(
+                        """{"title":"Ship v1","description":"streamed by the agent","streaming":true,""" +
+                            """"steps":[{"label":"Write code","status":"complete"},{"label":"Test","status":"active"},"Release"]}""",
+                    ),
+                ),
+            )
+            DataPartView(DataPart("d2", "weather", Json.parseToJsonElement("""{"city":"Tokyo","tempC":21}""")))
+        }
+    },
+    "Canvas / Node / Edge" to {
+        val nodes = listOf(
+            CanvasNode("a", "Prompt", "User question", DpOffset(80.dp, 0.dp), Icons.Outlined.Person, NodeTone.NEUTRAL),
+            CanvasNode("b", "search_docs", "3 results", DpOffset(0.dp, 120.dp), Icons.Outlined.Build, NodeTone.TERTIARY),
+            CanvasNode("c", "calculate", "42", DpOffset(220.dp, 120.dp), Icons.Outlined.Build, NodeTone.TERTIARY),
+            CanvasNode("d", "Answer", "Streaming…", DpOffset(80.dp, 240.dp), Icons.Outlined.AutoAwesome, status = StepStatus.ACTIVE),
+        )
+        val edges = listOf(
+            CanvasEdge("a", "b"), CanvasEdge("a", "c"),
+            CanvasEdge("b", "d", label = "sources", animated = true), CanvasEdge("c", "d", animated = true),
+        )
+        WorkflowCanvas(nodes, edges, Modifier.fillMaxWidth().height(300.dp).clip(MaterialTheme.shapes.large), showControls = false)
     },
     "Sources" to {
         Sources(sampleAssistant.parts.filterIsInstance<SourcePart>())

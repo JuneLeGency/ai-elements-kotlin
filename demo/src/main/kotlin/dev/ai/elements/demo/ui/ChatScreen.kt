@@ -87,6 +87,7 @@ import dev.ai.elements.ui.chat.ChatEmptyState
 import dev.ai.elements.ui.chat.ContextUsage
 import dev.ai.elements.ui.chat.Conversation
 import dev.ai.elements.ui.chat.PromptInput
+import dev.ai.elements.ui.chat.Queue
 import kotlinx.coroutines.launch
 
 private val DemoSuggestions = listOf(
@@ -220,12 +221,22 @@ private fun ChatPane(
                         onRegenerate = viewModel::regenerate,
                         onDismissError = viewModel::dismissError,
                         onToolApproval = viewModel::respondToApproval,
+                        onSelectVersion = viewModel::selectVersion,
+                        onRestoreCheckpoint = viewModel::restoreCheckpoint,
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
             }
+            Queue(
+                items = state.queue,
+                paused = state.queuePaused,
+                onRemove = { viewModel.removeQueued(it.id) },
+                onSendNow = { viewModel.sendQueuedNow(it.id) },
+                modifier = Modifier.widthIn(max = 840.dp).padding(start = 12.dp, end = 12.dp, bottom = 8.dp),
+            )
             PromptInput(
+                allowQueue = true,
                 value = input,
                 onValueChange = { input = it },
                 onSubmit = { submit(input) },
