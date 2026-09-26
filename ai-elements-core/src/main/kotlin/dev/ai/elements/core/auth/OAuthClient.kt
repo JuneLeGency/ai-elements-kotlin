@@ -63,12 +63,19 @@ class OAuthClient(private val http: OkHttpClient = DefaultHttpClient) {
                 put("code_challenge", attempt.challenge)
                 put("code_challenge_method", "S256")
             }
+            putAll(flow.extraTokenParams)
         },
         previous = null,
     )
 
     /** Exchanges the refresh token; keeps the old refresh token when the server doesn't rotate it. */
-    suspend fun refresh(tokenUrl: String, clientId: String, clientSecret: String?, tokens: OAuthTokens): OAuthTokens {
+    suspend fun refresh(
+        tokenUrl: String,
+        clientId: String,
+        clientSecret: String?,
+        tokens: OAuthTokens,
+        extraParams: Map<String, String> = emptyMap(),
+    ): OAuthTokens {
         val refresh = tokens.refreshToken ?: throw OAuthException("Signed out: no refresh token. Sign in again.")
         return tokenRequest(
             tokenUrl,
@@ -77,6 +84,7 @@ class OAuthClient(private val http: OkHttpClient = DefaultHttpClient) {
                 put("refresh_token", refresh)
                 put("client_id", clientId)
                 clientSecret?.let { put("client_secret", it) }
+                putAll(extraParams)
             },
             previous = tokens,
         )

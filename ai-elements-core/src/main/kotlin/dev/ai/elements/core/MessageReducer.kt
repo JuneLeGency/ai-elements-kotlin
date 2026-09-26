@@ -10,6 +10,7 @@ import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
 import dev.ai.elements.core.model.Usage
+import kotlinx.serialization.json.JsonObject
 
 /**
  * Folds one [ChatEvent] into the assistant [Message]. Pure, so it is trivially
@@ -32,24 +33,41 @@ fun Message.reduce(event: ChatEvent, now: Long): Message = when (event) {
 
     is ChatEvent.ReasoningEnd -> updateExisting<ReasoningPart>(event.id) { it.finish(now) }
 
-    is ChatEvent.ToolInputStart -> upsert<ToolPart>(event.id, { ToolPart(event.id, event.name) }) { it }
+    is ChatEvent.ToolInputStart -> upsert<ToolPart>(event.id, { ToolPart(event.id, event.name, title = event.title) }) {
+        it.copy(title = event.title ?: it.title)
+    }
 
     is ChatEvent.ToolInputDelta -> updateExisting<ToolPart>(event.id) { it.copy(input = it.input + event.delta) }
 
     is ChatEvent.ToolInputAvailable -> upsert<ToolPart>(
         event.id,
-        { ToolPart(event.id, event.name, ToolState.INPUT_AVAILABLE, event.input) },
-    ) { it.copy(name = event.name, state = ToolState.INPUT_AVAILABLE, input = event.input) }
+        { ToolPart(event.id, event.name, ToolState.INPUT_AVAILABLE, event.input, title = event.title) },
+    ) {
+        // A call that already has a (preliminary) result or awaits approval keeps its state.
+        val state = if (it.state == ToolState.INPUT_STREAMING) ToolState.INPUT_AVAILABLE else it.state
+        it.copy(name = event.name, state = state, input = event.input, title = event.title ?: it.title)
+    }
 
     is ChatEvent.ToolOutput -> updateExisting<ToolPart>(event.id) {
-        it.copy(state = ToolState.OUTPUT_AVAILABLE, output = event.output)
+        if (it.state == ToolState.OUTPUT_DENIED) it
+        else if (event.preliminary) it.copy(state = if (it.state == ToolState.INPUT_STREAMING) ToolState.INPUT_AVAILABLE else it.state, output = event.output, preliminary = true)
+        else it.copy(state = ToolState.OUTPUT_AVAILABLE, output = event.output, preliminary = false)
     }
+
+    is ChatEvent.SubagentUpdate -> updateExisting<ToolPart>(event.id) { it.copy(subagent = event.message) }
+
+    is ChatEvent.Metadata -> copy(metadata = JsonObject((metadata ?: JsonObject(emptyMap())) + event.metadata))
 
     is ChatEvent.ToolError -> updateExisting<ToolPart>(event.id) {
         it.copy(state = ToolState.OUTPUT_ERROR, errorText = event.error)
     }
 
     is ChatEvent.ToolApprovalRequest -> updateExisting<ToolPart>(event.id) { it.copy(state = ToolState.APPROVAL_REQUESTED) }
+
+    // Approved: back to running until the output arrives.
+    is ChatEvent.ToolApproved -> updateExisting<ToolPart>(event.id) {
+        if (it.state == ToolState.APPROVAL_REQUESTED) it.copy(state = ToolState.INPUT_AVAILABLE) else it
+    }
 
     is ChatEvent.ToolDenied -> updateExisting<ToolPart>(event.id) { it.copy(state = ToolState.OUTPUT_DENIED) }
 
@@ -74,7 +92,15 @@ fun Message.finishStreaming(now: Long): Message = copy(
         when (part) {
             is TextPart -> if (part.isStreaming) part.copy(isStreaming = false) else part
             is ReasoningPart -> if (part.isStreaming) part.finish(now) else part
-            is ToolPart -> if (part.isStreaming) part.copy(state = ToolState.OUTPUT_ERROR, errorText = part.errorText ?: "Interrupted") else part
+            is ToolPart -> when {
+                part.isStreaming -> part.copy(
+                    state = ToolState.OUTPUT_ERROR,
+                    errorText = part.errorText ?: "Interrupted",
+                    subagent = part.subagent?.finishStreaming(now),
+                )
+                part.subagent?.isStreaming == true -> part.copy(subagent = part.subagent.finishStreaming(now))
+                else -> part
+            }
             is SourcePart, is FilePart, is DataPart -> part
         }
     },

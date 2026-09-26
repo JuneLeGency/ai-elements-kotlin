@@ -34,6 +34,8 @@ dependencies {
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.serialization.json)
     api(libs.okhttp)
+    implementation(libs.kotlin.json.patch)
+    implementation(libs.agui.kotlin.core)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

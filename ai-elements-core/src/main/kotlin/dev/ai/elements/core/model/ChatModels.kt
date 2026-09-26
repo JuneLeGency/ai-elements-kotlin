@@ -3,6 +3,7 @@ package dev.ai.elements.core.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 
 /** Who produced a [Message]. Mirrors the AI SDK `UIMessage.role`. */
 @Serializable
@@ -40,6 +41,11 @@ data class Message(
      * the previous answer here instead of discarding it. Oldest first.
      */
     val alternatives: List<Message> = emptyList(),
+    /**
+     * App- or protocol-defined metadata (AI SDK `UIMessage.metadata`), e.g. the
+     * A2A `contextId` / `taskId` a remote agent's reply belongs to.
+     */
+    val metadata: JsonObject? = null,
 ) {
     /** All versions in creation order, this one included. */
     val versions: List<Message>
@@ -107,6 +113,13 @@ enum class ToolState {
 /**
  * One tool invocation. [id] is the tool call id; [input] is the raw JSON
  * arguments and [output] the tool result as text.
+ *
+ * @property title human-readable label (AI SDK `title`), e.g. an MCP tool's
+ *   title and server; UIs fall back to [name].
+ * @property preliminary [output] is an interim result that later updates will
+ *   replace (AI SDK preliminary tool results).
+ * @property subagent the live run of a delegated agent (AI SDK subagent
+ *   pattern): the nested reply with its own reasoning, tool calls and text.
  */
 @Serializable
 @SerialName("tool")
@@ -117,10 +130,16 @@ data class ToolPart(
     val input: String = "",
     val output: String? = null,
     val errorText: String? = null,
+    val title: String? = null,
+    val preliminary: Boolean = false,
+    val subagent: Message? = null,
 ) : Part {
     override val isStreaming: Boolean
         get() = state == ToolState.INPUT_STREAMING || state == ToolState.INPUT_AVAILABLE ||
             state == ToolState.APPROVAL_REQUESTED
+
+    /** [title] or, failing that, the tool [name]. */
+    val displayName: String get() = title ?: name
 }
 
 /** A cited source (URL and title), shown by [dev.ai.elements.ui.chat.Sources] and inline citations. */

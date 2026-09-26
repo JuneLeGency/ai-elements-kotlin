@@ -13,16 +13,27 @@ import java.util.Locale
 import java.util.TimeZone
 
 /**
- * A function the on-device agent loop can call (OpenAI / Anthropic backends).
- * [parameters] is a JSON Schema object, shared verbatim by both APIs.
+ * A function an agent loop can call: the on-device loops (OpenAI, Anthropic,
+ * Gemini, Ollama), and server agents that accept client-side tools (AG-UI
+ * frontend tools, AI SDK client tools). [parameters] is a JSON Schema object,
+ * shared verbatim by every API.
+ *
+ * [name] must match `^[a-zA-Z0-9_-]{1,64}$` (the strictest provider rule).
+ * Long-running tools can report progress through [ToolCallContext.current].
  */
 interface AgentTool {
     val name: String
     val description: String
     val parameters: JsonObject
 
+    /** Human-readable label for the UI (e.g. an MCP tool's title); null shows [name]. */
+    val title: String? get() = null
+
     /** Ask the user before running (rendered as a Confirmation). */
     val requiresApproval: Boolean get() = false
+
+    /** Label for one call, e.g. "Skill · pdf" from its arguments; defaults to [title]. */
+    fun titleFor(arguments: JsonObject): String? = title
 
     /** Run the tool. Throwing reports a tool error back to the model. */
     suspend fun execute(arguments: JsonObject): String

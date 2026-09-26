@@ -213,7 +213,9 @@ class ChatController(
                     }
                     assistant = assistant.reduce(event, clock())
                     live = history to assistant
-                    val isDelta = event is ChatEvent.TextDelta || event is ChatEvent.ReasoningDelta || event is ChatEvent.ToolInputDelta
+                    val isDelta = event is ChatEvent.TextDelta || event is ChatEvent.ReasoningDelta ||
+                        event is ChatEvent.ToolInputDelta || event is ChatEvent.SubagentUpdate ||
+                        (event is ChatEvent.ToolOutput && event.preliminary)
                     // The first content leaves SUBMITTED right away; later deltas are coalesced.
                     if (flusher == null || !isDelta || _state.value.status == ChatStatus.SUBMITTED) publish() else dirty = true
                 }

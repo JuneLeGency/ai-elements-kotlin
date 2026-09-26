@@ -1,10 +1,13 @@
 """AI Elements agent server.
 
-A FastAPI service running a PydanticAI agent (with tools) and streaming its run
-to the Android demo over two agent↔UI protocols, via PydanticAI's adapters:
+A FastAPI service running a Pydantic AI agent built from Pydantic AI Harness
+capabilities — Planning, SubAgents (researcher, writer), Skills (../skills) and an
+MCP toolset — and exposing it over open protocols only:
 
-    POST /api/chat   Vercel AI SDK v5 UI Message Stream (VercelAIAdapter)
-    POST /api/agui   AG-UI (AGUIAdapter)
+    POST /api/chat                      Vercel AI SDK 6 UI Message Stream (VercelAIAdapter)
+    POST /api/agui                      AG-UI 1.0 (AGUIAdapter)
+    POST /mcp                           MCP server, Streamable HTTP (official `mcp` SDK)
+    GET  /.well-known/agent-card.json   A2A agent card; JSON-RPC at POST /a2a (official `a2a-sdk`)
 
 Upstream model (any OpenAI-compatible endpoint, e.g. CLIProxyAPI):
 
@@ -27,11 +30,25 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+from contextlib import asynccontextmanager
+from pathlib import Path
+
+from ag_ui.core import StateSnapshotEvent
 from fastapi import FastAPI, Request
 from fastapi.responses import Response
-from ag_ui.core import CustomEvent
-from pydantic_ai import Agent, RunContext
-from pydantic_ai.messages import ModelMessage, ModelResponse, TextPart, ToolCallPart, ToolReturn, ToolReturnPart
+from mcp.server.transport_security import TransportSecuritySettings
+from pydantic_ai import Agent, CustomEvent, DeferredToolRequests, RunContext
+from pydantic_ai.mcp import MCPToolset
+from pydantic_ai_harness import Planning, Skills, SubAgent, SubAgents
+from pydantic_ai_harness.planning import (
+    InMemoryPlanStore,
+    PlanCompletedEvent,
+    PlanCreatedEvent,
+    PlanDeletedEvent,
+    PlanStatusChangedEvent,
+    PlanUpdatedEvent,
+)
+from pydantic_ai.messages import ModelMessage, ModelResponse, RetryPromptPart, TextPart, ToolCallPart, ToolReturn, ToolReturnPart
 from pydantic_ai.models import Model
 from pydantic_ai.models.function import AgentInfo, DeltaToolCall, FunctionModel
 from pydantic_ai.models.openai import OpenAIChatModel
@@ -40,6 +57,9 @@ from pydantic_ai.ui.ag_ui import AGUIAdapter
 from pydantic_ai.ui.vercel_ai import VercelAIAdapter
 from pydantic_ai.ui.vercel_ai.response_types import DataChunk, MessageMetadataChunk, SourceUrlChunk
 
+from a2a_agent import a2a_routes
+from mcp_server import mcp
+
 BASE_URL = os.environ.get("AGENT_BASE_URL", os.environ.get("CLIPROXY_BASE_URL", "http://localhost:8317/v1"))
 API_KEY = os.environ.get("AGENT_API_KEY", os.environ.get("CLIPROXY_API_KEY", ""))
 DEFAULT_MODEL = os.environ.get("AGENT_MODEL", os.environ.get("CLIPROXY_MODEL", "demo"))
@@ -47,26 +67,62 @@ DEFAULT_MODEL = os.environ.get("AGENT_MODEL", os.environ.get("CLIPROXY_MODEL", "
 INSTRUCTIONS = """\
 You are a helpful assistant inside an Android chat app that renders GitHub-flavoured
 Markdown (headings, lists, tables, fenced code with a language tag), Mermaid
-diagrams (```mermaid fenced blocks) and LaTeX math ($...$, $$...$$). Prefer a
-Mermaid diagram when the user asks about flows, architectures, sequences or
-relationships. Use the tools when they help: `get_current_time` for dates/times,
-`calculate` for arithmetic, `search_docs` for questions about AI Elements,
-Material 3, Mermaid, KaTeX, PydanticAI or AG-UI — cite its results inline as [n]
-using the numbers it returns. For multi-step tasks call `make_plan` first and
-`update_plan` as you finish steps. Answer in the user's language.
+diagrams (```mermaid fenced blocks) and LaTeX math ($...$, $$...$$). Use the tools
+when they help: `get_current_time` for dates/times, `calculate` for arithmetic,
+`search_docs` for questions about AI Elements, Material 3, Mermaid, KaTeX,
+PydanticAI or AG-UI — cite its results inline as [n] using the numbers it returns.
+For multi-step tasks keep a plan with the planning tools. Answer in the user's language.
 """
+
+# Harness capabilities surface as ordinary tool calls on the wire (`delegate_task`,
+# `load_capability`, `write_plan`, MCP tools); the plan is additionally mirrored to the UI
+# through each protocol's own state channel (see `mirror_plan`).
+SKILLS_DIR = Path(__file__).resolve().parent.parent / "skills"
+MCP_URL = os.environ.get("MCP_URL", f"http://127.0.0.1:{os.environ.get('PORT', '8788')}/mcp")
+PUBLIC_URL = os.environ.get("PUBLIC_URL", f"http://127.0.0.1:{os.environ.get('PORT', '8788')}")
+# MCP tools that change data ask the user first (AG-UI interrupt / AI SDK 6 tool approval).
+MCP_WRITE_TOOLS = {"save_note", "delete_note"}
 
 
 @dataclass
 class RunState:
-    """Per-run state shared by the tools (plan progress, citation numbering)."""
+    """Per-run state shared by the tools (plan store, citation numbering, wire protocol)."""
 
-    plan_title: str = ""
-    plan_steps: list[str] = field(default_factory=list)
+    protocol: str = "vercel"
+    plan: InMemoryPlanStore = field(default_factory=InMemoryPlanStore)
     sources: int = 0
 
 
-agent = Agent(instructions=INSTRUCTIONS, name="ai-elements-agent", deps_type=RunState)
+notes = MCPToolset(MCP_URL, id="notes").approval_required(lambda ctx, tool, args: tool.name in MCP_WRITE_TOOLS)
+
+researcher = Agent(
+    name="researcher",
+    description="Searches the AI Elements knowledge base and reports findings with numbered citations.",
+    instructions="Research the task with `search_docs` and report concise findings, citing sources as [n].",
+    deps_type=RunState,
+)
+writer = Agent(
+    name="writer",
+    description="Turns notes or findings into polished prose, release notes or diagrams.",
+    instructions="Write the requested text. Load a skill first when one matches the task.",
+    capabilities=[Skills(SKILLS_DIR)],
+    deps_type=RunState,
+)
+
+agent = Agent(
+    instructions=INSTRUCTIONS,
+    # Tools that need approval end the run with DeferredToolRequests; the UI adapters turn
+    # them into an AG-UI interrupt / AI SDK 6 tool-approval-request.
+    output_type=[str, DeferredToolRequests],
+    name="ai-elements-agent",
+    deps_type=RunState,
+    toolsets=[notes],
+    capabilities=[
+        Planning(store_resolver=lambda ctx: ctx.deps.plan),
+        SubAgents(agents=[SubAgent(researcher), SubAgent(writer)]),
+        Skills(SKILLS_DIR),
+    ],
+)
 
 
 @agent.tool_plain
@@ -113,36 +169,31 @@ def calculate(expression: str) -> str:
         return f"error: {exc}"
 
 
-def _plan_chunk(state: RunState, completed: int) -> DataChunk:
-    steps = [
-        {"label": label, "status": "complete" if i < completed else "active" if i == completed else "pending"}
-        for i, label in enumerate(state.plan_steps)
-    ]
-    return DataChunk(
-        type="data-plan",
-        id="plan",
-        data={
-            "title": state.plan_title,
-            "description": f"{min(completed, len(steps))}/{len(steps)} steps done",
-            "streaming": completed < len(steps),
-            "steps": steps,
-        },
-    )
+# --- Plan → UI -----------------------------------------------------------------
+# `Planning` emits typed capability events; the UI adapters don't forward those by
+# default, so re-emit the whole plan in each protocol's native channel: an AI SDK
+# `data-plan` part (the AI Elements <Plan> shape) or an AG-UI STATE_SNAPSHOT.
+
+_STATUS = {"pending": "pending", "in_progress": "active", "completed": "complete", "cancelled": "complete", "blocked": "pending"}
 
 
-@agent.tool
-def make_plan(ctx: RunContext[RunState], title: str, steps: list[str]) -> ToolReturn:
-    """Show the user a short plan (3-6 steps) before doing multi-step work."""
-    ctx.deps.plan_title, ctx.deps.plan_steps = title, steps
-    return ToolReturn(return_value=f"Plan shown with {len(steps)} steps.", metadata=[_plan_chunk(ctx.deps, 0)])
+@dataclass(kw_only=True)
+class PlanSnapshot(CustomEvent, name="plan"):
+    protocol: str
+    items: list
+
+    def to_payload(self):
+        steps = [{"label": i.active_form if i.status == "in_progress" and i.active_form else i.content, "status": _STATUS.get(i.status, "pending")} for i in self.items]
+        done = sum(i.status in ("completed", "cancelled") for i in self.items)
+        plan = {"title": "Plan", "description": f"{done}/{len(steps)} steps done", "streaming": done < len(steps), "steps": steps}
+        if self.protocol == "agui":
+            return StateSnapshotEvent(snapshot={"plan": plan})
+        return DataChunk(type="data-plan", id="plan", data=plan)
 
 
-@agent.tool
-def update_plan(ctx: RunContext[RunState], completed_steps: int) -> ToolReturn:
-    """Mark the first `completed_steps` steps of the current plan as done."""
-    if not ctx.deps.plan_steps:
-        return ToolReturn(return_value="No plan yet; call make_plan first.")
-    return ToolReturn(return_value="Plan updated.", metadata=[_plan_chunk(ctx.deps, completed_steps)])
+@agent.on_event(PlanCreatedEvent, PlanUpdatedEvent, PlanStatusChangedEvent, PlanCompletedEvent, PlanDeletedEvent)
+async def mirror_plan(ctx: RunContext[RunState], event) -> None:
+    await ctx.emit(PlanSnapshot(protocol=ctx.deps.protocol, items=await ctx.deps.plan.get_items()))
 
 
 # A tiny local knowledge base, so citations work offline and deterministically.
@@ -168,7 +219,6 @@ DOCS = [
 ]
 
 
-@agent.tool
 def search_docs(ctx: RunContext[RunState], query: str) -> ToolReturn:
     """Search documentation about AI Elements, AI SDK, Material 3, Mermaid, KaTeX, PydanticAI and AG-UI.
     Results are numbered; cite them inline as [n]."""
@@ -181,6 +231,10 @@ def search_docs(ctx: RunContext[RunState], query: str) -> ToolReturn:
         lines.append(f"[{n}] {title}: {text}")
         chunks.append(SourceUrlChunk(source_id=f"src-{n}", url=url, title=title))
     return ToolReturn(return_value="\n".join(lines), metadata=chunks)
+
+
+agent.tool(search_docs)
+researcher.tool(search_docs)
 
 
 # --- Offline "demo" model -------------------------------------------------------
@@ -221,26 +275,66 @@ controller.send("Hello")
 """
 
 
+# Keyword → the harness tool the scripted model calls first, so every capability can be
+# exercised end to end (and recorded as protocol fixtures) without an LLM.
+_DEMO_SCRIPTS = [
+    ("delegate", "delegate_task", {"agent_name": "researcher", "task": "Explain the AG-UI protocol in two sentences."}),
+    ("plan", "write_plan", {"items": [
+        {"content": "Read the question", "active_form": "Reading the question", "status": "completed"},
+        {"content": "Look up the docs", "active_form": "Looking up the docs", "status": "in_progress"},
+        {"content": "Write the answer", "active_form": "Writing the answer", "status": "pending"},
+    ]}),
+    ("skill", "load_capability", {"id": "mermaid-diagrams"}),
+    ("note", "save_note", {"title": "Demo", "content": "Saved from the scripted demo model."}),
+    # A frontend tool the client advertises (AG-UI `tools`), executed on the device.
+    ("device", "get_device_info", {}),
+]
+
+
+def _user_prompt(messages: list[ModelMessage]) -> str:
+    for message in messages:
+        for part in getattr(message, "parts", []):
+            if type(part).__name__ == "UserPromptPart" and isinstance(part.content, str):
+                return part.content.lower()
+    return ""
+
+
+def _demo_call(messages: list[ModelMessage], info: AgentInfo) -> ToolCallPart | None:
+    """The scripted model's one tool call: a keyword-selected harness tool, else the clock or docs search."""
+    # One tool call per user turn: stop once a result came back after the latest prompt.
+    last_prompt = max((i for i, m in enumerate(messages) if any(type(p).__name__ == "UserPromptPart" for p in getattr(m, "parts", []))), default=0)
+    if any(isinstance(p, (ToolReturnPart, RetryPromptPart)) for m in messages[last_prompt:] for p in getattr(m, "parts", [])):
+        return None
+    names = {t.name for t in info.function_tools}
+    prompt = _user_prompt(messages)
+    for keyword, tool, args in _DEMO_SCRIPTS:
+        if keyword in prompt and tool in names:
+            return ToolCallPart(tool, args)
+    if "get_current_time" in names:
+        return ToolCallPart("get_current_time", {"timezone": "Asia/Shanghai"})
+    if "search_docs" in names:
+        return ToolCallPart("search_docs", {"query": "AG-UI protocol"})
+    return None
+
+
 async def _demo_stream(messages: list[ModelMessage], info: AgentInfo) -> AsyncIterator[str | dict[int, DeltaToolCall]]:
-    last = messages[-1]
-    tool_result = next(
-        (p.content for p in getattr(last, "parts", []) if isinstance(p, ToolReturnPart)),
-        None,
-    )
-    if tool_result is None:
-        yield {0: DeltaToolCall(name="get_current_time", json_args='{"timezone": "Asia/Shanghai"}')}
+    call = _demo_call(messages, info)
+    if call is not None:
+        yield {0: DeltaToolCall(name=call.tool_name, json_args=call.args_as_json_str())}
         return
-    text = DEMO_ANSWER.replace("{time}", str(tool_result))
+    tool_result = next((p.content for p in getattr(messages[-1], "parts", []) if isinstance(p, ToolReturnPart)), "no tool")
+    text = DEMO_ANSWER.replace("{time}", str(tool_result).splitlines()[0][:80])
     for i in range(0, len(text), 12):
         await asyncio.sleep(0.02)
         yield text[i : i + 12]
 
 
 def _demo_sync(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
-    last = messages[-1]
-    if not any(isinstance(p, ToolReturnPart) for p in getattr(last, "parts", [])):
-        return ModelResponse(parts=[ToolCallPart("get_current_time", {"timezone": "Asia/Shanghai"})])
-    return ModelResponse(parts=[TextPart("done")])
+    call = _demo_call(messages, info)
+    if call is not None:
+        return ModelResponse(parts=[call])
+    result = next((p.content for m in reversed(messages) for p in getattr(m, "parts", []) if isinstance(p, ToolReturnPart)), None)
+    return ModelResponse(parts=[TextPart(f"AG-UI streams agent events to user interfaces. (Scripted answer; the tool said: {str(result)[:120]})")])
 
 
 def resolve_model(name: str) -> Model:
@@ -252,26 +346,41 @@ def resolve_model(name: str) -> Model:
 
 # --- HTTP ---------------------------------------------------------------------
 
-app = FastAPI(title="AI Elements agent server")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with mcp.session_manager.run():
+        yield
+
+
+app = FastAPI(title="AI Elements agent server", lifespan=lifespan)
+
+# MCP (Streamable HTTP) at /mcp. DNS-rebinding protection is off because the demo is
+# reached through the emulator alias / LAN IP; keep it on for anything public.
+mcp_app = mcp.streamable_http_app(
+    streamable_http_path="/mcp",
+    transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False),
+)
+app.router.routes.extend(mcp_app.routes)
+
+# A2A: agent card at /.well-known/agent-card.json, JSON-RPC at /a2a.
+app.router.routes.extend(a2a_routes(researcher, lambda: resolve_model(DEFAULT_MODEL), PUBLIC_URL, deps=RunState))
 
 
 @app.post("/api/chat")
 async def chat(request: Request) -> Response:
     model_name = request.query_params.get("model") or DEFAULT_MODEL
-    state = RunState()
 
     async def on_complete(result):
-        # Models often forget update_plan; a finished run means the plan is done.
-        if state.plan_steps:
-            yield _plan_chunk(state, len(state.plan_steps))
         u = result.usage
         yield MessageMetadataChunk(message_metadata={"usage": {"inputTokens": u.input_tokens, "outputTokens": u.output_tokens}})
 
     return await VercelAIAdapter.dispatch_request(
         request,
         agent=agent,
-        deps=state,
+        deps=RunState(protocol="vercel"),
         model=resolve_model(model_name),
+        sdk_version=6,  # AI SDK 6: tool approval (human in the loop)
         allow_uploaded_files=True,  # image attachments arrive as data: URLs
         on_complete=on_complete,
     )
@@ -280,13 +389,7 @@ async def chat(request: Request) -> Response:
 @app.post("/api/agui")
 async def agui(request: Request) -> Response:
     model_name = request.query_params.get("model") or DEFAULT_MODEL
-    async def usage(result):
-        u = result.usage
-        yield CustomEvent(name="usage", value={"inputTokens": u.input_tokens, "outputTokens": u.output_tokens})
-
-    return await AGUIAdapter.dispatch_request(
-        request, agent=agent, deps=RunState(), model=resolve_model(model_name), on_complete=usage
-    )
+    return await AGUIAdapter.dispatch_request(request, agent=agent, deps=RunState(protocol="agui"), model=resolve_model(model_name))
 
 
 @app.get("/health")
@@ -296,6 +399,7 @@ async def health() -> dict:
         "default_model": DEFAULT_MODEL,
         "upstream": BASE_URL,
         "has_key": bool(API_KEY),
-        "tools": ["get_current_time", "calculate", "search_docs", "make_plan", "update_plan"],
+        "capabilities": ["Planning", "SubAgents(researcher, writer)", "Skills", "MCP(notes)"],
+        "mcp": "/mcp",
+        "a2a": "/.well-known/agent-card.json",
     }
-

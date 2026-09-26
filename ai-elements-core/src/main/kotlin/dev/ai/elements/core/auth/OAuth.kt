@@ -81,6 +81,8 @@ data class AuthorizationCodeFlow(
     val clientSecret: String? = null,
     /** Extra query parameters some servers require on the authorize URL. */
     val extraAuthorizeParams: Map<String, String> = emptyMap(),
+    /** Extra form parameters on the token request (e.g. the RFC 8707 `resource` indicator). */
+    val extraTokenParams: Map<String, String> = emptyMap(),
     /** Send a `nonce` (OpenID Connect servers that require one). */
     val nonce: Boolean = false,
     /** Also send the `code_challenge` pair on exchange (a few servers insist). */

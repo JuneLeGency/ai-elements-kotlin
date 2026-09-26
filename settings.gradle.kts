@@ -25,4 +25,5 @@ rootProject.name = "ai-elements-kotlin"
 include(":ai-elements-core")
 include(":ai-elements-ui")
 include(":ai-elements-mermaid-native")
+include(":ai-elements-a2a")
 include(":demo")

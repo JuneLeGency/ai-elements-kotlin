@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping! A few conventions keep the library consistent:
+Thanks for helping! Read [AGENTS.md](AGENTS.md) first (open protocols only, no private wire formats). A few conventions keep the library consistent:
 
 - **Build & test** before a PR: `./gradlew testDebugUnitTest lintDebug` and, with an emulator,
   `./gradlew :demo:connectedDebugAndroidTest`.
