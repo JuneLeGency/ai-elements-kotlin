@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +47,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import dev.ai.elements.ui.theme.isDark
+import kotlinx.coroutines.delay
 import kotlinx.serialization.json.JsonPrimitive
 
 /**
@@ -133,28 +135,12 @@ fun MermaidDiagram(
     }
 }
 
-private sealed interface RenderState {
-    data object Loading : RenderState
-    data class Rendered(val heightDp: Float) : RenderState
-    data class Failed(val message: String) : RenderState
-}
-
-/** Last measured heights, so recycled list items don't jump while re-rendering. */
-private val heightCache = object : LinkedHashMap<String, Float>(32, 0.75f, true) {
-    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Float>?) = size > 64
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@SuppressLint("SetJavaScriptEnabled")
 @Composable
 private fun MermaidWebView(code: String, fitWidth: Boolean, modifier: Modifier, onClick: (() -> Unit)? = null) {
     val dark = MaterialTheme.isDark
     val colors = MaterialTheme.colorScheme
-    val cacheKey = "$dark|$code"
-    var state by remember(cacheKey) {
-        mutableStateOf<RenderState>(heightCache[cacheKey]?.let { RenderState.Rendered(it) } ?: RenderState.Loading)
-    }
-    val html = remember(cacheKey, fitWidth) {
+    val cacheKey = "mermaid|$dark|$fitWidth|$code"
+    val html = remember(cacheKey) {
         buildHtml(
             code = code,
             dark = dark,
@@ -181,73 +167,25 @@ private fun MermaidWebView(code: String, fitWidth: Boolean, modifier: Modifier, 
             ),
         )
     }
-
-    val failed = state as? RenderState.Failed
-    if (failed != null) {
+    AutoHeightWebView(
+        html = html,
+        cacheKey = cacheKey,
+        fitWidth = fitWidth,
+        modifier = modifier,
+        onClick = onClick,
+        onClickLabel = "Open diagram",
+    ) { message ->
         Column(modifier) {
             Text(
-                "Diagram error: ${failed.message.take(160)}",
+                "Diagram error: ${message.take(160)}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(horizontal = 8.dp),
             )
             CodeBlock(code, "mermaid")
         }
-        return
-    }
-
-    val rendered = state as? RenderState.Rendered
-    Box(
-        modifier = if (fitWidth) modifier.height((rendered?.heightDp ?: 160f).dp) else modifier,
-        contentAlignment = Alignment.Center,
-    ) {
-        AndroidView(
-            factory = { context ->
-                WebView(context).apply {
-                    layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-                    setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                    settings.javaScriptEnabled = true
-                    settings.setSupportZoom(!fitWidth)
-                    settings.builtInZoomControls = !fitWidth
-                    settings.displayZoomControls = false
-                    isVerticalScrollBarEnabled = !fitWidth
-                    isHorizontalScrollBarEnabled = !fitWidth
-                    val main = Handler(Looper.getMainLooper())
-                    addJavascriptInterface(
-                        object {
-                            @JavascriptInterface
-                            fun onRendered(height: Float) = main.post {
-                                heightCache[cacheKey] = height
-                                state = RenderState.Rendered(height)
-                            }.let { }
-
-                            @JavascriptInterface
-                            fun onError(message: String) = main.post { state = RenderState.Failed(message) }.let { }
-                        },
-                        "Bridge",
-                    )
-                    tag = html
-                    loadDataWithBaseURL(ASSET_BASE, html, "text/html", "utf-8", null)
-                }
-            },
-            update = { view ->
-                if (view.tag != html) {
-                    view.tag = html
-                    view.loadDataWithBaseURL(ASSET_BASE, html, "text/html", "utf-8", null)
-                }
-            },
-            modifier = Modifier.fillMaxSize(),
-        )
-        if (rendered == null) LoadingIndicator(Modifier.size(40.dp))
-        if (onClick != null) {
-            // Inline diagrams sit in a scrolling list: a transparent layer on top
-            // takes taps (open viewer) and leaves drags to the list.
-            Box(Modifier.matchParentSize().clickable(onClickLabel = "Open diagram", onClick = onClick))
-        }
     }
 }
-
-private const val ASSET_BASE = "file:///android_asset/ai-elements/"
 
 private fun Color.hex() = "#%06X".format(toArgb() and 0xFFFFFF)
 
@@ -267,7 +205,9 @@ private fun buildHtml(code: String, dark: Boolean, fitWidth: Boolean, vars: Map<
              ${if (fitWidth) "" else "min-height:100%;padding:64px 12px 12px;"}}
           #c svg{$svgCss}
         </style>
+        $ERROR_BRIDGE_JS
         <script src="mermaid.min.js"></script>
+        <script>$REPORT_HEIGHT_JS</script>
         </head><body><div id="c"></div>
         <script>
           (async function () {
@@ -280,16 +220,7 @@ private fun buildHtml(code: String, dark: Boolean, fitWidth: Boolean, vars: Map<
               const { svg } = await mermaid.render('d' + Date.now(), $source);
               const c = document.getElementById('c');
               c.innerHTML = svg;
-              // Report the height whenever layout settles; the WebView may
-              // start at width 0 inside lazy layouts, so keep observing.
-              var last = -1;
-              var report = function () {
-                var r = c.getBoundingClientRect();
-                var h = Math.ceil(r.height) + 4;
-                if (r.width > 0 && h > 8 && h !== last) { last = h; Bridge.onRendered(h); }
-              };
-              new ResizeObserver(report).observe(c);
-              requestAnimationFrame(report);
+              aiReportHeight(c);
             } catch (e) {
               Bridge.onError(String((e && e.message) || e));
             }

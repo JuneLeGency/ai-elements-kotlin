@@ -21,6 +21,9 @@ interface AgentTool {
     val description: String
     val parameters: JsonObject
 
+    /** Ask the user before running (rendered as a Confirmation). */
+    val requiresApproval: Boolean get() = false
+
     /** Run the tool. Throwing reports a tool error back to the model. */
     suspend fun execute(arguments: JsonObject): String
 }

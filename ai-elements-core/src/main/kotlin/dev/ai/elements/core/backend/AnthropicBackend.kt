@@ -3,6 +3,7 @@ package dev.ai.elements.core.backend
 import dev.ai.elements.core.ChatBackend
 import dev.ai.elements.core.ChatBackendException
 import dev.ai.elements.core.ChatEvent
+import dev.ai.elements.core.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
@@ -14,13 +15,12 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.putJsonObject
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import okhttp3.OkHttpClient
 import java.util.UUID
@@ -39,6 +39,7 @@ class AnthropicBackend(
     private val apiKey: String,
     private val systemPrompt: String = "",
     private val tools: List<AgentTool> = emptyList(),
+    private val approver: ToolApprover = ToolApprover.AlwaysApprove,
     private val maxTokens: Int = 8192,
     private val maxSteps: Int = 8,
     private val client: OkHttpClient = DefaultHttpClient,
@@ -52,12 +53,10 @@ class AnthropicBackend(
     }
 
     override fun stream(history: List<Message>): Flow<ChatEvent> = flow {
-        val messages = history.mapNotNull { m ->
-            val text = m.text
-            if (text.isBlank()) null
-            else buildJsonObject {
+        val messages = history.filter { it.hasContent }.map { m ->
+            buildJsonObject {
                 put("role", if (m.role == Role.USER) "user" else "assistant")
-                put("content", text)
+                put("content", m.anthropicContent())
             }
         }.toMutableList<JsonElement>()
 
@@ -73,7 +72,7 @@ class AnthropicBackend(
                 put("content", buildJsonArray { blocks.forEach { add(it.toContent()) } })
             }
             val results = toolUses.map { block ->
-                block to runTool(tools, block.id, block.name, block.text.toString())
+                block to runTool(tools, approver, block.id, block.name, block.text.toString())
             }
             messages += buildJsonObject {
                 put("role", "user")
@@ -113,8 +112,14 @@ class AnthropicBackend(
 
         client.sse(jsonPost(baseUrl.trimEnd('/') + "/v1/messages", body, headers)).collect { sse ->
             val data = runCatching { BackendJson.parseToJsonElement(sse.data).jsonObject }.getOrNull() ?: return@collect
-            val index = data["index"]?.jsonPrimitive?.int ?: -1
+            val index = data.int("index") ?: -1
             when (data.str("type")) {
+                "message_start" -> data.obj("message")?.obj("usage")?.int("input_tokens")?.let {
+                    if (it > 0) emit(ChatEvent.Usage(it, 0))
+                }
+                "message_delta" -> data.obj("usage")?.let { usage ->
+                    emit(ChatEvent.Usage(0, usage.int("output_tokens") ?: 0))
+                }
                 "content_block_start" -> {
                     val cb = data["content_block"]?.jsonObject ?: return@collect
                     val block = Block(cb.str("type").orEmpty(), cb.str("id").orEmpty(), cb.str("name").orEmpty(), cb)
@@ -170,5 +175,27 @@ class AnthropicBackend(
         }
     }
 
-    private fun JsonObject.str(key: String) = runCatching { this[key]?.jsonPrimitive?.contentOrNull }.getOrNull()
+    /** String content, or content blocks with base64 / URL image sources. */
+    private fun Message.anthropicContent(): JsonElement {
+        if (images.isEmpty()) return JsonPrimitive(text)
+        return buildJsonArray {
+            images.forEach { image ->
+                addJsonObject {
+                    put("type", "image")
+                    putJsonObject("source") {
+                        val data = image.base64Data
+                        if (data != null) {
+                            put("type", "base64")
+                            put("media_type", image.mediaType)
+                            put("data", data)
+                        } else {
+                            put("type", "url")
+                            put("url", image.url)
+                        }
+                    }
+                }
+            }
+            if (text.isNotBlank()) addJsonObject { put("type", "text"); put("text", text) }
+        }
+    }
 }

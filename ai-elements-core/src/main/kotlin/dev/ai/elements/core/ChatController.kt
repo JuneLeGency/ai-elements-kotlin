@@ -1,10 +1,12 @@
 package dev.ai.elements.core
 
 import dev.ai.elements.core.model.ChatStatus
+import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.TextPart
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 /** Immutable snapshot rendered by the UI. */
 data class ChatState(
@@ -28,12 +31,14 @@ data class ChatState(
  * the AI SDK `useChat()` hook.
  *
  * @param backend resolved on every turn, so switching provider/model applies to
- *   the next message without losing the conversation.
+ *   the next message without losing the conversation. It receives the
+ *   controller's [ToolApprover], which surfaces approval requests in the UI
+ *   until [respondToApproval] is called.
  * @param scope where turns run; collection happens on this scope's dispatcher
  *   (backends move their own I/O off the main thread).
  */
 class ChatController(
-    private val backend: () -> ChatBackend,
+    private val backend: (ToolApprover) -> ChatBackend,
     private val scope: CoroutineScope,
     initialMessages: List<Message> = emptyList(),
     private val clock: () -> Long = System::currentTimeMillis,
@@ -43,14 +48,32 @@ class ChatController(
     val state: StateFlow<ChatState> = _state.asStateFlow()
 
     private var job: Job? = null
+    private val pendingApprovals = ConcurrentHashMap<String, CompletableDeferred<Boolean>>()
+    private val approver = ToolApprover { id ->
+        val decision = pendingApprovals.getOrPut(id) { CompletableDeferred() }
+        try {
+            decision.await()
+        } finally {
+            pendingApprovals.remove(id)
+        }
+    }
 
-    /** Append a user message and stream the reply. Returns false when busy or blank. */
-    fun send(text: String): Boolean {
+    /**
+     * Append a user message (text and/or [attachments]) and stream the reply.
+     * Returns false when busy or empty.
+     */
+    fun send(text: String, attachments: List<FilePart> = emptyList()): Boolean {
         val prompt = text.trim()
-        if (prompt.isEmpty() || _state.value.isBusy) return false
-        val user = Message(newId(), Role.USER, listOf(TextPart(newId(), prompt)), clock())
+        if ((prompt.isEmpty() && attachments.isEmpty()) || _state.value.isBusy) return false
+        val parts = attachments + listOfNotNull(prompt.takeIf { it.isNotEmpty() }?.let { TextPart(newId(), it) })
+        val user = Message(newId(), Role.USER, parts, clock())
         run(_state.value.messages + user)
         return true
+    }
+
+    /** Answer a tool approval request (AI Elements `<Confirmation>`). */
+    fun respondToApproval(toolCallId: String, approved: Boolean) {
+        pendingApprovals.getOrPut(toolCallId) { CompletableDeferred() }.complete(approved)
     }
 
     /** Drop the last assistant reply (if any) and ask again. */
@@ -66,6 +89,8 @@ class ChatController(
         val running = job ?: return
         job = null
         running.cancel()
+        pendingApprovals.values.forEach { it.cancel() }
+        pendingApprovals.clear()
         _state.update { st ->
             st.copy(messages = st.messages.finishLastAssistant(), status = ChatStatus.READY)
         }
@@ -88,7 +113,7 @@ class ChatController(
 
         job = scope.launch {
             try {
-                backend().stream(history).collect { event ->
+                backend(approver).stream(history).collect { event ->
                     if (event is ChatEvent.Error) {
                         inBandError = event.message
                         return@collect
@@ -111,10 +136,11 @@ class ChatController(
         job = null
         val finished = assistant.finishStreaming(clock())
         val messages = if (finished.parts.isEmpty()) history else history + finished
+        val failure = error ?: "The provider returned an empty response.".takeIf { finished.parts.isEmpty() }
         _state.value = ChatState(
             messages = messages,
-            status = if (error == null) ChatStatus.READY else ChatStatus.ERROR,
-            error = error,
+            status = if (failure == null) ChatStatus.READY else ChatStatus.ERROR,
+            error = failure,
         )
     }
 

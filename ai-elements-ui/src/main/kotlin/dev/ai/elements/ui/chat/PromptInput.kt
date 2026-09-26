@@ -13,6 +13,8 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,10 +29,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AddPhotoAlternate
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.Stop
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -47,14 +52,18 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import dev.ai.elements.core.model.FilePart
 
 /**
  * The composer (AI Elements `<PromptInput>`): a roomy rounded field with a
  * toolbar row. The submit button morphs into a spinning cookie-shaped stop
  * button while a reply is streaming.
  *
+ * @param attachments pending files shown above the field (removable).
+ * @param onAddAttachment shows an add button when non-null.
  * @param toolbar extra controls on the left of the toolbar (e.g. a model chip).
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PromptInput(
     value: String,
@@ -64,15 +73,19 @@ fun PromptInput(
     busy: Boolean,
     modifier: Modifier = Modifier,
     placeholder: String = "Ask anything",
+    attachments: List<FilePart> = emptyList(),
+    onAddAttachment: (() -> Unit)? = null,
+    onRemoveAttachment: (FilePart) -> Unit = {},
     toolbar: @Composable RowScope.() -> Unit = {},
 ) {
-    val canSend = value.isNotBlank() && !busy
+    val canSend = (value.isNotBlank() || attachments.isNotEmpty()) && !busy
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         shape = RoundedCornerShape(28.dp),
         modifier = modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(start = 20.dp, end = 8.dp, top = 16.dp, bottom = 8.dp)) {
+            AttachmentStrip(attachments, onRemoveAttachment, Modifier.padding(end = 12.dp, bottom = 12.dp))
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
@@ -95,8 +108,22 @@ fun PromptInput(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             ) {
-                toolbar()
-                Box(Modifier.weight(1f))
+                // Toolbar takes the remaining width and scrolls, so large font scales
+                // can never push the submit button off screen.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+                ) {
+                    if (onAddAttachment != null) {
+                        IconButton(
+                            onClick = onAddAttachment,
+                            shapes = IconButtonDefaults.shapes(),
+                            modifier = Modifier.size(36.dp).testTag("add-attachment"),
+                        ) { Icon(Icons.Outlined.AddPhotoAlternate, "Attach image") }
+                    }
+                    toolbar()
+                }
                 SubmitButton(busy = busy, enabled = canSend || busy, onClick = if (busy) onStop else onSubmit)
             }
         }

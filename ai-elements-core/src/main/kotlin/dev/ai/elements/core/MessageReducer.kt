@@ -1,5 +1,6 @@
 package dev.ai.elements.core
 
+import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Part
 import dev.ai.elements.core.model.ReasoningPart
@@ -7,6 +8,7 @@ import dev.ai.elements.core.model.SourcePart
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
+import dev.ai.elements.core.model.Usage
 
 /**
  * Folds one [ChatEvent] into the assistant [Message]. Pure, so it is trivially
@@ -46,6 +48,14 @@ fun Message.reduce(event: ChatEvent, now: Long): Message = when (event) {
         it.copy(state = ToolState.OUTPUT_ERROR, errorText = event.error)
     }
 
+    is ChatEvent.ToolApprovalRequest -> updateExisting<ToolPart>(event.id) { it.copy(state = ToolState.APPROVAL_REQUESTED) }
+
+    is ChatEvent.ToolDenied -> updateExisting<ToolPart>(event.id) { it.copy(state = ToolState.OUTPUT_DENIED) }
+
+    is ChatEvent.File -> upsert<FilePart>(event.id, { FilePart(event.id, event.mediaType, event.url) }) { it }
+
+    is ChatEvent.Usage -> copy(usage = (usage ?: Usage()) + Usage(event.inputTokens, event.outputTokens))
+
     is ChatEvent.SourceUrl ->
         if (parts.any { it is SourcePart && it.url == event.url }) this
         else copy(parts = parts + SourcePart(event.id, event.url, event.title))
@@ -60,7 +70,7 @@ fun Message.finishStreaming(now: Long): Message = copy(
             is TextPart -> if (part.isStreaming) part.copy(isStreaming = false) else part
             is ReasoningPart -> if (part.isStreaming) part.finish(now) else part
             is ToolPart -> if (part.isStreaming) part.copy(state = ToolState.OUTPUT_ERROR, errorText = part.errorText ?: "Interrupted") else part
-            is SourcePart -> part
+            is SourcePart, is FilePart -> part
         }
     },
 )

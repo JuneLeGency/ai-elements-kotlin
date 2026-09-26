@@ -64,6 +64,7 @@ fun Conversation(
     onRegenerate: () -> Unit = {},
     onRetry: () -> Unit = onRegenerate,
     onDismissError: () -> Unit = {},
+    onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
     val messages = state.messages.asReversed()
@@ -103,6 +104,7 @@ fun Conversation(
                 MessageItem(
                     message = message,
                     onRegenerate = if (message.id == lastAssistantId && !state.isBusy) onRegenerate else null,
+                    onToolApproval = onToolApproval,
                     modifier = Modifier.widthIn(max = maxContentWidth).fillMaxWidth().animateItem(),
                 )
             }

@@ -24,7 +24,9 @@ import org.intellij.markdown.MarkdownTokenTypes
  *
  * - fenced code gets syntax highlighting and a copy action ([CodeBlock]);
  * - ```` ```mermaid ```` fences render as diagrams ([MermaidDiagram]) once the
- *   fence is closed, so half-streamed diagrams never flash parse errors.
+ *   fence is closed, so half-streamed diagrams never flash parse errors;
+ * - LaTeX: `$$…$$` / `\[…\]` render with KaTeX ([MathBlock]), inline `$…$`
+ *   becomes Unicode math (see [LatexPreprocessor]).
  *
  * Safe to call with a growing string while streaming: the previous render is
  * kept on screen while the new text is parsed.
@@ -42,10 +44,10 @@ fun MarkdownContent(
             codeFence = { model ->
                 val closed = model.node.children.lastOrNull()?.type == MarkdownTokenTypes.CODE_FENCE_END
                 MarkdownCodeFence(model.content, model.node, model.typography.code) { source, language, _ ->
-                    if (language.equals("mermaid", ignoreCase = true)) {
-                        MermaidDiagram(source, complete = closed)
-                    } else {
-                        CodeBlock(source, language)
+                    when {
+                        language.equals("mermaid", ignoreCase = true) -> MermaidDiagram(source, complete = closed)
+                        language.equals("math", ignoreCase = true) && closed -> MathBlock(source)
+                        else -> CodeBlock(source, language)
                     }
                 }
             },
@@ -57,8 +59,9 @@ fun MarkdownContent(
             checkbox = { MarkdownCheckBox(it.content, it.node, it.typography.text) },
         )
     }
+    val content = remember(markdown) { LatexPreprocessor.process(markdown) }
     Markdown(
-        content = markdown,
+        content = content,
         colors = markdownColor(
             text = scheme.onSurface,
             codeBackground = scheme.surfaceContainerHighest,

@@ -23,7 +23,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Computer
 import androidx.compose.material.icons.outlined.CloudQueue
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.ErrorOutline
@@ -32,6 +34,7 @@ import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.OfflineBolt
 import androidx.compose.material.icons.outlined.PhoneAndroid
+import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
@@ -201,10 +204,13 @@ private fun SettingsList(
                                             name = "Custom ${kind.label}",
                                             kind = kind,
                                             baseUrl = when (kind) {
-                                                ProviderKind.AGENT_SERVER -> "http://10.0.2.2:8788"
+                                                ProviderKind.AGENT_SERVER, ProviderKind.AG_UI -> "http://10.0.2.2:8788"
                                                 ProviderKind.ANTHROPIC -> "https://api.anthropic.com"
-                                                else -> "http://10.0.2.2:8317/v1"
+                                                ProviderKind.GEMINI -> "https://generativelanguage.googleapis.com"
+                                                ProviderKind.OLLAMA -> "http://10.0.2.2:11434"
+                                                else -> "http://10.0.2.2:11434/v1"
                                             },
+                                            model = if (kind.serverSideAgent) "" else "qwen3:4b",
                                         )
                                         viewModel.providers.upsert(profile)
                                         onEdit(profile.id)
@@ -322,7 +328,7 @@ private fun ProviderEditor(viewModel: ChatViewModel, profile: ProviderProfile, s
                         value = draft.model,
                         onValueChange = { draft = draft.copy(model = it.trim()) },
                         label = { Text("Model") },
-                        placeholder = { if (draft.kind == ProviderKind.AGENT_SERVER) Text("server default") },
+                        placeholder = { if (draft.kind.serverSideAgent) Text("server default") },
                         singleLine = true,
                         trailingIcon = {
                             if (testResult?.getOrNull()?.isNotEmpty() == true) {
@@ -354,11 +360,11 @@ private fun ProviderEditor(viewModel: ChatViewModel, profile: ProviderProfile, s
                     modifier = Modifier.fillMaxWidth().testTag("provider-api-key"),
                 )
             }
-            if (draft.kind == ProviderKind.OPENAI || draft.kind == ProviderKind.ANTHROPIC) {
+            if (draft.kind != ProviderKind.MOCK && !draft.kind.serverSideAgent) {
                 ListItem(
                     checked = draft.useTools,
                     onCheckedChange = { draft = draft.copy(useTools = it) },
-                    supportingContent = { Text("Let the agent call get_current_time and calculate") },
+                    supportingContent = { Text("get_current_time, calculate, copy_to_clipboard (asks first)") },
                     trailingContent = { Switch(checked = draft.useTools, onCheckedChange = null) },
                 ) { Text("On-device tools") }
                 OutlinedTextField(
@@ -441,14 +447,21 @@ private val ProviderKind.icon: ImageVector
     get() = when (this) {
         ProviderKind.MOCK -> Icons.Outlined.OfflineBolt
         ProviderKind.AGENT_SERVER -> Icons.Outlined.SmartToy
-        ProviderKind.OPENAI -> Icons.Outlined.CloudQueue
-        ProviderKind.ANTHROPIC -> Icons.Outlined.Hub
+        ProviderKind.AG_UI -> Icons.Outlined.Hub
+        ProviderKind.OPENAI, ProviderKind.OPENAI_RESPONSES -> Icons.Outlined.CloudQueue
+        ProviderKind.ANTHROPIC -> Icons.Outlined.Psychology
+        ProviderKind.GEMINI -> Icons.Outlined.AutoAwesome
+        ProviderKind.OLLAMA -> Icons.Outlined.Computer
     }
 
 private val ProviderKind.description: String
     get() = when (this) {
         ProviderKind.MOCK -> "Scripted offline agent: reasoning, a real on-device tool call, Markdown and Mermaid. No network."
-        ProviderKind.AGENT_SERVER -> "A server-side agent (e.g. server/main.py with PydanticAI) streaming the Vercel AI SDK UI Message Stream protocol. Tools run on the server."
+        ProviderKind.AGENT_SERVER -> "A server-side agent (e.g. server/main.py with PydanticAI) at {base}/api/chat, streaming the Vercel AI SDK UI Message Stream (v5) or Data Stream (v4). Tools run on the server."
+        ProviderKind.AG_UI -> "An AG-UI agent at {base}/api/agui (PydanticAI, LangGraph, CrewAI, Mastra…). Tools run on the server."
         ProviderKind.OPENAI -> "Any OpenAI-compatible /chat/completions endpoint. The agent loop and tools run on this device."
+        ProviderKind.OPENAI_RESPONSES -> "OpenAI Responses API (/responses), stateless with encrypted reasoning. The agent loop and tools run on this device."
         ProviderKind.ANTHROPIC -> "Anthropic Messages API (/v1/messages). The agent loop and tools run on this device."
+        ProviderKind.GEMINI -> "Google Gemini native API (streamGenerateContent) with thought summaries. The agent loop and tools run on this device."
+        ProviderKind.OLLAMA -> "Ollama native API (/api/chat) with thinking. The agent loop and tools run on this device."
     }

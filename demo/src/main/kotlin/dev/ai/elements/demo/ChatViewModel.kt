@@ -5,11 +5,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.ai.elements.core.ChatController
 import dev.ai.elements.core.ChatState
+import dev.ai.elements.core.agent.BuiltinTools
 import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.core.config.ProviderStore
+import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.demo.data.AppSettings
 import dev.ai.elements.demo.data.Conversation
 import dev.ai.elements.demo.data.ConversationRepository
+import dev.ai.elements.demo.tools.ClipboardTool
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,8 +31,11 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
     private val repository = ConversationRepository(app)
     val conversations: StateFlow<List<Conversation>> = repository.conversations
 
+    /** Built-in tools plus an app-defined one that needs approval. */
+    private val tools = BuiltinTools + ClipboardTool(app)
+
     private val chat = ChatController(
-        backend = { providers.selected.let { it.createBackend(providers.apiKey(it.id)) } },
+        backend = { approver -> providers.selected.let { it.createBackend(providers.apiKey(it.id), tools, approver) } },
         scope = viewModelScope,
     )
     val chatState: StateFlow<ChatState> = chat.state
@@ -47,7 +53,8 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun send(text: String): Boolean = chat.send(text)
+    fun send(text: String, attachments: List<FilePart> = emptyList()): Boolean = chat.send(text, attachments)
+    fun respondToApproval(toolCallId: String, approved: Boolean) = chat.respondToApproval(toolCallId, approved)
     fun stop() = chat.stop()
     fun regenerate() = chat.regenerate()
     fun dismissError() = chat.dismissError()

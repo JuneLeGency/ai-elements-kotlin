@@ -40,12 +40,14 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.ReasoningPart
 import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.SourcePart
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
+import dev.ai.elements.core.model.Usage
 import dev.ai.elements.ui.markdown.MarkdownContent
 
 /** Renders any [Message]: a bubble for the user, a full-width part list for the assistant. */
@@ -54,29 +56,41 @@ fun MessageItem(
     message: Message,
     modifier: Modifier = Modifier,
     onRegenerate: (() -> Unit)? = null,
+    onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)? = null,
 ) {
     when (message.role) {
         Role.USER -> UserMessage(message, modifier)
-        Role.ASSISTANT -> AssistantMessage(message, modifier, onRegenerate)
+        Role.ASSISTANT -> AssistantMessage(message, modifier, onRegenerate, onToolApproval)
     }
 }
 
 @Composable
 fun UserMessage(message: Message, modifier: Modifier = Modifier) {
+    val files = message.parts.filterIsInstance<FilePart>()
     BoxWithConstraints(modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-        Surface(
-            color = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomEnd = 6.dp, bottomStart = 24.dp),
-            modifier = Modifier.widthIn(max = maxWidth * 0.85f).testTag("user-message"),
-        ) {
-            SelectionContainer {
-                Text(
-                    message.text,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
-                )
-            }
+        val bubbleMax = maxWidth * 0.85f
+        val imageMax = minOf(maxWidth * 0.7f, 320.dp)
+        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            files.forEach { file -> FileAttachment(file, Modifier.widthIn(max = imageMax)) }
+            if (message.text.isNotBlank()) UserBubble(message.text, Modifier.widthIn(max = bubbleMax))
+        }
+    }
+}
+
+@Composable
+private fun UserBubble(text: String, modifier: Modifier) {
+    Surface(
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomEnd = 6.dp, bottomStart = 24.dp),
+        modifier = modifier.testTag("user-message"),
+    ) {
+        SelectionContainer {
+            Text(
+                text,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
+            )
         }
     }
 }
@@ -86,6 +100,7 @@ fun AssistantMessage(
     message: Message,
     modifier: Modifier = Modifier,
     onRegenerate: (() -> Unit)? = null,
+    onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)? = null,
 ) {
     val streaming = message.isStreaming
     Row(modifier.fillMaxWidth().testTag("assistant-message"), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -95,12 +110,13 @@ fun AssistantMessage(
                 when (part) {
                     is TextPart -> if (part.text.isNotBlank()) MarkdownContent(part.text)
                     is ReasoningPart -> Reasoning(part)
-                    is ToolPart -> ToolCall(part)
+                    is ToolPart -> ToolCall(part, onApproval = onToolApproval?.let { cb -> { approved -> cb(part.id, approved) } })
+                    is FilePart -> FileAttachment(part)
                     is SourcePart -> Unit
                 }
             }
             Sources(message.parts.filterIsInstance<SourcePart>())
-            if (!streaming && message.text.isNotBlank()) MessageActions(message.text, onRegenerate)
+            if (!streaming && message.text.isNotBlank()) MessageActions(message.text, message.usage, onRegenerate)
         }
     }
 }
@@ -130,9 +146,9 @@ fun AssistantAvatar(active: Boolean, modifier: Modifier = Modifier) {
 @Suppress("DEPRECATION")
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun MessageActions(text: String, onRegenerate: (() -> Unit)?) {
+private fun MessageActions(text: String, usage: Usage?, onRegenerate: (() -> Unit)?) {
     val clipboard = LocalClipboardManager.current
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
         IconButton(
             onClick = { clipboard.setText(AnnotatedString(text)) },
             shapes = IconButtonDefaults.shapes(),
@@ -145,5 +161,6 @@ private fun MessageActions(text: String, onRegenerate: (() -> Unit)?) {
                 modifier = Modifier.size(36.dp).testTag("regenerate"),
             ) { Icon(Icons.Outlined.Refresh, "Regenerate", Modifier.size(18.dp)) }
         }
+        usage?.takeIf { it.totalTokens > 0 }?.let { ContextUsage(it, Modifier.padding(start = 4.dp)) }
     }
 }

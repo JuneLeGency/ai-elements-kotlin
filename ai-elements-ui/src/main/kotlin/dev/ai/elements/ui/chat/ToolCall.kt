@@ -17,10 +17,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.PanTool
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
@@ -50,11 +52,14 @@ import kotlinx.serialization.json.JsonElement
 
 /**
  * A tool invocation card (AI Elements `<Tool>`): tool name, a status pill, and
- * an expandable section with the JSON input and the output / error.
+ * an expandable section with the JSON input and the output / error. While the
+ * call awaits approval it shows a [Confirmation] with approve / deny actions.
+ *
+ * @param onApproval answers an approval request; null hides the actions.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun ToolCall(part: ToolPart, modifier: Modifier = Modifier) {
+fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolean) -> Unit)? = null) {
     var open by rememberSaveable(part.id) { mutableStateOf(false) }
     val scheme = MaterialTheme.colorScheme
 
@@ -76,7 +81,12 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier) {
                     Icon(Icons.Outlined.Build, null, Modifier.size(18.dp), scheme.onTertiaryContainer)
                 }
                 Column(Modifier.weight(1f)) {
-                    Text(part.name, style = MaterialTheme.typography.titleSmall.copy(fontFamily = FontFamily.Monospace))
+                    Text(
+                        part.name,
+                        style = MaterialTheme.typography.titleSmall.copy(fontFamily = FontFamily.Monospace),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                     Text(
                         text = part.input.compactJson().ifBlank { "…" },
                         style = MaterialTheme.typography.bodySmall,
@@ -93,6 +103,15 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier) {
                     modifier = Modifier.rotate(if (open) 180f else 0f),
                 )
             }
+            if (part.state == ToolState.APPROVAL_REQUESTED) {
+                Confirmation(
+                    title = "Allow ${part.name}?",
+                    description = part.input.compactJson().ifBlank { "No arguments" },
+                    onApprove = onApproval?.let { { it(true) } },
+                    onDeny = onApproval?.let { { it(false) } },
+                    modifier = Modifier.padding(top = 12.dp),
+                )
+            }
             AnimatedVisibility(
                 visible = open,
                 enter = expandVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) + fadeIn(),
@@ -101,6 +120,7 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier) {
                 Column(Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Section("Input", part.input.prettyJson().ifBlank { "{}" })
                     when {
+                        part.state == ToolState.OUTPUT_DENIED -> Section("Output", "Denied by user", scheme.error)
                         part.errorText != null -> Section("Error", part.errorText!!, scheme.error)
                         part.output != null -> Section("Output", part.output!!.prettyJson())
                     }
@@ -117,7 +137,9 @@ private fun StatusPill(state: ToolState) {
     val (label, container, content) = when (state) {
         ToolState.INPUT_STREAMING, ToolState.INPUT_AVAILABLE -> Triple("Running", scheme.secondaryContainer, scheme.onSecondaryContainer)
         ToolState.OUTPUT_AVAILABLE -> Triple("Done", scheme.primaryContainer, scheme.onPrimaryContainer)
+        ToolState.APPROVAL_REQUESTED -> Triple("Approval", scheme.tertiaryContainer, scheme.onTertiaryContainer)
         ToolState.OUTPUT_ERROR -> Triple("Error", scheme.errorContainer, scheme.onErrorContainer)
+        ToolState.OUTPUT_DENIED -> Triple("Denied", scheme.errorContainer, scheme.onErrorContainer)
     }
     Surface(color = container, contentColor = content, shape = MaterialTheme.shapes.extraLarge) {
         Row(
@@ -128,6 +150,8 @@ private fun StatusPill(state: ToolState) {
             when (state) {
                 ToolState.OUTPUT_AVAILABLE -> Icon(Icons.Outlined.CheckCircle, null, Modifier.size(14.dp))
                 ToolState.OUTPUT_ERROR -> Icon(Icons.Outlined.ErrorOutline, null, Modifier.size(14.dp))
+                ToolState.OUTPUT_DENIED -> Icon(Icons.Outlined.Block, null, Modifier.size(14.dp))
+                ToolState.APPROVAL_REQUESTED -> Icon(Icons.Outlined.PanTool, null, Modifier.size(14.dp))
                 else -> LoadingIndicator(Modifier.size(16.dp), color = content)
             }
             Text(label, style = MaterialTheme.typography.labelMedium)

@@ -35,4 +35,6 @@ dependencies {
     implementation(libs.highlights)
 
     debugImplementation(libs.compose.ui.tooling)
+
+    testImplementation(libs.junit)
 }

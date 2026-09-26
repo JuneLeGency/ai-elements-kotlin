@@ -53,9 +53,11 @@ fun DemoApp(viewModel: ChatViewModel) {
     var destination by rememberSaveable { mutableStateOf(Destination.CHAT) }
     // Expose testTags as resource ids for UI Automator / adb-driven checks.
     BoxWithConstraints(Modifier.semantics { testTagsAsResourceId = true }) {
+        // Phones in landscape are wide but short: never give them the three-pane layout.
+        val compactHeight = maxHeight < 480.dp
         val widthClass = when {
             maxWidth < 600.dp -> WidthClass.COMPACT
-            maxWidth < 840.dp -> WidthClass.MEDIUM
+            maxWidth < 840.dp || compactHeight -> WidthClass.MEDIUM
             else -> WidthClass.EXPANDED
         }
         // Phones: a bottom bar, hidden while typing so the composer sits right on the IME.
@@ -82,7 +84,7 @@ fun DemoApp(viewModel: ChatViewModel) {
             val handled = if (bottomBar) WindowInsets.navigationBars.only(WindowInsetsSides.Bottom) else WindowInsets(0)
             Box(Modifier.consumeWindowInsets(handled)) {
                 when (destination) {
-                    Destination.CHAT -> ChatScreen(viewModel, widthClass, onOpenSettings = { destination = Destination.SETTINGS })
+                    Destination.CHAT -> ChatScreen(viewModel, widthClass, compactHeight, onOpenSettings = { destination = Destination.SETTINGS })
                     Destination.COMPONENTS -> GalleryScreen()
                     Destination.SETTINGS -> SettingsScreen(viewModel, widthClass)
                 }

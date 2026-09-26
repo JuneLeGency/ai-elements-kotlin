@@ -63,7 +63,10 @@ fun Suggestions(
     }
 }
 
-/** Empty-conversation hero: a slowly turning expressive shape, a greeting and suggestions. */
+/**
+ * Empty-conversation hero: a slowly turning expressive shape, a greeting and
+ * suggestions. Pass `showHero = false` on short windows (phone landscape).
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ChatEmptyState(
@@ -72,6 +75,7 @@ fun ChatEmptyState(
     suggestions: List<Suggestion>,
     onSelect: (Suggestion) -> Unit,
     modifier: Modifier = Modifier,
+    showHero: Boolean = true,
 ) {
     val scheme = MaterialTheme.colorScheme
     val angle by rememberInfiniteTransition(label = "hero").animateFloat(
@@ -82,7 +86,7 @@ fun ChatEmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Box(contentAlignment = Alignment.Center) {
+        if (showHero) Box(contentAlignment = Alignment.Center) {
             Box(
                 Modifier
                     .size(96.dp)

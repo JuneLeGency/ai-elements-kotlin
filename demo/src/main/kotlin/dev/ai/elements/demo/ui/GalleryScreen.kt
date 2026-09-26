@@ -34,7 +34,23 @@ import dev.ai.elements.core.model.Suggestion
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import dev.ai.elements.core.model.FilePart
+import dev.ai.elements.core.model.Usage
+import dev.ai.elements.ui.chat.Artifact
+import dev.ai.elements.ui.chat.ChainOfThought
+import dev.ai.elements.ui.chat.ContextUsage
+import dev.ai.elements.ui.chat.FileAttachment
 import dev.ai.elements.ui.chat.MessageItem
+import dev.ai.elements.ui.chat.Plan
+import dev.ai.elements.ui.chat.StepStatus
+import dev.ai.elements.ui.chat.Task
+import dev.ai.elements.ui.chat.WebPreview
+import dev.ai.elements.ui.chat.WorkflowStep
 import dev.ai.elements.ui.chat.PromptInput
 import dev.ai.elements.ui.chat.Reasoning
 import dev.ai.elements.ui.chat.Sources
@@ -158,6 +174,76 @@ private val GallerySamples: List<Pair<String, @Composable () -> Unit>> = listOf(
             ToolCall(ToolPart("g-t3", "fetch_url", ToolState.OUTPUT_ERROR, """{"url":"https://x"}""", errorText = "Timed out"))
         }
     },
+    "Confirmation (tool approval)" to {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            ToolCall(
+                ToolPart("g-t4", "copy_to_clipboard", ToolState.APPROVAL_REQUESTED, """{"text":"Hello"}"""),
+                onApproval = {},
+            )
+            ToolCall(ToolPart("g-t5", "delete_files", ToolState.OUTPUT_DENIED, """{"path":"/"}"""))
+        }
+    },
+    "Context (token usage)" to {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ContextUsage(Usage(inputTokens = 12_480, outputTokens = 1_730))
+            ContextUsage(Usage(inputTokens = 96_000, outputTokens = 4_000), contextWindow = 128_000)
+        }
+    },
+    "Chain of thought" to {
+        ChainOfThought(
+            listOf(
+                WorkflowStep("Searching the web", "Looked for Compose adaptive layouts", StepStatus.COMPLETE, listOf("developer.android.com", "m3.material.io")),
+                WorkflowStep("Reading sources", "Comparing window size classes", StepStatus.COMPLETE),
+                WorkflowStep("Drafting the answer", status = StepStatus.ACTIVE),
+            ),
+        )
+    },
+    "Plan" to {
+        Plan(
+            title = "Add tablet support",
+            description = "Three steps, about an hour",
+            steps = listOf(
+                WorkflowStep("Measure window width classes", status = StepStatus.COMPLETE),
+                WorkflowStep("Swap bottom bar for a navigation rail", status = StepStatus.ACTIVE),
+                WorkflowStep("Show history as a side pane"),
+            ),
+        )
+    },
+    "Task" to {
+        Task(
+            "Refactor the chat screen",
+            listOf(
+                WorkflowStep("Read files", badges = listOf("ChatScreen.kt", "DemoApp.kt"), status = StepStatus.COMPLETE),
+                WorkflowStep("Edited 2 files", badges = listOf("Conversation.kt"), status = StepStatus.ACTIVE),
+            ),
+        )
+    },
+    "Math (KaTeX)" to {
+        MarkdownContent("Inline: \$\\pi r^2\$, \$a \\times b \\leq c\$\n\n\$\$\n\\int_0^\\infty e^{-x^2}\\,dx = \\frac{\\sqrt{\\pi}}{2}\n\$\$")
+    },
+    "Artifact" to {
+        Artifact(
+            title = "fibonacci.kt",
+            description = "Generated code",
+            actions = {
+                IconButton(onClick = {}) { Icon(Icons.Outlined.ContentCopy, "Copy") }
+                IconButton(onClick = {}) { Icon(Icons.Outlined.Download, "Download") }
+            },
+        ) {
+            CodeBlock("fun fib(n: Int): Long =\n    if (n < 2) n.toLong() else fib(n - 1) + fib(n - 2)", "kotlin")
+        }
+    },
+    "Web preview" to {
+        WebPreview(
+            url = "about:blank",
+            html = "<html><body style='font-family:sans-serif;padding:16px'><h2>Generated page</h2>" +
+                "<p>Agents can emit HTML that previews here.</p><button onclick=\"this.innerText='Clicked!'\">Try me</button></body></html>",
+            height = 200.dp,
+        )
+    },
+    "Image" to {
+        FileAttachment(FilePart("g-img", "image/png", SampleImageDataUrl), imageHeight = 160.dp)
+    },
     "Sources" to {
         Sources(sampleAssistant.parts.filterIsInstance<SourcePart>())
     },
@@ -197,3 +283,20 @@ private val GallerySamples: List<Pair<String, @Composable () -> Unit>> = listOf(
         }
     },
 )
+
+/** A tiny generated gradient PNG, as a model-returned image would arrive. */
+private val SampleImageDataUrl: String by lazy {
+    val bitmap = android.graphics.Bitmap.createBitmap(320, 160, android.graphics.Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(bitmap)
+    val paint = android.graphics.Paint().apply {
+        shader = android.graphics.LinearGradient(0f, 0f, 320f, 160f, 0xFF6750A4.toInt(), 0xFF7D5260.toInt(), android.graphics.Shader.TileMode.CLAMP)
+    }
+    canvas.drawRect(0f, 0f, 320f, 160f, paint)
+    paint.shader = null
+    paint.color = android.graphics.Color.WHITE
+    paint.textSize = 28f
+    canvas.drawText("Generated image", 60f, 90f, paint)
+    val out = java.io.ByteArrayOutputStream()
+    bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
+    "data:image/png;base64," + android.util.Base64.encodeToString(out.toByteArray(), android.util.Base64.NO_WRAP)
+}

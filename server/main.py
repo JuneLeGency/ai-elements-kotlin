@@ -1,9 +1,10 @@
 """AI Elements agent server.
 
 A FastAPI service running a PydanticAI agent (with tools) and streaming its run
-to the Android demo over the **Vercel AI SDK v5 UI Message Stream protocol**
-(SSE, `data: {"type": "text-delta", ...}`), via PydanticAI's built-in
-`VercelAIAdapter`.
+to the Android demo over two agent↔UI protocols, via PydanticAI's adapters:
+
+    POST /api/chat   Vercel AI SDK v5 UI Message Stream (VercelAIAdapter)
+    POST /api/agui   AG-UI (AGUIAdapter)
 
 Upstream model (any OpenAI-compatible endpoint, e.g. CLIProxyAPI):
 
@@ -33,6 +34,7 @@ from pydantic_ai.models import Model
 from pydantic_ai.models.function import AgentInfo, DeltaToolCall, FunctionModel
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
+from pydantic_ai.ui.ag_ui import AGUIAdapter
 from pydantic_ai.ui.vercel_ai import VercelAIAdapter
 
 BASE_URL = os.environ.get("AGENT_BASE_URL", os.environ.get("CLIPROXY_BASE_URL", "http://localhost:8317/v1"))
@@ -170,7 +172,18 @@ app = FastAPI(title="AI Elements agent server")
 @app.post("/api/chat")
 async def chat(request: Request) -> Response:
     model_name = request.query_params.get("model") or DEFAULT_MODEL
-    return await VercelAIAdapter.dispatch_request(request, agent=agent, model=resolve_model(model_name))
+    return await VercelAIAdapter.dispatch_request(
+        request,
+        agent=agent,
+        model=resolve_model(model_name),
+        allow_uploaded_files=True,  # image attachments arrive as data: URLs
+    )
+
+
+@app.post("/api/agui")
+async def agui(request: Request) -> Response:
+    model_name = request.query_params.get("model") or DEFAULT_MODEL
+    return await AGUIAdapter.dispatch_request(request, agent=agent, model=resolve_model(model_name))
 
 
 @app.get("/health")

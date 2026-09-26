@@ -34,13 +34,35 @@ sealed interface ChatEvent {
     data class ToolOutput(val id: String, val output: String) : ChatEvent
     data class ToolError(val id: String, val error: String) : ChatEvent
 
+    /** The backend is waiting for [ToolApprover] to approve this tool call. */
+    data class ToolApprovalRequest(val id: String) : ChatEvent
+    data class ToolDenied(val id: String) : ChatEvent
+
     data class SourceUrl(val id: String, val url: String, val title: String) : ChatEvent
+
+    /** A model-generated file (e.g. an image). */
+    data class File(val id: String, val mediaType: String, val url: String) : ChatEvent
+
+    /** Token usage of one model call; summed per turn. */
+    data class Usage(val inputTokens: Int, val outputTokens: Int) : ChatEvent
 
     /** Explicit end of the turn. Optional: a completed flow also ends the turn. */
     data object Finish : ChatEvent
 
     /** An in-band error reported by the server. */
     data class Error(val message: String) : ChatEvent
+}
+
+/**
+ * Gate for tools that need a human in the loop (`AgentTool.requiresApproval`).
+ * [ChatController] implements it by surfacing a Confirmation in the UI.
+ */
+fun interface ToolApprover {
+    suspend fun approve(toolCallId: String): Boolean
+
+    companion object {
+        val AlwaysApprove = ToolApprover { true }
+    }
 }
 
 /** Thrown by backends for transport / HTTP failures. */

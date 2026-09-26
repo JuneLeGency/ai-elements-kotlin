@@ -1,7 +1,12 @@
 package dev.ai.elements.demo.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -67,15 +72,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ai.elements.core.config.ProviderProfile
+import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Suggestion
 import dev.ai.elements.demo.ChatViewModel
 import dev.ai.elements.demo.data.Conversation
+import dev.ai.elements.demo.data.imageAttachment
 import dev.ai.elements.ui.chat.ChatEmptyState
+import dev.ai.elements.ui.chat.ContextUsage
 import dev.ai.elements.ui.chat.Conversation
 import dev.ai.elements.ui.chat.PromptInput
 import kotlinx.coroutines.launch
@@ -85,10 +94,11 @@ private val DemoSuggestions = listOf(
     Suggestion("What time is it in Tokyo right now?", "What time is it in Tokyo?"),
     Suggestion("Calculate (1234 * 5678) / 9 and show the steps in a table", "Calculate with a tool"),
     Suggestion("Write a Kotlin data class for a chat message and explain each field in a table", "Kotlin + table"),
+    Suggestion("Copy the text 'Hello from AI Elements' to my clipboard", "Clipboard (needs approval)"),
 )
 
 @Composable
-fun ChatScreen(viewModel: ChatViewModel, widthClass: WidthClass, onOpenSettings: () -> Unit) {
+fun ChatScreen(viewModel: ChatViewModel, widthClass: WidthClass, compactHeight: Boolean, onOpenSettings: () -> Unit) {
     val conversations by viewModel.conversations.collectAsStateWithLifecycle()
     val currentId by viewModel.conversationId.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -106,7 +116,7 @@ fun ChatScreen(viewModel: ChatViewModel, widthClass: WidthClass, onOpenSettings:
                 )
             }
             VerticalDivider()
-            ChatPane(viewModel, showMenu = false, onMenu = {}, onOpenSettings = onOpenSettings)
+            ChatPane(viewModel, showMenu = false, compactHeight = compactHeight, onMenu = {}, onOpenSettings = onOpenSettings)
         }
     } else {
         val drawer = rememberDrawerState(DrawerValue.Closed)
@@ -124,28 +134,53 @@ fun ChatScreen(viewModel: ChatViewModel, widthClass: WidthClass, onOpenSettings:
                 }
             },
         ) {
-            ChatPane(viewModel, showMenu = true, onMenu = { scope.launch { drawer.open() } }, onOpenSettings = onOpenSettings)
+            ChatPane(
+                viewModel,
+                showMenu = true,
+                compactHeight = compactHeight,
+                onMenu = { scope.launch { drawer.open() } },
+                onOpenSettings = onOpenSettings,
+            )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
 @Composable
-private fun ChatPane(viewModel: ChatViewModel, showMenu: Boolean, onMenu: () -> Unit, onOpenSettings: () -> Unit) {
+private fun ChatPane(
+    viewModel: ChatViewModel,
+    showMenu: Boolean,
+    compactHeight: Boolean,
+    onMenu: () -> Unit,
+    onOpenSettings: () -> Unit,
+) {
     val state by viewModel.chatState.collectAsStateWithLifecycle()
     val profiles by viewModel.providers.profiles.collectAsStateWithLifecycle()
     val selectedId by viewModel.providers.selectedId.collectAsStateWithLifecycle()
     val provider = profiles.firstOrNull { it.id == selectedId } ?: profiles.first()
     var input by rememberSaveable { mutableStateOf("") }
+    var attachments by remember { mutableStateOf<List<FilePart>>(emptyList()) }
     var providerSheet by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val pickImages = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(4)) { uris ->
+        scope.launch { attachments = attachments + uris.mapNotNull { context.imageAttachment(it) } }
+    }
+    // Context used by the conversation so far ≈ the last turn's input + output.
+    val lastUsage = state.messages.lastOrNull { it.usage != null }?.usage
 
     fun submit(text: String) {
-        if (viewModel.send(text)) input = ""
+        if (viewModel.send(text, attachments)) {
+            input = ""
+            attachments = emptyList()
+        }
     }
 
+    // Short windows (phone landscape) with the keyboard up: give every pixel to the conversation.
+    val hideTopBar = compactHeight && WindowInsets.isImeVisible
     Scaffold(
         topBar = {
-            TopAppBar(
+            if (!hideTopBar) TopAppBar(
                 navigationIcon = {
                     if (showMenu) IconButton(onClick = onMenu, shapes = IconButtonDefaults.shapes()) {
                         Icon(Icons.Outlined.Menu, "Conversations")
@@ -176,6 +211,7 @@ private fun ChatPane(viewModel: ChatViewModel, showMenu: Boolean, onMenu: () -> 
                         subtitle = "Chatting with ${provider.name} · ${provider.kind.label}",
                         suggestions = DemoSuggestions,
                         onSelect = { submit(it.text) },
+                        showHero = !compactHeight,
                         modifier = Modifier.verticalScroll(rememberScrollState()),
                     )
                 } else {
@@ -183,6 +219,7 @@ private fun ChatPane(viewModel: ChatViewModel, showMenu: Boolean, onMenu: () -> 
                         state = state,
                         onRegenerate = viewModel::regenerate,
                         onDismissError = viewModel::dismissError,
+                        onToolApproval = viewModel::respondToApproval,
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -195,7 +232,15 @@ private fun ChatPane(viewModel: ChatViewModel, showMenu: Boolean, onMenu: () -> 
                 onStop = viewModel::stop,
                 busy = state.isBusy,
                 placeholder = "Message ${provider.name}",
-                toolbar = { ModelChip(viewModel, provider) },
+                attachments = attachments,
+                onAddAttachment = {
+                    pickImages.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },
+                onRemoveAttachment = { removed -> attachments = attachments.filterNot { it.id == removed.id } },
+                toolbar = {
+                    ModelChip(viewModel, provider)
+                    lastUsage?.let { ContextUsage(it) }
+                },
                 modifier = Modifier
                     .widthIn(max = 840.dp)
                     .padding(start = 12.dp, end = 12.dp, bottom = 12.dp),

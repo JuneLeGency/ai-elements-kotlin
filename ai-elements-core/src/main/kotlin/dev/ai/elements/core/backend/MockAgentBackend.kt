@@ -2,6 +2,7 @@ package dev.ai.elements.core.backend
 
 import dev.ai.elements.core.ChatBackend
 import dev.ai.elements.core.ChatEvent
+import dev.ai.elements.core.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.BuiltinTools
 import dev.ai.elements.core.model.Message
@@ -20,30 +21,37 @@ import java.util.UUID
  */
 class MockAgentBackend(
     private val tools: List<AgentTool> = BuiltinTools,
+    private val approver: ToolApprover = ToolApprover.AlwaysApprove,
     private val chunkDelayMs: Long = 18,
 ) : ChatBackend {
 
     override fun stream(history: List<Message>): Flow<ChatEvent> = flow {
         val prompt = history.lastOrNull { it.role == Role.USER }?.text.orEmpty()
         val math = Regex("""[\d.]+\s*[-+*/^%]\s*[\d.(][\d.+\-*/^%() ]*""").find(prompt)?.value?.trim()
+        val wantsCopy = tools.any { it.name == "copy_to_clipboard" } &&
+            listOf("copy", "clipboard", "复制", "剪贴板").any { prompt.contains(it, ignoreCase = true) }
 
         val reasoningId = "reasoning-${UUID.randomUUID()}"
         streamText(
             "The user asked: \"${prompt.take(80)}\". I should " +
-                (if (math != null) "evaluate the expression with the calculator tool" else "check the current time with a tool") +
+                (when {
+                    wantsCopy -> "copy the text to the clipboard, which needs the user's approval"
+                    math != null -> "evaluate the expression with the calculator tool"
+                    else -> "check the current time with a tool"
+                }) +
                 ", then answer with a structured Markdown overview and a Mermaid diagram of the agent loop.",
         ) { emit(ChatEvent.ReasoningDelta(reasoningId, it)) }
         emit(ChatEvent.ReasoningEnd(reasoningId))
 
         val callId = "call_${UUID.randomUUID()}"
-        val (toolName, args) = if (math != null) {
-            "calculate" to """{"expression": "${math.replace("\"", "")}"}"""
-        } else {
-            "get_current_time" to """{"timezone": "Asia/Shanghai"}"""
+        val (toolName, args) = when {
+            wantsCopy -> "copy_to_clipboard" to """{"text": "Hello from the AI Elements agent"}"""
+            math != null -> "calculate" to """{"expression": "${math.replace("\"", "")}"}"""
+            else -> "get_current_time" to """{"timezone": "Asia/Shanghai"}"""
         }
         emit(ChatEvent.ToolInputStart(callId, toolName))
         pause(10)
-        val result = runTool(tools, callId, toolName, args)
+        val result = runTool(tools, approver, callId, toolName, args)
 
         emit(ChatEvent.SourceUrl("s1", "https://elements.ai-sdk.dev", "AI Elements"))
         emit(ChatEvent.SourceUrl("s2", "https://m3.material.io/blog/building-with-m3-expressive", "M3 Expressive"))
@@ -52,6 +60,7 @@ class MockAgentBackend(
         val textId = "text-${UUID.randomUUID()}"
         streamText(answer(prompt, toolName, result)) { emit(ChatEvent.TextDelta(textId, it)) }
         emit(ChatEvent.TextEnd(textId))
+        emit(ChatEvent.Usage(inputTokens = history.sumOf { it.text.length } / 4 + 180, outputTokens = 420))
         emit(ChatEvent.Finish)
     }
 
