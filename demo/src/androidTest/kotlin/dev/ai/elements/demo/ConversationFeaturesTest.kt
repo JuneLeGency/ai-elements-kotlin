@@ -17,8 +17,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.printToLog
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -120,7 +122,12 @@ class ConversationFeaturesTest {
         compose.onNodeWithContentDescription("Close").performClick()
 
         // Checkpoint: rewind to the first turn.
-        compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("checkpoint-restore"))
+        // Items: prompt 1, reply 1, checkpoint, prompt 2, reply 2.
+        compose.onNodeWithTag("conversation").performScrollToIndex(2)
+        runCatching { compose.onNodeWithTag("checkpoint-restore").assertExists() }.onFailure {
+            compose.onNodeWithTag("conversation").printToLog("CKPT", maxDepth = 2)
+            throw it
+        }
         compose.onNodeWithTag("checkpoint-restore").performClick()
         compose.onNodeWithTag("checkpoint-confirm").performClick()
         compose.waitUntil(5_000) { compose.onAllNodesWithText("What is 6 * 7").fetchSemanticsNodes().isEmpty() }

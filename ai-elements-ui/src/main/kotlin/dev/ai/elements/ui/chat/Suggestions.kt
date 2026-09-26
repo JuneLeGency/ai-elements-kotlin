@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,7 +52,7 @@ fun Suggestions(
                 onClick = { onSelect(suggestion) },
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 shape = MaterialTheme.shapes.large,
-                modifier = Modifier.testTag("suggestion"),
+                modifier = Modifier.minimumInteractiveComponentSize().testTag("suggestion"),
             ) {
                 Text(
                     suggestion.label,

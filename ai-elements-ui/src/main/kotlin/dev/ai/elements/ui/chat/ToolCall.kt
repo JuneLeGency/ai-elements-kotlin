@@ -47,6 +47,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
+import dev.ai.elements.ui.theme.AiSize
+import dev.ai.elements.ui.theme.AiSpacing
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
@@ -78,7 +80,7 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
                         .clip(MaterialShapes.Cookie6Sided.toShape())
                         .background(scheme.tertiaryContainer),
                 ) {
-                    Icon(Icons.Outlined.Build, null, Modifier.size(18.dp), scheme.onTertiaryContainer)
+                    Icon(Icons.Outlined.Build, null, Modifier.size(AiSize.compactIcon), scheme.onTertiaryContainer)
                 }
                 Column(Modifier.weight(1f)) {
                     Text(
@@ -145,13 +147,13 @@ private fun StatusPill(state: ToolState) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = AiSpacing.m, vertical = AiSpacing.xs),
         ) {
             when (state) {
-                ToolState.OUTPUT_AVAILABLE -> Icon(Icons.Outlined.CheckCircle, null, Modifier.size(14.dp))
-                ToolState.OUTPUT_ERROR -> Icon(Icons.Outlined.ErrorOutline, null, Modifier.size(14.dp))
-                ToolState.OUTPUT_DENIED -> Icon(Icons.Outlined.Block, null, Modifier.size(14.dp))
-                ToolState.APPROVAL_REQUESTED -> Icon(Icons.Outlined.PanTool, null, Modifier.size(14.dp))
+                ToolState.OUTPUT_AVAILABLE -> Icon(Icons.Outlined.CheckCircle, null, Modifier.size(AiSize.badgeIcon))
+                ToolState.OUTPUT_ERROR -> Icon(Icons.Outlined.ErrorOutline, null, Modifier.size(AiSize.badgeIcon))
+                ToolState.OUTPUT_DENIED -> Icon(Icons.Outlined.Block, null, Modifier.size(AiSize.badgeIcon))
+                ToolState.APPROVAL_REQUESTED -> Icon(Icons.Outlined.PanTool, null, Modifier.size(AiSize.badgeIcon))
                 else -> LoadingIndicator(Modifier.size(16.dp), color = content)
             }
             Text(label, style = MaterialTheme.typography.labelMedium)

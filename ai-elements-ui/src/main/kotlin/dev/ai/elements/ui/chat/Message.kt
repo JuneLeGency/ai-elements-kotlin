@@ -10,15 +10,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountTree
 import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -32,6 +38,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,15 +49,6 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material.icons.outlined.AccountTree
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import dev.ai.elements.core.model.DataPart
@@ -60,6 +60,9 @@ import dev.ai.elements.core.model.SourcePart
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.ui.markdown.MarkdownContent
+import dev.ai.elements.ui.theme.AiSize
+import dev.ai.elements.ui.theme.AiSpacing
+import dev.ai.elements.ui.theme.compactIconButton
 
 /**
  * Renders any [Message]: a bubble for the user, a full-width part list for the assistant.
@@ -88,7 +91,7 @@ fun UserMessage(message: Message, modifier: Modifier = Modifier) {
     BoxWithConstraints(modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
         val bubbleMax = maxWidth * 0.85f
         val imageMax = minOf(maxWidth * 0.7f, 320.dp)
-        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
             files.forEach { file -> FileAttachment(file, Modifier.widthIn(max = imageMax)) }
             if (message.text.isNotBlank()) UserBubble(message.text, Modifier.widthIn(max = bubbleMax))
         }
@@ -107,7 +110,7 @@ private fun UserBubble(text: String, modifier: Modifier) {
             Text(
                 text,
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
+                modifier = Modifier.padding(horizontal = AiSpacing.l, vertical = 12.dp),
             )
         }
     }
@@ -126,10 +129,10 @@ fun AssistantMessage(
     val sources = message.parts.filterIsInstance<SourcePart>()
     Row(modifier.fillMaxWidth().testTag("assistant-message"), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         AssistantAvatar(active = streaming)
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
             message.parts.forEach { part ->
                 when (part) {
-                    is TextPart -> if (part.text.isNotBlank()) MarkdownContent(part.text, citations = sources)
+                    is TextPart -> if (part.text.isNotBlank()) MarkdownContent(part.text, citations = sources, streaming = part.isStreaming)
                     is ReasoningPart -> Reasoning(part)
                     is ToolPart -> ToolCall(part, onApproval = onToolApproval?.let { cb -> { approved -> cb(part.id, approved) } })
                     is FilePart -> FileAttachment(part)
@@ -181,20 +184,20 @@ private fun MessageActions(
         if (message.text.isNotBlank()) IconButton(
             onClick = { clipboard.setText(AnnotatedString(message.text)) },
             shapes = IconButtonDefaults.shapes(),
-            modifier = Modifier.size(36.dp),
-        ) { Icon(Icons.Outlined.ContentCopy, "Copy", Modifier.size(18.dp)) }
+            modifier = Modifier.compactIconButton(),
+        ) { Icon(Icons.Outlined.ContentCopy, "Copy", Modifier.size(AiSize.compactIcon)) }
         if (onRegenerate != null) {
             IconButton(
                 onClick = onRegenerate,
                 shapes = IconButtonDefaults.shapes(),
-                modifier = Modifier.size(36.dp).testTag("regenerate"),
-            ) { Icon(Icons.Outlined.Refresh, "Regenerate", Modifier.size(18.dp)) }
+                modifier = Modifier.compactIconButton().testTag("regenerate"),
+            ) { Icon(Icons.Outlined.Refresh, "Regenerate", Modifier.size(AiSize.compactIcon)) }
         }
         IconButton(
             onClick = { showGraph = true },
             shapes = IconButtonDefaults.shapes(),
-            modifier = Modifier.size(36.dp).testTag("run-graph"),
-        ) { Icon(Icons.Outlined.AccountTree, "View agent run", Modifier.size(18.dp)) }
+            modifier = Modifier.compactIconButton().testTag("run-graph"),
+        ) { Icon(Icons.Outlined.AccountTree, "View agent run", Modifier.size(AiSize.compactIcon)) }
         if (!prompt.isNullOrBlank()) OpenInChat(prompt)
         message.usage?.takeIf { it.totalTokens > 0 }?.let { ContextUsage(it, Modifier.padding(start = 4.dp)) }
     }

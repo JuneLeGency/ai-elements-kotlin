@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.Usage
+import dev.ai.elements.ui.theme.AiSize
+import dev.ai.elements.ui.theme.AiSpacing
 import java.util.Locale
 
 /**
@@ -43,17 +46,17 @@ fun ContextUsage(
             onClick = { open = true },
             shape = MaterialTheme.shapes.extraLarge,
             color = MaterialTheme.colorScheme.surfaceContainerHighest,
-            modifier = Modifier.testTag("context-usage"),
+            modifier = Modifier.minimumInteractiveComponentSize().testTag("context-usage"),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(AiSpacing.s),
+                modifier = Modifier.padding(horizontal = AiSpacing.m, vertical = 6.dp),
             ) {
                 if (fraction != null) {
-                    CircularProgressIndicator(progress = { fraction }, modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
+                    CircularProgressIndicator(progress = { fraction }, modifier = Modifier.size(AiSize.badgeIcon), strokeWidth = 2.dp)
                 } else {
-                    Icon(Icons.Outlined.DataUsage, null, Modifier.size(14.dp))
+                    Icon(Icons.Outlined.DataUsage, null, Modifier.size(AiSize.badgeIcon))
                 }
                 Text(
                     fraction?.let { "${(it * 100).toInt()}%" } ?: compact(usage.totalTokens),

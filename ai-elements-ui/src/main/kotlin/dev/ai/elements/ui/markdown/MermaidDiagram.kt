@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import dev.ai.elements.ui.theme.compactIconButton
 import dev.ai.elements.ui.theme.isDark
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.JsonPrimitive
@@ -91,7 +92,7 @@ fun MermaidDiagram(
                     onClick = { fullscreen = true },
                     enabled = complete,
                     shapes = IconButtonDefaults.shapes(),
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier.compactIconButton(),
                 ) {
                     Icon(Icons.Outlined.OpenInFull, "Open diagram full screen", Modifier.size(16.dp))
                 }

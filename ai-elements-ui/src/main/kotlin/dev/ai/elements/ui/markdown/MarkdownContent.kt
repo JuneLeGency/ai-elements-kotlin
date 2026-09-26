@@ -1,21 +1,21 @@
 package dev.ai.elements.ui.markdown
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
-import dev.ai.elements.core.model.SourcePart
-import dev.ai.elements.ui.chat.CitationPreprocessor
-import dev.ai.elements.ui.chat.CitationSheet
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,6 +28,9 @@ import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.markdownDimens
 import com.mikepenz.markdown.model.markdownPadding
+import dev.ai.elements.core.model.SourcePart
+import dev.ai.elements.ui.chat.CitationPreprocessor
+import dev.ai.elements.ui.chat.CitationSheet
 import org.intellij.markdown.MarkdownTokenTypes
 
 /**
@@ -42,15 +45,47 @@ import org.intellij.markdown.MarkdownTokenTypes
  * - `[n]` references become [InlineCitation]-style links into [citations]
  *   (the message's sources), opening a sheet with the cited sources.
  *
- * Safe to call with a growing string while streaming: the previous render is
- * kept on screen while the new text is parsed.
+ * Streaming ([streaming] = true): the text is split into top-level blocks
+ * ([MarkdownStreaming.split]); finished blocks keep identical strings, so their
+ * composables are skipped and only the block being written re-parses — cost
+ * stays linear in the answer's length. The tail block has unfinished markup
+ * closed ([MarkdownStreaming.repairTail]) so raw `**` never flashes.
  */
 @Composable
 fun MarkdownContent(
     markdown: String,
     modifier: Modifier = Modifier,
     citations: List<SourcePart> = emptyList(),
+    streaming: Boolean = false,
 ) {
+    val blocks = remember(markdown, citations) {
+        MarkdownStreaming.split(LatexPreprocessor.process(CitationPreprocessor.process(markdown, citations)))
+    }
+    // Citation links open the cited sources in a sheet; other links go to the browser.
+    val platformUriHandler = LocalUriHandler.current
+    var cited by remember { mutableStateOf<List<SourcePart>>(emptyList()) }
+    val uriHandler = remember(platformUriHandler, citations) {
+        object : UriHandler {
+            override fun openUri(uri: String) {
+                if (uri.startsWith(CitationPreprocessor.SCHEME)) cited = CitationPreprocessor.resolve(uri, citations)
+                else runCatching { platformUriHandler.openUri(uri) }
+            }
+        }
+    }
+    if (cited.isNotEmpty()) CitationSheet(cited, onDismiss = { cited = emptyList() })
+    CompositionLocalProvider(LocalUriHandler provides uriHandler) {
+        Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            blocks.forEachIndexed { index, block ->
+                val text = if (streaming && index == blocks.lastIndex) MarkdownStreaming.repairTail(block) else block
+                key(index) { MarkdownBlock(text) }
+            }
+        }
+    }
+}
+
+/** One top-level block. Takes only a String, so unchanged blocks are skipped. */
+@Composable
+private fun MarkdownBlock(content: String) {
     val type = MaterialTheme.typography
     val scheme = MaterialTheme.colorScheme
     val code = type.bodyMedium.copy(fontFamily = FontFamily.Monospace)
@@ -74,22 +109,6 @@ fun MarkdownContent(
             checkbox = { MarkdownCheckBox(it.content, it.node, it.typography.text) },
         )
     }
-    val content = remember(markdown, citations) {
-        LatexPreprocessor.process(CitationPreprocessor.process(markdown, citations))
-    }
-    // Citation links open the cited sources in a sheet; other links go to the browser.
-    val platformUriHandler = LocalUriHandler.current
-    var cited by remember { mutableStateOf<List<SourcePart>>(emptyList()) }
-    val uriHandler = remember(platformUriHandler, citations) {
-        object : UriHandler {
-            override fun openUri(uri: String) {
-                if (uri.startsWith(CitationPreprocessor.SCHEME)) cited = CitationPreprocessor.resolve(uri, citations)
-                else runCatching { platformUriHandler.openUri(uri) }
-            }
-        }
-    }
-    if (cited.isNotEmpty()) CitationSheet(cited, onDismiss = { cited = emptyList() })
-    CompositionLocalProvider(LocalUriHandler provides uriHandler) {
     Markdown(
         content = content,
         colors = markdownColor(
@@ -118,11 +137,10 @@ fun MarkdownContent(
                 ),
             ),
         ),
-        padding = markdownPadding(block = 4.dp, listIndent = 12.dp),
+        padding = markdownPadding(block = 0.dp, listIndent = 12.dp),
         dimens = markdownDimens(codeBackgroundCornerSize = 16.dp, tableCornerSize = 16.dp, tableCellWidth = 200.dp),
         components = components,
         retainState = true,
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
     )
-    }
 }

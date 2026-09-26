@@ -88,7 +88,9 @@ class MockAgentBackend(
 
         plan(2)
         val textId = "text-${UUID.randomUUID()}"
-        streamText(answer(prompt, toolName, result)) { emit(ChatEvent.TextDelta(textId, it)) }
+        val body = answer(prompt, toolName, result) +
+            if (prompt.contains("long", ignoreCase = true)) longTail() else ""
+        streamText(body) { emit(ChatEvent.TextDelta(textId, it)) }
         emit(ChatEvent.TextEnd(textId))
         plan(3)
         emit(ChatEvent.Usage(inputTokens = history.sumOf { it.text.length } / 4 + 180, outputTokens = 420))
@@ -141,6 +143,13 @@ class MockAgentBackend(
         |
         |> Switch providers from the chip in the top bar — the conversation is kept.
         """.trimMargin()
+
+    /** Extra sections for "long" prompts, to exercise streaming and scrolling. */
+    private fun longTail() = (1..24).joinToString("") { i ->
+        "\n\n### Section $i\n\nThis is paragraph $i of a long streamed answer. It keeps growing so the " +
+            "conversation must follow the bottom while you watch, and stay perfectly still once you scroll up to read. " +
+            "Item **$i** has `inline code`, a [link](https://example.com/$i) and some *emphasis*."
+    }
 
     companion object {
         private val expression = Regex("""[(\d.][\d.+\-*/^%() ]*[-+*/^%][\d.+\-*/^%() ]*[\d.)]""")

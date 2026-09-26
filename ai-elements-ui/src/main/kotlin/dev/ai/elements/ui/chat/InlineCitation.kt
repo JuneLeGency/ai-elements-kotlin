@@ -18,6 +18,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,6 +32,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.SourcePart
+import dev.ai.elements.ui.theme.AiSize
 import java.net.URI
 
 /**
@@ -45,7 +47,7 @@ fun InlineCitation(sources: List<SourcePart>, modifier: Modifier = Modifier) {
         onClick = { open = true },
         shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.secondaryContainer,
-        modifier = modifier.testTag("inline-citation"),
+        modifier = modifier.minimumInteractiveComponentSize().testTag("inline-citation"),
     ) {
         Text(
             citationLabel(sources),
@@ -97,7 +99,7 @@ fun CitationSheet(sources: List<SourcePart>, onDismiss: () -> Unit) {
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        Icon(Icons.AutoMirrored.Outlined.OpenInNew, "Open", Modifier.size(18.dp))
+                        Icon(Icons.AutoMirrored.Outlined.OpenInNew, "Open", Modifier.size(AiSize.compactIcon))
                     }
                 }
             }

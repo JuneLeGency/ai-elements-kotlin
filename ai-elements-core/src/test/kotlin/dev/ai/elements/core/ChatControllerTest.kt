@@ -13,6 +13,7 @@ import dev.ai.elements.core.model.ToolState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -232,5 +233,54 @@ class ChatControllerTest {
         assertEquals("(1234 * 5678) / 9", MockAgentBackend.extractExpression("Calculate (1234 * 5678) / 9 and show the steps"))
         assertEquals("6 * 7", MockAgentBackend.extractExpression("what is 6 * 7?"))
         assertEquals(null, MockAgentBackend.extractExpression("What time is it in Tokyo?"))
+    }
+
+    @Test
+    fun deltas_areCoalescedPerFrame_andNothingIsLost() = runTest(StandardTestDispatcher()) {
+        val chat = ChatController(
+            backend = {
+                ChatBackend {
+                    flow {
+                    repeat(300) { i ->
+                        emit(ChatEvent.TextDelta("t", "$i "))
+                        if (i % 30 == 29) kotlinx.coroutines.delay(10) // ~10 tokens per ms
+                    }
+                    }
+                }
+            },
+            scope = backgroundScope,
+            clock = { testScheduler.currentTime },
+            publishIntervalMs = 32,
+        )
+        val emissions = mutableListOf<ChatState>()
+        backgroundScope.launch { chat.state.collect { emissions += it } }
+        runCurrent()
+        chat.send("go")
+        testScheduler.advanceTimeBy(1_000)
+        runCurrent()
+        val streamed = emissions.count { it.status == ChatStatus.STREAMING }
+        assertTrue("300 deltas should publish only a few frames, got $streamed", streamed in 1..10)
+        assertEquals((0 until 300).joinToString(" ") + " ", chat.state.value.messages.last().text)
+    }
+
+    @Test
+    fun stop_keepsUnpublishedDeltas() = runTest(StandardTestDispatcher()) {
+        val chat = ChatController(
+            backend = {
+                ChatBackend { flow {
+                    emit(ChatEvent.TextDelta("t", "a"))
+                    emit(ChatEvent.TextDelta("t", "b"))
+                    emit(ChatEvent.TextDelta("t", "c"))
+                    awaitCancellation()
+                } }
+            },
+            scope = backgroundScope,
+            publishIntervalMs = 10_000,
+        )
+        chat.send("go")
+        runCurrent()
+        assertEquals("a", chat.state.value.messages.last().text)
+        chat.stop()
+        assertEquals("abc", chat.state.value.messages.last().text)
     }
 }

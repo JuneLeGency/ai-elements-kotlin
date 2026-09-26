@@ -5,25 +5,25 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -33,8 +33,8 @@ import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.EditNote
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Memory
+import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
@@ -54,15 +54,21 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.material3.SheetValue
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -88,6 +94,9 @@ import dev.ai.elements.ui.chat.ContextUsage
 import dev.ai.elements.ui.chat.Conversation
 import dev.ai.elements.ui.chat.PromptInput
 import dev.ai.elements.ui.chat.Queue
+import dev.ai.elements.ui.theme.AiSize
+import dev.ai.elements.ui.theme.AiSpacing
+import dev.ai.elements.ui.theme.compactIconButton
 import kotlinx.coroutines.launch
 
 private val DemoSuggestions = listOf(
@@ -98,27 +107,72 @@ private val DemoSuggestions = listOf(
     Suggestion("Copy the text 'Hello from AI Elements' to my clipboard", "Clipboard (needs approval)"),
 )
 
+/**
+ * Chat with its conversation history.
+ *
+ * Phones get the history in a modal drawer. Larger windows use the M3
+ * list-detail scaffold: history and chat side by side (resizable with the drag
+ * handle) when [twoPane], otherwise one at a time with predictive back.
+ */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun ChatScreen(viewModel: ChatViewModel, widthClass: WidthClass, compactHeight: Boolean, onOpenSettings: () -> Unit) {
+fun ChatScreen(
+    viewModel: ChatViewModel,
+    widthClass: WidthClass,
+    twoPane: Boolean,
+    compactHeight: Boolean,
+    onOpenSettings: () -> Unit,
+) {
     val conversations by viewModel.conversations.collectAsStateWithLifecycle()
     val currentId by viewModel.conversationId.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
-    if (widthClass == WidthClass.EXPANDED) {
-        Row(Modifier.fillMaxSize()) {
-            Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.width(320.dp).fillMaxHeight()) {
-                HistoryPane(
-                    modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical)),
-                    conversations = conversations,
-                    currentId = currentId,
-                    onNew = viewModel::newChat,
-                    onOpen = viewModel::open,
-                    onDelete = viewModel::delete,
-                )
+    if (widthClass != WidthClass.COMPACT) {
+        val navigator = rememberListDetailNavigator<Any>(twoPane)
+        // The chat is the primary destination; the list sits "behind" it when single-pane.
+        LaunchedEffect(navigator) {
+            if (navigator.currentDestination?.pane != ListDetailPaneScaffoldRole.Detail) {
+                navigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
             }
-            VerticalDivider()
-            ChatPane(viewModel, showMenu = false, compactHeight = compactHeight, onMenu = {}, onOpenSettings = onOpenSettings)
         }
+        fun showChat() {
+            if (!navigator.isDetailVisible) scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail) }
+        }
+        NavigableListDetailPaneScaffold(
+            navigator = navigator,
+            listPane = {
+                AnimatedPane {
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        shape = if (twoPane) MaterialTheme.shapes.extraLarge else RectangleShape,
+                        modifier = Modifier.fillMaxHeight().then(if (twoPane) Modifier.padding(vertical = 8.dp) else Modifier),
+                    ) {
+                        HistoryPane(
+                            modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical)),
+                            conversations = conversations,
+                            currentId = currentId,
+                            onNew = { viewModel.newChat(); showChat() },
+                            onOpen = { viewModel.open(it); showChat() },
+                            onDelete = viewModel::delete,
+                        )
+                    }
+                }
+            },
+            detailPane = {
+                AnimatedPane {
+                    ChatPane(
+                        viewModel,
+                        // Expanded layouts keep a 24dp window margin on the trailing edge (M3).
+                        modifier = if (twoPane) Modifier.padding(end = 24.dp) else Modifier,
+                        showMenu = !navigator.isListVisible,
+                        compactHeight = compactHeight,
+                        onMenu = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.List) } },
+                        onOpenSettings = onOpenSettings,
+                    )
+                }
+            },
+            paneExpansionDragHandle = if (twoPane) { state -> PaneDragHandle(state) } else null,
+        )
     } else {
         val drawer = rememberDrawerState(DrawerValue.Closed)
         ModalNavigationDrawer(
@@ -151,6 +205,7 @@ fun ChatScreen(viewModel: ChatViewModel, widthClass: WidthClass, compactHeight: 
 private fun ChatPane(
     viewModel: ChatViewModel,
     showMenu: Boolean,
+    modifier: Modifier = Modifier,
     compactHeight: Boolean,
     onMenu: () -> Unit,
     onOpenSettings: () -> Unit,
@@ -180,6 +235,7 @@ private fun ChatPane(
     // Short windows (phone landscape) with the keyboard up: give every pixel to the conversation.
     val hideTopBar = compactHeight && WindowInsets.isImeVisible
     Scaffold(
+        modifier = modifier,
         topBar = {
             if (!hideTopBar) TopAppBar(
                 navigationIcon = {
@@ -209,7 +265,7 @@ private fun ChatPane(
                 if (state.messages.isEmpty() && !state.isBusy) {
                     ChatEmptyState(
                         title = "What shall we explore?",
-                        subtitle = "Chatting with ${provider.name} · ${provider.kind.label}",
+                        subtitle = listOf(provider.name, provider.kind.label).distinct().joinToString(" · "),
                         suggestions = DemoSuggestions,
                         onSelect = { submit(it.text) },
                         showHero = !compactHeight,
@@ -326,7 +382,7 @@ private fun ProviderSheet(
             }
             item {
                 TextButton(onClick = onManage, modifier = Modifier.padding(16.dp)) {
-                    Icon(Icons.Outlined.Tune, null, Modifier.size(18.dp))
+                    Icon(Icons.Outlined.Tune, null, Modifier.size(AiSize.compactIcon))
                     Text("  Manage providers & API keys")
                 }
             }
@@ -358,11 +414,11 @@ private fun ModelChip(viewModel: ChatViewModel, provider: ProviderProfile) {
             },
             shape = MaterialTheme.shapes.extraLarge,
             color = MaterialTheme.colorScheme.secondaryContainer,
-            modifier = Modifier.testTag("model-chip"),
+            modifier = Modifier.minimumInteractiveComponentSize().testTag("model-chip"),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(AiSpacing.s),
                 modifier = Modifier.padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
             ) {
                 Icon(Icons.Outlined.Memory, null, Modifier.size(16.dp))
@@ -373,7 +429,7 @@ private fun ModelChip(viewModel: ChatViewModel, provider: ProviderProfile) {
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.widthIn(max = 180.dp),
                 )
-                Icon(Icons.Outlined.ArrowDropDown, null, Modifier.size(18.dp))
+                Icon(Icons.Outlined.ArrowDropDown, null, Modifier.size(AiSize.compactIcon))
             }
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
@@ -441,8 +497,8 @@ private fun HistoryPane(
                     onClick = { onOpen(conversation.id) },
                     icon = { Icon(Icons.Outlined.ChatBubbleOutline, null) },
                     badge = {
-                        IconButton(onClick = { onDelete(conversation.id) }, modifier = Modifier.size(32.dp)) {
-                            Icon(Icons.Outlined.DeleteOutline, "Delete", Modifier.size(18.dp))
+                        IconButton(onClick = { onDelete(conversation.id) }, modifier = Modifier.compactIconButton()) {
+                            Icon(Icons.Outlined.DeleteOutline, "Delete", Modifier.size(AiSize.compactIcon))
                         }
                     },
                 )

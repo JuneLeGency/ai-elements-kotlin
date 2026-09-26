@@ -22,9 +22,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
-import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import dev.ai.elements.ui.theme.AiSpacing
 
 /** Progress of a plan / task / chain-of-thought step. */
 enum class StepStatus { PENDING, ACTIVE, COMPLETE }
@@ -81,7 +82,7 @@ fun Plan(
 ) {
     Collapsible(title, Icons.Outlined.Checklist, streaming = streaming, subtitle = description, modifier = modifier) {
         steps.forEach { step ->
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
+            Row(horizontalArrangement = Arrangement.spacedBy(AiSpacing.s), verticalAlignment = Alignment.Top) {
                 StatusIcon(step.status, Modifier.padding(top = 2.dp))
                 Text(step.label, style = MaterialTheme.typography.bodyMedium)
             }
@@ -133,13 +134,13 @@ private fun TimelineStep(step: WorkflowStep, isLast: Boolean) {
 @Composable
 private fun Badges(badges: List<String>) {
     if (badges.isEmpty()) return
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(AiSpacing.s), verticalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
         badges.forEach { badge ->
             Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = MaterialTheme.shapes.small) {
                 Text(
                     badge,
                     style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = AiSpacing.xs),
                 )
             }
         }
@@ -177,7 +178,7 @@ private fun Collapsible(
         modifier = modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.size(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
@@ -195,7 +196,7 @@ private fun Collapsible(
                 enter = expandVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) + fadeIn(),
                 exit = shrinkVertically(MaterialTheme.motionScheme.fastSpatialSpec()) + fadeOut(),
             ) {
-                Column(Modifier.padding(top = 14.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column(Modifier.padding(top = AiSpacing.l).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
                     content()
                 }
             }

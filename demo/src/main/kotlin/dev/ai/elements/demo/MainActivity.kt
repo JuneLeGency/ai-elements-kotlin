@@ -1,7 +1,7 @@
 package dev.ai.elements.demo
 
-import android.os.Bundle
 import android.graphics.Color
+import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent

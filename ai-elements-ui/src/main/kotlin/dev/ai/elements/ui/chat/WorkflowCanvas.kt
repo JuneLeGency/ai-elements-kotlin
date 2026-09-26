@@ -79,6 +79,7 @@ import dev.ai.elements.core.model.SourcePart
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
+import dev.ai.elements.ui.theme.AiSpacing
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
@@ -273,7 +274,7 @@ private fun NodeCard(node: CanvasNode, onClick: (() -> Unit)?, modifier: Modifie
     val body: @Composable () -> Unit = {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(AiSpacing.s),
             modifier = Modifier.padding(horizontal = 12.dp),
         ) {
             node.icon?.let {

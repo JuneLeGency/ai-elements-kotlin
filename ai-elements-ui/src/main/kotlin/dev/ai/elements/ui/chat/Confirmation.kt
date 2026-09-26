@@ -24,6 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.ai.elements.ui.theme.AiSize
+import dev.ai.elements.ui.theme.AiSpacing
 
 /**
  * Human-in-the-loop approval (AI Elements `<Confirmation>`): what the agent
@@ -45,8 +47,8 @@ fun Confirmation(
         modifier = modifier.fillMaxWidth().testTag("confirmation"),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.PanTool, null, Modifier.size(18.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(AiSpacing.s), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Outlined.PanTool, null, Modifier.size(AiSize.compactIcon))
                 Column(Modifier.weight(1f)) {
                     Text(title, style = MaterialTheme.typography.titleSmall)
                     Text(description, style = MaterialTheme.typography.bodySmall, maxLines = 3, overflow = TextOverflow.Ellipsis)

@@ -1,15 +1,14 @@
 package dev.ai.elements.demo.ui
 
 import android.os.Build
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,8 +24,8 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Computer
 import androidx.compose.material.icons.outlined.CloudQueue
+import androidx.compose.material.icons.outlined.Computer
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Hub
@@ -59,7 +58,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -82,52 +84,61 @@ import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.demo.ChatViewModel
 import dev.ai.elements.demo.data.Appearance
 import dev.ai.elements.demo.data.ThemeMode
+import dev.ai.elements.ui.theme.AiSize
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Settings as an M3 list-detail: providers on the left, the selected one's
+ * editor on the right when [twoPane] (resizable), otherwise one pane at a time
+ * with predictive back.
+ */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun SettingsScreen(viewModel: ChatViewModel, widthClass: WidthClass) {
+fun SettingsScreen(viewModel: ChatViewModel, twoPane: Boolean) {
     val profiles by viewModel.providers.profiles.collectAsStateWithLifecycle()
     val selectedId by viewModel.providers.selectedId.collectAsStateWithLifecycle()
-    var editingId by rememberSaveable { mutableStateOf<String?>(null) }
-    val editing = profiles.firstOrNull { it.id == editingId }
-    val twoPane = widthClass == WidthClass.EXPANDED
+    val navigator = rememberListDetailNavigator<String>(twoPane, listWidth = 400.dp)
+    val scope = rememberCoroutineScope()
+    val editing = profiles.firstOrNull { it.id == navigator.currentDestination?.contentKey }
 
-    BackHandler(enabled = !twoPane && editing != null) { editingId = null }
-
-    val list: @Composable () -> Unit = {
-        SettingsList(
-            viewModel = viewModel,
-            profiles = profiles,
-            selectedId = selectedId,
-            highlightedId = if (twoPane) editingId else null,
-            onEdit = { editingId = it },
-        )
-    }
-
-    if (twoPane) {
-        Row(Modifier.fillMaxSize()) {
-            Box(Modifier.width(400.dp).fillMaxHeight()) { list() }
-            VerticalDivider()
-            Box(Modifier.weight(1f).fillMaxHeight()) {
+    NavigableListDetailPaneScaffold(
+        navigator = navigator,
+        listPane = {
+            AnimatedPane {
+                SettingsList(
+                    viewModel = viewModel,
+                    profiles = profiles,
+                    selectedId = selectedId,
+                    highlightedId = if (navigator.isDetailVisible) editing?.id else null,
+                    onEdit = { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } },
+                )
+            }
+        },
+        detailPane = {
+            AnimatedPane {
                 if (editing != null) {
-                    ProviderEditor(viewModel, editing, showBack = false, onClose = { editingId = null })
-                } else {
-                    Text(
-                        "Select a provider to edit its endpoint, model and API key.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.align(Alignment.Center).padding(32.dp),
+                    ProviderEditor(
+                        viewModel,
+                        editing,
+                        modifier = if (twoPane) Modifier.padding(end = 24.dp) else Modifier,
+                        showBack = !navigator.isListVisible,
+                        onClose = { scope.launch { navigator.navigateBack() } },
                     )
+                } else {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            "Select a provider to edit its endpoint, model and API key.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(32.dp),
+                        )
+                    }
                 }
             }
-        }
-    } else if (editing != null) {
-        ProviderEditor(viewModel, editing, showBack = true, onClose = { editingId = null })
-    } else {
-        list()
-    }
+        },
+        paneExpansionDragHandle = if (twoPane) { state -> PaneDragHandle(state) } else null,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -189,7 +200,7 @@ private fun SettingsList(
                     SectionHeader("Agent providers", Modifier.weight(1f))
                     Box {
                         TextButton(onClick = { addMenu = true }, modifier = Modifier.padding(end = 8.dp)) {
-                            Icon(Icons.Outlined.Add, null, Modifier.size(18.dp))
+                            Icon(Icons.Outlined.Add, null, Modifier.size(AiSize.compactIcon))
                             Text("Add", Modifier.padding(start = 4.dp))
                         }
                         DropdownMenu(expanded = addMenu, onDismissRequest = { addMenu = false }) {
@@ -229,7 +240,7 @@ private fun SettingsList(
                     supportingContent = {
                         Text(
                             buildString {
-                                append(profile.kind.label)
+                                append(if (profile.kind.label == profile.name) "No network needed" else profile.kind.label)
                                 if (profile.kind.needsKey) append(if (hasKey) " · key set" else " · no key")
                             },
                             maxLines = 1,
@@ -261,7 +272,13 @@ private fun SettingsList(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ProviderEditor(viewModel: ChatViewModel, profile: ProviderProfile, showBack: Boolean, onClose: () -> Unit) {
+private fun ProviderEditor(
+    viewModel: ChatViewModel,
+    profile: ProviderProfile,
+    showBack: Boolean,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val scope = rememberCoroutineScope()
     val store = viewModel.providers
     var draft by remember(profile.id) { mutableStateOf(profile) }
@@ -278,6 +295,7 @@ private fun ProviderEditor(viewModel: ChatViewModel, profile: ProviderProfile, s
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text(draft.name.ifBlank { "Provider" }, maxLines = 1, overflow = TextOverflow.Ellipsis) },

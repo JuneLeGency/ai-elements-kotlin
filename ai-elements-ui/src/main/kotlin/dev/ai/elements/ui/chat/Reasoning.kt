@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.ReasoningPart
+import dev.ai.elements.ui.theme.AiSpacing
 
 /**
  * Collapsible "thinking" block. Opens automatically while the model reasons
@@ -56,7 +57,7 @@ fun Reasoning(part: ReasoningPart, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth().testTag("reasoning"),
     ) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
                 if (part.isStreaming) {
                     LoadingIndicator(Modifier.size(24.dp))
                 } else {
@@ -87,7 +88,7 @@ fun Reasoning(part: ReasoningPart, modifier: Modifier = Modifier) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
-                        .padding(top = 10.dp)
+                        .padding(top = AiSpacing.m)
                         .heightIn(max = 280.dp)
                         .verticalScroll(scroll),
                 )

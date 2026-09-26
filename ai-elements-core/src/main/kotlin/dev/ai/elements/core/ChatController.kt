@@ -9,6 +9,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,6 +47,10 @@ data class ChatState(
  *   until [respondToApproval] is called.
  * @param scope where turns run; collection happens on this scope's dispatcher
  *   (backends move their own I/O off the main thread).
+ * @param publishIntervalMs streamed deltas are coalesced and published at most
+ *   this often (one frame by default), so a model emitting hundreds of tokens
+ *   per second never recomposes the UI per token. Structural events (tool
+ *   calls, part ends, errors) publish immediately. 0 publishes every event.
  */
 class ChatController(
     private val backend: (ToolApprover) -> ChatBackend,
@@ -53,11 +58,15 @@ class ChatController(
     initialMessages: List<Message> = emptyList(),
     private val clock: () -> Long = System::currentTimeMillis,
     private val newId: () -> String = { UUID.randomUUID().toString() },
+    private val publishIntervalMs: Long = 32,
 ) {
     private val _state = MutableStateFlow(ChatState(messages = initialMessages))
     val state: StateFlow<ChatState> = _state.asStateFlow()
 
     private var job: Job? = null
+
+    /** The in-flight reply, including deltas not yet published (read by [stop]). */
+    private var live: Pair<List<Message>, Message>? = null
     private val pendingApprovals = ConcurrentHashMap<String, CompletableDeferred<Boolean>>()
     private val approver = ToolApprover { id ->
         val decision = pendingApprovals.getOrPut(id) { CompletableDeferred() }
@@ -144,9 +153,13 @@ class ChatController(
         running.cancel()
         pendingApprovals.values.forEach { it.cancel() }
         pendingApprovals.clear()
+        val inFlight = live
+        live = null
         _state.update { st ->
             st.copy(
-                messages = st.messages.finishLastAssistant(),
+                messages = inFlight?.takeIf { it.second.parts.isNotEmpty() }
+                    ?.let { (history, reply) -> history + reply.finishStreaming(clock()) }
+                    ?: st.messages.finishLastAssistant(),
                 status = ChatStatus.READY,
                 queuePaused = st.queue.isNotEmpty(),
             )
@@ -174,6 +187,19 @@ class ChatController(
         var inBandError: String? = null
 
         job = scope.launch {
+            var dirty = false
+            fun publish() {
+                dirty = false
+                if (assistant.parts.isNotEmpty()) {
+                    _state.update { it.copy(messages = history + assistant, status = ChatStatus.STREAMING) }
+                }
+            }
+            val flusher = if (publishIntervalMs > 0) launch {
+                while (true) {
+                    delay(publishIntervalMs)
+                    if (dirty) publish()
+                }
+            } else null
             try {
                 backend(approver).stream(history).collect { event ->
                     if (event is ChatEvent.Error) {
@@ -181,14 +207,17 @@ class ChatController(
                         return@collect
                     }
                     assistant = assistant.reduce(event, clock())
-                    if (assistant.parts.isNotEmpty()) {
-                        _state.update { it.copy(messages = history + assistant, status = ChatStatus.STREAMING) }
-                    }
+                    live = history to assistant
+                    val isDelta = event is ChatEvent.TextDelta || event is ChatEvent.ReasoningDelta || event is ChatEvent.ToolInputDelta
+                    // The first content leaves SUBMITTED right away; later deltas are coalesced.
+                    if (flusher == null || !isDelta || _state.value.status == ChatStatus.SUBMITTED) publish() else dirty = true
                 }
+                flusher?.cancel()
                 complete(history, assistant, inBandError)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Throwable) {
+                flusher?.cancel()
                 complete(history, assistant, e.message ?: e::class.simpleName ?: "Unknown error")
             }
         }
@@ -196,6 +225,7 @@ class ChatController(
 
     private fun complete(history: List<Message>, assistant: Message, error: String?) {
         job = null
+        live = null
         val finished = assistant.finishStreaming(clock())
         val failure = error ?: "The provider returned an empty response.".takeIf { finished.parts.isEmpty() }
         // A failed regenerate must not lose the earlier versions.

@@ -47,6 +47,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.QueuedMessage
+import dev.ai.elements.ui.theme.AiSize
+import dev.ai.elements.ui.theme.compactIconButton
 import java.net.URLEncoder
 
 /**
@@ -62,14 +64,14 @@ fun BranchSelector(index: Int, count: Int, onSelect: (Int) -> Unit, modifier: Mo
             onClick = { onSelect(index - 1) },
             enabled = enabled && index > 0,
             shapes = IconButtonDefaults.shapes(),
-            modifier = Modifier.size(32.dp).testTag("branch-previous"),
+            modifier = Modifier.compactIconButton().testTag("branch-previous"),
         ) { Icon(Icons.Outlined.ChevronLeft, "Previous version") }
         Text("${index + 1} / $count", style = MaterialTheme.typography.labelMedium, modifier = Modifier.testTag("branch-label"))
         IconButton(
             onClick = { onSelect(index + 1) },
             enabled = enabled && index < count - 1,
             shapes = IconButtonDefaults.shapes(),
-            modifier = Modifier.size(32.dp).testTag("branch-next"),
+            modifier = Modifier.compactIconButton().testTag("branch-next"),
         ) { Icon(Icons.Outlined.ChevronRight, "Next version") }
     }
 }
@@ -148,12 +150,12 @@ fun Queue(
                             modifier = Modifier.weight(1f),
                         )
                         if (paused) {
-                            IconButton(onClick = { onSendNow(item) }, modifier = Modifier.size(36.dp).testTag("queue-send")) {
-                                Icon(Icons.AutoMirrored.Outlined.Send, "Send now", Modifier.size(18.dp))
+                            IconButton(onClick = { onSendNow(item) }, modifier = Modifier.compactIconButton().testTag("queue-send")) {
+                                Icon(Icons.AutoMirrored.Outlined.Send, "Send now", Modifier.size(AiSize.compactIcon))
                             }
                         }
-                        IconButton(onClick = { onRemove(item) }, modifier = Modifier.size(36.dp).testTag("queue-remove")) {
-                            Icon(Icons.Outlined.Close, "Remove from queue", Modifier.size(18.dp))
+                        IconButton(onClick = { onRemove(item) }, modifier = Modifier.compactIconButton().testTag("queue-remove")) {
+                            Icon(Icons.Outlined.Close, "Remove from queue", Modifier.size(AiSize.compactIcon))
                         }
                     }
                 }
@@ -187,8 +189,8 @@ fun OpenInChat(prompt: String, modifier: Modifier = Modifier, targets: List<Open
         IconButton(
             onClick = { open = true },
             shapes = IconButtonDefaults.shapes(),
-            modifier = Modifier.size(36.dp).testTag("open-in"),
-        ) { Icon(Icons.AutoMirrored.Outlined.OpenInNew, "Open in…", Modifier.size(18.dp)) }
+            modifier = Modifier.compactIconButton().testTag("open-in"),
+        ) { Icon(Icons.AutoMirrored.Outlined.OpenInNew, "Open in…", Modifier.size(AiSize.compactIcon)) }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             Text(
                 "Open in",

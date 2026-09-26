@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -38,6 +39,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.backend.DefaultHttpClient
 import dev.ai.elements.core.model.FilePart
+import dev.ai.elements.ui.theme.AiSize
+import dev.ai.elements.ui.theme.AiSpacing
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Request
@@ -114,18 +117,22 @@ fun AttachmentStrip(
         items(attachments, key = { it.id }) { file ->
             Box(Modifier.size(thumbSize)) {
                 FileImage(file, Modifier.matchParentSize().clip(MaterialTheme.shapes.medium))
+                // 20dp visual, 48dp touch target, centred on the thumbnail's corner.
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(4.dp)
-                        .size(20.dp)
-                        .clip(MaterialTheme.shapes.extraLarge)
-                        .background(MaterialTheme.colorScheme.inverseSurface)
+                        .offset(x = 12.dp, y = (-12).dp)
+                        .size(AiSize.touchTarget)
                         .clickable(onClickLabel = "Remove attachment") { onRemove(file) }
                         .testTag("remove-attachment"),
                 ) {
-                    Icon(Icons.Outlined.Close, null, Modifier.size(14.dp), MaterialTheme.colorScheme.inverseOnSurface)
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.size(20.dp).clip(MaterialTheme.shapes.extraLarge).background(MaterialTheme.colorScheme.inverseSurface),
+                    ) {
+                        Icon(Icons.Outlined.Close, "Remove attachment", Modifier.size(AiSpacing.l), MaterialTheme.colorScheme.inverseOnSurface)
+                    }
                 }
             }
         }

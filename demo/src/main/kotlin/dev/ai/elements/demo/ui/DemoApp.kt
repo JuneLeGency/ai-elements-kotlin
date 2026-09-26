@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material3.Icon
@@ -55,6 +55,8 @@ fun DemoApp(viewModel: ChatViewModel) {
     BoxWithConstraints(Modifier.semantics { testTagsAsResourceId = true }) {
         // Phones in landscape are wide but short: never give them the three-pane layout.
         val compactHeight = maxHeight < 480.dp
+        // Two panes (list + detail) need room for both; short landscape phones don't get them.
+        val twoPane = maxWidth >= 720.dp && !compactHeight
         val widthClass = when {
             maxWidth < 600.dp -> WidthClass.COMPACT
             maxWidth < 840.dp || compactHeight -> WidthClass.MEDIUM
@@ -84,9 +86,9 @@ fun DemoApp(viewModel: ChatViewModel) {
             val handled = if (bottomBar) WindowInsets.navigationBars.only(WindowInsetsSides.Bottom) else WindowInsets(0)
             Box(Modifier.consumeWindowInsets(handled)) {
                 when (destination) {
-                    Destination.CHAT -> ChatScreen(viewModel, widthClass, compactHeight, onOpenSettings = { destination = Destination.SETTINGS })
+                    Destination.CHAT -> ChatScreen(viewModel, widthClass, twoPane, compactHeight, onOpenSettings = { destination = Destination.SETTINGS })
                     Destination.COMPONENTS -> GalleryScreen()
-                    Destination.SETTINGS -> SettingsScreen(viewModel, widthClass)
+                    Destination.SETTINGS -> SettingsScreen(viewModel, twoPane)
                 }
             }
         }

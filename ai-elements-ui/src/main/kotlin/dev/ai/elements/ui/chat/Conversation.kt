@@ -29,26 +29,27 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.ChatState
 import dev.ai.elements.core.model.ChatStatus
 import dev.ai.elements.core.model.Role
+import dev.ai.elements.ui.theme.AiSpacing
 import kotlinx.coroutines.launch
 
 /**
  * The scrolling message list (AI Elements `<Conversation>`).
  *
- * Uses a reversed layout so the newest content is anchored to the bottom: a
- * streaming reply grows upward while the user is at the bottom, and the list
- * stays put if they scrolled back to read. A jump-to-latest button appears
- * when scrolled away.
+ * Scrolling is handled by [StickToBottomState]: the list follows the stream
+ * while you are at the bottom, stops the instant you scroll up to read (the
+ * content you are looking at never moves), and a jump-to-latest button
+ * resumes following.
  *
  * @param maxContentWidth readable column width on large screens.
  */
@@ -68,7 +69,7 @@ fun Conversation(
     onRestoreCheckpoint: ((messageId: String) -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
-    val messages = state.messages.asReversed()
+    val stick = rememberStickToBottomState(listState)
     // The prompt each reply answers, for "Open in…".
     val prompts = remember(state.messages) {
         var lastPrompt: String? = null
@@ -79,47 +80,20 @@ fun Conversation(
     }
     val lastAssistantId = state.messages.lastOrNull()?.takeIf { it.role == Role.ASSISTANT }?.id
 
-    // Jump to the newest message whenever the user sends one.
+    // Sending a message, or opening another conversation, starts at the bottom and follows.
     val userCount = state.messages.count { it.role == Role.USER }
-    LaunchedEffect(userCount) { if (userCount > 0) listState.animateScrollToItem(0) }
+    val conversationKey = state.messages.firstOrNull()?.id
+    LaunchedEffect(userCount, conversationKey) { if (userCount > 0) stick.jumpToLatest() }
 
-    Box(modifier) {
+    Box(modifier.nestedScroll(stick.connection)) {
         LazyColumn(
             state = listState,
-            reverseLayout = true,
             contentPadding = contentPadding,
-            verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.Bottom),
+            verticalArrangement = Arrangement.spacedBy(AiSpacing.turn, Alignment.Bottom),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize().testTag("conversation"),
         ) {
-            if (state.status == ChatStatus.ERROR && state.error != null) {
-                item(key = "error") {
-                    ErrorCard(state.error!!, onRetry, onDismissError, Modifier.widthIn(max = maxContentWidth).animateItem())
-                }
-            }
-            if (state.status == ChatStatus.SUBMITTED) {
-                item(key = "pending") {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.widthIn(max = maxContentWidth).fillMaxWidth().animateItem().testTag("pending"),
-                    ) {
-                        AssistantAvatar(active = true)
-                        LoadingIndicator(Modifier.size(36.dp))
-                    }
-                }
-            }
-            messages.forEachIndexed { index, message ->
-                // Reversed list: index 0 is the newest message. A checkpoint sits
-                // below every finished turn that has later messages.
-                if (onRestoreCheckpoint != null && index > 0 && message.role == Role.ASSISTANT && !state.isBusy) {
-                    item(key = "checkpoint-${message.id}", contentType = "checkpoint") {
-                        Checkpoint(
-                            onRestore = { onRestoreCheckpoint(message.id) },
-                            modifier = Modifier.widthIn(max = maxContentWidth).animateItem(),
-                        )
-                    }
-                }
+            state.messages.forEachIndexed { index, message ->
                 item(key = message.id, contentType = message.role) {
                     MessageItem(
                         message = message,
@@ -127,20 +101,45 @@ fun Conversation(
                         onRegenerate = if (message.id == lastAssistantId && !state.isBusy) onRegenerate else null,
                         onToolApproval = onToolApproval,
                         onSelectVersion = onSelectVersion?.takeIf { !state.isBusy }?.let { cb -> { i -> cb(message.id, i) } },
-                        modifier = Modifier.widthIn(max = maxContentWidth).fillMaxWidth().animateItem(),
+                        modifier = Modifier.widthIn(max = maxContentWidth).fillMaxWidth(),
                     )
+                }
+                // A checkpoint after every finished turn that has later messages.
+                if (onRestoreCheckpoint != null && index < state.messages.lastIndex && message.role == Role.ASSISTANT && !state.isBusy) {
+                    item(key = "checkpoint-${message.id}", contentType = "checkpoint") {
+                        Checkpoint(
+                            onRestore = { onRestoreCheckpoint(message.id) },
+                            modifier = Modifier.widthIn(max = maxContentWidth),
+                        )
+                    }
+                }
+            }
+            if (state.status == ChatStatus.SUBMITTED) {
+                item(key = "pending", contentType = "pending") {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.widthIn(max = maxContentWidth).fillMaxWidth().testTag("pending"),
+                    ) {
+                        AssistantAvatar(active = true)
+                        LoadingIndicator(Modifier.size(36.dp))
+                    }
+                }
+            }
+            if (state.status == ChatStatus.ERROR && state.error != null) {
+                item(key = "error", contentType = "error") {
+                    ErrorCard(state.error!!, onRetry, onDismissError, Modifier.widthIn(max = maxContentWidth))
                 }
             }
         }
 
-        val awayFromLatest by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 200 } }
         AnimatedVisibility(
-            visible = awayFromLatest,
+            visible = stick.showJumpToLatest,
             enter = scaleIn(MaterialTheme.motionScheme.fastSpatialSpec()),
             exit = scaleOut(MaterialTheme.motionScheme.fastSpatialSpec()),
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp),
         ) {
-            SmallFloatingActionButton(onClick = { scope.launch { listState.animateScrollToItem(0) } }) {
+            SmallFloatingActionButton(onClick = { scope.launch { stick.jumpToLatest(animated = true) } }) {
                 Icon(Icons.Outlined.KeyboardArrowDown, "Scroll to latest")
             }
         }
@@ -155,8 +154,8 @@ private fun ErrorCard(error: String, onRetry: () -> Unit, onDismiss: () -> Unit,
         shape = MaterialTheme.shapes.large,
         modifier = modifier.fillMaxWidth().testTag("chat-error"),
     ) {
-        Column(Modifier.padding(start = 16.dp, end = 8.dp, top = 14.dp, bottom = 4.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.padding(start = 16.dp, end = 8.dp, top = AiSpacing.l, bottom = 4.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
                 Icon(Icons.Outlined.ErrorOutline, null, Modifier.size(20.dp))
                 Text(error, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
             }

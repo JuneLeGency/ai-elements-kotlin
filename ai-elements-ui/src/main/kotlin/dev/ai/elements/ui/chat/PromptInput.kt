@@ -14,7 +14,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -49,11 +49,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.FilePart
+import dev.ai.elements.ui.theme.compactIconButton
 
 /**
  * The composer (AI Elements `<PromptInput>`): a roomy rounded field with a
@@ -102,7 +109,20 @@ fun PromptInput(
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 maxLines = 6,
-                modifier = Modifier.fillMaxWidth().padding(end = 12.dp).heightIn(min = 24.dp).testTag("prompt-input"),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 12.dp)
+                    .heightIn(min = 24.dp)
+                    // Hardware keyboards (tablets, ChromeOS, DeX): Enter sends, Shift+Enter is a newline.
+                    // Soft keyboards commit "\n" as text and keep inserting newlines.
+                    .onPreviewKeyEvent { event ->
+                        val physical = event.nativeKeyEvent.device?.isVirtual == false
+                        val enter = event.key == Key.Enter || event.key == Key.NumPadEnter
+                        if (!physical || !enter || event.isShiftPressed) return@onPreviewKeyEvent false
+                        if (event.type == KeyEventType.KeyDown && mode != SubmitMode.STOP && hasInput) onSubmit()
+                        true
+                    }
+                    .testTag("prompt-input"),
                 decorationBox = { inner ->
                     Box {
                         if (value.isEmpty()) {
@@ -128,7 +148,7 @@ fun PromptInput(
                         IconButton(
                             onClick = onAddAttachment,
                             shapes = IconButtonDefaults.shapes(),
-                            modifier = Modifier.size(36.dp).testTag("add-attachment"),
+                            modifier = Modifier.compactIconButton().testTag("add-attachment"),
                         ) { Icon(Icons.Outlined.AddPhotoAlternate, "Attach image") }
                     }
                     toolbar()
