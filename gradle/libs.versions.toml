@@ -16,6 +16,7 @@ kotlinxSerialization = "1.11.0"
 okhttp = "4.12.0"
 markdownRenderer = "0.45.0"
 highlights = "1.1.0"
+cmpMermaid = "0.1.7"
 junit = "4.13.2"
 junitExt = "1.2.1"
 androidxTest = "1.7.0"
@@ -47,6 +48,7 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 
 markdown-renderer-m3 = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
+cmp-mermaid-compose = { group = "io.github.swithun-liu", name = "mermaid-compose", version.ref = "cmpMermaid" }
 highlights = { group = "dev.snipme", name = "highlights", version.ref = "highlights" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }

@@ -33,6 +33,7 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.markdown.renderer.m3)
     implementation(libs.highlights)
+    implementation(libs.cmp.mermaid.compose)
 
     debugImplementation(libs.compose.ui.tooling)
 
