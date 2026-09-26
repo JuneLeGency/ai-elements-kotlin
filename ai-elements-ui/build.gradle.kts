@@ -24,6 +24,10 @@ android {
     }
 }
 
+composeCompiler {
+    stabilityConfigurationFiles.add(layout.projectDirectory.file("compose-stability.conf"))
+}
+
 dependencies {
     api(project(":ai-elements-core"))
 

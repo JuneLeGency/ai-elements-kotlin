@@ -45,6 +45,11 @@ data class ChatState(
  *   the next message without losing the conversation. It receives the
  *   controller's [ToolApprover], which surfaces approval requests in the UI
  *   until [respondToApproval] is called.
+ * **Threading:** call it from one thread and give it a [scope] on a
+ * single-threaded dispatcher — `viewModelScope` (main thread) is the intended
+ * setup. The controller keeps its in-flight turn in plain fields, so a
+ * multi-threaded dispatcher such as `Dispatchers.Default` would race.
+ *
  * @param scope where turns run; collection happens on this scope's dispatcher
  *   (backends move their own I/O off the main thread).
  * @param publishIntervalMs streamed deltas are coalesced and published at most
