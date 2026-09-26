@@ -43,6 +43,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.browser)
     implementation(project(":ai-elements-ui"))
 
     implementation(libs.activity.compose)

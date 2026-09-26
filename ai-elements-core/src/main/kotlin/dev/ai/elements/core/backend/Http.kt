@@ -129,7 +129,7 @@ suspend fun OkHttpClient.getJson(url: String, headers: Map<String, String> = emp
 private fun Response.ensureSuccess() {
     if (isSuccessful) return
     val raw = runCatching { body?.string() }.getOrNull().orEmpty()
-    throw ChatBackendException("HTTP $code: ${errorDetail(raw) ?: raw.take(300).ifBlank { message }}")
+    throw ChatBackendException("HTTP $code: ${errorDetail(raw) ?: raw.take(300).ifBlank { message }}", statusCode = code)
 }
 
 /**

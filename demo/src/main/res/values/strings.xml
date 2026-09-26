@@ -101,4 +101,27 @@
     <string name="text_default">Default</string>
     <string name="text_large">Large</string>
     <string name="text_extra_large">Extra large</string>
+    <string name="save">Save</string>
+    <string name="sign_in">Sign in</string>
+    <string name="sign_in_again">Sign in again</string>
+    <string name="sign_out">Sign out</string>
+    <string name="sign_in_with">Sign in with %1$s</string>
+    <string name="signed_in_as">Signed in as %1$s</string>
+    <string name="signed_in">Signed in</string>
+    <string name="not_signed_in">Not signed in</string>
+    <string name="openrouter_signed_in">Signed in · key stored encrypted</string>
+    <string name="finish_in_browser">Finish signing in in the browser…</string>
+    <string name="sign_in_failed">Sign-in failed: %1$s</string>
+    <string name="experimental">Experimental</string>
+    <string name="subscription_warning">Uses your subscription through the vendor\'s own command-line client. Not endorsed by the vendor: it may stop working at any time and could put your account at risk.</string>
+    <string name="subscription_signin">Subscription sign-in (experimental)</string>
+    <string name="subscription_signin_desc">ChatGPT, Grok and Kimi plans through their CLI clients</string>
+    <string name="enable_anyway">Enable anyway</string>
+    <string name="sign_in_section">Sign in</string>
+    <string name="device_title">Approve on %1$s</string>
+    <string name="device_desc">Open the page and confirm this code:</string>
+    <string name="open_page">Open page</string>
+    <string name="copy_code">Copy code</string>
+    <string name="waiting_approval">Waiting for approval…</string>
+    <string name="cancel">Cancel</string>
 </resources>

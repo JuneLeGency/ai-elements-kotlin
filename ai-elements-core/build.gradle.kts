@@ -18,7 +18,10 @@ android {
 
     testOptions.unitTests.all { test ->
         // Opt-in live agent tests (see LiveAgentTest): -PliveOllama=... -PliveAgentServer=...
-        listOf("liveOllama" to "live.ollama", "liveModel" to "live.model", "liveAgentServer" to "live.agentServer")
+        listOf(
+            "liveOllama" to "live.ollama", "liveModel" to "live.model", "liveAgentServer" to "live.agentServer",
+            "liveCodexAuth" to "live.codexAuth", "liveCodexModel" to "live.codexModel",
+        )
             .forEach { (property, key) -> (findProperty(property) as String?)?.let { test.systemProperty(key, it) } }
         test.testLogging { showStandardStreams = true }
     }

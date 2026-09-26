@@ -6,18 +6,20 @@ import androidx.lifecycle.viewModelScope
 import dev.ai.elements.core.ChatController
 import dev.ai.elements.core.ChatState
 import dev.ai.elements.core.agent.BuiltinTools
+import dev.ai.elements.core.auth.OAuthProvider
 import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.core.config.ProviderStore
 import dev.ai.elements.core.model.FilePart
+import dev.ai.elements.demo.auth.SignInController
 import dev.ai.elements.demo.data.AppSettings
 import dev.ai.elements.demo.data.Conversation
 import dev.ai.elements.demo.data.ConversationRepository
 import dev.ai.elements.demo.tools.ClipboardTool
+import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 /**
  * App-wide state: providers, conversation history and the active chat.
@@ -25,6 +27,8 @@ import java.util.UUID
  * The [ChatController] resolves the backend from the selected provider on each
  * turn, so switching provider or model mid-conversation just works.
  */
+private val ChatGptModels = listOf("gpt-5.5", "gpt-5.3-codex")
+
 class ChatViewModel(app: Application) : AndroidViewModel(app) {
     val providers = ProviderStore(app)
     val settings = AppSettings(app)
@@ -35,7 +39,12 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
     private val tools = BuiltinTools + ClipboardTool(app)
 
     private val chat = ChatController(
-        backend = { approver -> providers.selected.let { it.createBackend(providers.apiKey(it.id), tools, approver) } },
+        backend = { approver ->
+            providers.selected.let {
+                if (it.usesTokens) it.createOAuthBackend(providers.tokenSource(it), tools, approver)
+                else it.createBackend(providers.apiKey(it.id), tools, approver)
+            }
+        },
         scope = viewModelScope,
     )
     val chatState: StateFlow<ChatState> = chat.state
@@ -81,8 +90,14 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    suspend fun listModels(profile: ProviderProfile): List<String> =
-        profile.listModels(providers.apiKey(profile.id))
+    suspend fun listModels(profile: ProviderProfile): List<String> = when {
+        // The ChatGPT backend has no public model list; offer the plan's current models.
+        profile.oauth == OAuthProvider.CHATGPT -> { providers.tokenSource(profile).fresh(); ChatGptModels }
+        profile.usesTokens -> profile.listModels(providers.tokenSource(profile).fresh().accessToken)
+        else -> profile.listModels(providers.apiKey(profile.id))
+    }
+
+    val signIn = SignInController(app, providers, viewModelScope)
 
     private suspend fun persist(state: ChatState) {
         val id = _conversationId.value

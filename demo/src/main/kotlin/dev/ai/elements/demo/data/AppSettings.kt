@@ -23,6 +23,8 @@ data class Appearance(
     val diagramSize: DiagramSize = DiagramSize.MEDIUM,
     val font: AppFont = AppFont.SYSTEM,
     val textSize: TextSize = TextSize.DEFAULT,
+    /** Offer subscription sign-ins through vendors' CLI clients (see OAuthProvider). */
+    val subscriptionSignIn: Boolean = false,
 )
 
 class AppSettings(context: Context) {
@@ -36,6 +38,7 @@ class AppSettings(context: Context) {
             diagramSize = runCatching { DiagramSize.valueOf(prefs.getString("diagram_size", null)!!) }.getOrDefault(DiagramSize.MEDIUM),
             font = runCatching { AppFont.valueOf(prefs.getString("font", null)!!) }.getOrDefault(AppFont.SYSTEM),
             textSize = runCatching { TextSize.valueOf(prefs.getString("text_size", null)!!) }.getOrDefault(TextSize.DEFAULT),
+            subscriptionSignIn = prefs.getBoolean("subscription_sign_in", false),
         ),
     )
     val appearance: StateFlow<Appearance> = _appearance.asStateFlow()
@@ -49,6 +52,7 @@ class AppSettings(context: Context) {
             .putString("diagram_size", appearance.diagramSize.name)
             .putString("font", appearance.font.name)
             .putString("text_size", appearance.textSize.name)
+            .putBoolean("subscription_sign_in", appearance.subscriptionSignIn)
             .apply()
     }
 }

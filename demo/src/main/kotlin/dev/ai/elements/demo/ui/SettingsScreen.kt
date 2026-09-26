@@ -24,6 +24,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.Login
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Check
@@ -42,6 +43,8 @@ import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material.icons.outlined.WarningAmber
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
@@ -49,6 +52,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -88,6 +92,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.ai.elements.core.auth.OAuthProvider
 import dev.ai.elements.core.config.ProviderKind
 import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.demo.ChatViewModel
@@ -170,7 +175,25 @@ private fun SettingsList(
     val noNetwork = stringResource(R.string.no_network_needed)
     val keySet = stringResource(R.string.key_set)
     val noKey = stringResource(R.string.no_key)
+    val signedInLabel = stringResource(R.string.signed_in)
+    val notSignedInLabel = stringResource(R.string.not_signed_in)
+    var confirmSubscription by remember { mutableStateOf(false) }
 
+    if (confirmSubscription) {
+        AlertDialog(
+            onDismissRequest = { confirmSubscription = false },
+            icon = { Icon(Icons.Outlined.WarningAmber, null) },
+            title = { Text(stringResource(R.string.subscription_signin)) },
+            text = { Text(stringResource(R.string.subscription_warning)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmSubscription = false
+                    viewModel.settings.update(appearance.copy(subscriptionSignIn = true))
+                }, modifier = Modifier.testTag("subscription-confirm")) { Text(stringResource(R.string.enable_anyway)) }
+            },
+            dismissButton = { TextButton(onClick = { confirmSubscription = false }) { Text(stringResource(R.string.cancel)) } },
+        )
+    }
     Scaffold(containerColor = Color.Transparent, topBar = { TopAppBar(title = { Text(stringResource(R.string.settings)) }, colors = transparentAppBarColors()) }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding)) {
             item { SectionHeader(stringResource(R.string.appearance)) }
@@ -323,12 +346,46 @@ private fun SettingsList(
                                     },
                                 )
                             }
+                            HorizontalDivider()
+                            Text(
+                                stringResource(R.string.sign_in_section),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            )
+                            OAuthProvider.entries.filter { !it.experimental || appearance.subscriptionSignIn }.forEach { provider ->
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.sign_in_with, provider.label)) },
+                                    leadingIcon = { Icon(Icons.AutoMirrored.Outlined.Login, null) },
+                                    trailingIcon = if (provider.experimental) ({
+                                        Text(stringResource(R.string.experimental), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary)
+                                    }) else null,
+                                    modifier = Modifier.testTag("add-oauth-${provider.name.lowercase()}"),
+                                    onClick = {
+                                        addMenu = false
+                                        val profile = ProviderProfile(
+                                            id = "oauth-${provider.name.lowercase()}-" + UUID.randomUUID().toString().take(6),
+                                            name = provider.label,
+                                            kind = provider.kind,
+                                            baseUrl = provider.baseUrl,
+                                            model = provider.defaultModel,
+                                            oauth = provider,
+                                        )
+                                        viewModel.providers.upsert(profile)
+                                        onEdit(profile.id)
+                                    },
+                                )
+                            }
                         }
                     }
                 }
             }
             items(profiles, key = { it.id }) { profile ->
-                val hasKey = remember(profile.id, highlightedId) { viewModel.providers.apiKey(profile.id).isNotBlank() }
+                val tokenVersion by viewModel.providers.tokenVersion.collectAsStateWithLifecycle()
+                val hasKey = remember(profile.id, highlightedId, tokenVersion) {
+                    if (profile.usesTokens) viewModel.providers.tokenStore(profile.id).load() != null
+                    else viewModel.providers.apiKey(profile.id).isNotBlank()
+                }
                 ListItem(
                     selected = profile.id == highlightedId,
                     onClick = { onEdit(profile.id) },
@@ -336,7 +393,10 @@ private fun SettingsList(
                         Text(
                             buildString {
                                 append(if (profile.kind.label == profile.name) noNetwork else profile.kind.label)
-                                if (profile.kind.needsKey) append(if (hasKey) keySet else noKey)
+                                when {
+                                    profile.oauth != null -> append(" · ").append(if (hasKey) signedInLabel else notSignedInLabel)
+                                    profile.kind.needsKey -> append(if (hasKey) keySet else noKey)
+                                }
                             },
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -360,6 +420,17 @@ private fun SettingsList(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(16.dp),
                 )
+            }
+            item {
+                ListItem(
+                    checked = appearance.subscriptionSignIn,
+                    onCheckedChange = {
+                        if (it) confirmSubscription = true else viewModel.settings.update(appearance.copy(subscriptionSignIn = false))
+                    },
+                    supportingContent = { Text(stringResource(R.string.subscription_signin_desc)) },
+                    trailingContent = { Switch(checked = appearance.subscriptionSignIn, onCheckedChange = null) },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp).testTag("subscription-sign-in"),
+                ) { Text(stringResource(R.string.subscription_signin)) }
             }
         }
     }
@@ -399,7 +470,7 @@ private fun ProviderEditor(
                     if (showBack) IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.back)) }
                 },
                 actions = {
-                    TextButton(onClick = ::save, enabled = dirty, modifier = Modifier.testTag("provider-save")) { Text("Save") }
+                    TextButton(onClick = ::save, enabled = dirty, modifier = Modifier.testTag("provider-save")) { Text(stringResource(R.string.save)) }
                 },
             )
         },
@@ -457,7 +528,7 @@ private fun ProviderEditor(
                         }
                     }
                 }
-                OutlinedTextField(
+                if (draft.oauth != null) AccountCard(viewModel, draft) else OutlinedTextField(
                     value = apiKey,
                     onValueChange = { apiKey = it },
                     label = { Text(if (draft.kind.needsKey) stringResource(R.string.api_key) else stringResource(R.string.api_key_optional)) },
@@ -496,7 +567,7 @@ private fun ProviderEditor(
                     onClick = {
                         scope.launch {
                             testing = true
-                            testResult = runCatching { draft.listModels(apiKey) }
+                            testResult = runCatching { if (draft.oauth != null) viewModel.listModels(draft) else draft.listModels(apiKey) }
                             testing = false
                         }
                     },

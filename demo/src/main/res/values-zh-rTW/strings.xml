@@ -99,4 +99,27 @@
     <string name="text_default">標準</string>
     <string name="text_large">大</string>
     <string name="text_extra_large">特大</string>
+    <string name="save">儲存</string>
+    <string name="sign_in">登入</string>
+    <string name="sign_in_again">重新登入</string>
+    <string name="sign_out">登出</string>
+    <string name="sign_in_with">使用 %1$s 登入</string>
+    <string name="signed_in_as">已登入：%1$s</string>
+    <string name="signed_in">已登入</string>
+    <string name="not_signed_in">未登入</string>
+    <string name="openrouter_signed_in">已登入 · 金鑰已加密儲存</string>
+    <string name="finish_in_browser">請在瀏覽器中完成登入…</string>
+    <string name="sign_in_failed">登入失敗：%1$s</string>
+    <string name="experimental">實驗性</string>
+    <string name="subscription_warning">透過廠商官方命令列工具的用戶端使用你的訂閱，未獲廠商認可：可能隨時失效，也可能為帳號帶來風險。</string>
+    <string name="subscription_signin">訂閱登入（實驗性）</string>
+    <string name="subscription_signin_desc">透過 CLI 用戶端使用 ChatGPT、Grok、Kimi 訂閱</string>
+    <string name="enable_anyway">仍然開啟</string>
+    <string name="sign_in_section">登入</string>
+    <string name="device_title">在 %1$s 上確認</string>
+    <string name="device_desc">開啟頁面並確認以下代碼：</string>
+    <string name="open_page">開啟頁面</string>
+    <string name="copy_code">複製代碼</string>
+    <string name="waiting_approval">等待確認…</string>
+    <string name="cancel">取消</string>
 </resources>

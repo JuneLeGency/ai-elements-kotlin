@@ -69,4 +69,9 @@ fun interface ToolApprover {
 }
 
 /** Thrown by backends for transport / HTTP failures. */
-class ChatBackendException(message: String, cause: Throwable? = null) : Exception(message, cause)
+class ChatBackendException(
+    message: String,
+    cause: Throwable? = null,
+    /** HTTP status when the provider answered with an error status. */
+    val statusCode: Int? = null,
+) : Exception(message, cause)

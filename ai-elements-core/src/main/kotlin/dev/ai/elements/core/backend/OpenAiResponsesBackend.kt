@@ -42,6 +42,8 @@ class OpenAiResponsesBackend(
     private val approver: ToolApprover = ToolApprover.AlwaysApprove,
     private val maxSteps: Int = 8,
     private val client: OkHttpClient = DefaultHttpClient,
+    /** Extra request headers (e.g. a signed-in provider's account header). */
+    private val extraHeaders: Map<String, String> = emptyMap(),
 ) : ChatBackend {
 
     override fun stream(history: List<Message>): Flow<ChatEvent> = flow {
@@ -88,7 +90,7 @@ class OpenAiResponsesBackend(
                 }
             })
         }
-        val headers = mapOf("Authorization" to if (apiKey.isBlank()) "" else "Bearer $apiKey")
+        val headers = extraHeaders + ("Authorization" to if (apiKey.isBlank()) "" else "Bearer $apiKey")
         val output = mutableListOf<JsonObject>()
         /** function_call item id → call_id (argument deltas are keyed by item id). */
         val callIds = mutableMapOf<String, String>()

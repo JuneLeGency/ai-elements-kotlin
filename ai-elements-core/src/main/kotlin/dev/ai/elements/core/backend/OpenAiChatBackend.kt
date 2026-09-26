@@ -44,6 +44,8 @@ class OpenAiChatBackend(
     private val approver: ToolApprover = ToolApprover.AlwaysApprove,
     private val maxSteps: Int = 8,
     private val client: OkHttpClient = DefaultHttpClient,
+    /** Extra request headers (e.g. a signed-in provider's account header). */
+    private val extraHeaders: Map<String, String> = emptyMap(),
 ) : ChatBackend {
 
     private class PendingCall(var id: String, var name: String, val args: StringBuilder = StringBuilder())
@@ -102,7 +104,7 @@ class OpenAiChatBackend(
             put("messages", messages)
             if (tools.isNotEmpty()) put("tools", buildJsonArray { tools.forEach { add(it.toOpenAi()) } })
         }
-        val headers = mapOf("Authorization" to if (apiKey.isBlank()) "" else "Bearer $apiKey")
+        val headers = extraHeaders + ("Authorization" to if (apiKey.isBlank()) "" else "Bearer $apiKey")
         val textId = "text-$step-${UUID.randomUUID()}"
         val reasoningId = "reasoning-$step-${UUID.randomUUID()}"
         var reasoningOpen = false

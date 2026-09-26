@@ -4,11 +4,14 @@ import dev.ai.elements.core.ChatBackend
 import dev.ai.elements.core.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.BuiltinTools
+import dev.ai.elements.core.auth.OAuthProvider
+import dev.ai.elements.core.auth.TokenSource
 import dev.ai.elements.core.backend.AgUiBackend
 import dev.ai.elements.core.backend.AnthropicBackend
 import dev.ai.elements.core.backend.DefaultHttpClient
 import dev.ai.elements.core.backend.GeminiBackend
 import dev.ai.elements.core.backend.MockAgentBackend
+import dev.ai.elements.core.backend.OAuthBackend
 import dev.ai.elements.core.backend.OllamaBackend
 import dev.ai.elements.core.backend.OpenAiChatBackend
 import dev.ai.elements.core.backend.OpenAiResponsesBackend
@@ -51,11 +54,31 @@ data class ProviderProfile(
     val useTools: Boolean = true,
     val systemPrompt: String = DEFAULT_SYSTEM_PROMPT,
     val builtIn: Boolean = false,
+    /** Signed in with OAuth instead of an API key (see [OAuthProvider]). */
+    val oauth: OAuthProvider? = null,
 ) {
+    /** Signed in with tokens (OpenRouter's sign-in yields a plain API key instead). */
+    val usesTokens: Boolean get() = oauth != null && oauth != OAuthProvider.OPENROUTER
+
+    /**
+     * The backend for a signed-in profile: every turn takes a fresh access
+     * token from [tokens] (refreshing as needed) and adds the provider's
+     * account headers.
+     */
+    fun createOAuthBackend(
+        tokens: TokenSource,
+        tools: List<AgentTool> = BuiltinTools,
+        approver: ToolApprover = ToolApprover.AlwaysApprove,
+    ): ChatBackend {
+        val provider = requireNotNull(oauth) { "$id is not an OAuth profile" }
+        return OAuthBackend(tokens) { t -> createBackend(t.accessToken, tools, approver, provider.apiHeaders(t)) }
+    }
+
     fun createBackend(
         apiKey: String,
         tools: List<AgentTool> = BuiltinTools,
         approver: ToolApprover = ToolApprover.AlwaysApprove,
+        headers: Map<String, String> = emptyMap(),
     ): ChatBackend {
         val agentTools = if (useTools) tools else emptyList()
         val base = baseUrl.trimEnd('/')
@@ -63,8 +86,8 @@ data class ProviderProfile(
             ProviderKind.MOCK -> MockAgentBackend(tools, approver)
             ProviderKind.AGENT_SERVER -> UiMessageStreamBackend("$base/api/chat", model, apiKey)
             ProviderKind.AG_UI -> AgUiBackend("$base/api/agui", apiKey)
-            ProviderKind.OPENAI -> OpenAiChatBackend(base, model, apiKey, systemPrompt, agentTools, approver)
-            ProviderKind.OPENAI_RESPONSES -> OpenAiResponsesBackend(base, model, apiKey, systemPrompt, agentTools, approver)
+            ProviderKind.OPENAI -> OpenAiChatBackend(base, model, apiKey, systemPrompt, agentTools, approver, extraHeaders = headers)
+            ProviderKind.OPENAI_RESPONSES -> OpenAiResponsesBackend(base, model, apiKey, systemPrompt, agentTools, approver, extraHeaders = headers)
             ProviderKind.ANTHROPIC -> AnthropicBackend(base, model, apiKey, systemPrompt, agentTools, approver)
             ProviderKind.GEMINI -> GeminiBackend(base, model, apiKey, systemPrompt, agentTools, approver)
             ProviderKind.OLLAMA -> OllamaBackend(base, model, systemPrompt, agentTools, approver)

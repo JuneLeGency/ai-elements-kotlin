@@ -99,4 +99,27 @@
     <string name="text_default">標準</string>
     <string name="text_large">大</string>
     <string name="text_extra_large">特大</string>
+    <string name="save">保存</string>
+    <string name="sign_in">サインイン</string>
+    <string name="sign_in_again">再サインイン</string>
+    <string name="sign_out">サインアウト</string>
+    <string name="sign_in_with">%1$s でサインイン</string>
+    <string name="signed_in_as">%1$s でサインイン中</string>
+    <string name="signed_in">サインイン済み</string>
+    <string name="not_signed_in">未サインイン</string>
+    <string name="openrouter_signed_in">サインイン済み · キーを暗号化して保存</string>
+    <string name="finish_in_browser">ブラウザでサインインを完了してください…</string>
+    <string name="sign_in_failed">サインインに失敗しました：%1$s</string>
+    <string name="experimental">試験運用</string>
+    <string name="subscription_warning">ベンダー公式のコマンドラインクライアント経由でサブスクリプションを利用します。ベンダーの公認ではないため、いつでも使えなくなる可能性があり、アカウントに影響するおそれもあります。</string>
+    <string name="subscription_signin">サブスクリプションでサインイン（試験運用）</string>
+    <string name="subscription_signin_desc">CLI クライアント経由で ChatGPT・Grok・Kimi のプランを利用</string>
+    <string name="enable_anyway">有効にする</string>
+    <string name="sign_in_section">サインイン</string>
+    <string name="device_title">%1$s で承認</string>
+    <string name="device_desc">ページを開いて次のコードを確認してください：</string>
+    <string name="open_page">ページを開く</string>
+    <string name="copy_code">コードをコピー</string>
+    <string name="waiting_approval">承認を待っています…</string>
+    <string name="cancel">キャンセル</string>
 </resources>
