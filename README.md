@@ -1,153 +1,62 @@
 # AI Elements for Kotlin
 
-A Kotlin/Compose (Android) port of [Vercel AI Elements](https://ai-elements.dev/) —
-the shadcn/ui AI chat components — plus a real model-gateway backend that streams
-over the **Vercel AI Data Stream Protocol** and **OpenAI-compatible SSE**.
+A Jetpack Compose (Android) port of [Vercel AI Elements](https://elements.ai-sdk.dev) with a
+**Material 3 Expressive** UI, a pluggable multi-provider agent layer, Markdown + Mermaid
+rendering, and a PydanticAI agent server. Adaptive for phones, foldables and tablets.
 
 ```
-demo (Android app, Compose)
-  └── :ai-elements-ui    14 ported components (Conversation, Message, Reasoning,
-                          PromptInput, Sources, Suggestions, Task, Plan,
-                          Confirmation, Image, Terminal, Snippet, ...)
-  └── :ai-elements-core  models + ChatController + theme/tokens
-                           + gateway backends (Vercel Data Stream / OpenAI)
-                           + GatewayConfig (SharedPreferences)
-                           + auth/ (PKCE + OAuth code flow + encrypted token store)
+demo (Android app)
+ ├─ :ai-elements-ui    Compose components (M3 Expressive)
+ │    chat/      Conversation · Message · Reasoning · ToolCall · Sources · PromptInput · Suggestions
+ │    markdown/  MarkdownContent (GFM) · CodeBlock (syntax highlight) · MermaidDiagram (offline mermaid.js)
+ │    theme/     AiElementsTheme (MaterialExpressiveTheme, dynamic color, expressive motion)
+ └─ :ai-elements-core  no Compose; pure Kotlin + OkHttp
+      ChatController (≈ useChat) · MessageReducer · ChatBackend/ChatEvent
+      backend/   UiMessageStreamBackend · OpenAiChatBackend · AnthropicBackend · MockAgentBackend
+      agent/     AgentTool + built-in tools (get_current_time, calculate)
+      config/    ProviderProfile presets · ProviderStore · SecretStore (Android Keystore)
 
-server (Python, uv)
-  FastAPI + PydanticAI agent → any OpenAI-compatible endpoint
-  (your local CLIProxyAPI / tinker-llm-gw on :9090)
-  streams the reply as the Vercel AI Data Stream Protocol
+server (Python, uv)   FastAPI + PydanticAI agent with tools → Vercel AI SDK v5 UI Message Stream
 ```
 
-## Toolchain (all latest stable)
+## Agent providers
 
-| Component        | Version  |
-|------------------|----------|
-| AGP              | 9.4.0    |
-| Gradle           | 9.7.1    |
-| Kotlin           | 2.4.20   |
-| Compose          | 1.12.1   |
-| Material3        | 1.4.0    |
-| compileSdk       | 37       |
-| Python (uv)      | pydantic-ai 2.42, fastapi 0.141, openai 3.13 |
+| Provider kind | Where the agent loop runs | Wire protocol |
+|---|---|---|
+| **Offline demo** | on-device, scripted | — (reasoning → real tool call → Markdown/Mermaid) |
+| **Agent server** | server (PydanticAI, `server/main.py`) | AI SDK v5 UI Message Stream (SSE) |
+| **OpenAI-compatible** | on-device tool loop | `/chat/completions` SSE (+ `reasoning_content`) |
+| **Anthropic** | on-device tool loop | `/v1/messages` SSE (thinking, tool_use) |
 
-> AGP 9.x ships **built-in Kotlin** — the `org.jetbrains.kotlin.android` plugin is
-> removed and must not be applied (see `build.gradle.kts`).
+Presets: Offline demo, PydanticAI agent server, CLIProxyAPI, Ollama, OpenAI, Anthropic, Google
+Gemini, OpenRouter — all editable, plus custom providers. Switch provider/model from the chip in
+the chat top bar; the conversation is kept. API keys are encrypted with the Android Keystore.
 
-## 1. Run the gateway server
+`10.0.2.2` is the emulator's alias for the host. On a physical device use the host's LAN IP.
+
+## Run
 
 ```bash
-cd server
-uv sync                 # creates .venv + installs (uses uv.lock)
-uv run uvicorn main:app --host 127.0.0.1 --port 8787
+# 1. Agent server (optional; the offline demo needs nothing)
+cd server && uv sync
+AGENT_MODEL=demo uv run uvicorn main:app --host 0.0.0.0 --port 8788
+#   AGENT_MODEL=demo  → offline scripted model (exercises the whole chain, no key)
+#   real model:  AGENT_BASE_URL=http://localhost:8317/v1 AGENT_API_KEY=... AGENT_MODEL=<model>
+
+# 2. App
+ANDROID_HOME=$HOME/Library/Android/sdk ./gradlew :demo:installDebug
 ```
 
-`/api/chat` takes `{messages, model, base_url, api_key, stream}` and streams
-Vercel Data Stream frames:
-
-```
-0:{"id":...}                       start
-9:<text delta>                     text
-a:<reasoning delta>                reasoning
-d:{"url":...,"title":...}          source-url
-3:{"message":...}                  error
-2:{"finishReason":"stop","usage":{...}}   finish
-```
-
-Point it at your OpenAI-compatible gateway (CLIProxyAPI) via request fields or
-env:
+## Test
 
 ```bash
-export CLIPROXY_BASE_URL=http://localhost:9090/v1
-export CLIPROXY_API_KEY=<your-cli-proxy-api-key>
-export CLIPROXY_MODEL=gpt-4o
+./gradlew :ai-elements-core:testDebugUnitTest      # protocol parsers, tool loops, controller
+./gradlew :demo:connectedDebugAndroidTest          # E2E through the UI (agent-server test skips if :8788 is down)
 ```
 
-## 2. Run the demo
+## Toolchain
 
-```bash
-ANDROID_HOME=$HOME/Library/Android/sdk ./gradlew :demo:assembleDebug
-# or: open in Android Studio and Run `demo`.
-```
-
-In-app: tap **Settings** → pick **Provider**:
-
-- **AI Elements gateway** — base URL `http://10.0.2.2:8787`, path `/api/chat`
-  (`10.0.2.2` is the emulator alias for the host loopback). Paste the server's
-  upstream API key if your gateway needs it.
-- **OpenAI-compatible** — base URL `http://10.0.2.2:9090/v1` (CLIProxyAPI), paste
-  the API key, set the model.
-- **Mock (offline)** — canned reply, no network.
-
-Changes persist to SharedPreferences and rebuild the backend on the next send.
-Secrets (API keys, OAuth tokens) live in **EncryptedSharedPreferences**.
-
-> The demo talks to the **host's** ports. On a physical device use your machine's
-> LAN IP in the base URL instead of `10.0.2.2`.
-
-## OAuth (authorization code + PKCE)
-
-`core/auth/` is a generic, parameterised OAuth framework (no per-vendor class).
-Add a provider by describing it with an `OAuthSpec`:
-
-```kotlin
-OAuthSpec(
-    instanceId = "openai",
-    providerLabel = "OpenAI",
-    authUrl   = "https://auth.openai.com/oauth/authorize",
-    tokenUrl  = "https://auth.openai.com/oauth/token",
-    clientId  = "app_...",
-    callbackPort = 8465,            // loopback port bound BEFORE the browser opens
-    redirectPath = "/oauth/callback",
-    tokenResponseFormat = TokenResponseFormat.JSON,
-)
-```
-
-Flow (`OAuthManager.startLogin()`): build a `Pkce` triple → bind
-`OAuthCallbackServer` on `localhost:port` → open the auth URL → await the redirect
-(state-checked) → exchange `code` + `code_verifier` at `tokenUrl` → persist the
-token to `OAuthTokenStore` (EncryptedSP). Tokens refresh **lazily** on demand
-(`validAccessToken()`, coalesced by a per-instance `Mutex`). The backends read the
-token via a suspend `authProvider`, so a refreshed token is used without rebuilding
-the backend. In-app: **Settings → Sign in** (providers with `supportsOAuth`).
-
-## Testing
-
-```bash
-# Parser unit tests (no network) — replay recorded Vercel/OpenAI fixtures against
-# a local in-process HTTP server and assert the ChatEvent sequence.
-ANDROID_HOME=$HOME/Library/Android/sdk \
-  ./gradlew :ai-elements-core:testDebugUnitTest
-
-# Real-service UI test (needs a connected device/emulator + a live gateway).
-# Skips gracefully when no API key is set.
-ANDROID_HOME=$HOME/Library/Android/sdk ./gradlew :demo:connectedDebugAndroidTest \
-  -PrealGatewayBaseUrl="http://10.0.2.2:9090/v1" \
-  -PrealGatewayApiKey="<sk-...>" \
-  -PrealGatewayModel="claude-sonnet-5"
-```
-
-## 3. Which libraries to distill
-
-Reusable, framework-agnostic pieces worth extracting into their own artifacts:
-
-- `core/backend/VercelDataStreamBackend.kt` — a tiny SSE→`ChatEvent` parser for
-  the Vercel AI Data Stream Protocol. Pure Kotlin + OkHttp, KMP-ready.
-- `core/backend/OpenAiBackend.kt` — the OpenAI-compatible SSE→`ChatEvent` parser.
-- `core/ChatController.kt` + `ChatModels.kt` — the `ChatBackend`/`ChatEvent`
-  contract and the AI-SDK-shaped `Message`/`Part` model.
-- `core/config/GatewayConfig*.kt` — SharedPreferences-backed, observable
-  `StateFlow` gateway settings (swap in `EncryptedSharedPreferences` for keys).
-- `ui/*` — the 14 Compose components (already isolated, only depend on
-  `:ai-elements-core` + Compose).
-
-## Notes
-
-- `LocalClipboardManager` is used in 3 components and is deprecated in Compose
-  1.12 (the new `LocalClipboard` wraps Android `ClipData`); kept for now, 3
-  deprecation warnings remain.
-- API keys and OAuth tokens are stored in **EncryptedSharedPreferences**
-  (`androidx.security:security-crypto`). The alpha (1.1.0) marks the old
-  `MasterKey`/`create` API deprecated — still functional; migrate to the new
-  `MasterKey` factory when a stable release lands.
+AGP 9.4 (built-in Kotlin) · Gradle 9.7.1 · Kotlin 2.4.20 · Compose 1.13.0-alpha01 ·
+Material3 **1.5.0-alpha29** (the Expressive APIs — `MaterialExpressiveTheme`, `LoadingIndicator`,
+`MaterialShapes`, connected button groups, `ShortNavigationBar`/`WideNavigationRail` — only ship in
+the 1.5 alpha line) · adaptive 1.3.0 · multiplatform-markdown-renderer 0.45 · mermaid 12.0.0.

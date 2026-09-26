@@ -1,164 +1,99 @@
 package dev.ai.elements.core.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
-/**
- * Role of a chat participant.
- *
- * Mirrors the `role` field of a `UIMessage` from the Vercel AI SDK.
- */
+/** Who produced a [Message]. Mirrors the AI SDK `UIMessage.role`. */
 @Serializable
-enum class Role {
-    USER,
-    ASSISTANT,
-    SYSTEM,
-    TOOL,
-}
+enum class Role { USER, ASSISTANT }
 
-/**
- * Lifecycle status of the chat, mirroring the AI SDK `ChatStatus` union
- * (`"idle" | "submitted" | "streaming" | "ready" | "error"`).
- */
-@Serializable
+/** Chat lifecycle, mirroring the AI SDK `useChat().status`. */
 enum class ChatStatus {
-    IDLE,
-    SUBMITTED,
-    STREAMING,
+    /** Idle; a new message can be sent. */
     READY,
+
+    /** Request sent, nothing received yet. */
+    SUBMITTED,
+
+    /** Parts are streaming in. */
+    STREAMING,
+
+    /** The last request failed; see [dev.ai.elements.core.ChatState.error]. */
     ERROR,
 }
 
 /**
- * A single step in the model's chain-of-thought / reasoning.
- *
- * [state] mirrors the AI SDK step status: `"incomplete" | "complete"`.
- *
- * @property id stable identifier, used by [ChatController] to update a step in place.
- * @property title human readable label, e.g. "Searching the web".
- * @property detail optional longer description of the step.
- * @property state whether the step is still running or finished.
- */
-@Serializable
-data class ReasoningStep(
-    val id: String,
-    val title: String,
-    val detail: String? = null,
-    val state: StepState = StepState.INCOMPLETE,
-)
-
-@Serializable
-enum class StepState { INCOMPLETE, COMPLETE }
-
-/**
- * A cited source / reference shown in the [Sources] component.
- *
- * @property id stable identifier.
- * @property title display title of the source.
- * @property url canonical link.
- * @property domain optional domain label, e.g. "www.x.com".
- */
-@Serializable
-data class Source(
-    val id: String,
-    val title: String,
-    val url: String,
-    val domain: String? = null,
-)
-
-/**
- * A suggestion chip offered to the user.
- *
- * @property id stable identifier.
- * @property text the prompt text to send when selected.
- */
-@Serializable
-data class Suggestion(
-    val id: String,
-    val text: String,
-)
-
-/**
- * A tool/function call made by the model.
- *
- * @property id stable identifier.
- * @property name name of the tool.
- * @property state execution state.
- */
-@Serializable
-data class ToolCall(
-    val id: String,
-    val name: String,
-    val state: ToolCallState = ToolCallState.RUNNING,
-    val input: Map<String, String>? = null,
-    val output: String? = null,
-)
-
-@Serializable
-enum class ToolCallState { RUNNING, SUCCESS, ERROR }
-
-/**
- * A complete chat message.
- *
- * Mirrors the AI SDK `UIMessage` shape. The content is delivered as a stream of
- * "parts" (text, reasoning, tool calls, sources) which the UI renders in order.
- *
- * @property id stable identifier.
- * @property role who produced the message.
- * @property parts the ordered content parts.
- * @property timestamp epoch millis when the message was created.
+ * A chat message: an ordered list of [Part]s, the same shape as the AI SDK
+ * `UIMessage`. Assistant messages usually interleave reasoning, tool calls and
+ * text across several agent steps.
  */
 @Serializable
 data class Message(
     val id: String,
     val role: Role,
     val parts: List<Part> = emptyList(),
-    val timestamp: Long = 0L,
+    val createdAt: Long = 0L,
 ) {
-    /** Convenience: concatenate all [TextPart] bodies in order. */
+    /** Concatenated text of all [TextPart]s. */
     val text: String
-        get() = parts.mapNotNull { it.textOrNull() }.joinToString("")
+        get() = parts.filterIsInstance<TextPart>().joinToString("\n\n") { it.text }
 
-    fun copyUpdateParts(transform: (List<Part>) -> List<Part>): Message =
-        copy(parts = transform(parts))
+    val isStreaming: Boolean
+        get() = parts.any { it.isStreaming }
 }
 
-/**
- * Sealed hierarchy of message content parts.
- *
- * This is the KMP-friendly equivalent of the AI SDK `MessagePart` discriminated
- * union (`text | reasoning | tool-* | source-url | source-document | file`).
- */
 @Serializable
 sealed interface Part {
-    fun textOrNull(): String? = null
+    val id: String
+    val isStreaming: Boolean get() = false
 }
 
 @Serializable
+@SerialName("text")
 data class TextPart(
-    val id: String,
+    override val id: String,
     val text: String,
-    @Transient val isStreaming: Boolean = false,
+    override val isStreaming: Boolean = false,
+) : Part
+
+@Serializable
+@SerialName("reasoning")
+data class ReasoningPart(
+    override val id: String,
+    val text: String,
+    override val isStreaming: Boolean = false,
+    val startedAt: Long = 0L,
+    val durationMs: Long? = null,
+) : Part
+
+@Serializable
+enum class ToolState { INPUT_STREAMING, INPUT_AVAILABLE, OUTPUT_AVAILABLE, OUTPUT_ERROR }
+
+/**
+ * One tool invocation. [id] is the tool call id; [input] is the raw JSON
+ * arguments and [output] the tool result as text.
+ */
+@Serializable
+@SerialName("tool")
+data class ToolPart(
+    override val id: String,
+    val name: String,
+    val state: ToolState = ToolState.INPUT_STREAMING,
+    val input: String = "",
+    val output: String? = null,
+    val errorText: String? = null,
 ) : Part {
-    override fun textOrNull(): String = text
+    override val isStreaming: Boolean
+        get() = state == ToolState.INPUT_STREAMING || state == ToolState.INPUT_AVAILABLE
 }
 
 @Serializable
-data class ReasoningPart(
-    val id: String,
-    val steps: List<ReasoningStep> = emptyList(),
-    @Transient val isStreaming: Boolean = false,
-    @Transient val durationMs: Long? = null,
+@SerialName("source")
+data class SourcePart(
+    override val id: String,
+    val url: String,
+    val title: String = url,
 ) : Part
 
-@Serializable
-data class ToolCallPart(
-    val id: String,
-    val call: ToolCall,
-) : Part
-
-@Serializable
-data class SourcesPart(
-    val id: String,
-    val sources: List<Source> = emptyList(),
-) : Part
+/** A prompt suggestion chip. */
+data class Suggestion(val text: String, val label: String = text)

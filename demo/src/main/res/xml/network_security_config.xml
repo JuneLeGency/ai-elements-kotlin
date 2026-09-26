@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Local agent servers / proxies on the dev machine are plain HTTP. This is a
+     demo app: cleartext is allowed so any LAN host works; ship HTTPS-only. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>
