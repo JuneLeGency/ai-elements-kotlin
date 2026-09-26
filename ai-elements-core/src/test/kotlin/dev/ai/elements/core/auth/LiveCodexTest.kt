@@ -63,4 +63,22 @@ class LiveCodexTest {
         println("LiveCodex model=$model events=${events.size} text=${text.take(80)}")
         assertTrue("expected a reply, got events=${events.map { it::class.simpleName }}", text.contains("pong", ignoreCase = true))
     }
+
+    @Test fun chatgptSubscription_runsOnDeviceToolLoop() = runBlocking {
+        assumeTrue("set -PliveCodexAuth=/path/to/auth.json", authPath.isNotBlank())
+        val tokens = codexCliTokens(File(authPath))
+        assumeTrue("access token expired — run `codex` once to renew it", !tokens.expiresSoon(slackMs = 60_000))
+        val profile = ProviderProfile(
+            id = "live-chatgpt-tools", name = "ChatGPT", kind = OAuthProvider.CHATGPT.kind,
+            baseUrl = OAuthProvider.CHATGPT.baseUrl, model = model, useTools = true, oauth = OAuthProvider.CHATGPT,
+        )
+        val backend = profile.createOAuthBackend(TokenSource(OAuthProvider.CHATGPT, ReadOnlyStore(tokens)))
+        val prompt = Message("u1", Role.USER, listOf(TextPart("t1", "Use the calculate tool to compute 1234 * 5678, then state the result.")))
+        val events = backend.stream(listOf(prompt)).toList()
+        val outputs = events.filterIsInstance<ChatEvent.ToolOutput>()
+        val text = events.filterIsInstance<ChatEvent.TextDelta>().joinToString("") { it.delta }
+        println("LiveCodex tools: calls=${outputs.size} output=${outputs.firstOrNull()?.output} text=${text.take(100)}")
+        assertTrue("expected the calculate tool to run", outputs.any { it.output.contains("7006652") || it.output.contains("7,006,652") })
+        assertTrue("expected the result in the reply: $text", text.contains("7006652") || text.contains("7,006,652"))
+    }
 }
