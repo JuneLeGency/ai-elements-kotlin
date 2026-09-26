@@ -142,6 +142,7 @@ private fun deviceIcon(d: AudioDeviceInfo): ImageVector = when (d.type) {
 
 // ---------------------------------------------------------------- VoiceSelector
 
+/** A text-to-speech voice in [VoiceSelector]. */
 @Immutable
 data class VoiceOption(
     val id: String,

@@ -45,11 +45,14 @@ import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiType
 import dev.ai.elements.ui.theme.isDark
 
+/** Outcome of a test in [TestResults]. */
 enum class TestStatus { PASSED, FAILED, SKIPPED, RUNNING }
 
+/** One test; [error] is shown under failed tests. */
 @Immutable
 data class TestCaseResult(val name: String, val status: TestStatus, val durationMs: Long? = null, val error: String? = null)
 
+/** A group of tests in [TestResults]. */
 @Immutable
 data class TestSuiteResult(val name: String, val tests: List<TestCaseResult>)
 

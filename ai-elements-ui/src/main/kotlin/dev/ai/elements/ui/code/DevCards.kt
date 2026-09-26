@@ -1,6 +1,5 @@
 package dev.ai.elements.ui.code
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Api
@@ -50,6 +48,7 @@ import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiType
 import dev.ai.elements.ui.theme.compactIconButton
+import dev.ai.elements.ui.theme.fadingHorizontalScroll
 import dev.ai.elements.ui.theme.isDark
 import java.text.DateFormat
 import java.util.Date
@@ -68,7 +67,7 @@ fun Snippet(text: String, modifier: Modifier = Modifier, prefix: String? = null)
     Surface(color = MaterialTheme.colorScheme.surfaceContainerHighest, shape = MaterialTheme.shapes.medium, modifier = modifier.fillMaxWidth().testTag("snippet")) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 14.dp, end = 2.dp)) {
             prefix?.let { Text("$it ", style = AiType.code, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-            SelectionContainer(Modifier.weight(1f).horizontalScroll(rememberScrollState())) {
+            SelectionContainer(Modifier.weight(1f).fadingHorizontalScroll()) {
                 Text(text, style = AiType.code, softWrap = false)
             }
             CopyButton({ text })
@@ -78,8 +77,10 @@ fun Snippet(text: String, modifier: Modifier = Modifier, prefix: String? = null)
 
 // ---------------------------------------------------------------- Commit
 
+/** How a file changed in a [Commit]. */
 enum class FileChange(val letter: String) { ADDED("A"), MODIFIED("M"), DELETED("D"), RENAMED("R") }
 
+/** A changed file in a [Commit] with its line counts. */
 @Immutable
 data class CommitFile(val path: String, val change: FileChange = FileChange.MODIFIED, val additions: Int = 0, val deletions: Int = 0)
 
@@ -147,6 +148,7 @@ fun Commit(
 
 // ---------------------------------------------------------------- SchemaDisplay
 
+/** A parameter of an endpoint in [SchemaDisplay]; [location] is where it goes (path, query, header, body). */
 @Immutable
 data class SchemaParameter(
     val name: String,
@@ -222,13 +224,14 @@ private fun SectionLabel(text: String) {
 private fun CodeSample(text: String) {
     Surface(color = MaterialTheme.colorScheme.surfaceContainerHighest, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
         SelectionContainer {
-            Text(text, style = AiType.code, softWrap = false, modifier = Modifier.horizontalScroll(rememberScrollState()).padding(12.dp))
+            Text(text, style = AiType.code, softWrap = false, modifier = Modifier.fadingHorizontalScroll().padding(12.dp))
         }
     }
 }
 
 // ---------------------------------------------------------------- PackageInfo
 
+/** The size of a dependency change in [PackageInfo]. */
 enum class PackageChange { MAJOR, MINOR, PATCH, ADDED, REMOVED }
 
 /**
@@ -280,6 +283,7 @@ private val PackageChange.label: Int
 
 // ---------------------------------------------------------------- EnvironmentVariables
 
+/** A variable in [EnvironmentVariables]; [secret] values stay masked until revealed. */
 @Immutable
 data class EnvironmentVariable(val name: String, val value: String, val secret: Boolean = true)
 

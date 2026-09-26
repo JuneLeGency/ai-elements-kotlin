@@ -37,6 +37,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.ui.R
 
+/** A choice in a [Question]; [id] is what [QuestionAnswer.selected] reports. */
 @Immutable
 data class QuestionOption(val id: String, val label: String, val description: String? = null)
 

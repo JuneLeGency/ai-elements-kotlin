@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material3.AssistChip
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.SourcePart
 import dev.ai.elements.ui.R
+import dev.ai.elements.ui.theme.horizontalFadingEdges
 
 /** "Used N sources" with a row of link chips (AI Elements `<Sources>`). */
 @Composable
@@ -32,7 +34,12 @@ fun Sources(sources: List<SourcePart>, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        val row = rememberLazyListState()
+        LazyRow(
+            state = row,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.horizontalFadingEdges({ row.canScrollBackward }, { row.canScrollForward }),
+        ) {
             items(sources, key = { it.id }) { source ->
                 AssistChip(
                     onClick = { runCatching { uriHandler.openUri(source.url) } },

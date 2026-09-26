@@ -250,11 +250,18 @@ private fun plainPreview(markdown: String): String =
         .orEmpty()
         .take(120)
 
-/** Drop emphasis/code markers, citation markers and backslash escapes; keep a spaced `*` (as in `2 * 3`). */
-private fun String.stripInlineMarkdown(): String =
-    replace(Regex("""\[\d+]|`|\*\*|__"""), "")
-        .replace(Regex("""(?<=^|\s)[*_](?=\S)|(?<=\S)[*_](?=\s|$|\p{Punct})"""), "")
-        .replace(Regex("""\\(\p{Punct})"""), "$1")
+/**
+ * Drop emphasis/code and citation markers but keep literal punctuation:
+ * backslash-escaped characters (`\*`) and a spaced `*` (as in `2 * 3`) survive.
+ */
+private fun String.stripInlineMarkdown(): String {
+    // Park escaped characters behind a private-use marker so the marker rules skip them.
+    val parked = replace(Regex("""\\(\p{Punct})""")) { "\uE000" + it.groupValues[1] }
+    return parked
+        .replace(Regex("""\[\d+]|`|(?<!\uE000)\*\*|(?<!\uE000)__"""), "")
+        .replace(Regex("""(?<=^|\s)(?<!\uE000)[*_](?=\S)|(?<=[^\s\uE000])[*_](?=\s|$|\p{Punct})"""), "")
+        .replace("\uE000", "")
+}
 
 private enum class DateGroup(@StringRes val label: Int) {
     TODAY(R.string.group_today),

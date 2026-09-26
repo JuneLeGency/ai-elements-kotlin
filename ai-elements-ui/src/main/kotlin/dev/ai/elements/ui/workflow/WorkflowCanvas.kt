@@ -1,4 +1,4 @@
-package dev.ai.elements.ui.chat
+package dev.ai.elements.ui.workflow
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
@@ -83,12 +83,15 @@ import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
 import dev.ai.elements.ui.R
+import dev.ai.elements.ui.chat.StepStatus
+import dev.ai.elements.ui.chat.host
 import dev.ai.elements.ui.theme.AiSpacing
 import kotlin.math.roundToInt
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 
+/** Color role of a [CanvasNode]. */
 enum class NodeTone { PRIMARY, SECONDARY, TERTIARY, ERROR, NEUTRAL }
 
 /** A node on a [WorkflowCanvas] (AI Elements `<Node>`); [position] is its top-left in canvas dp. */
@@ -318,6 +321,7 @@ data class AgentRunLabels(
     val sources: (count: Int) -> String = { "$it sources" },
 )
 
+/** Localized node titles for [agentRunGraph]. */
 @Composable
 fun rememberAgentRunLabels(): AgentRunLabels {
     val resources = LocalResources.current

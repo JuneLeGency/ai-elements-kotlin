@@ -105,6 +105,7 @@ class StickToBottomState internal constructor(private val listState: LazyListSta
     }
 }
 
+/** Remembers a [StickToBottomState] for [listState]; install its `connection` with `Modifier.nestedScroll`. */
 @Composable
 fun rememberStickToBottomState(listState: LazyListState): StickToBottomState {
     val state = remember(listState) { StickToBottomState(listState) }

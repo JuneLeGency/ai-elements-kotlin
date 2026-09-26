@@ -57,12 +57,14 @@ data class Message(
         get() = parts.any { it.isStreaming }
 }
 
+/** One piece of a [Message]: text, reasoning, a tool call, a file, a source or custom data. */
 @Serializable
 sealed interface Part {
     val id: String
     val isStreaming: Boolean get() = false
 }
 
+/** Answer text (Markdown); [isStreaming] while tokens are still arriving. */
 @Serializable
 @SerialName("text")
 data class TextPart(
@@ -71,6 +73,7 @@ data class TextPart(
     override val isStreaming: Boolean = false,
 ) : Part
 
+/** The model's reasoning; [durationMs] is how long it thought, once finished. */
 @Serializable
 @SerialName("reasoning")
 data class ReasoningPart(
@@ -88,6 +91,7 @@ data class Usage(val inputTokens: Int = 0, val outputTokens: Int = 0) {
     operator fun plus(other: Usage) = Usage(inputTokens + other.inputTokens, outputTokens + other.outputTokens)
 }
 
+/** Life cycle of a tool call: input streaming → available → (approval) → output / error / denied. */
 @Serializable
 enum class ToolState {
     INPUT_STREAMING,
@@ -119,6 +123,7 @@ data class ToolPart(
             state == ToolState.APPROVAL_REQUESTED
 }
 
+/** A cited source (URL and title), shown by [dev.ai.elements.ui.chat.Sources] and inline citations. */
 @Serializable
 @SerialName("source")
 data class SourcePart(

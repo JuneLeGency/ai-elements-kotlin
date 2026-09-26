@@ -50,4 +50,5 @@ data class MermaidSizing(val scale: Float = 0.75f, val maxInlineHeight: Dp = 400
     }
 }
 
+/** The inline size every [MermaidDiagram] below uses. */
 val LocalMermaidSizing = staticCompositionLocalOf { MermaidSizing() }

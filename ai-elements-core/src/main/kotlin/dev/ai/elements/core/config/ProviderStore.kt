@@ -78,6 +78,7 @@ class SecretStore(context: Context) {
 /** SecretStore key prefix for a profile's OAuth tokens. */
 private const val TOKENS_PREFIX = "oauth-tokens:"
 
+/** Saved provider profiles (SharedPreferences) with their API keys and OAuth tokens kept encrypted in [SecretStore]; exposes the list and the selected profile as flows. */
 class ProviderStore(context: Context) {
     private val prefs = context.getSharedPreferences("ai_elements_providers", Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }

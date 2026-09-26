@@ -13,7 +13,6 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -63,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.compactIconButton
+import dev.ai.elements.ui.theme.fadingHorizontalScroll
 
 /**
  * The composer (AI Elements `<PromptInput>`): a roomy rounded field with a
@@ -144,7 +143,7 @@ fun PromptInput(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+                    modifier = Modifier.weight(1f).fadingHorizontalScroll(),
                 ) {
                     if (onAddAttachment != null) {
                         IconButton(

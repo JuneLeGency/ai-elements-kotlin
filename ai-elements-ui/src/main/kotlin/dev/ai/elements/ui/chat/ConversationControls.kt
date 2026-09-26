@@ -176,6 +176,7 @@ fun Queue(
 /** A destination for [OpenInChat]; `{q}` in [urlTemplate] is replaced by the encoded prompt. */
 data class OpenInTarget(val label: String, val urlTemplate: String)
 
+/** The chat apps [OpenInChat] offers by default; pass your own list to change them. */
 val DefaultOpenInTargets = listOf(
     OpenInTarget("ChatGPT", "https://chatgpt.com/?q={q}"),
     OpenInTarget("Claude", "https://claude.ai/new?q={q}"),

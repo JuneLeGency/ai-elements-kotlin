@@ -1,10 +1,8 @@
 package dev.ai.elements.ui.chat
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -17,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.LocalCodeFontFamily
+import dev.ai.elements.ui.theme.fadingHorizontalScroll
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -75,7 +74,7 @@ private fun JsonCard(part: DataPart, modifier: Modifier) {
                 prettyJson.encodeToString(JsonElement.serializer(), part.data),
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = LocalCodeFontFamily.current),
                 softWrap = false,
-                modifier = Modifier.padding(top = 6.dp).horizontalScroll(rememberScrollState()),
+                modifier = Modifier.padding(top = 6.dp).fadingHorizontalScroll(),
             )
         }
     }

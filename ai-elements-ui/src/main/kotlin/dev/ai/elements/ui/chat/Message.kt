@@ -67,6 +67,9 @@ import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
 import dev.ai.elements.ui.theme.AiType
 import dev.ai.elements.ui.theme.compactIconButton
+import dev.ai.elements.ui.workflow.WorkflowCanvas
+import dev.ai.elements.ui.workflow.agentRunGraph
+import dev.ai.elements.ui.workflow.rememberAgentRunLabels
 
 /**
  * Renders any [Message]: a bubble for the user, a full-width part list for the assistant.
@@ -89,6 +92,7 @@ fun MessageItem(
     }
 }
 
+/** A user message: attachments above a right-aligned bubble. */
 @Composable
 fun UserMessage(message: Message, modifier: Modifier = Modifier) {
     val files = message.parts.filterIsInstance<FilePart>()
@@ -120,6 +124,7 @@ private fun UserBubble(text: String, modifier: Modifier) {
     }
 }
 
+/** A whole assistant message in one composable (for non-virtualized lists); [Conversation] renders replies block by block instead. */
 @Composable
 fun AssistantMessage(
     message: Message,

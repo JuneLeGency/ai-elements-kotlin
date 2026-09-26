@@ -113,6 +113,7 @@ class SpeechInputState internal constructor(private val context: Context) {
     }
 }
 
+/** Remembers a [SpeechInputState]; the recognizer is released with the composition. */
 @Composable
 fun rememberSpeechInputState(): SpeechInputState {
     val context = LocalContext.current.applicationContext

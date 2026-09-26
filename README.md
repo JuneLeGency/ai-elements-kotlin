@@ -82,15 +82,16 @@ tablets, OAuth sign-in, languages, palettes and fonts.
 
 ## Elements
 
-| Group | Elements |
+| Group (package) | Elements |
 |---|---|
-| Chat | `Conversation` (stick-to-bottom, jump to latest) · `MessageItem` / actions · `PromptInput` (attachments, queue, hardware-keyboard send) · `Suggestions` · `Reasoning` · `ToolCall` + `Confirmation` · `Sources` · `InlineCitation` · `ContextUsage` · `BranchSelector` · `Checkpoint` · `Queue` · `OpenInChat` · `ModelSelector` · `Question` · `Agent` · `Persona` |
-| Structure | `ChainOfThought` · `Plan` · `Task` · `Artifact` · `WebPreview` · `WorkflowCanvas` (nodes, edges, pan / zoom) · `DataPartView` |
-| Content | `MarkdownContent` · `CodeBlock` · `MermaidDiagram` · `MathBlock` · `FileImage` / attachments |
-| Voice | `SpeechInput` · `AudioPlayer` · `Transcription` · `MicSelector` · `VoiceSelector` |
-| Developer | `Terminal` (ANSI) · `StackTrace` · `TestResults` · `FileTree` · `Commit` · `SchemaDisplay` · `PackageInfo` · `EnvironmentVariables` · `Sandbox` · `Snippet` |
+| Chat (`ui.chat`) | `Conversation` (stick-to-bottom, jump to latest) · `MessageItem` / actions · `PromptInput` (attachments, queue, hardware-keyboard send) · `Suggestions` · `Reasoning` · `ToolCall` + `Confirmation` · `Sources` · `InlineCitation` · `ContextUsage` · `BranchSelector` · `Checkpoint` · `Queue` · `OpenInChat` · `ModelSelector` · `Question` · `Agent` |
+| Agent structure (`ui.chat`) | `ChainOfThought` · `Plan` · `Task` · `DataPartView` |
+| Workflow (`ui.workflow`) | `WorkflowCanvas` (nodes, edges, pan / zoom) · `agentRunGraph` |
+| Content (`ui.markdown`) | `MarkdownContent` · `CodeBlock` · `MermaidDiagram` · `MathBlock` · `FileImage` / attachments |
+| Voice (`ui.voice`) | `Persona` · `SpeechInput` · `AudioPlayer` · `Transcription` · `MicSelector` · `VoiceSelector` |
+| Vibe coding (`ui.code`) | `Artifact` · `WebPreview` · `Terminal` (ANSI) · `StackTrace` · `TestResults` · `FileTree` · `Commit` · `SchemaDisplay` · `PackageInfo` · `EnvironmentVariables` · `Sandbox` · `Snippet` |
 
-All 50 AI Elements are covered except `JSXPreview` (web-only; `WebPreview` renders HTML). The
+Packages follow the AI Elements docs categories. All 50 AI Elements are covered except `JSXPreview` (web-only; `WebPreview` renders HTML). The
 canvas `Panel` / `Toolbar` / `Controls` / `Connection` are part of `WorkflowCanvas`.
 
 ## Theming

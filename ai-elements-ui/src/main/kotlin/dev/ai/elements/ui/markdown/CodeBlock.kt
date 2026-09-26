@@ -1,12 +1,10 @@
 package dev.ai.elements.ui.markdown
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
@@ -37,6 +35,7 @@ import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiType
 import dev.ai.elements.ui.theme.compactIconButton
+import dev.ai.elements.ui.theme.fadingHorizontalScroll
 import dev.ai.elements.ui.theme.isDark
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.BoldHighlight
@@ -105,7 +104,7 @@ fun CodeBlock(
                     color = MaterialTheme.colorScheme.onSurface,
                     softWrap = false,
                     modifier = Modifier
-                        .horizontalScroll(rememberScrollState())
+                        .fadingHorizontalScroll()
                         .padding(start = 14.dp, end = 14.dp, bottom = 12.dp),
                 )
             }

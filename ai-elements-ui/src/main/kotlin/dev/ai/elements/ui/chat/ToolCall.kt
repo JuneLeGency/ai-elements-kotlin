@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Block
@@ -52,6 +50,7 @@ import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
 import dev.ai.elements.ui.theme.LocalCodeFontFamily
+import dev.ai.elements.ui.theme.fadingHorizontalScroll
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
@@ -179,7 +178,7 @@ private fun Section(title: String, body: String, color: Color = MaterialTheme.co
                     color = color,
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = LocalCodeFontFamily.current),
                     softWrap = false,
-                    modifier = Modifier.horizontalScroll(rememberScrollState()).padding(12.dp),
+                    modifier = Modifier.fadingHorizontalScroll().padding(12.dp),
                 )
             }
         }

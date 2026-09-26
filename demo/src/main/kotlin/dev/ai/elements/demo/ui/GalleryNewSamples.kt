@@ -24,8 +24,8 @@ import dev.ai.elements.ui.chat.AgentToolSpec
 import dev.ai.elements.ui.chat.ModelCapability
 import dev.ai.elements.ui.chat.ModelOption
 import dev.ai.elements.ui.chat.ModelSelector
-import dev.ai.elements.ui.chat.Persona
-import dev.ai.elements.ui.chat.PersonaState
+import dev.ai.elements.ui.voice.Persona
+import dev.ai.elements.ui.voice.PersonaState
 import dev.ai.elements.ui.chat.Question
 import dev.ai.elements.ui.chat.QuestionAnswer
 import dev.ai.elements.ui.chat.QuestionOption

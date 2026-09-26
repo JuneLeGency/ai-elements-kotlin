@@ -1,7 +1,6 @@
 package dev.ai.elements.ui.code
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -44,6 +43,7 @@ import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiType
 import dev.ai.elements.ui.theme.compactIconButton
+import dev.ai.elements.ui.theme.fadingHorizontalScroll
 import dev.ai.elements.ui.theme.isDark
 
 /** Where a command is in its life. */
@@ -107,7 +107,7 @@ fun Terminal(
                     .heightIn(max = maxHeight)
                     .background(Color.Black.copy(alpha = 0.12f))
                     .verticalScroll(scroll)
-                    .horizontalScroll(rememberScrollState())
+                    .fadingHorizontalScroll()
                     .padding(horizontal = 14.dp, vertical = 10.dp),
             ) {
                 SelectionContainer { Text(text, style = AiType.code, softWrap = false) }

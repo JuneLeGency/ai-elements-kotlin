@@ -53,10 +53,10 @@ import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
 import dev.ai.elements.core.model.Usage
 import dev.ai.elements.demo.R
-import dev.ai.elements.ui.chat.Artifact
+import dev.ai.elements.ui.code.Artifact
 import dev.ai.elements.ui.chat.BranchSelector
-import dev.ai.elements.ui.chat.CanvasEdge
-import dev.ai.elements.ui.chat.CanvasNode
+import dev.ai.elements.ui.workflow.CanvasEdge
+import dev.ai.elements.ui.workflow.CanvasNode
 import dev.ai.elements.ui.chat.ChainOfThought
 import dev.ai.elements.ui.chat.Checkpoint
 import dev.ai.elements.ui.chat.ContextUsage
@@ -64,7 +64,7 @@ import dev.ai.elements.ui.chat.DataPartView
 import dev.ai.elements.ui.chat.FileAttachment
 import dev.ai.elements.ui.chat.InlineCitation
 import dev.ai.elements.ui.chat.MessageItem
-import dev.ai.elements.ui.chat.NodeTone
+import dev.ai.elements.ui.workflow.NodeTone
 import dev.ai.elements.ui.chat.OpenInChat
 import dev.ai.elements.ui.chat.Plan
 import dev.ai.elements.ui.chat.PromptInput
@@ -75,8 +75,8 @@ import dev.ai.elements.ui.chat.StepStatus
 import dev.ai.elements.ui.chat.Suggestions
 import dev.ai.elements.ui.chat.Task
 import dev.ai.elements.ui.chat.ToolCall
-import dev.ai.elements.ui.chat.WebPreview
-import dev.ai.elements.ui.chat.WorkflowCanvas
+import dev.ai.elements.ui.code.WebPreview
+import dev.ai.elements.ui.workflow.WorkflowCanvas
 import dev.ai.elements.ui.chat.WorkflowStep
 import dev.ai.elements.ui.markdown.CodeBlock
 import dev.ai.elements.ui.markdown.MarkdownContent

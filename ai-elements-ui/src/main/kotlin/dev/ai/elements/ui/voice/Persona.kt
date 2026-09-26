@@ -1,4 +1,4 @@
-package dev.ai.elements.ui.chat
+package dev.ai.elements.ui.voice
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing

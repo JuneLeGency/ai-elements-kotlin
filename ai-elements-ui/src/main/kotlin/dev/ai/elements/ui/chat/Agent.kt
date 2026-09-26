@@ -2,7 +2,6 @@ package dev.ai.elements.ui.chat
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Build
@@ -36,6 +34,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiType
+import dev.ai.elements.ui.theme.fadingHorizontalScroll
 
 /** A tool an agent can call; [schema] is its JSON input schema, if shown. */
 @Immutable
@@ -120,7 +119,7 @@ private fun ToolSpecRow(tool: AgentToolSpec) {
 private fun Schema(text: String) {
     Surface(color = MaterialTheme.colorScheme.surfaceContainerHighest, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
         SelectionContainer {
-            Text(text, style = AiType.code, softWrap = false, modifier = Modifier.horizontalScroll(rememberScrollState()).padding(12.dp))
+            Text(text, style = AiType.code, softWrap = false, modifier = Modifier.fadingHorizontalScroll().padding(12.dp))
         }
     }
 }

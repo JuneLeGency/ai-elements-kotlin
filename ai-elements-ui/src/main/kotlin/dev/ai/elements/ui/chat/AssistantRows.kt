@@ -34,7 +34,7 @@ import dev.ai.elements.ui.theme.AiSize
  * reply only ever re-renders its last block.
  */
 @Immutable
-sealed interface AssistantRow {
+internal sealed interface AssistantRow {
     val key: String
 
     /** The row that carries the avatar. */
@@ -80,7 +80,7 @@ sealed interface AssistantRow {
 }
 
 /** Split an assistant [message] into [AssistantRow]s, in display order. */
-fun assistantRows(message: Message): List<AssistantRow> {
+internal fun assistantRows(message: Message): List<AssistantRow> {
     val sources = message.parts.filterIsInstance<SourcePart>()
     val rows = mutableListOf<AssistantRow>()
     message.parts.forEach { part ->
@@ -111,7 +111,7 @@ fun assistantRows(message: Message): List<AssistantRow> {
  * a reply read as a single message.
  */
 @Composable
-fun AssistantRowItem(
+internal fun AssistantRowItem(
     row: AssistantRow,
     modifier: Modifier = Modifier,
     prompt: String? = null,

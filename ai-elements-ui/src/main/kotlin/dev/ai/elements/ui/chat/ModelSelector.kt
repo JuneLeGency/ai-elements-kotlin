@@ -45,6 +45,7 @@ import dev.ai.elements.ui.R
 /** What a model can do; shown as small tags. */
 enum class ModelCapability { REASONING, TOOLS, VISION, AUDIO, FAST }
 
+/** A model offered by [ModelSelector]; [provider] groups the list, [contextWindow] is in tokens. */
 @Immutable
 data class ModelOption(
     val id: String,

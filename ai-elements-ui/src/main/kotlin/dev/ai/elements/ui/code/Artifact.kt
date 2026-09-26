@@ -1,4 +1,4 @@
-package dev.ai.elements.ui.chat
+package dev.ai.elements.ui.code
 
 import android.annotation.SuppressLint
 import android.webkit.WebChromeClient

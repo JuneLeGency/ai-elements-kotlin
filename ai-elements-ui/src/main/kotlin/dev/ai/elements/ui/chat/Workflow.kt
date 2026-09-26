@@ -52,6 +52,7 @@ import dev.ai.elements.ui.theme.LocalCodeFontFamily
 /** Progress of a plan / task / chain-of-thought step. */
 enum class StepStatus { PENDING, ACTIVE, COMPLETE }
 
+/** One step of a plan, task or chain of thought; [badges] are short tags such as files or URLs. */
 data class WorkflowStep(
     val label: String,
     val description: String? = null,

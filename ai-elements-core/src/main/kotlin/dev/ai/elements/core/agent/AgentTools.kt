@@ -28,6 +28,7 @@ interface AgentTool {
     suspend fun execute(arguments: JsonObject): String
 }
 
+/** Built-in tool: the current date and time in an IANA timezone. */
 object CurrentTimeTool : AgentTool {
     override val name = "get_current_time"
     override val description = "Get the current date and time in an IANA timezone, e.g. \"Asia/Shanghai\"."
@@ -51,6 +52,7 @@ object CurrentTimeTool : AgentTool {
     }
 }
 
+/** Built-in tool: evaluates an arithmetic expression (+ - * / % ^ and parentheses) without `eval`. */
 object CalculatorTool : AgentTool {
     override val name = "calculate"
     override val description = "Evaluate an arithmetic expression with + - * / % ^ and parentheses."
@@ -72,10 +74,15 @@ object CalculatorTool : AgentTool {
 
     fun evaluate(expression: String): Double = ExpressionParser(expression).parse()
 
-    private fun formatNumber(v: Double): String =
-        if (v == Math.floor(v) && !v.isInfinite() && Math.abs(v) < 1e15) v.toLong().toString() else v.toString()
+    /** Integers as-is; otherwise 10 significant digits without trailing zeros (778516.8888888889 → 778516.8889). */
+    internal fun formatNumber(v: Double): String = when {
+        v.isNaN() || v.isInfinite() -> v.toString()
+        v == Math.floor(v) && Math.abs(v) < 1e15 -> v.toLong().toString()
+        else -> java.math.BigDecimal(v).round(java.math.MathContext(10)).stripTrailingZeros().toPlainString()
+    }
 }
 
+/** The tools every on-device agent loop gets by default. */
 val BuiltinTools: List<AgentTool> = listOf(CurrentTimeTool, CalculatorTool)
 
 /** Recursive-descent parser: expr := term (('+'|'-') term)*, with ^ right-assoc. */

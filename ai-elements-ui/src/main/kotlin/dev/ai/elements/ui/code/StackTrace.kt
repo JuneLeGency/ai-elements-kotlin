@@ -1,11 +1,9 @@
 package dev.ai.elements.ui.code
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BugReport
@@ -30,19 +28,21 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiType
+import dev.ai.elements.ui.theme.fadingHorizontalScroll
 
 /** One parsed frame; [app] frames are the caller's own code. */
 @Immutable
-data class StackFrame(val text: String, val app: Boolean)
+internal data class StackFrame(val text: String, val app: Boolean)
 
 /** An exception: its type, message and frames (JVM, Python, JS and Swift traces all parse). */
 @Immutable
-data class ParsedStackTrace(val type: String, val message: String, val frames: List<StackFrame>) {
+internal data class ParsedStackTrace(val type: String, val message: String, val frames: List<StackFrame>) {
     companion object {
         private val jvmHeader = Regex("""^(?:Exception in thread "[^"]*" )?((?:[\w$]+\.)*[\w$]+(?:Exception|Error|Throwable)[\w$]*):?\s*(.*)$""")
         private val pyHeader = Regex("""^(\w+(?:Error|Exception|Warning)):\s*(.*)$""")
         private val jsHeader = Regex("""^(\w*Error):\s*(.*)$""")
-        private val library = Regex("""\b(java\.|javax\.|kotlin\.|kotlinx\.|android\.|androidx\.|com\.android\.|dalvik\.|sun\.|jdk\.|node:|node_modules|site-packages|/usr/lib/)""")
+        /** Platform and dependency frames (package prefixes need a word boundary, paths don't). */
+        private val library = Regex("""\b(?:java|javax|kotlin|kotlinx|android|androidx|dalvik|sun|jdk)\.|\bcom\.android\.|node:|node_modules|site-packages|/usr/lib/|/lib/python""")
 
         /** Parses [trace]; frames are lines starting with `at`, `File "…"`, or `#n`. */
         fun parse(trace: String): ParsedStackTrace {
@@ -57,6 +57,9 @@ data class ParsedStackTrace(val type: String, val message: String, val frames: L
                     line.startsWith("... ") || line.startsWith("Caused by:")
                 if (isFrame) {
                     frames += StackFrame(line, app = !library.containsMatchIn(line) && !line.startsWith("..."))
+                } else if (frames.isNotEmpty() && raw.first().isWhitespace()) {
+                    // Python puts the source line, indented, under each `File` frame.
+                    frames[frames.lastIndex] = frames.last().copy(text = frames.last().text + "\n    " + line)
                 } else if (type.isEmpty()) {
                     val m = jvmHeader.find(line) ?: pyHeader.find(line) ?: jsHeader.find(line)
                     if (m != null) {
@@ -67,9 +70,6 @@ data class ParsedStackTrace(val type: String, val message: String, val frames: L
                     }
                 } else if (frames.isEmpty()) {
                     message = listOf(message, line).filter { it.isNotEmpty() }.joinToString("\n")
-                } else if (frames.isNotEmpty() && !isFrame) {
-                    // Python puts the source line under each `File` frame.
-                    frames[frames.lastIndex] = frames.last().copy(text = frames.last().text + "\n    " + line)
                 }
             }
             return ParsedStackTrace(type.ifEmpty { "Error" }, message, frames)
@@ -118,7 +118,7 @@ fun StackTrace(trace: String, modifier: Modifier = Modifier, collapsedFrames: In
                     },
                     style = AiType.code,
                     softWrap = false,
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    modifier = Modifier.fillMaxWidth().fadingHorizontalScroll(),
                 )
             }
             if (shown.size < parsed.frames.size || showAll) {
