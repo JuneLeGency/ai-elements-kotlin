@@ -82,6 +82,7 @@
     <string name="kind_mock">脚本化的离线智能体：推理、真实的端侧工具调用、Markdown 与 Mermaid。无需联网。</string>
     <string name="kind_agent_server">服务端智能体（如基于 PydanticAI 的 server/main.py），地址 {base}/api/chat，以 Vercel AI SDK UI Message Stream（v5）或 Data Stream（v4）流式输出。工具在服务器上运行。</string>
     <string name="kind_ag_ui">AG-UI 智能体，地址 {base}/api/agui（PydanticAI、LangGraph、CrewAI、Mastra…）。工具在服务器上运行。</string>
+    <string name="kind_a2a">A2A 智能体：从 {base}/.well-known/agent-card.json 读取 Agent Card，智能体在远端运行，通过 A2A 任务回复。</string>
     <string name="kind_openai">任意兼容 OpenAI 的 /chat/completions 接口。智能体循环和工具在本机运行。</string>
     <string name="kind_openai_responses">OpenAI Responses API（/responses），无状态并携带加密推理。智能体循环和工具在本机运行。</string>
     <string name="kind_anthropic">Anthropic Messages API（/v1/messages）。智能体循环和工具在本机运行。</string>

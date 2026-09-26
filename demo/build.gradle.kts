@@ -10,7 +10,8 @@ android {
 
     defaultConfig {
         applicationId = "dev.ai.elements.demo"
-        minSdk = 24
+        // 26: the optional A2A module (official A2A Java SDK) needs it.
+        minSdk = 26
         targetSdk = 36
         versionCode = 2
         versionName = "0.2.0"
@@ -39,13 +40,39 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
+}
+
+/** Bundles the repository's Agent Skills (`/skills`, shared with `server/`) as `assets/skills`. */
+abstract class BundleSkills : DefaultTask() {
+    @get:InputDirectory abstract val source: DirectoryProperty
+    @get:OutputDirectory abstract val output: DirectoryProperty
+
+    @TaskAction
+    fun bundle() {
+        val out = output.get().asFile
+        out.deleteRecursively()
+        source.get().asFile.copyRecursively(File(out, "skills"))
+    }
+}
+
+val bundleSkills = tasks.register<BundleSkills>("bundleSkills") {
+    source.set(rootProject.layout.projectDirectory.dir("skills"))
+    output.set(layout.buildDirectory.dir("generated/skillAssets"))
+}
+
+androidComponents {
+    onVariants { variant -> variant.sources.assets?.addGeneratedSourceDirectory(bundleSkills, BundleSkills::output) }
 }
 
 dependencies {
     implementation(libs.androidx.browser)
     implementation(project(":ai-elements-ui"))
     implementation(project(":ai-elements-mermaid-native"))
+    implementation(project(":ai-elements-a2a"))
+    implementation(project(":harness:harness-core"))
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(libs.activity.compose)
     // Installs the baseline profiles Compose & AndroidX ship, for faster startup and smoother scrolling.

@@ -5,13 +5,15 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.ai.elements.core.ChatController
 import dev.ai.elements.core.ChatState
-import dev.ai.elements.core.agent.BuiltinTools
+import dev.ai.elements.core.config.McpServerStore
 import dev.ai.elements.core.auth.OAuthProvider
 import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.core.config.ProviderStore
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.demo.auth.SignInController
+import dev.ai.elements.demo.data.AgentsStore
 import dev.ai.elements.demo.data.AppSettings
+import dev.ai.elements.demo.data.SkillsRepository
 import dev.ai.elements.demo.data.Conversation
 import dev.ai.elements.demo.data.ConversationRepository
 import dev.ai.elements.demo.tools.ClipboardTool
@@ -35,24 +37,21 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
     private val repository = ConversationRepository(app)
     val conversations: StateFlow<List<Conversation>> = repository.conversations
 
-    /** Built-in tools plus an app-defined one that needs approval. */
-    private val tools = BuiltinTools + ClipboardTool(app)
+    val mcpServers = McpServerStore(app, providers.secrets)
+    val agents = AgentsStore(app)
+    val skills = SkillsRepository(app)
 
-    private val chat = ChatController(
-        backend = { approver ->
-            providers.selected.let {
-                if (it.usesTokens) it.createOAuthBackend(providers.tokenSource(it), tools, approver)
-                else it.createBackend(providers.apiKey(it.id), tools, approver)
-            }
-        },
-        scope = viewModelScope,
-    )
+    /** Each turn: the selected provider with the enabled skills, MCP servers and sub-agents. */
+    val runtime = AgentRuntime(providers, mcpServers, agents, skills, appTools = listOf(ClipboardTool(app)))
+
+    private val chat = ChatController(backend = runtime::backend, scope = viewModelScope)
     val chatState: StateFlow<ChatState> = chat.state
 
     private val _conversationId = MutableStateFlow(newId())
     val conversationId: StateFlow<String> = _conversationId.asStateFlow()
 
     init {
+        viewModelScope.launch { skills.refresh() }
         viewModelScope.launch {
             repository.load()
             // Persist every settled turn (not each streamed delta).
@@ -91,6 +90,7 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     suspend fun listModels(profile: ProviderProfile): List<String> = when {
+        profile.kind == dev.ai.elements.core.config.ProviderKind.A2A -> listOf(runtime.a2aAgent(profile.baseUrl).card().name())
         // The ChatGPT backend has no public model list; offer the plan's current models.
         profile.oauth == OAuthProvider.CHATGPT -> { providers.tokenSource(profile).fresh(); ChatGptModels }
         profile.usesTokens -> profile.listModels(providers.tokenSource(profile).fresh().accessToken)

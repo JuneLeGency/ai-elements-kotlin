@@ -62,7 +62,8 @@ Harness」两种形态，真实链路全部跑通，并在模拟器、手机和�
 | | `ai-elements-a2a`（可选） | A2A 1.0：官方 `a2a-java-sdk`，provider 与子 Agent 两种用法 | core |
 | | `ai-elements-koog`（可选） | Koog Agent → `ChatBackend`；`Capability` → Koog tools | core |
 | | `ai-elements-mermaid-native`（可选） | Compose Canvas 渲染 Mermaid | ui |
-| `io.github.junelegency.harness` | `harness-filesystem` | 工作区 + SAF 挂载目录；`read_file` `write_file` `edit_file` `list_directory` `search_files` `find_files` `create_directory` `file_info` | core |
+| `io.github.junelegency.harness` | `harness-core` | `AgentHarness`：模型 + 能力组合成 `ChatBackend`，本地/远端子 Agent，`maxDepth`；`ModelBinding` 适配任意 provider | core |
+| | `harness-filesystem` | 工作区 + SAF 挂载目录；`read_file` `write_file` `edit_file` `list_directory` `search_files` `find_files` `create_directory` `file_info` | core |
 | | `harness-shell` | `run_command` `start_command` `check_command` `stop_command`；可插拔 `ShellRuntime` | core |
 | | `harness-sandbox-proot` | Alpine Linux：上游 proot 以独立进程运行，rootfs 首次使用时下载；GPL-2 二进制单独成包 | harness-shell |
 | | `harness-memory` | `write_memory` `read_memory` `delete_memory` `search_memory` | core |

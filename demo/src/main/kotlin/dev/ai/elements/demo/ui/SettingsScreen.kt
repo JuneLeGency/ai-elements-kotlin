@@ -670,6 +670,7 @@ private val ProviderKind.icon: ImageVector
         ProviderKind.ANTHROPIC -> Icons.Outlined.Psychology
         ProviderKind.GEMINI -> Icons.Outlined.AutoAwesome
         ProviderKind.OLLAMA -> Icons.Outlined.Computer
+        ProviderKind.A2A -> Icons.Outlined.Hub
     }
 
 @get:StringRes
@@ -683,6 +684,7 @@ private val ProviderKind.description: Int
         ProviderKind.ANTHROPIC -> R.string.kind_anthropic
         ProviderKind.GEMINI -> R.string.kind_gemini
         ProviderKind.OLLAMA -> R.string.kind_ollama
+        ProviderKind.A2A -> R.string.kind_a2a
     }
 
 /** Per-app language: follow the system or pick one of the shipped translations. */

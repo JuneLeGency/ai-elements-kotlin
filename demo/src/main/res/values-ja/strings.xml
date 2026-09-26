@@ -82,6 +82,7 @@
     <string name="kind_mock">スクリプト化されたオフラインエージェント：推論、端末上での実際のツール呼び出し、Markdown と Mermaid。ネットワーク不要。</string>
     <string name="kind_agent_server">サーバー側エージェント（例：PydanticAI を使った server/main.py）。{base}/api/chat で Vercel AI SDK の UI Message Stream（v5）または Data Stream（v4）をストリーミングします。ツールはサーバーで実行されます。</string>
     <string name="kind_ag_ui">{base}/api/agui の AG-UI エージェント（PydanticAI、LangGraph、CrewAI、Mastra…）。ツールはサーバーで実行されます。</string>
+    <string name="kind_a2a">A2A エージェント：{base}/.well-known/agent-card.json からエージェントカードを読み込み、リモートで実行され A2A タスクで応答します。</string>
     <string name="kind_openai">OpenAI 互換の /chat/completions エンドポイント。エージェントループとツールはこの端末で実行されます。</string>
     <string name="kind_openai_responses">OpenAI Responses API（/responses）。暗号化された推論を用いたステートレス方式。エージェントループとツールはこの端末で実行されます。</string>
     <string name="kind_anthropic">Anthropic Messages API（/v1/messages）。エージェントループとツールはこの端末で実行されます。</string>

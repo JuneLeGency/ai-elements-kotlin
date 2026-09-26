@@ -35,6 +35,9 @@ enum class ProviderKind(val label: String, val needsKey: Boolean, val serverSide
     ANTHROPIC("Anthropic Messages", needsKey = true),
     GEMINI("Gemini", needsKey = true),
     OLLAMA("Ollama native", needsKey = false),
+
+    /** A remote A2A agent; built by `ai-elements-a2a` (`A2aBackend`), not by [ProviderProfile.createBackend]. */
+    A2A("A2A agent", needsKey = false, serverSideAgent = true),
 }
 
 /**
@@ -69,28 +72,44 @@ data class ProviderProfile(
         tokens: TokenSource,
         tools: List<AgentTool> = BuiltinTools,
         approver: ToolApprover = ToolApprover.AlwaysApprove,
+        instructions: String = "",
     ): ChatBackend {
         val provider = requireNotNull(oauth) { "$id is not an OAuth profile" }
-        return OAuthBackend(tokens) { t -> createBackend(t.accessToken, tools, approver, provider.apiHeaders(t)) }
+        return OAuthBackend(tokens) { t -> createBackend(t.accessToken, tools, approver, provider.apiHeaders(t), instructions) }
     }
 
+    /**
+     * The backend for this profile.
+     *
+     * @param tools on-device tools: run by on-device loops, advertised to AG-UI servers as
+     *   frontend tools, and executed for AI SDK servers that hand a call to the client.
+     * @param instructions extra guidance (e.g. [dev.ai.elements.core.agent.Capability]
+     *   instructions): appended to the system prompt of on-device loops and sent to AG-UI
+     *   servers as `context`.
+     */
     fun createBackend(
         apiKey: String,
         tools: List<AgentTool> = BuiltinTools,
         approver: ToolApprover = ToolApprover.AlwaysApprove,
         headers: Map<String, String> = emptyMap(),
+        instructions: String = "",
     ): ChatBackend {
         val agentTools = if (useTools) tools else emptyList()
         val base = baseUrl.trimEnd('/')
+        val system = listOf(systemPrompt, instructions).filter { it.isNotBlank() }.joinToString("\n\n")
         return when (kind) {
             ProviderKind.MOCK -> MockAgentBackend(tools, approver)
-            ProviderKind.AGENT_SERVER -> UiMessageStreamBackend("$base/api/chat", model, apiKey)
-            ProviderKind.AG_UI -> AgUiBackend("$base/api/agui", apiKey)
-            ProviderKind.OPENAI -> OpenAiChatBackend(base, model, apiKey, systemPrompt, agentTools, approver, extraHeaders = headers)
-            ProviderKind.OPENAI_RESPONSES -> OpenAiResponsesBackend(base, model, apiKey, systemPrompt, agentTools, approver, extraHeaders = headers)
-            ProviderKind.ANTHROPIC -> AnthropicBackend(base, model, apiKey, systemPrompt, agentTools, approver)
-            ProviderKind.GEMINI -> GeminiBackend(base, model, apiKey, systemPrompt, agentTools, approver)
-            ProviderKind.OLLAMA -> OllamaBackend(base, model, systemPrompt, agentTools, approver)
+            ProviderKind.AGENT_SERVER -> UiMessageStreamBackend("$base/api/chat", model, apiKey, agentTools, approver)
+            ProviderKind.AG_UI -> AgUiBackend(
+                "$base/api/agui", apiKey, agentTools, approver,
+                context = listOfNotNull(instructions.takeIf { it.isNotBlank() }?.let { "Client capabilities" to it }),
+            )
+            ProviderKind.OPENAI -> OpenAiChatBackend(base, model, apiKey, system, agentTools, approver, extraHeaders = headers)
+            ProviderKind.OPENAI_RESPONSES -> OpenAiResponsesBackend(base, model, apiKey, system, agentTools, approver, extraHeaders = headers)
+            ProviderKind.ANTHROPIC -> AnthropicBackend(base, model, apiKey, system, agentTools, approver)
+            ProviderKind.GEMINI -> GeminiBackend(base, model, apiKey, system, agentTools, approver)
+            ProviderKind.OLLAMA -> OllamaBackend(base, model, system, agentTools, approver)
+            ProviderKind.A2A -> throw UnsupportedOperationException("A2A agents need the ai-elements-a2a module: A2aBackend(A2aAgent(\"$baseUrl\"))")
         }
     }
 
@@ -115,6 +134,7 @@ data class ProviderProfile(
                 "data",
                 client.getJson("$base/v1/models", mapOf("x-api-key" to apiKey, "anthropic-version" to "2023-06-01")),
             )
+            ProviderKind.A2A -> listOfNotNull(client.getJson("$base/.well-known/agent-card.json")["name"]?.jsonPrimitive?.contentOrNull)
         }.sorted()
     }
 
@@ -141,6 +161,7 @@ data class ProviderProfile(
             ProviderProfile("anthropic", "Anthropic", ProviderKind.ANTHROPIC, "https://api.anthropic.com", "claude-sonnet-5", builtIn = true),
             ProviderProfile("gemini", "Google Gemini", ProviderKind.GEMINI, "https://generativelanguage.googleapis.com", "gemini-2.5-flash", builtIn = true),
             ProviderProfile("openrouter", "OpenRouter", ProviderKind.OPENAI, "https://openrouter.ai/api/v1", "openai/gpt-5", builtIn = true),
+            ProviderProfile("a2a-research", "Research agent · A2A", ProviderKind.A2A, "http://10.0.2.2:8788", "", builtIn = true),
         )
     }
 }

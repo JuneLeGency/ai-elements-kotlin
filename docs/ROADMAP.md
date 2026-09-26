@@ -66,6 +66,7 @@ reference only, never copied).
 
 | Artifact | Capability | OpenMinis counterpart | Status |
 |---|---|---|---|
+| `harness-core` | `AgentHarness`: model + capabilities → `ChatBackend`; local / remote sub-agents, `maxDepth`; `ModelBinding` for any provider | agent loop | ✅ unit tests; the demo runs on it |
 | `harness-filesystem` | Workspace + SAF-mounted folders: `read_file`, `write_file`, `edit_file`, `list_directory`, `search_files`, `find_files`, `create_directory`, `file_info` | file tools, mounted folders | ⬜ |
 | `harness-shell` | `run_command`, `start_command`, `check_command`, `stop_command` over a pluggable `ShellRuntime` | `shell_execute` | ⬜ |
 | `harness-sandbox-proot` | Alpine Linux via upstream proot (separate process, GPL-2 binary + source offer), rootfs downloaded on first use | proot sandbox | ⬜ |
@@ -109,7 +110,7 @@ The demo is a showcase of both modes, switchable per conversation:
 
 | Item | Status |
 |---|---|
-| Backend picker: in-app harness · AI SDK server · AG-UI server · A2A agent · direct model API | ⬜ |
+| Backend picker: in-app harness · AI SDK server · AG-UI server · A2A agent · direct model API | 🟡 A2A provider kind + preset; runtime wired through `AgentHarness`; settings UI next |
 | Settings: MCP servers (add, test, tools, approval policy, OAuth sign-in), Skills (bundled + zip import), Agents (sub-agents, remote A2A agents) | ⬜ |
 | Composer sheet to toggle MCP servers / skills / agents per chat | ⬜ |
 | Bundled skills from `/skills` (shared with the server) | ⬜ |
