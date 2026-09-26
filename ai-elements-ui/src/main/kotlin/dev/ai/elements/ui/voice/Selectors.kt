@@ -128,7 +128,8 @@ private fun deviceName(d: AudioDeviceInfo): String {
             else -> if (Build.VERSION.SDK_INT >= 31 && d.type == AudioDeviceInfo.TYPE_BLE_HEADSET) R.string.ai_mic_bluetooth else R.string.ai_microphone
         },
     )
-    val address = if (d.type == AudioDeviceInfo.TYPE_BUILTIN_MIC && d.address.isNotBlank()) " · ${d.address}" else ""
+    // Several built-in mics (top / bottom / back) are told apart by address (API 28+).
+    val address = if (Build.VERSION.SDK_INT >= 28 && d.type == AudioDeviceInfo.TYPE_BUILTIN_MIC && d.address.isNotBlank()) " · ${d.address}" else ""
     return if (name.isBlank()) kind + address else "$name ($kind)$address"
 }
 

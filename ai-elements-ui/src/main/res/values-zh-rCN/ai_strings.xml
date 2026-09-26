@@ -93,7 +93,6 @@
     <string name="ai_clear">清空</string>
     <string name="ai_exit_code">退出码 %1$d</string>
     <string name="ai_show_less">收起</string>
-    <string name="ai_show_all_frames">显示全部 %1$d 帧</string>
     <string name="ai_test_results">测试结果</string>
     <string name="ai_tests_passed">%1$d 通过</string>
     <string name="ai_tests_failed">%1$d 失败</string>
@@ -154,4 +153,7 @@
     <string name="ai_voice">音色</string>
     <string name="ai_search_voices">搜索音色</string>
     <string name="ai_preview_voice">试听</string>
+    <plurals name="ai_show_all_frames">
+        <item quantity="other">显示全部 %d 帧</item>
+    </plurals>
 </resources>

@@ -95,8 +95,7 @@ class CodexLiveTest {
 
         compose.onNodeWithTag("prompt-input").performClick().performTextInput("Use the calculate tool to compute 1234 * 5678, then state the result.")
         compose.onNodeWithTag("send-button").performClick()
-        compose.waitUntilExactlyOneExists(hasTestTag("regenerate"), 180_000)
-        compose.onNodeWithTag("chat-error").assertDoesNotExist()
+        compose.awaitTurnEnd(180_000)
         compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("tool-calculate"))
         compose.onNodeWithTag("conversation").performScrollToNode(
             hasText("7,006,652", substring = true) or hasText("7006652", substring = true),

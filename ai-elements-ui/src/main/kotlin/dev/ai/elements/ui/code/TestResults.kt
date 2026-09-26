@@ -66,7 +66,7 @@ fun TestResults(suites: List<TestSuiteResult>, modifier: Modifier = Modifier, du
     val failed = all.count { it.status == TestStatus.FAILED }
     val skipped = all.count { it.status == TestStatus.SKIPPED }
     val running = all.any { it.status == TestStatus.RUNNING }
-    val colors = StatusColors()
+    val colors = statusColors()
     ElementCard(
         title = stringResource(R.string.ai_test_results),
         subtitle = listOfNotNull(
@@ -146,7 +146,7 @@ private fun StatusIcon(status: TestStatus, colors: StatusColors, small: Boolean 
 private data class StatusColors(val pass: Color, val fail: Color, val skip: Color)
 
 @Composable
-private fun StatusColors(): StatusColors {
+private fun statusColors(): StatusColors {
     val c = MaterialTheme.colorScheme
     val dark = MaterialTheme.isDark
     return StatusColors(pass = if (dark) Color(0xFF7FD99A) else Color(0xFF1E7B3A), fail = c.error, skip = c.outline)

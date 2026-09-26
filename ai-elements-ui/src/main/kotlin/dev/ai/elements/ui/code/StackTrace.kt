@@ -123,7 +123,7 @@ fun StackTrace(trace: String, modifier: Modifier = Modifier, collapsedFrames: In
             }
             if (shown.size < parsed.frames.size || showAll) {
                 TextButton(onClick = { showAll = !showAll }) {
-                    Text(if (showAll) stringResource(R.string.ai_show_less) else stringResource(R.string.ai_show_all_frames, parsed.frames.size))
+                    Text(if (showAll) stringResource(R.string.ai_show_less) else pluralStringResource(R.plurals.ai_show_all_frames, parsed.frames.size, parsed.frames.size))
                 }
             }
         }

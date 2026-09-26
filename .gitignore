@@ -8,3 +8,5 @@ local.properties
 server/.venv/
 server/__pycache__/
 .DS_Store
+.claude/
+*.whl

@@ -24,6 +24,7 @@ import dev.ai.elements.demo.data.ThemeMode
 import dev.ai.elements.demo.ui.DemoApp
 import dev.ai.elements.demo.ui.codeFamily
 import dev.ai.elements.demo.ui.family
+import dev.ai.elements.mermaid.NativeMermaidRenderer
 import dev.ai.elements.ui.markdown.LocalMermaidRenderer
 import dev.ai.elements.ui.markdown.LocalMermaidSizing
 import dev.ai.elements.ui.markdown.MermaidRenderer
@@ -60,7 +61,7 @@ class MainActivity : ComponentActivity() {
                 fontFamily = appearance.font.family,
                 codeFontFamily = appearance.font.codeFamily,
             ) {
-                val renderer = if (appearance.nativeMermaid) MermaidRenderer.Native else MermaidRenderer.WebView
+                val renderer = if (appearance.nativeMermaid) NativeMermaidRenderer else MermaidRenderer.WebView
                 val sizing = when (appearance.diagramSize) {
                     DiagramSize.SMALL -> MermaidSizing.Small
                     DiagramSize.MEDIUM -> MermaidSizing.Medium

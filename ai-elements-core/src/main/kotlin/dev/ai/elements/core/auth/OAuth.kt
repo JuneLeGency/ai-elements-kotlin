@@ -8,7 +8,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.security.MessageDigest
 import java.security.SecureRandom
-import java.util.Base64
+import kotlin.io.encoding.Base64
 
 /**
  * Tokens from an OAuth sign-in. Persist them encrypted (the demo uses
@@ -34,25 +34,27 @@ data class OAuthTokens(
     override fun toString() = "OAuthTokens(email=$email, expiresAtMs=$expiresAtMs, refresh=${refreshToken != null})"
 }
 
+/** Base64url without padding (RFC 4648 §5); Kotlin's codec works on every API level (java.util.Base64 needs 26). */
+private val Base64Url = Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
+
 /** PKCE (RFC 7636) with the S256 method. */
 object Pkce {
     private val random = SecureRandom()
-    private val base64 = Base64.getUrlEncoder().withoutPadding()
 
     /** A 43–128 character verifier from 64 random bytes. */
     fun verifier(): String = randomToken(64)
 
     fun challenge(verifier: String): String =
-        base64.encodeToString(MessageDigest.getInstance("SHA-256").digest(verifier.toByteArray(Charsets.US_ASCII)))
+        Base64Url.encode(MessageDigest.getInstance("SHA-256").digest(verifier.toByteArray(Charsets.US_ASCII)))
 
     /** Opaque URL-safe random value, for `state` and `nonce`. */
-    fun randomToken(bytes: Int = 32): String = base64.encodeToString(ByteArray(bytes).also(random::nextBytes))
+    fun randomToken(bytes: Int = 32): String = Base64Url.encode(ByteArray(bytes).also(random::nextBytes))
 }
 
 /** Reads a JWT's claims without verifying it (only for display / routing, never for trust). */
 fun jwtClaims(jwt: String?): JsonObject? = runCatching {
     val payload = jwt!!.split('.')[1]
-    Json.parseToJsonElement(String(Base64.getUrlDecoder().decode(payload))).jsonObject
+    Json.parseToJsonElement(Base64Url.decode(payload).decodeToString()).jsonObject
 }.getOrNull()
 
 internal fun JsonObject.string(key: String): String? = (this[key] as? kotlinx.serialization.json.JsonPrimitive)?.contentOrNull

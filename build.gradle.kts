@@ -5,4 +5,5 @@ plugins {
     // AGP 9.x built-in Kotlin: no `kotlin.android` plugin needed.
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.vanniktech.publish) apply false
 }

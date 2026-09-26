@@ -96,7 +96,6 @@
     <string name="ai_clear">Clear</string>
     <string name="ai_exit_code">exit %1$d</string>
     <string name="ai_show_less">Show less</string>
-    <string name="ai_show_all_frames">Show all %1$d frames</string>
     <string name="ai_test_results">Test results</string>
     <string name="ai_tests_passed">%1$d passed</string>
     <string name="ai_tests_failed">%1$d failed</string>
@@ -159,4 +158,8 @@
     <string name="ai_voice">Voice</string>
     <string name="ai_search_voices">Search voices</string>
     <string name="ai_preview_voice">Preview voice</string>
+    <plurals name="ai_show_all_frames">
+        <item quantity="one">Show %d frame</item>
+        <item quantity="other">Show all %d frames</item>
+    </plurals>
 </resources>

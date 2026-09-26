@@ -45,6 +45,7 @@ android {
 dependencies {
     implementation(libs.androidx.browser)
     implementation(project(":ai-elements-ui"))
+    implementation(project(":ai-elements-mermaid-native"))
 
     implementation(libs.activity.compose)
     // Installs the baseline profiles Compose & AndroidX ship, for faster startup and smoother scrolling.

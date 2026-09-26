@@ -4,13 +4,14 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+// Optional: Mermaid drawn with Compose Canvas (cmp-mermaid) instead of a WebView.
+// Kept out of :ai-elements-ui because it is experimental and bundles ~4 MB of fonts.
 android {
-    namespace = "dev.ai.elements.ui"
+    namespace = "dev.ai.elements.mermaid"
     compileSdk = 37
 
     defaultConfig {
         minSdk = 24
-        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildFeatures {
@@ -24,22 +25,8 @@ android {
 }
 
 dependencies {
-    api(project(":ai-elements-core"))
-
-    api(libs.compose.ui)
-    api(libs.compose.foundation)
-    api(libs.compose.animation)
-    api(libs.compose.material3)
-    api(libs.compose.material.icons.extended)
-    implementation(libs.compose.ui.graphics)
-    implementation(libs.activity.compose)
-    implementation(libs.compose.ui.tooling.preview)
-    implementation(libs.markdown.renderer.m3)
-    implementation(libs.highlights)
-
-    debugImplementation(libs.compose.ui.tooling)
-
-    testImplementation(libs.junit)
+    api(project(":ai-elements-ui"))
+    implementation(libs.cmp.mermaid.compose)
 }
 
 // Maven Central: `./gradlew publishToMavenCentral` with mavenCentralUsername / mavenCentralPassword

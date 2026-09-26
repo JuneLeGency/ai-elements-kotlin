@@ -1,0 +1,28 @@
+AI Elements for Kotlin
+Copyright 2026 The AI Elements for Kotlin authors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+It is an independent Android implementation inspired by Vercel AI Elements
+(https://elements.ai-sdk.dev); it contains no code from that project.
+
+Bundled third-party software
+----------------------------
+
+ai-elements-ui (assets/ai-elements/)
+  * Mermaid 12.0.0 — MIT License, Copyright (c) 2014 - 2022 Knut Sveidqvist
+    https://github.com/mermaid-js/mermaid
+  * KaTeX 0.18.9 (JS, CSS and fonts) — MIT License, Copyright (c) 2013-2020 Khan Academy and other contributors
+    https://github.com/KaTeX/KaTeX
+
+ai-elements-mermaid-native (dependency)
+  * cmp-mermaid — MIT License, https://github.com/swithun-liu/cmp-mermaid
+
+demo app only (res/font/, licenses in demo/src/main/assets/licenses/)
+  * Geist and Geist Mono — SIL Open Font License 1.1, Copyright 2024 The Geist Project Authors
+  * Inter — SIL Open Font License 1.1, Copyright 2020 The Inter Project Authors
+  * WenKai GB Screen Subset — SIL Open Font License 1.1, a renamed subset of
+    LXGW WenKai Screen, Copyright 2021-2026 LXGW
+
+Runtime dependencies (not bundled, resolved from Maven)
+  * AndroidX / Jetpack Compose, OkHttp, kotlinx.coroutines, kotlinx.serialization,
+    multiplatform-markdown-renderer, Highlights — Apache License 2.0

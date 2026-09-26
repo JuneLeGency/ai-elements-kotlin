@@ -1,104 +1,182 @@
 # AI Elements for Kotlin
 
-A Jetpack Compose (Android) counterpart of [Vercel AI Elements](https://elements.ai-sdk.dev): a
-**Material 3 Expressive** chat UI kit plus a multi-protocol agent layer, with Markdown, Mermaid and
-KaTeX rendering. Adaptive for phones, foldables and tablets.
+**Material 3 Expressive** Jetpack Compose components for AI chat and agent apps — the Android
+counterpart of [Vercel AI Elements](https://elements.ai-sdk.dev) — plus a multi-protocol agent
+layer that streams from AI SDK / AG-UI servers or runs the agent loop on the device.
 
-```
-demo (Android app)
- ├─ :ai-elements-ui    Compose components (M3 Expressive)
- │    chat/      Conversation · Message · Reasoning · ToolCall · Confirmation · Context · Sources
- │               PromptInput (+attachments) · Suggestions · Image · ChainOfThought · Plan · Task
- │               Artifact · WebPreview · Shimmer
- │    markdown/  MarkdownContent (GFM) · CodeBlock · MermaidDiagram · MathBlock (KaTeX)
- │    theme/     AiElementsTheme (MaterialExpressiveTheme, dynamic color, expressive motion)
- └─ :ai-elements-core  no Compose; pure Kotlin + OkHttp
-      ChatController (≈ useChat) · MessageReducer · ChatBackend / ChatEvent · ToolApprover
-      backend/   8 protocol backends (below)
-      agent/     AgentTool (+ requiresApproval) · get_current_time · calculate
-      config/    ProviderProfile presets · ProviderStore · SecretStore (Android Keystore)
+- **Complete element set**: conversation, messages, reasoning, tools with approval, sources and
+  inline citations, branches, checkpoints, queue, plan / task / chain of thought, artifacts, web
+  preview, workflow canvas, voice (speech input, persona, audio player, transcription), and
+  developer tools (terminal, stack trace, test results, file tree, commit, schema…).
+- **Rich answers**: GitHub-flavoured Markdown, syntax highlighting, **Mermaid** and **KaTeX**
+  (bundled, offline).
+- **Streaming that stays readable**: replies are virtualized block by block, the list follows the
+  stream until the user scrolls, and nothing moves under their finger.
+- **Adaptive**: phones, foldables and tablets (M3 canonical list-detail), dark mode, dynamic color,
+  7 built-in palettes × 3 contrast levels, custom fonts, font scaling, TalkBack.
+- **8 protocols, on-device tools, OAuth**: AI SDK v5/v4, AG-UI, OpenAI Chat Completions and
+  Responses, Anthropic, Gemini, Ollama — with human-in-the-loop tool approval.
+- **Localized**: English, 简体中文, 繁體中文, 日本語.
 
-server (Python, uv)   FastAPI + PydanticAI agent with tools
-                      /api/chat → AI SDK UI Message Stream · /api/agui → AG-UI
+## Modules
+
+| Artifact | What it is |
+|---|---|
+| `ai-elements-core` | Chat state and protocols; no Compose. `ChatController` (≈ `useChat`), `ChatBackend`s, `AgentTool`s, OAuth, encrypted provider storage. |
+| `ai-elements-ui` | The Compose elements and `AiElementsTheme`. Depends on core. |
+| `ai-elements-mermaid-native` | *Optional.* Mermaid drawn with Compose Canvas instead of a WebView (experimental, ~4 MB of fonts). |
+
+```kotlin
+dependencies {
+    implementation("io.github.junelegency:ai-elements-ui:0.3.0-SNAPSHOT")
+    // implementation("io.github.junelegency:ai-elements-mermaid-native:0.3.0-SNAPSHOT") // optional
+}
 ```
+
+minSdk 24 · R8 rules ship with the libraries (consumer rules), no app-side configuration needed.
+
+## Quick start
+
+```kotlin
+class ChatViewModel : ViewModel() {
+    private val profile = ProviderProfile(
+        id = "openai", name = "OpenAI", kind = ProviderKind.OPENAI,
+        baseUrl = "https://api.openai.com/v1", model = "gpt-5.5",
+    )
+    val chat = ChatController(
+        backend = { approver -> profile.createBackend(apiKey = BuildConfig.OPENAI_KEY, approver = approver) },
+        scope = viewModelScope,
+    )
+}
+
+@Composable
+fun ChatScreen(vm: ChatViewModel) {
+    val state by vm.chat.state.collectAsStateWithLifecycle()
+    var input by rememberSaveable { mutableStateOf("") }
+    AiElementsTheme {
+        Column(Modifier.fillMaxSize().imePadding()) {
+            Conversation(
+                state = state,
+                modifier = Modifier.weight(1f),
+                onRegenerate = vm.chat::regenerate,
+                onToolApproval = vm.chat::respondToApproval,
+                onSelectVersion = vm.chat::selectVersion,
+                onRestoreCheckpoint = vm.chat::restoreCheckpoint,
+            )
+            PromptInput(
+                value = input,
+                onValueChange = { input = it },
+                onSubmit = { if (vm.chat.send(input)) input = "" },
+                onStop = vm.chat::stop,
+                busy = state.isBusy,
+                allowQueue = true,
+                toolbar = { SpeechInput(onTranscript = { text, _ -> input = text }) },
+            )
+        }
+    }
+}
+```
+
+The `demo` app wires everything together: provider settings, conversation history, list-detail on
+tablets, OAuth sign-in, languages, palettes and fonts.
+
+## Elements
+
+| Group | Elements |
+|---|---|
+| Chat | `Conversation` (stick-to-bottom, jump to latest) · `MessageItem` / actions · `PromptInput` (attachments, queue, hardware-keyboard send) · `Suggestions` · `Reasoning` · `ToolCall` + `Confirmation` · `Sources` · `InlineCitation` · `ContextUsage` · `BranchSelector` · `Checkpoint` · `Queue` · `OpenInChat` · `ModelSelector` · `Question` · `Agent` · `Persona` |
+| Structure | `ChainOfThought` · `Plan` · `Task` · `Artifact` · `WebPreview` · `WorkflowCanvas` (nodes, edges, pan / zoom) · `DataPartView` |
+| Content | `MarkdownContent` · `CodeBlock` · `MermaidDiagram` · `MathBlock` · `FileImage` / attachments |
+| Voice | `SpeechInput` · `AudioPlayer` · `Transcription` · `MicSelector` · `VoiceSelector` |
+| Developer | `Terminal` (ANSI) · `StackTrace` · `TestResults` · `FileTree` · `Commit` · `SchemaDisplay` · `PackageInfo` · `EnvironmentVariables` · `Sandbox` · `Snippet` |
+
+All 50 AI Elements are covered except `JSXPreview` (web-only; `WebPreview` renders HTML). The
+canvas `Panel` / `Toolbar` / `Controls` / `Connection` are part of `WorkflowCanvas`.
+
+## Theming
+
+```kotlin
+AiElementsTheme(
+    darkTheme = isSystemInDarkTheme(),
+    dynamicColor = true,                 // Android 12+: wallpaper colors
+    palette = AiPalette.OCEAN,           // otherwise: VIOLET, OCEAN, JADE, FOREST, SUNSET, SAKURA, GRAPHITE
+    contrast = AiContrast.MEDIUM,        // Material 3 contrast levels
+    fontFamily = myFontFamily,           // every type style; CJK falls back to system fonts
+    codeFontFamily = myMonoFamily,       // code blocks, inline code, tool arguments
+) { … }
+```
+
+Palettes are full Material 3 schemes generated by Google's material-color-utilities
+(`tools/generate-schemes.mjs`); `aiColorScheme(palette, dark, contrast)` returns one directly.
+Chat content uses a reading type scale (`AiType`) derived from your typography, and spacing tokens
+(`AiSpacing`, `AiSize`) that keep 48 dp touch targets.
+
+**Mermaid**: `LocalMermaidRenderer` picks the renderer (`MermaidRenderer.WebView` by default,
+`NativeMermaidRenderer` from the optional module), `LocalMermaidSizing` the inline size.
 
 ## Protocols
 
 | Provider kind | Protocol | Agent loop | Reasoning | Tools | Images in | Usage |
 |---|---|---|---|---|---|---|
-| AI SDK stream | Vercel AI SDK v5 UI Message Stream **and** v4 Data Stream (auto-detected) | server | ✅ | ✅ server | ✅ | v4 only |
-| AG-UI | AG-UI events (PydanticAI, LangGraph, CrewAI, Mastra…) | server | ✅ | ✅ server | — | — |
-| OpenAI Chat Completions | `/chat/completions` SSE | on-device | ✅ `reasoning(_content)` | ✅ | ✅ | ✅ |
-| OpenAI Responses | `/responses` SSE, stateless + encrypted reasoning | on-device | ✅ summaries | ✅ | ✅ | ✅ |
-| Anthropic Messages | `/v1/messages` SSE | on-device | ✅ thinking + signatures | ✅ | ✅ | ✅ |
-| Gemini | `:streamGenerateContent?alt=sse` | on-device | ✅ thought summaries | ✅ (+ thoughtSignature) | ✅ | ✅ |
-| Ollama native | `/api/chat` NDJSON | on-device | ✅ `think` | ✅ | ✅ | ✅ |
-| Offline demo | scripted | on-device | ✅ | ✅ (real tools) | — | ✅ |
+| AI SDK stream | Vercel AI SDK v5 UI Message Stream and v4 Data Stream (auto-detected) | server | ✅ | ✅ server | ✅ | ✅ |
+| AG-UI | AG-UI events (PydanticAI, LangGraph, CrewAI, Mastra…) | server | ✅ | ✅ server | — | ✅ |
+| OpenAI Chat Completions | `/chat/completions` SSE | on-device | ✅ | ✅ | ✅ | ✅ |
+| OpenAI Responses | `/responses` SSE, stateless + encrypted reasoning | on-device | ✅ | ✅ | ✅ | ✅ |
+| Anthropic Messages | `/v1/messages` SSE | on-device | ✅ thinking | ✅ | ✅ | ✅ |
+| Gemini | `:streamGenerateContent` SSE | on-device | ✅ thought summaries | ✅ | ✅ | ✅ |
+| Ollama | `/api/chat` NDJSON | on-device | ✅ | ✅ | ✅ | ✅ |
+| Offline demo | scripted | on-device | ✅ | ✅ real tools | — | ✅ |
 
-On-device agent loops run app-defined `AgentTool`s; tools with `requiresApproval` pause the run and
-show a **Confirmation** (approve / deny) — the demo's `copy_to_clipboard` does this. Gateways that
-answer `200` with a JSON error (e.g. `{"msg":"Model not support"}`) and empty replies are surfaced
-as errors, not silently dropped.
+On-device agent loops run app-defined `AgentTool`s; tools with `requiresApproval` pause for a
+`Confirmation`. Provider errors — including gateways that answer `200` with a JSON error — surface
+as errors instead of empty replies.
 
-**Verified live** against a real model (`qwen3:4b` via local Ollama, which serves four of these
-protocols) — each run reasons, calls `calculate`, and answers — see `LiveAgentTest`. Gemini is
-covered by recorded fixtures only.
+### Sign-in (OAuth)
 
-## Component coverage vs AI Elements
+`ai-elements-core` implements OAuth from the RFCs: authorization code + PKCE through a loopback
+redirect (RFC 6749 / 7636 / 8252), the device flow (RFC 8628), single-flight token refresh, and a
+retry after `401`. Tokens are stored encrypted with the Android Keystore.
 
-| AI Elements | Here | | AI Elements | Here |
-|---|---|---|---|---|
-| Conversation | ✅ | | Tool | ✅ |
-| Message / Actions | ✅ | | Confirmation | ✅ (end-to-end) |
-| Response (Markdown) | ✅ GFM, code highlight, **Mermaid**, **KaTeX** | | Context | ✅ token usage |
-| Prompt Input | ✅ + image attachments, model picker | | Image | ✅ |
-| Reasoning | ✅ | | Chain of Thought | ✅ |
-| Sources | ✅ | | Plan / Task | ✅ |
-| Suggestion | ✅ | | Artifact | ✅ |
-| Loader / Shimmer | ✅ (M3 LoadingIndicator) | | Web Preview | ✅ |
-| Code Block | ✅ | | Branch, Checkpoint, Queue, Inline Citation, Open In Chat, Canvas/Node/Edge | ❌ not yet |
+- **OpenRouter** uses OpenRouter's documented PKCE flow for apps and yields a user-owned API key.
+- **ChatGPT (Codex), xAI Grok, Kimi Code** are *subscription* sign-ins through each vendor's own
+  CLI client. They are not endorsed by the vendors, may stop working, and can put accounts at risk;
+  the demo keeps them behind an explicit, warned, off-by-default switch.
+- Claude.ai subscriptions are intentionally not offered: Anthropic permits them only in its own
+  products. Use an Anthropic API key.
 
-Plan, Task, Chain of Thought, Artifact and Web Preview are components you drive with your own data;
-no wire protocol in the table emits them as standard parts.
-
-## Device support
-
-Tested on emulators: phone portrait / landscape (≥ 480dp-high rule: short windows never get the
-three-pane layout; top bar hides while typing), foldable width (~686dp: rail + chat), tablet
-(1280dp: rail + history pane + chat, two-pane settings), light/dark, font scale 1.5, API 36 and
-**API 28** (Chrome 66 WebView). On outdated System WebViews KaTeX still renders; Mermaid 12 cannot
-parse there and falls back to showing the diagram source with an "update WebView" note.
-
-## Run
+## Run the demo
 
 ```bash
-# Agent server (optional; the offline demo needs nothing)
+./gradlew :demo:installDebug                      # the "Offline demo" provider needs nothing else
+
+# Optional: a real agent server (FastAPI + PydanticAI) and a free local model
+ollama pull qwen3:4b
 cd server && uv sync
-AGENT_MODEL=demo uv run uvicorn main:app --host 0.0.0.0 --port 8788          # scripted, no model
-AGENT_BASE_URL=http://localhost:11434/v1 AGENT_MODEL=qwen3:4b \
-  uv run uvicorn main:app --host 0.0.0.0 --port 8788                           # real model
-
-# Free local model
-ollama pull qwen3:4b          # then use the "Ollama" provider (http://10.0.2.2:11434 on the emulator)
-
-# App
-ANDROID_HOME=$HOME/Library/Android/sdk ./gradlew :demo:installDebug
+AGENT_BASE_URL=http://localhost:11434/v1 AGENT_MODEL=qwen3:4b uv run uvicorn main:app --host 0.0.0.0 --port 8788
 ```
 
-`10.0.2.2` is the emulator's alias for the host; on a physical device use the host's LAN IP.
+`10.0.2.2` is the emulator's alias for your computer; on a phone use its LAN IP.
 
 ## Test
 
 ```bash
-./gradlew :ai-elements-core:testDebugUnitTest :ai-elements-ui:testDebugUnitTest   # fixtures, controller, LaTeX
-./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveAgentTest*' \
-  -PliveOllama=http://localhost:11434 -PliveModel=qwen3:4b -PliveAgentServer=http://localhost:8788
-./gradlew :demo:connectedDebugAndroidTest \
-  -Pandroid.testInstrumentationRunnerArguments.ollama=http://10.0.2.2:11434    # E2E UI, live tests skip if unreachable
+./gradlew testDebugUnitTest                        # protocol fixtures, controller, OAuth (local mock server)
+./gradlew :demo:connectedDebugAndroidTest          # UI end-to-end; live-model cases skip when unreachable
+# Live, opt-in:
+./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveAgentTest*' -PliveOllama=http://localhost:11434
+./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveCodexTest*' -PliveCodexAuth=$HOME/.codex/auth.json
 ```
+
+The live Codex test reads an existing Codex CLI login and never refreshes it (refreshing would sign
+the CLI out).
 
 ## Toolchain
 
-AGP 9.4 (built-in Kotlin) · Gradle 9.7.1 · Kotlin 2.4.20 · Compose 1.13.0-alpha01 ·
-Material3 **1.5.0-alpha29** (Expressive APIs ship only in the 1.5 alpha line) · adaptive 1.3.0 ·
-multiplatform-markdown-renderer 0.45 · mermaid 12.0.0 · KaTeX 0.18.9 (both bundled offline).
+AGP 9.4 (built-in Kotlin) · Gradle 9.7 · Kotlin 2.4 · Compose 1.13 alpha · Material3 1.5 alpha
+(Expressive APIs) · adaptive 1.3 · OkHttp 4.12 · kotlinx.serialization · mermaid 12 and KaTeX 0.18
+(bundled).
+
+## License
+
+Apache License 2.0 — see [LICENSE](LICENSE). Bundled third-party code and fonts are listed in
+[NOTICE](NOTICE).

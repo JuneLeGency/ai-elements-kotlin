@@ -1,4 +1,4 @@
-package dev.ai.elements.ui.markdown
+package dev.ai.elements.mermaid
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -13,12 +13,10 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,40 +31,31 @@ import com.swithun.cmpmermaid.core.GMResult
 import com.swithun.cmpmermaid.core.MermaidTheme
 import com.swithun.cmpmermaid.core.SceneColor
 import dev.ai.elements.ui.R
+import dev.ai.elements.ui.markdown.CodeBlock
+import dev.ai.elements.ui.markdown.LocalMermaidSizing
+import dev.ai.elements.ui.markdown.MermaidRenderer
 import dev.ai.elements.ui.theme.isDark
 
-/** How [MermaidDiagram] draws diagrams. */
-enum class MermaidRenderer {
-    /** The bundled mermaid.js 12 in an offline WebView: the reference renderer. */
-    WebView,
-
-    /**
-     * Experimental: drawn with Compose Canvas by `cmp-mermaid` (a Kotlin port of
-     * Mermaid). No WebView, layout runs off the main thread.
-     */
-    Native,
-}
-
-/** The renderer every [MermaidDiagram] below uses. Defaults to [MermaidRenderer.WebView]. */
-val LocalMermaidRenderer = staticCompositionLocalOf { MermaidRenderer.WebView }
-
 /**
- * Size of inline diagrams, for both renderers. Mermaid lays out at 16px text,
- * which at 1px = 1dp reads larger than body copy, so the default is 0.75.
+ * Mermaid drawn natively with Compose Canvas by `cmp-mermaid` (a Kotlin port
+ * of Mermaid): no WebView, layout off the main thread, themed from the
+ * Material color scheme. Provide it with
+ * `CompositionLocalProvider(LocalMermaidRenderer provides NativeMermaidRenderer)`.
  *
- * @param scale diagram units to dp (0.75 → 12dp labels); never wider than the column.
- * @param maxInlineHeight inline diagrams shrink to fit this height. Full screen is unscaled.
+ * Experimental: `cmp-mermaid` is young, and bundles fonts (~4 MB).
  */
-@Immutable
-data class MermaidSizing(val scale: Float = 0.75f, val maxInlineHeight: Dp = 400.dp) {
-    companion object {
-        val Small = MermaidSizing(scale = 0.6f, maxInlineHeight = 320.dp)
-        val Medium = MermaidSizing()
-        val Large = MermaidSizing(scale = 1f, maxInlineHeight = 560.dp)
-    }
+object NativeMermaidRenderer : MermaidRenderer {
+    @Composable
+    override fun Diagram(code: String, fullScreen: Boolean, modifier: Modifier, onClick: (() -> Unit)?) =
+        NativeMermaidView(
+            code = code,
+            fill = fullScreen,
+            modifier = if (fullScreen) modifier.padding(top = 64.dp, start = 12.dp, end = 12.dp, bottom = 12.dp) else modifier,
+            onClick = onClick,
+        )
 }
 
-val LocalMermaidSizing = staticCompositionLocalOf { MermaidSizing() }
+
 
 /**
  * A [MermaidRenderer.Native] diagram. Inline ([fill] = false) it takes its

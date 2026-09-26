@@ -97,6 +97,7 @@ import dev.ai.elements.ui.chat.PromptInput
 import dev.ai.elements.ui.chat.Queue
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
+import dev.ai.elements.ui.voice.SpeechInput
 import kotlinx.coroutines.launch
 
 /** Starter prompts, in the UI language (the model answers in kind). */
@@ -225,6 +226,7 @@ private fun ChatPane(
     val selectedId by viewModel.providers.selectedId.collectAsStateWithLifecycle()
     val provider = profiles.firstOrNull { it.id == selectedId } ?: profiles.first()
     var input by rememberSaveable { mutableStateOf("") }
+    var dictationBase by remember { mutableStateOf<String?>(null) }
     var attachments by remember { mutableStateOf<List<FilePart>>(emptyList()) }
     var providerSheet by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -316,6 +318,12 @@ private fun ChatPane(
                 },
                 onRemoveAttachment = { removed -> attachments = attachments.filterNot { it.id == removed.id } },
                 toolbar = {
+                    // Dictation appends to what's typed; partial results update in place.
+                    SpeechInput(onTranscript = { text, isFinal ->
+                        val base = dictationBase ?: input.also { dictationBase = it }
+                        input = listOf(base, text).filter { it.isNotBlank() }.joinToString(" ")
+                        if (isFinal) dictationBase = null
+                    })
                     ModelChip(viewModel, provider)
                     // Phones already show usage under each reply; the composer has no room for it.
                     if (!compactWidth) lastUsage?.let { ContextUsage(it) }

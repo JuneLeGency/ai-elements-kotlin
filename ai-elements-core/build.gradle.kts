@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.vanniktech.publish)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -9,6 +10,7 @@ android {
 
     defaultConfig {
         minSdk = 24
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     compileOptions {
@@ -34,4 +36,11 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+}
+
+// Maven Central: `./gradlew publishToMavenCentral` with mavenCentralUsername / mavenCentralPassword
+// and signingInMemoryKey(+Password) set; `publishToMavenLocal` works without them.
+mavenPublishing {
+    publishToMavenCentral()
+    if (providers.gradleProperty("signingInMemoryKey").isPresent) signAllPublications()
 }

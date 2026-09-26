@@ -93,7 +93,6 @@
     <string name="ai_clear">クリア</string>
     <string name="ai_exit_code">終了コード %1$d</string>
     <string name="ai_show_less">表示を減らす</string>
-    <string name="ai_show_all_frames">全 %1$d フレームを表示</string>
     <string name="ai_test_results">テスト結果</string>
     <string name="ai_tests_passed">%1$d 件成功</string>
     <string name="ai_tests_failed">%1$d 件失敗</string>
@@ -154,4 +153,7 @@
     <string name="ai_voice">音声</string>
     <string name="ai_search_voices">音声を検索</string>
     <string name="ai_preview_voice">試聴</string>
+    <plurals name="ai_show_all_frames">
+        <item quantity="other">全 %d フレームを表示</item>
+    </plurals>
 </resources>

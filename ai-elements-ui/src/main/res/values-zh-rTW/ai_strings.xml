@@ -93,7 +93,6 @@
     <string name="ai_clear">清除</string>
     <string name="ai_exit_code">結束碼 %1$d</string>
     <string name="ai_show_less">收合</string>
-    <string name="ai_show_all_frames">顯示全部 %1$d 個框架</string>
     <string name="ai_test_results">測試結果</string>
     <string name="ai_tests_passed">%1$d 通過</string>
     <string name="ai_tests_failed">%1$d 失敗</string>
@@ -154,4 +153,7 @@
     <string name="ai_voice">音色</string>
     <string name="ai_search_voices">搜尋音色</string>
     <string name="ai_preview_voice">試聽</string>
+    <plurals name="ai_show_all_frames">
+        <item quantity="other">顯示全部 %d 個框架</item>
+    </plurals>
 </resources>

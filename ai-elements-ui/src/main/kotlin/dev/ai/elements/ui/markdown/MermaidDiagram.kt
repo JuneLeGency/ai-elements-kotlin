@@ -55,7 +55,8 @@ import kotlinx.serialization.json.JsonPrimitive
 /**
  * Renders Mermaid source as a diagram. By default with the bundled, offline
  * `mermaid.js` inside a transparent WebView that sizes itself to the rendered
- * SVG; provide [LocalMermaidRenderer] = [MermaidRenderer.Native] to draw it
+ * SVG; provide another [MermaidRenderer] through [LocalMermaidRenderer] (e.g.
+ * `NativeMermaidRenderer` from `ai-elements-mermaid-native`) to draw it
  * with Compose Canvas instead.
  *
  * Mermaid is themed from the current Material color scheme. Tap to open a
@@ -112,19 +113,8 @@ fun MermaidDiagram(
                     LoadingIndicator(Modifier.size(40.dp))
                     Text(stringResource(R.string.ai_drawing_diagram), style = MaterialTheme.typography.bodyMedium)
                 }
-            } else when (renderer) {
-                MermaidRenderer.WebView -> MermaidWebView(
-                    code = code,
-                    fitWidth = true,
-                    onClick = { fullscreen = true },
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
-                )
-                MermaidRenderer.Native -> NativeMermaidView(
-                    code = code,
-                    fill = false,
-                    onClick = { fullscreen = true },
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
-                )
+            } else {
+                renderer.Diagram(code = code, fullScreen = false, modifier = Modifier.fillMaxWidth().padding(8.dp), onClick = { fullscreen = true })
             }
         }
     }
@@ -136,14 +126,7 @@ fun MermaidDiagram(
         ) {
             Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
                 Box(Modifier.systemBarsPadding()) {
-                    when (renderer) {
-                        MermaidRenderer.WebView -> MermaidWebView(code = code, fitWidth = false, modifier = Modifier.fillMaxSize())
-                        MermaidRenderer.Native -> NativeMermaidView(
-                            code = code,
-                            fill = true,
-                            modifier = Modifier.fillMaxSize().padding(top = 64.dp, start = 12.dp, end = 12.dp, bottom = 12.dp),
-                        )
-                    }
+                    renderer.Diagram(code = code, fullScreen = true, modifier = Modifier.fillMaxSize(), onClick = null)
                     FilledTonalIconButton(
                         onClick = { fullscreen = false },
                         shapes = IconButtonDefaults.shapes(),
@@ -153,6 +136,13 @@ fun MermaidDiagram(
             }
         }
     }
+}
+
+/** The default [MermaidRenderer]: bundled mermaid.js 12 in an offline WebView, snapshotted inline. */
+internal object WebViewMermaidRenderer : MermaidRenderer {
+    @Composable
+    override fun Diagram(code: String, fullScreen: Boolean, modifier: Modifier, onClick: (() -> Unit)?) =
+        MermaidWebView(code, fitWidth = !fullScreen, modifier = modifier, onClick = onClick)
 }
 
 @Composable

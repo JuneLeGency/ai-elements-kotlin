@@ -77,10 +77,7 @@ class AgentFlowTest {
         compose.onNodeWithTag("conversation").performScrollToNode(matcher)
     }
 
-    private fun awaitTurnEnd(timeoutMs: Long) {
-        compose.waitUntilExactlyOneExists(hasTestTag("regenerate"), timeoutMs)
-        compose.onNodeWithTag("chat-error").assertDoesNotExist()
-    }
+    private fun awaitTurnEnd(timeoutMs: Long) = compose.awaitTurnEnd(timeoutMs)
 
     @Test
     fun offlineAgent_runsToolAndRendersMarkdownAndMermaid() {

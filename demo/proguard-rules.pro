@@ -1,10 +1,6 @@
-# kotlinx.serialization: keep generated serializers of our @Serializable models.
--keepclassmembers @kotlinx.serialization.Serializable class ** {
+# The libraries ship their own consumer rules (serialization models, WebView bridges).
+# Keep serializers of the demo's own @Serializable models (conversations, settings).
+-keepclassmembers @kotlinx.serialization.Serializable class dev.ai.elements.demo.** {
     *** Companion;
     kotlinx.serialization.KSerializer serializer(...);
-}
--keepattributes *Annotation*, InnerClasses
-# WebView JS bridges (Mermaid / KaTeX height + error callbacks).
--keepclassmembers class * {
-    @android.webkit.JavascriptInterface <methods>;
 }
