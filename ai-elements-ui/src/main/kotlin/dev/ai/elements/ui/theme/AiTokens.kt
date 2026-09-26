@@ -70,7 +70,7 @@ object AiType {
     /** Code blocks. */
     val code: TextStyle
         @Composable @ReadOnlyComposable
-        get() = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace, fontSize = 13.sp, lineHeight = 19.sp, letterSpacing = 0.sp)
+        get() = MaterialTheme.typography.bodyMedium.copy(fontFamily = LocalCodeFontFamily.current, fontSize = 13.sp, lineHeight = 19.sp, letterSpacing = 0.sp)
 
     /** Tables and other secondary content. */
     val small: TextStyle

@@ -90,4 +90,13 @@
     <plurals name="connected_models">
         <item quantity="other">已连接 · 共 %d 个模型</item>
     </plurals>
+    <string name="font">字体</string>
+    <string name="font_desc">开源字体，采用 SIL Open Font License</string>
+    <string name="font_system">系统</string>
+    <string name="font_wenkai">文楷</string>
+    <string name="text_size">字号</string>
+    <string name="text_small">小</string>
+    <string name="text_default">标准</string>
+    <string name="text_large">大</string>
+    <string name="text_extra_large">特大</string>
 </resources>

@@ -62,7 +62,8 @@ class ConversationFeaturesTest {
         scenario?.close()
     }
 
-    private fun type(prompt: String) = compose.onNodeWithTag("prompt-input").performTextInput(prompt)
+    // Like a user: tap the composer, then type (the app keeps untouched fields from grabbing focus).
+    private fun type(prompt: String) = compose.onNodeWithTag("prompt-input").performClick().performTextInput(prompt)
 
     /** Headless emulators run in hardware-keyboard mode and keep the IME up; hide it. */
     private fun hideKeyboard() {

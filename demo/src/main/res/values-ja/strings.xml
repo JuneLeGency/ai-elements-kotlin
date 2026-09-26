@@ -90,4 +90,13 @@
     <plurals name="connected_models">
         <item quantity="other">接続しました · %d 個のモデル</item>
     </plurals>
+    <string name="font">フォント</string>
+    <string name="font_desc">SIL Open Font License のオープンソースフォント</string>
+    <string name="font_system">システム</string>
+    <string name="font_wenkai">文楷</string>
+    <string name="text_size">文字サイズ</string>
+    <string name="text_small">小</string>
+    <string name="text_default">標準</string>
+    <string name="text_large">大</string>
+    <string name="text_extra_large">特大</string>
 </resources>

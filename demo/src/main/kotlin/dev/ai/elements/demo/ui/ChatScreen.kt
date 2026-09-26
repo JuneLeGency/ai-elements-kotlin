@@ -246,7 +246,7 @@ private fun ChatPane(
     val hideTopBar = compactHeight && WindowInsets.isImeVisible
     val compactWidth = LocalConfiguration.current.screenWidthDp < 600
     Scaffold(containerColor = Color.Transparent, 
-        modifier = modifier,
+        modifier = modifier.noAutoFocusInTouchMode(),
         topBar = {
             if (!hideTopBar) TopAppBar(
                 navigationIcon = {

@@ -65,7 +65,7 @@ class AgentFlowTest {
     }
 
     private fun send(prompt: String) {
-        compose.onNodeWithTag("prompt-input").performTextInput(prompt)
+        compose.onNodeWithTag("prompt-input").performClick().performTextInput(prompt)
         compose.onNodeWithTag("send-button").performClick()
     }
 

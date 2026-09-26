@@ -13,12 +13,17 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ai.elements.demo.data.AppLocale
 import dev.ai.elements.demo.data.DiagramSize
 import dev.ai.elements.demo.data.ThemeMode
 import dev.ai.elements.demo.ui.DemoApp
+import dev.ai.elements.demo.ui.codeFamily
+import dev.ai.elements.demo.ui.family
 import dev.ai.elements.ui.markdown.LocalMermaidRenderer
 import dev.ai.elements.ui.markdown.LocalMermaidSizing
 import dev.ai.elements.ui.markdown.MermaidRenderer
@@ -47,14 +52,28 @@ class MainActivity : ComponentActivity() {
                 enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
                 onDispose {}
             }
-            AiElementsTheme(darkTheme = dark, dynamicColor = appearance.dynamicColor) {
+            AiElementsTheme(
+                darkTheme = dark,
+                dynamicColor = appearance.dynamicColor,
+                fontFamily = appearance.font.family,
+                codeFontFamily = appearance.font.codeFamily,
+            ) {
                 val renderer = if (appearance.nativeMermaid) MermaidRenderer.Native else MermaidRenderer.WebView
                 val sizing = when (appearance.diagramSize) {
                     DiagramSize.SMALL -> MermaidSizing.Small
                     DiagramSize.MEDIUM -> MermaidSizing.Medium
                     DiagramSize.LARGE -> MermaidSizing.Large
                 }
-                CompositionLocalProvider(LocalMermaidRenderer provides renderer, LocalMermaidSizing provides sizing) {
+                // In-app text size multiplies the system font scale, so every sp in the app follows it.
+                val density = LocalDensity.current
+                val scaled = remember(density, appearance.textSize) {
+                    Density(density.density, density.fontScale * appearance.textSize.scale)
+                }
+                CompositionLocalProvider(
+                    LocalMermaidRenderer provides renderer,
+                    LocalMermaidSizing provides sizing,
+                    LocalDensity provides scaled,
+                ) {
                     DemoApp(viewModel)
                 }
             }

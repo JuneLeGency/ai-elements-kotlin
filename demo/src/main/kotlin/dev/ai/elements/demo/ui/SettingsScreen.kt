@@ -6,6 +6,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -91,9 +92,11 @@ import dev.ai.elements.core.config.ProviderKind
 import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.demo.ChatViewModel
 import dev.ai.elements.demo.R
+import dev.ai.elements.demo.data.AppFont
 import dev.ai.elements.demo.data.AppLanguage
 import dev.ai.elements.demo.data.AppLocale
 import dev.ai.elements.demo.data.DiagramSize
+import dev.ai.elements.demo.data.TextSize
 import dev.ai.elements.demo.data.ThemeMode
 import dev.ai.elements.ui.theme.AiSize
 import java.util.UUID
@@ -210,6 +213,48 @@ private fun SettingsList(
                 }
             }
             item { LanguageItem() }
+            item {
+                SettingLabel(stringResource(R.string.font), stringResource(R.string.font_desc))
+                ConnectedChoices(
+                    options = AppFont.entries,
+                    selected = appearance.font,
+                    onSelect = { viewModel.settings.update(appearance.copy(font = it)) },
+                    tag = { "font-${it.name.lowercase()}" },
+                ) { font ->
+                    // Each option is set in its own font: the picker is the preview.
+                    Text(
+                        when (font) {
+                            AppFont.SYSTEM -> stringResource(R.string.font_system)
+                            AppFont.GEIST -> "Geist"
+                            AppFont.INTER -> "Inter"
+                            AppFont.WENKAI -> stringResource(R.string.font_wenkai)
+                        },
+                        fontFamily = font.family,
+                        maxLines = 1,
+                    )
+                }
+            }
+            item {
+                SettingLabel(stringResource(R.string.text_size), null)
+                ConnectedChoices(
+                    options = TextSize.entries,
+                    selected = appearance.textSize,
+                    onSelect = { viewModel.settings.update(appearance.copy(textSize = it)) },
+                    tag = { "text-size-${it.name.lowercase()}" },
+                ) { size ->
+                    Text(
+                        stringResource(
+                            when (size) {
+                                TextSize.SMALL -> R.string.text_small
+                                TextSize.DEFAULT -> R.string.text_default
+                                TextSize.LARGE -> R.string.text_large
+                                TextSize.EXTRA_LARGE -> R.string.text_extra_large
+                            },
+                        ),
+                        maxLines = 1,
+                    )
+                }
+            }
             item {
                 ListItem(
                     checked = appearance.nativeMermaid,
@@ -345,7 +390,7 @@ private fun ProviderEditor(
     }
 
     Scaffold(containerColor = Color.Transparent, 
-        modifier = modifier,
+        modifier = modifier.noAutoFocusInTouchMode(),
         topBar = {
             TopAppBar(
                 colors = transparentAppBarColors(),
@@ -564,6 +609,46 @@ private fun LanguageItem() {
                     modifier = Modifier.testTag("language-${language.name.lowercase()}"),
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun SettingLabel(title: String, description: String?) {
+    Column(Modifier.padding(start = 28.dp, end = 16.dp, top = 12.dp, bottom = 8.dp)) {
+        Text(title, style = MaterialTheme.typography.bodyLarge)
+        if (description != null) {
+            Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+/** An M3 Expressive connected button group for a single choice. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun <T> ConnectedChoices(
+    options: List<T>,
+    selected: T,
+    onSelect: (T) -> Unit,
+    tag: (T) -> String,
+    label: @Composable (T) -> Unit,
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+        modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
+    ) {
+        options.forEachIndexed { index, option ->
+            ToggleButton(
+                checked = option == selected,
+                onCheckedChange = { onSelect(option) },
+                shapes = when (index) {
+                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                    options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                },
+                contentPadding = PaddingValues(horizontal = 8.dp),
+                modifier = Modifier.weight(1f).testTag(tag(option)),
+            ) { label(option) }
         }
     }
 }

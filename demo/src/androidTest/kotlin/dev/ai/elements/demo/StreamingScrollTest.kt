@@ -93,7 +93,7 @@ class StreamingScrollTest {
 
     /** Send a long prompt and return once the reply overflows the screen, with the clock paused. */
     private fun startLongStream() {
-        compose.onNodeWithTag("prompt-input").performTextInput("Write a long answer")
+        compose.onNodeWithTag("prompt-input").performClick().performTextInput("Write a long answer")
         compose.onNodeWithTag("send-button").performClick()
         compose.mainClock.autoAdvance = false
         var waited = 0L

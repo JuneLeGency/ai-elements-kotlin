@@ -27,6 +27,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -59,16 +60,21 @@ enum class WidthClass { COMPACT, MEDIUM, EXPANDED }
 fun DemoApp(viewModel: ChatViewModel) {
     var destination by rememberSaveable { mutableStateOf(Destination.CHAT) }
     // Expose testTags as resource ids for UI Automator / adb-driven checks.
-    BoxWithConstraints(Modifier.semantics { testTagsAsResourceId = true }) {
+    BoxWithConstraints(
+        Modifier
+            .semantics { testTagsAsResourceId = true }
+            .noAutoFocusInTouchMode(),
+    ) {
         // Phones in landscape are wide but short: never give them the three-pane layout.
         val compactHeight = maxHeight < 480.dp
-        // Two panes (list + detail) need room for both; short landscape phones don't get them.
-        val twoPane = maxWidth >= 720.dp && !compactHeight
         val widthClass = when {
             maxWidth < 600.dp -> WidthClass.COMPACT
             maxWidth < 840.dp || compactHeight -> WidthClass.MEDIUM
             else -> WidthClass.EXPANDED
         }
+        // List + detail side by side only when Expanded (M3 canonical list-detail): at Medium
+        // (e.g. a tablet in portrait, ~800dp) a 360dp list would leave the chat ~350dp wide.
+        val twoPane = widthClass == WidthClass.EXPANDED
         // Phones: a bottom bar, hidden while typing so the composer sits right on the IME.
         val bottomBar = widthClass == WidthClass.COMPACT && !WindowInsets.isImeVisible
         NavigationSuiteScaffold(

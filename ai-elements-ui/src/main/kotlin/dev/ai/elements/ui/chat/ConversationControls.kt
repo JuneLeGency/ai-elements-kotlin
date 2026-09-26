@@ -8,8 +8,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -89,7 +91,12 @@ fun Checkpoint(onRestore: () -> Unit, modifier: Modifier = Modifier, label: Stri
         HorizontalDivider(Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
         Icon(Icons.Outlined.BookmarkBorder, null, Modifier.size(16.dp), MaterialTheme.colorScheme.onSurfaceVariant)
         Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        TextButton(onClick = { confirm = true }, modifier = Modifier.testTag("checkpoint-restore")) { Text(stringResource(R.string.ai_restore)) }
+        // Same type size as the label beside it; compact visually, still a 48dp touch target.
+        TextButton(
+            onClick = { confirm = true },
+            contentPadding = PaddingValues(horizontal = 8.dp),
+            modifier = Modifier.heightIn(min = 32.dp).testTag("checkpoint-restore"),
+        ) { Text(stringResource(R.string.ai_restore), style = MaterialTheme.typography.labelMedium) }
         HorizontalDivider(Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
     }
     if (confirm) {

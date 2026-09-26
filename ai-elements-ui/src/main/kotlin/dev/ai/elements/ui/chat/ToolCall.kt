@@ -51,6 +51,7 @@ import dev.ai.elements.core.model.ToolState
 import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
+import dev.ai.elements.ui.theme.LocalCodeFontFamily
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
@@ -87,7 +88,7 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
                 Column(Modifier.weight(1f)) {
                     Text(
                         part.name,
-                        style = MaterialTheme.typography.titleSmall.copy(fontFamily = FontFamily.Monospace),
+                        style = MaterialTheme.typography.titleSmall.copy(fontFamily = LocalCodeFontFamily.current),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -176,7 +177,7 @@ private fun Section(title: String, body: String, color: Color = MaterialTheme.co
                 Text(
                     text = body,
                     color = color,
-                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = LocalCodeFontFamily.current),
                     softWrap = false,
                     modifier = Modifier.horizontalScroll(rememberScrollState()).padding(12.dp),
                 )

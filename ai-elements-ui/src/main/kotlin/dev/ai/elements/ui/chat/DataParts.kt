@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.ui.R
+import dev.ai.elements.ui.theme.LocalCodeFontFamily
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -72,7 +73,7 @@ private fun JsonCard(part: DataPart, modifier: Modifier) {
             Text("data-${part.name}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(
                 prettyJson.encodeToString(JsonElement.serializer(), part.data),
-                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                style = MaterialTheme.typography.bodySmall.copy(fontFamily = LocalCodeFontFamily.current),
                 softWrap = false,
                 modifier = Modifier.padding(top = 6.dp).horizontalScroll(rememberScrollState()),
             )

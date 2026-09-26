@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSpacing
+import dev.ai.elements.ui.theme.LocalCodeFontFamily
 
 /** Progress of a plan / task / chain-of-thought step. */
 enum class StepStatus { PENDING, ACTIVE, COMPLETE }
@@ -141,7 +142,7 @@ private fun Badges(badges: List<String>) {
             Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = MaterialTheme.shapes.small) {
                 Text(
                     badge,
-                    style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+                    style = MaterialTheme.typography.labelSmall.copy(fontFamily = LocalCodeFontFamily.current),
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = AiSpacing.xs),
                 )
             }
