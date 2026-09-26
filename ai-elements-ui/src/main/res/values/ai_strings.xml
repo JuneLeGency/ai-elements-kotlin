@@ -171,4 +171,5 @@
     <string name="ai_subagent_steps">%1$d steps</string>
     <string name="ai_skill">Skill</string>
     <string name="ai_tool_via">via %1$s</string>
+    <string name="ai_skills_count">Skills (%1$d)</string>
 </resources>

@@ -41,9 +41,19 @@ class AgentRuntime(
 
     fun a2aAgent(url: String): A2aAgent = synchronized(a2aAgents) { a2aAgents.getOrPut(url.trimEnd('/')) { A2aAgent(url.trimEnd('/')) } }
 
+    /**
+     * For agent servers (AI SDK / AG-UI): only device-side capabilities travel, as client /
+     * frontend tools. The server's own harness brings its sub-agents and skills; sending ours
+     * too would duplicate them (and collide on `delegate_task` / `load_capability`).
+     */
+    private val deviceToolsOnly = AgentHarness(
+        model = { tools, instructions, approver -> modelOf(providers.selected).backend(tools, instructions, approver) },
+        capabilities = { capabilities(serverSide = true) },
+    )
+
     private val harness = AgentHarness(
         model = { tools, instructions, approver -> modelOf(providers.selected).backend(tools, instructions, approver) },
-        capabilities = ::capabilities,
+        capabilities = { capabilities(serverSide = false) },
         localSubAgents = {
             agents.settings.value.subAgents.filter { it.enabled }.map { def ->
                 val profile = def.providerId?.let { id -> providers.profiles.value.firstOrNull { it.id == id } }
@@ -56,7 +66,11 @@ class AgentRuntime(
     /** The backend of the chat's next turn. */
     fun backend(approver: ToolApprover): ChatBackend {
         val profile = providers.selected
-        return if (profile.kind == ProviderKind.A2A) A2aBackend(a2aAgent(profile.baseUrl)) else harness.backend(approver)
+        return when {
+            profile.kind == ProviderKind.A2A -> A2aBackend(a2aAgent(profile.baseUrl))
+            profile.kind.serverSideAgent -> deviceToolsOnly.backend(approver)
+            else -> harness.backend(approver)
+        }
     }
 
     private fun modelOf(profile: ProviderProfile): ModelBinding =
@@ -64,11 +78,12 @@ class AgentRuntime(
         else if (profile.usesTokens) profile.model(tokens = providers.tokenSource(profile))
         else profile.model(apiKey = providers.apiKey(profile.id))
 
-    private fun capabilities(): List<Capability> {
+    /** [serverSide]: only what the device alone can do (app tools, MCP); servers have their own clock, calculator and skills. */
+    private fun capabilities(serverSide: Boolean): List<Capability> {
         val settings = agents.settings.value
         return buildList {
-            if (settings.builtinTools) add(StaticCapability(tools = BuiltinTools + appTools))
-            if (settings.skillsEnabled) {
+            if (settings.builtinTools) add(StaticCapability(tools = if (serverSide) appTools else BuiltinTools + appTools))
+            if (!serverSide && settings.skillsEnabled) {
                 val enabled = skills.skills.value.map { it.skill }.filter { it.name !in settings.disabledSkills }
                 if (enabled.isNotEmpty()) add(Skills(enabled))
             }

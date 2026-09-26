@@ -299,7 +299,8 @@ _DEMO_SCRIPTS = [
 
 
 def _user_prompt(messages: list[ModelMessage]) -> str:
-    for message in messages:
+    """The latest user prompt (earlier turns must not re-trigger their capability)."""
+    for message in reversed(messages):
         for part in getattr(message, "parts", []):
             if type(part).__name__ == "UserPromptPart" and isinstance(part.content, str):
                 return part.content.lower()

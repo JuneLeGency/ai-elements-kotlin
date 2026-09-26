@@ -43,7 +43,11 @@ data class AgentToolSpec(val name: String, val description: String? = null, val 
 /**
  * An agent's definition (AI Elements `<Agent>`): name and model, its
  * instructions, the tools it may call (each expands to its schema) and the
- * shape of its output.
+ * shape of its output. Also renders a remote agent's card (e.g. A2A): pass its
+ * [description] and its skills as [tools] with [toolsTitle].
+ *
+ * @param description one-line summary under the name (no section label).
+ * @param toolsTitle overrides the "Tools (n)" heading, e.g. "Skills (n)".
  */
 @Composable
 fun Agent(
@@ -53,6 +57,8 @@ fun Agent(
     instructions: String? = null,
     tools: List<AgentToolSpec> = emptyList(),
     outputSchema: String? = null,
+    description: String? = null,
+    toolsTitle: String? = null,
 ) {
     Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, shape = MaterialTheme.shapes.large, modifier = modifier.fillMaxWidth().testTag("agent")) {
         Column(Modifier.padding(vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -65,12 +71,15 @@ fun Agent(
                     }
                 }
             }
+            description?.let {
+                Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 16.dp))
+            }
             instructions?.let {
                 Label(stringResource(R.string.ai_instructions))
                 Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 16.dp))
             }
             if (tools.isNotEmpty()) {
-                Label(stringResource(R.string.ai_tools_count, tools.size))
+                Label(toolsTitle ?: stringResource(R.string.ai_tools_count, tools.size))
                 Column {
                     tools.forEach { ToolSpecRow(it) }
                 }

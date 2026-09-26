@@ -165,4 +165,5 @@
     <string name="ai_subagent_steps">%1$d ステップ</string>
     <string name="ai_skill">スキル</string>
     <string name="ai_tool_via">%1$s 経由</string>
+    <string name="ai_skills_count">スキル（%1$d）</string>
 </resources>

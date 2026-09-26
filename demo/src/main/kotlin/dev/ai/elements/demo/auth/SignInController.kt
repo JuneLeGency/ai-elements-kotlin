@@ -12,7 +12,12 @@ import dev.ai.elements.core.auth.LoopbackReceiver
 import dev.ai.elements.core.auth.OAuthClient
 import dev.ai.elements.core.auth.OAuthProvider
 import dev.ai.elements.core.config.ProviderProfile
+import dev.ai.elements.core.config.McpServerStore
 import dev.ai.elements.core.config.ProviderStore
+import dev.ai.elements.core.auth.LoopbackRedirect
+import dev.ai.elements.core.mcp.McpAuthRequiredException
+import dev.ai.elements.core.mcp.McpOAuth
+import dev.ai.elements.core.mcp.McpServerConfig
 import dev.ai.elements.demo.MainActivity
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -69,6 +74,44 @@ class SignInController(
             }
         }
     }
+
+    /**
+     * MCP authorization for a remote server (MCP spec: RFC 9728 / 8414 discovery, dynamic
+     * client registration, PKCE with the RFC 8707 resource). The registration is kept, so later
+     * sign-ins reuse the same client and loopback port.
+     */
+    fun signInMcp(activity: Activity, store: McpServerStore, server: McpServerConfig, challenge: McpAuthRequiredException?, onDone: () -> Unit) {
+        job?.cancel()
+        job = scope.launch {
+            try {
+                val registration = store.registration(server.id) ?: McpOAuth().discover(
+                    serverUrl = server.url,
+                    resourceMetadataUrl = challenge?.resourceMetadataUrl,
+                    scope = challenge?.scope,
+                    redirect = LoopbackRedirect("127.0.0.1", freePort()),
+                    clientName = "AI Elements",
+                ).also { store.setRegistration(server.id, it) }
+                val flow = registration.flow()
+                withContext(Dispatchers.IO) { LoopbackReceiver.open(flow.redirect) }.use { receiver ->
+                    val attempt = client.begin(flow)
+                    _state.value = State.InBrowser(server.id)
+                    open(activity, attempt.url)
+                    store.tokenStore(server.id).save(client.exchange(flow, attempt, receiver.awaitCode(attempt.state)))
+                }
+                store.upsert(server) // drops the cached client so the new tokens are used
+                returnToApp()
+                _state.value = State.Idle
+                onDone()
+            } catch (e: CancellationException) {
+                _state.value = State.Idle
+                throw e
+            } catch (e: Exception) {
+                _state.value = State.Failed(server.id, e.message ?: e.javaClass.simpleName)
+            }
+        }
+    }
+
+    private fun freePort(): Int = java.net.ServerSocket(0).use { it.localPort }
 
     fun cancel() {
         job?.cancel()

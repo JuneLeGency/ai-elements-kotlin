@@ -96,7 +96,7 @@ reference only, never copied).
 | `Subagent` element (nested run, live activity, nested approvals) for `delegate_task` / AG-UI subagents / AI SDK `UIMessage` outputs | ✅ component tests 10/10 on emulator; Gallery sample |
 | Tool titles (`title`), preliminary output, skill and MCP badges in `ToolCall` | ✅ |
 | AG-UI state / activity rendering (`state.plan` → `Plan`) | ⬜ |
-| A2A agent card view (extend `Agent`) | ⬜ |
+| A2A agent card view (extend `Agent`) | ✅ `description` + `toolsTitle` (skills) |
 
 ### W5 · Demo app
 
@@ -110,11 +110,11 @@ The demo is a showcase of both modes, switchable per conversation:
 
 | Item | Status |
 |---|---|
-| Backend picker: in-app harness · AI SDK server · AG-UI server · A2A agent · direct model API | 🟡 A2A provider kind + preset; runtime wired through `AgentHarness`; settings UI next |
-| Settings: MCP servers (add, test, tools, approval policy, OAuth sign-in), Skills (bundled + zip import), Agents (sub-agents, remote A2A agents) | ⬜ |
+| Backend picker: in-app harness · AI SDK server · AG-UI server · A2A agent · direct model API | ✅ provider kinds incl. A2A; remote servers get device-only tools, the in-app harness gets skills + sub-agents |
+| Settings: MCP servers (add, test, tools, approval policy, OAuth sign-in), Skills (bundled + zip import), Agents (sub-agents, remote A2A agents) | ✅ verified on emulator (MCP 2026-07-28 connect, 5 tools; live A2A card); MCP OAuth sign-in untested against a real OAuth server |
 | Composer sheet to toggle MCP servers / skills / agents per chat | ⬜ |
-| Bundled skills from `/skills` (shared with the server) | ⬜ |
-| E2E on emulator and Xiaomi Pad: every capability over each protocol | ⬜ |
+| Bundled skills from `/skills` (shared with the server) | ✅ `bundleSkills` Gradle task |
+| E2E on emulator and Xiaomi Pad: every capability over each protocol | 🟡 CapabilitiesFlowTest 4/4 on emulator (AG-UI delegation + interrupt approval, AI SDK skill + plan, A2A); Xiaomi Pad and in-app harness with a real model pending |
 
 ### W6 · Library structure
 

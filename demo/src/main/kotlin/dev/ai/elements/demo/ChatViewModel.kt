@@ -6,6 +6,10 @@ import androidx.lifecycle.viewModelScope
 import dev.ai.elements.core.ChatController
 import dev.ai.elements.core.ChatState
 import dev.ai.elements.core.config.McpServerStore
+import dev.ai.elements.core.mcp.McpAuthRequiredException
+import dev.ai.elements.core.mcp.McpServerConfig
+import dev.ai.elements.core.mcp.McpServerStatus
+import kotlinx.coroutines.flow.update
 import dev.ai.elements.core.auth.OAuthProvider
 import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.core.config.ProviderStore
@@ -98,6 +102,46 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     val signIn = SignInController(app, providers, viewModelScope)
+
+    // --- Capabilities: MCP servers, skills, agents ------------------------------------------
+
+    /** Last connection check per MCP server (null while checking). */
+    private val _mcpStatus = MutableStateFlow<Map<String, McpServerStatus?>>(emptyMap())
+    val mcpStatus: StateFlow<Map<String, McpServerStatus?>> = _mcpStatus.asStateFlow()
+
+    fun checkMcp(server: McpServerConfig) {
+        _mcpStatus.update { it + (server.id to null) }
+        viewModelScope.launch {
+            val client = mcpServers.client(server)
+            val status = try {
+                val tools = client.listTools()
+                McpServerStatus.Connected(tools, client.serverInfo, client.protocolVersion)
+            } catch (e: McpAuthRequiredException) {
+                McpServerStatus.NeedsSignIn(e)
+            } catch (e: Exception) {
+                McpServerStatus.Failed(e.message ?: e.javaClass.simpleName)
+            }
+            _mcpStatus.update { it + (server.id to status) }
+        }
+    }
+
+    fun signInMcp(activity: android.app.Activity, server: McpServerConfig) {
+        val challenge = (_mcpStatus.value[server.id] as? McpServerStatus.NeedsSignIn)?.error
+        signIn.signInMcp(activity, mcpServers, server, challenge) { checkMcp(server) }
+    }
+
+    fun removeMcp(id: String) {
+        mcpServers.remove(id)
+        _mcpStatus.update { it - id }
+    }
+
+    /** Install a skill `.zip`; returns its name, or throws with why it is not a valid skill. */
+    suspend fun installSkill(uri: android.net.Uri): String = skills.install(uri).name
+
+    fun uninstallSkill(name: String) = viewModelScope.launch { skills.uninstall(name) }
+
+    /** Name and description from a remote agent's A2A card. */
+    suspend fun agentCard(url: String) = runtime.a2aAgent(url).card()
 
     private suspend fun persist(state: ChatState) {
         val id = _conversationId.value

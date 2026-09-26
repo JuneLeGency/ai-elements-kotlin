@@ -27,6 +27,11 @@ android {
         generateLocaleConfig = true
     }
 
+    // The A2A Java SDK's jars each carry these; their notices are reproduced in the app's licences.
+    packaging {
+        resources.excludes += listOf("META-INF/NOTICE.md", "META-INF/LICENSE.md", "META-INF/INDEX.LIST", "META-INF/DEPENDENCIES", "META-INF/beans.xml")
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true

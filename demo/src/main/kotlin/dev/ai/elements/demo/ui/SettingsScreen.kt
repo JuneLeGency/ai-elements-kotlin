@@ -130,14 +130,22 @@ fun SettingsScreen(viewModel: ChatViewModel, twoPane: Boolean) {
                     viewModel = viewModel,
                     profiles = profiles,
                     selectedId = selectedId,
-                    highlightedId = if (navigator.isDetailVisible) editing?.id else null,
+                    highlightedId = if (navigator.isDetailVisible) navigator.currentDestination?.contentKey else null,
                     onEdit = { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } },
                 )
             }
         },
         detailPane = {
             AnimatedPane {
-                if (editing != null) {
+                val key = navigator.currentDestination?.contentKey
+                if (CapabilityPage.isCapability(key)) {
+                    CapabilityPane(
+                        viewModel, key!!,
+                        showBack = !navigator.isListVisible,
+                        onClose = { scope.launch { navigator.navigateBack() } },
+                        modifier = if (twoPane) Modifier.padding(end = 24.dp) else Modifier,
+                    )
+                } else if (editing != null) {
                     ProviderEditor(
                         viewModel,
                         editing,
@@ -346,6 +354,7 @@ private fun SettingsList(
                 }
             }
 
+            capabilityItems(viewModel, highlightedId, onEdit)
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                     SectionHeader(stringResource(R.string.agent_providers), Modifier.weight(1f))
@@ -366,7 +375,7 @@ private fun SettingsList(
                                             name = String.format(customName, kind.label),
                                             kind = kind,
                                             baseUrl = when (kind) {
-                                                ProviderKind.AGENT_SERVER, ProviderKind.AG_UI -> "http://10.0.2.2:8788"
+                                                ProviderKind.AGENT_SERVER, ProviderKind.AG_UI, ProviderKind.A2A -> "http://10.0.2.2:8788"
                                                 ProviderKind.ANTHROPIC -> "https://api.anthropic.com"
                                                 ProviderKind.GEMINI -> "https://generativelanguage.googleapis.com"
                                                 ProviderKind.OLLAMA -> "http://10.0.2.2:11434"
@@ -652,7 +661,7 @@ private fun ProviderEditor(
 }
 
 @Composable
-private fun SectionHeader(text: String, modifier: Modifier = Modifier) {
+internal fun SectionHeader(text: String, modifier: Modifier = Modifier) {
     Text(
         text,
         style = MaterialTheme.typography.titleSmall,
@@ -720,7 +729,7 @@ private fun LanguageItem() {
 }
 
 @Composable
-private fun SettingLabel(title: String, description: String?) {
+internal fun SettingLabel(title: String, description: String?) {
     Column(Modifier.padding(start = 28.dp, end = 16.dp, top = 12.dp, bottom = 8.dp)) {
         Text(title, style = MaterialTheme.typography.bodyLarge)
         if (description != null) {
@@ -732,7 +741,7 @@ private fun SettingLabel(title: String, description: String?) {
 /** An M3 Expressive connected button group for a single choice. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun <T> ConnectedChoices(
+internal fun <T> ConnectedChoices(
     options: List<T>,
     selected: T,
     onSelect: (T) -> Unit,

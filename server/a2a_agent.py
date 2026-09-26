@@ -11,13 +11,19 @@ multi-turn tasks.
 
 from __future__ import annotations
 
+import os
 from collections.abc import Callable
 
 from a2a.helpers.proto_helpers import new_task_from_user_message, new_text_part
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.server.request_handlers import DefaultRequestHandler
-from a2a.server.routes import create_agent_card_routes, create_jsonrpc_routes
+from a2a.server.request_handlers.response_helpers import agent_card_to_dict
+from a2a.server.routes import create_jsonrpc_routes
+from a2a.utils.constants import AGENT_CARD_WELL_KNOWN_PATH
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+from starlette.routing import Route
 from a2a.server.tasks import InMemoryTaskStore, TaskUpdater
 from a2a.types import AgentCapabilities, AgentCard, AgentInterface, AgentProvider, AgentSkill, TaskState
 from pydantic_ai import Agent
@@ -88,4 +94,17 @@ def a2a_routes(agent: Agent, model: Callable[[], Model], base_url: str, deps: Ca
         ],
     )
     handler = DefaultRequestHandler(agent_executor=PydanticAIExecutor(agent, model, deps), task_store=InMemoryTaskStore(), agent_card=card)
-    return create_agent_card_routes(card) + create_jsonrpc_routes(handler, rpc_url="/a2a", enable_v0_3_compat=True)
+
+    async def card_for_request(request: Request) -> JSONResponse:
+        # Advertise the interface at the address the client used (emulator alias, LAN IP,
+        # localhost), unless PUBLIC_URL pins it.
+        served = AgentCard()
+        served.CopyFrom(card)
+        if not os.environ.get("PUBLIC_URL"):
+            del served.supported_interfaces[:]
+            served.supported_interfaces.append(
+                AgentInterface(url=f"{str(request.base_url).rstrip('/')}/a2a", protocol_binding="JSONRPC", protocol_version="1.0")
+            )
+        return JSONResponse(agent_card_to_dict(served))
+
+    return [Route(AGENT_CARD_WELL_KNOWN_PATH, card_for_request, methods=["GET"])] + create_jsonrpc_routes(handler, rpc_url="/a2a", enable_v0_3_compat=True)
