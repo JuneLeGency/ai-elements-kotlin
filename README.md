@@ -173,6 +173,10 @@ LIVE_PROXY_KEY=… ./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveP
 The live Codex test reads an existing Codex CLI login and never refreshes it (refreshing would sign
 the CLI out).
 
+On MIUI / HyperOS devices, instrumentation started in the background cannot bring the app to the
+front until the app may "display pop-up windows while running in the background"
+(`adb shell appops set dev.ai.elements.demo 10021 allow`); reset it afterwards with `… 10021 default`.
+
 ## Toolchain
 
 AGP 9.4 (built-in Kotlin) · Gradle 9.7 · Kotlin 2.4 · Compose 1.13 alpha · Material3 1.5 alpha

@@ -20,6 +20,8 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -117,7 +119,13 @@ class ConversationFeaturesTest {
         hideKeyboard()
         compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("tool-calculate"))
 
-        // Data part: the offline agent streams a live `data-plan`.
+        // Data part: the offline agent streams a live `data-plan`, just above the tool call. Replies
+        // are virtualized, so bring it into the viewport (how far depends on the screen) first.
+        repeat(12) {
+            if (compose.onAllNodesWithTag("data-plan", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()) return@repeat
+            compose.onNodeWithTag("conversation").performTouchInput { swipeDown(startY = centerY - 150f, endY = centerY + 150f) }
+            compose.waitForIdle()
+        }
         compose.onAllNodesWithTag("data-plan", useUnmergedTree = true).onFirst().assertExists()
 
         // Branch: regenerating keeps the first answer as version 1 of 2.
