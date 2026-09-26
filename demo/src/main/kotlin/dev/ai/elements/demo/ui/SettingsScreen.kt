@@ -1,5 +1,6 @@
 package dev.ai.elements.demo.ui
 
+import androidx.compose.ui.graphics.Color
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -153,7 +154,7 @@ private fun SettingsList(
     val appearance by viewModel.settings.appearance.collectAsStateWithLifecycle()
     var addMenu by remember { mutableStateOf(false) }
 
-    Scaffold(topBar = { TopAppBar(title = { Text("Settings") }) }) { padding ->
+    Scaffold(containerColor = Color.Transparent, topBar = { TopAppBar(title = { Text("Settings") }, colors = transparentAppBarColors()) }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding)) {
             item { SectionHeader("Appearance") }
             item {
@@ -294,10 +295,11 @@ private fun ProviderEditor(
         store.setApiKey(draft.id, apiKey)
     }
 
-    Scaffold(
+    Scaffold(containerColor = Color.Transparent, 
         modifier = modifier,
         topBar = {
             TopAppBar(
+                colors = transparentAppBarColors(),
                 title = { Text(draft.name.ifBlank { "Provider" }, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     if (showBack) IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Back") }

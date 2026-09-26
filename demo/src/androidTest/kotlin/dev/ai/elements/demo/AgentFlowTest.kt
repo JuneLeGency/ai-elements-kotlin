@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -68,6 +69,10 @@ class AgentFlowTest {
         compose.onNodeWithTag("send-button").performClick()
     }
 
+    private fun scrollTo(matcher: androidx.compose.ui.test.SemanticsMatcher) {
+        compose.onNodeWithTag("conversation").performScrollToNode(matcher)
+    }
+
     private fun awaitTurnEnd(timeoutMs: Long) {
         compose.waitUntilExactlyOneExists(hasTestTag("regenerate"), timeoutMs)
         compose.onNodeWithTag("chat-error").assertDoesNotExist()
@@ -77,11 +82,12 @@ class AgentFlowTest {
     fun offlineAgent_runsToolAndRendersMarkdownAndMermaid() {
         launchWith(ProviderProfile.Presets.first { it.kind == ProviderKind.MOCK })
         send("What is 6 * 7?")
-        compose.waitUntilExactlyOneExists(hasTestTag("tool-calculate"), 10_000)
         awaitTurnEnd(20_000)
+        // Replies are virtualized: bring each slice into view before asserting on it.
+        scrollTo(hasTestTag("tool-calculate"))
         compose.onNodeWithText("Done").assertExists()
-        compose.onNodeWithTag("mermaid", useUnmergedTree = true).assertExists()
-        compose.onAllNodesWithTag("context-usage").onFirst().assertExists()
+        scrollTo(hasTestTag("mermaid"))
+        scrollTo(hasTestTag("context-usage"))
     }
 
     @Test
@@ -91,13 +97,14 @@ class AgentFlowTest {
         awaitConfirmation()
         compose.onNodeWithTag("approve").performClick()
         awaitTurnEnd(20_000)
+        scrollTo(hasTestTag("tool-copy_to_clipboard"))
         compose.onNodeWithText("Done").assertExists()
 
         send("Copy that again to the clipboard")
         awaitConfirmation()
         compose.onNodeWithTag("deny").performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Denied"), 10_000)
         compose.waitUntil(20_000) { compose.onAllNodesWithTag("regenerate").fetchSemanticsNodes().size == 1 }
+        scrollTo(hasText("Denied"))
     }
 
     @Test
@@ -105,9 +112,9 @@ class AgentFlowTest {
         assumeTrue("Ollama not reachable at $ollama", reachable("$ollama/api/tags"))
         launchWith(ProviderProfile("live-ollama", "Live Ollama", ProviderKind.OLLAMA, ollama, "qwen3:4b"))
         send("Use the calculate tool to compute 1234 * 5678.")
-        compose.waitUntilExactlyOneExists(hasTestTag("tool-calculate"), 120_000)
         awaitTurnEnd(240_000)
-        compose.waitUntilAtLeastOneExists(hasText("7,006,652", substring = true) or hasText("7006652", substring = true), 5_000)
+        scrollTo(hasTestTag("tool-calculate"))
+        scrollTo(hasText("7,006,652", substring = true) or hasText("7006652", substring = true))
     }
 
     @Test
@@ -115,8 +122,8 @@ class AgentFlowTest {
         assumeTrue("agent server not reachable at $agentServer", reachable("$agentServer/health"))
         launchWith(ProviderProfile("live-agui", "Live AG-UI", ProviderKind.AG_UI, agentServer))
         send("Use the calculate tool to compute 1234 * 5678.")
-        compose.waitUntilExactlyOneExists(hasTestTag("tool-calculate"), 120_000)
         awaitTurnEnd(240_000)
+        scrollTo(hasTestTag("tool-calculate"))
     }
 
     /** The Confirmation sits inside the clickable tool card, whose semantics merge it. */

@@ -9,6 +9,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ai.elements.demo.data.ThemeMode
@@ -36,6 +38,12 @@ class MainActivity : ComponentActivity() {
             }
             AiElementsTheme(darkTheme = dark, dynamicColor = appearance.dynamicColor) {
                 DemoApp(viewModel)
+            }
+            // The window background only covers startup; once Compose has drawn,
+            // it paints every pixel itself, so drop the extra full-screen layer.
+            LaunchedEffect(Unit) {
+                withFrameNanos { }
+                window.setBackgroundDrawable(null)
             }
         }
     }

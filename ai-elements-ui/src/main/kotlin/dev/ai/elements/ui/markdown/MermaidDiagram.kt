@@ -6,7 +6,6 @@ import android.os.Looper
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -75,7 +74,9 @@ fun MermaidDiagram(
         shape = MaterialTheme.shapes.large,
         modifier = modifier.fillMaxWidth().padding(vertical = 6.dp).testTag("mermaid"),
     ) {
-        Column(Modifier.animateContentSize(MaterialTheme.motionScheme.defaultSpatialSpec())) {
+        // No animateContentSize here: inside a lazy list it would report an animating
+        // size to the list while the snapshot draws at full size.
+        Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -173,6 +174,7 @@ private fun MermaidWebView(code: String, fitWidth: Boolean, modifier: Modifier, 
         cacheKey = cacheKey,
         fitWidth = fitWidth,
         modifier = modifier,
+        contentDescription = "Mermaid diagram",
         onClick = onClick,
         onClickLabel = "Open diagram",
     ) { message ->

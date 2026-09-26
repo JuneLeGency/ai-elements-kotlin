@@ -16,11 +16,11 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.printToLog
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -64,6 +64,15 @@ class ConversationFeaturesTest {
 
     private fun type(prompt: String) = compose.onNodeWithTag("prompt-input").performTextInput(prompt)
 
+    /** Headless emulators run in hardware-keyboard mode and keep the IME up; hide it. */
+    private fun hideKeyboard() {
+        scenario?.onActivity { activity ->
+            activity.getSystemService(android.view.inputmethod.InputMethodManager::class.java)
+                .hideSoftInputFromWindow(activity.window.decorView.windowToken, 0)
+        }
+        compose.waitForIdle()
+    }
+
     private fun awaitIdleTurn() = compose.waitUntil(30_000) {
         compose.onAllNodesWithTag("regenerate").fetchSemanticsNodes().size == 1 &&
             compose.onAllNodesWithTag("stop-button").fetchSemanticsNodes().isEmpty()
@@ -84,11 +93,13 @@ class ConversationFeaturesTest {
         type("Hello there")
         compose.onNodeWithTag("send-button").performClick()
         compose.mainClock.autoAdvance = false
-        repeat(20) {
+        var waited = 0
+        while (compose.onAllNodesWithTag("stop-button").fetchSemanticsNodes().isEmpty()) {
+            check(waited < 5_000) { "reply never started streaming" }
             Thread.sleep(50)
+            waited += 50
             compose.mainClock.advanceTimeByFrame()
         }
-        compose.onNodeWithTag("stop-button").assertExists()
         type("What is 6 * 7")
         compose.mainClock.advanceTimeByFrame()
         compose.onNodeWithTag("queue-button").performClick()
@@ -98,6 +109,7 @@ class ConversationFeaturesTest {
         compose.mainClock.autoAdvance = true
         compose.waitUntil(60_000) { compose.onAllNodesWithTag("queue").fetchSemanticsNodes().isEmpty() }
         awaitIdleTurn()
+        hideKeyboard()
         compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("tool-calculate"))
 
         // Data part: the offline agent streams a live `data-plan`.
@@ -114,20 +126,26 @@ class ConversationFeaturesTest {
         screenshot("02-branch")
 
         // Canvas: the agent run as a node graph.
-        compose.onAllNodesWithTag("run-graph").onFirst().performClick()
-        compose.waitUntilAtLeastOneExists(hasTestTag("workflow-canvas"), 5_000)
+        compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("regenerate"))
+        // Several replies each have a run-graph action; click the one on screen.
+        val viewport = compose.onNodeWithTag("conversation").fetchSemanticsNode().boundsInRoot
+        val visible = compose.onAllNodesWithTag("run-graph").fetchSemanticsNodes()
+            .indexOfFirst { it.boundsInRoot.top >= viewport.top && it.boundsInRoot.bottom <= viewport.bottom }
+        check(visible >= 0) { "no run-graph action on screen" }
+        compose.onAllNodesWithTag("run-graph")[visible].performSemanticsAction(SemanticsActions.OnClick)
+        runCatching { compose.waitUntilAtLeastOneExists(hasTestTag("workflow-canvas"), 5_000) }.onFailure {
+            val shot = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
+            val dir = File(context.getExternalFilesDir(null), "screens").apply { mkdirs() }
+            File(dir, "fail-run-graph.png").outputStream().use { out -> shot.compress(Bitmap.CompressFormat.PNG, 100, out) }
+            throw it
+        }
         compose.onNode(isDialog()).assertExists()
         compose.waitUntilAtLeastOneExists(hasText("Prompt"), 5_000)
         screenshot("03-run-graph", dialog = true)
         compose.onNodeWithContentDescription("Close").performClick()
 
         // Checkpoint: rewind to the first turn.
-        // Items: prompt 1, reply 1, checkpoint, prompt 2, reply 2.
-        compose.onNodeWithTag("conversation").performScrollToIndex(2)
-        runCatching { compose.onNodeWithTag("checkpoint-restore").assertExists() }.onFailure {
-            compose.onNodeWithTag("conversation").printToLog("CKPT", maxDepth = 2)
-            throw it
-        }
+        compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("checkpoint-restore"))
         compose.onNodeWithTag("checkpoint-restore").performClick()
         compose.onNodeWithTag("checkpoint-confirm").performClick()
         compose.waitUntil(5_000) { compose.onAllNodesWithText("What is 6 * 7").fetchSemanticsNodes().isEmpty() }

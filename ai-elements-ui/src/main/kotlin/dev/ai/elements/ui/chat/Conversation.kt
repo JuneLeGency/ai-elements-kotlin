@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -39,9 +40,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.ChatState
 import dev.ai.elements.core.model.ChatStatus
+import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
 import dev.ai.elements.ui.theme.AiSpacing
 import kotlinx.coroutines.launch
+import java.util.IdentityHashMap
 
 /**
  * The scrolling message list (AI Elements `<Conversation>`).
@@ -80,6 +83,12 @@ fun Conversation(
     }
     val lastAssistantId = state.messages.lastOrNull()?.takeIf { it.role == Role.ASSISTANT }?.id
 
+    // Rows per message *instance*: settled messages keep their instance, so only
+    // the reply that is streaming is re-split on each update.
+    val rowCache = remember { IdentityHashMap<Message, List<AssistantRow>>() }
+    val rowsFor: (Message) -> List<AssistantRow> = { m -> rowCache.getOrPut(m) { assistantRows(m) } }
+    SideEffect { rowCache.keys.retainAll(state.messages.toSet()) }
+
     // Sending a message, or opening another conversation, starts at the bottom and follows.
     val userCount = state.messages.count { it.role == Role.USER }
     val conversationKey = state.messages.firstOrNull()?.id
@@ -89,27 +98,39 @@ fun Conversation(
         LazyColumn(
             state = listState,
             contentPadding = contentPadding,
-            verticalArrangement = Arrangement.spacedBy(AiSpacing.turn, Alignment.Bottom),
+            verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize().testTag("conversation"),
         ) {
             state.messages.forEachIndexed { index, message ->
-                item(key = message.id, contentType = message.role) {
-                    MessageItem(
-                        message = message,
-                        prompt = prompts[message.id],
-                        onRegenerate = if (message.id == lastAssistantId && !state.isBusy) onRegenerate else null,
-                        onToolApproval = onToolApproval,
-                        onSelectVersion = onSelectVersion?.takeIf { !state.isBusy }?.let { cb -> { i -> cb(message.id, i) } },
-                        modifier = Modifier.widthIn(max = maxContentWidth).fillMaxWidth(),
-                    )
+                // Space between turns; slices of one reply sit closer together.
+                val turnGap = Modifier.padding(top = if (index == 0) 0.dp else AiSpacing.turn)
+                if (message.role == Role.USER) {
+                    item(key = message.id, contentType = "user") {
+                        MessageItem(message, turnGap.widthIn(max = maxContentWidth).fillMaxWidth())
+                    }
+                } else {
+                    rowsFor(message).forEach { row ->
+                        item(key = row.key, contentType = row.contentType) {
+                            AssistantRowItem(
+                                row = row,
+                                prompt = prompts[message.id],
+                                onRegenerate = if (message.id == lastAssistantId && !state.isBusy) onRegenerate else null,
+                                onToolApproval = onToolApproval,
+                                onSelectVersion = onSelectVersion?.takeIf { !state.isBusy }?.let { cb -> { i -> cb(message.id, i) } },
+                                modifier = (if (row.first) turnGap else Modifier.padding(top = AiSpacing.s))
+                                    .widthIn(max = maxContentWidth)
+                                    .fillMaxWidth(),
+                            )
+                        }
+                    }
                 }
                 // A checkpoint after every finished turn that has later messages.
                 if (onRestoreCheckpoint != null && index < state.messages.lastIndex && message.role == Role.ASSISTANT && !state.isBusy) {
                     item(key = "checkpoint-${message.id}", contentType = "checkpoint") {
                         Checkpoint(
                             onRestore = { onRestoreCheckpoint(message.id) },
-                            modifier = Modifier.widthIn(max = maxContentWidth),
+                            modifier = Modifier.padding(top = AiSpacing.s).widthIn(max = maxContentWidth),
                         )
                     }
                 }
@@ -119,7 +140,7 @@ fun Conversation(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.widthIn(max = maxContentWidth).fillMaxWidth().testTag("pending"),
+                        modifier = Modifier.padding(top = AiSpacing.turn).widthIn(max = maxContentWidth).fillMaxWidth().testTag("pending"),
                     ) {
                         AssistantAvatar(active = true)
                         LoadingIndicator(Modifier.size(36.dp))
@@ -128,7 +149,7 @@ fun Conversation(
             }
             if (state.status == ChatStatus.ERROR && state.error != null) {
                 item(key = "error", contentType = "error") {
-                    ErrorCard(state.error!!, onRetry, onDismissError, Modifier.widthIn(max = maxContentWidth))
+                    ErrorCard(state.error!!, onRetry, onDismissError, Modifier.padding(top = AiSpacing.l).widthIn(max = maxContentWidth))
                 }
             }
         }

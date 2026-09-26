@@ -1,5 +1,6 @@
 package dev.ai.elements.demo.ui
 
+import androidx.compose.ui.graphics.Color
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -78,6 +79,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
@@ -105,6 +107,7 @@ private val DemoSuggestions = listOf(
     Suggestion("Calculate (1234 * 5678) / 9 and show the steps in a table", "Calculate with a tool"),
     Suggestion("Write a Kotlin data class for a chat message and explain each field in a table", "Kotlin + table"),
     Suggestion("Copy the text 'Hello from AI Elements' to my clipboard", "Clipboard (needs approval)"),
+    Suggestion("Write a long answer so I can test streaming and scrolling", "Long streaming answer"),
 )
 
 /**
@@ -234,7 +237,8 @@ private fun ChatPane(
 
     // Short windows (phone landscape) with the keyboard up: give every pixel to the conversation.
     val hideTopBar = compactHeight && WindowInsets.isImeVisible
-    Scaffold(
+    val compactWidth = LocalConfiguration.current.screenWidthDp < 600
+    Scaffold(containerColor = Color.Transparent, 
         modifier = modifier,
         topBar = {
             if (!hideTopBar) TopAppBar(
@@ -249,7 +253,7 @@ private fun ChatPane(
                         Icon(Icons.Outlined.EditNote, "New chat")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
+                colors = transparentAppBarColors(),
             )
         },
     ) { padding ->
@@ -306,7 +310,8 @@ private fun ChatPane(
                 onRemoveAttachment = { removed -> attachments = attachments.filterNot { it.id == removed.id } },
                 toolbar = {
                     ModelChip(viewModel, provider)
-                    lastUsage?.let { ContextUsage(it) }
+                    // Phones already show usage under each reply; the composer has no room for it.
+                    if (!compactWidth) lastUsage?.let { ContextUsage(it) }
                 },
                 modifier = Modifier
                     .widthIn(max = 840.dp)

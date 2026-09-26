@@ -1,5 +1,6 @@
 package dev.ai.elements.demo.ui
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -84,7 +85,7 @@ import kotlinx.serialization.json.Json
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GalleryScreen() {
-    Scaffold(topBar = { TopAppBar(title = { Text("Components") }) }) { padding ->
+    Scaffold(containerColor = Color.Transparent, topBar = { TopAppBar(title = { Text("Components") }, colors = transparentAppBarColors()) }) { padding ->
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Adaptive(360.dp),
             contentPadding = PaddingValues(16.dp),

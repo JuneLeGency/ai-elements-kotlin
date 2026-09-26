@@ -84,7 +84,7 @@ class StreamingScrollTest {
     }
 
     private fun lastAssistantBottom(): Float =
-        compose.onAllNodesWithTag("assistant-message").fetchSemanticsNodes().maxOf { it.boundsInRoot.bottom } / density()
+        compose.onAllNodesWithTag("assistant-row").fetchSemanticsNodes().maxOf { it.boundsInRoot.bottom } / density()
 
     private fun assertFollowing(label: String, slackDp: Float = 48f) {
         val gap = viewport().bottom - lastAssistantBottom()

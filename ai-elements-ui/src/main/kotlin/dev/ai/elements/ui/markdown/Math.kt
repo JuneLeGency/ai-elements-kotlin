@@ -51,6 +51,7 @@ fun MathBlock(tex: String, modifier: Modifier = Modifier) {
         cacheKey = cacheKey,
         fitWidth = true,
         placeholderHeight = 48.dp,
+        contentDescription = source,
         modifier = modifier.fillMaxWidth().padding(vertical = 4.dp).testTag("math"),
     ) { CodeBlock(source, "latex") }
 }

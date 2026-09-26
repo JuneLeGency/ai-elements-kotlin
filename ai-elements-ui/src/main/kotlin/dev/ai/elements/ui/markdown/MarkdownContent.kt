@@ -58,10 +58,24 @@ fun MarkdownContent(
     citations: List<SourcePart> = emptyList(),
     streaming: Boolean = false,
 ) {
-    val blocks = remember(markdown, citations) {
-        MarkdownStreaming.split(LatexPreprocessor.process(CitationPreprocessor.process(markdown, citations)))
+    val blocks = remember(markdown, citations) { markdownBlocks(markdown, citations) }
+    CitationLinks(citations) {
+        Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            blocks.forEachIndexed { index, block ->
+                val text = if (streaming && index == blocks.lastIndex) MarkdownStreaming.repairTail(block) else block
+                key(index) { MarkdownBlock(text) }
+            }
+        }
     }
-    // Citation links open the cited sources in a sheet; other links go to the browser.
+}
+
+/** Preprocess (citations, LaTeX) and split Markdown into top-level blocks. */
+internal fun markdownBlocks(markdown: String, citations: List<SourcePart>): List<String> =
+    MarkdownStreaming.split(LatexPreprocessor.process(CitationPreprocessor.process(markdown, citations)))
+
+/** Routes `aicite:` links to a sheet of the cited sources; other links open the browser. */
+@Composable
+internal fun CitationLinks(citations: List<SourcePart>, content: @Composable () -> Unit) {
     val platformUriHandler = LocalUriHandler.current
     var cited by remember { mutableStateOf<List<SourcePart>>(emptyList()) }
     val uriHandler = remember(platformUriHandler, citations) {
@@ -73,19 +87,12 @@ fun MarkdownContent(
         }
     }
     if (cited.isNotEmpty()) CitationSheet(cited, onDismiss = { cited = emptyList() })
-    CompositionLocalProvider(LocalUriHandler provides uriHandler) {
-        Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            blocks.forEachIndexed { index, block ->
-                val text = if (streaming && index == blocks.lastIndex) MarkdownStreaming.repairTail(block) else block
-                key(index) { MarkdownBlock(text) }
-            }
-        }
-    }
+    CompositionLocalProvider(LocalUriHandler provides uriHandler, content = content)
 }
 
 /** One top-level block. Takes only a String, so unchanged blocks are skipped. */
 @Composable
-private fun MarkdownBlock(content: String) {
+internal fun MarkdownBlock(content: String) {
     val type = MaterialTheme.typography
     val scheme = MaterialTheme.colorScheme
     val code = type.bodyMedium.copy(fontFamily = FontFamily.Monospace)

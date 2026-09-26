@@ -171,7 +171,7 @@ fun AssistantAvatar(active: Boolean, modifier: Modifier = Modifier) {
 @Suppress("DEPRECATION")
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
 @Composable
-private fun MessageActions(
+internal fun MessageActions(
     message: Message,
     prompt: String?,
     onRegenerate: (() -> Unit)?,

@@ -23,7 +23,11 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // Demo only: sign release with the debug key so it installs for profiling.
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -37,6 +41,8 @@ dependencies {
     implementation(project(":ai-elements-ui"))
 
     implementation(libs.activity.compose)
+    // Installs the baseline profiles Compose & AndroidX ship, for faster startup and smoother scrolling.
+    implementation(libs.profileinstaller)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.kotlinx.coroutines.android)
