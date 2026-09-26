@@ -30,6 +30,7 @@ dependencies {
     api(libs.compose.material3)
     api(libs.compose.material.icons.extended)
     implementation(libs.compose.ui.graphics)
+    implementation(libs.activity.compose)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.markdown.renderer.m3)
     implementation(libs.highlights)

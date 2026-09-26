@@ -183,7 +183,7 @@ private val sampleAssistant = Message(
 )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-private val GallerySamples: List<Pair<String, @Composable () -> Unit>> = listOf(
+private val GallerySamples: List<Pair<String, @Composable () -> Unit>> = listOf<Pair<String, @Composable () -> Unit>>(
     "Messages" to {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             MessageItem(Message("gallery-u", Role.USER, listOf(TextPart("u", "Summarise AI Elements in one line"))))
@@ -372,7 +372,7 @@ private val GallerySamples: List<Pair<String, @Composable () -> Unit>> = listOf(
             ContainedLoadingIndicator(Modifier.size(48.dp))
         }
     },
-)
+) + NewGallerySamples
 
 /** A tiny generated gradient PNG, as a model-returned image would arrive. */
 private val SampleImageDataUrl: String by lazy {
