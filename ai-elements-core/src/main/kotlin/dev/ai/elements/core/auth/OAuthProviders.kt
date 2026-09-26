@@ -81,8 +81,9 @@ enum class OAuthProvider(
         )
 
         val XaiFlow = AuthorizationCodeFlow(
-            authorizeUrl = "https://auth.x.ai/oauth/authorize",
-            tokenUrl = "https://auth.x.ai/oauth/token",
+            // From https://auth.x.ai/.well-known/openid-configuration (checked by LiveOAuthEndpointsTest).
+            authorizeUrl = "https://auth.x.ai/oauth2/authorize",
+            tokenUrl = "https://auth.x.ai/oauth2/token",
             clientId = "b1a00492-073a-47ea-816f-4c329264a828",
             // The client's redirect allow-list pins this exact host and port.
             redirect = LoopbackRedirect(host = "127.0.0.1", port = 56121, path = "/callback"),

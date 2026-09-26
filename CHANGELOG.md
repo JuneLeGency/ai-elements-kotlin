@@ -26,6 +26,8 @@
 - Denser chat reading type scale (`AiType`).
 
 ### Fixed
+- xAI sign-in used `/oauth/*`; the endpoints are `/oauth2/authorize` and `/oauth2/token` (per its
+  OpenID discovery document) — sign-in could not work before.
 - `StackTrace`: Python source lines were read as the message; `/usr/lib` frames counted as app code.
 - Conversation list preview dropped escaped characters (`1234 \* 5678` → `1234  5678`).
 - OAuth on Android 7 (API 24–25): `java.util.Base64` replaced with Kotlin's codec.

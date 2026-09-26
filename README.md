@@ -167,6 +167,7 @@ AGENT_BASE_URL=http://localhost:11434/v1 AGENT_MODEL=qwen3:4b uv run uvicorn mai
 ./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveAgentTest*' -PliveOllama=http://localhost:11434
 ./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveCodexTest*' -PliveCodexAuth=$HOME/.codex/auth.json
 GEMINI_API_KEY=… ./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveGeminiTest*'
+./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveOAuthEndpointsTest*' -PliveOAuth=true   # auth servers accept our OAuth clients (no credentials)
 LIVE_PROXY_KEY=… ./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveProxyTest*' -PliveProxy=http://localhost:8317   # multi-format gateway
 ```
 
