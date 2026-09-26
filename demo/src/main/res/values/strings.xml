@@ -124,4 +124,17 @@
     <string name="copy_code">Copy code</string>
     <string name="waiting_approval">Waiting for approval…</string>
     <string name="cancel">Cancel</string>
+    <string name="color_palette">Color palette</string>
+    <string name="palette_dynamic_hint">Turn off Dynamic color to use a palette</string>
+    <string name="palette_violet">Violet</string>
+    <string name="palette_ocean">Ocean</string>
+    <string name="palette_jade">Jade</string>
+    <string name="palette_forest">Forest</string>
+    <string name="palette_sunset">Sunset</string>
+    <string name="palette_sakura">Sakura</string>
+    <string name="palette_graphite">Graphite</string>
+    <string name="contrast">Contrast</string>
+    <string name="contrast_standard">Standard</string>
+    <string name="contrast_medium">Medium</string>
+    <string name="contrast_high">High</string>
 </resources>

@@ -122,4 +122,17 @@
     <string name="copy_code">複製代碼</string>
     <string name="waiting_approval">等待確認…</string>
     <string name="cancel">取消</string>
+    <string name="color_palette">配色</string>
+    <string name="palette_dynamic_hint">關閉「動態色彩」後生效</string>
+    <string name="palette_violet">紫羅蘭</string>
+    <string name="palette_ocean">海藍</string>
+    <string name="palette_jade">青碧</string>
+    <string name="palette_forest">森林</string>
+    <string name="palette_sunset">落日</string>
+    <string name="palette_sakura">櫻粉</string>
+    <string name="palette_graphite">石墨</string>
+    <string name="contrast">對比度</string>
+    <string name="contrast_standard">標準</string>
+    <string name="contrast_medium">中</string>
+    <string name="contrast_high">高</string>
 </resources>

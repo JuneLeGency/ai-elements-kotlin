@@ -103,6 +103,7 @@ import dev.ai.elements.demo.data.AppLocale
 import dev.ai.elements.demo.data.DiagramSize
 import dev.ai.elements.demo.data.TextSize
 import dev.ai.elements.demo.data.ThemeMode
+import dev.ai.elements.ui.theme.AiContrast
 import dev.ai.elements.ui.theme.AiSize
 import java.util.UUID
 import kotlinx.coroutines.launch
@@ -233,6 +234,38 @@ private fun SettingsList(
                         trailingContent = { Switch(checked = appearance.dynamicColor, onCheckedChange = null) },
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                     ) { Text(stringResource(R.string.dynamic_color)) }
+                }
+            }
+            item {
+                val dynamicActive = appearance.dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                SettingLabel(
+                    stringResource(R.string.color_palette),
+                    if (dynamicActive) stringResource(R.string.palette_dynamic_hint) else stringResource(appearance.palette.label),
+                )
+                PalettePicker(
+                    selected = appearance.palette,
+                    enabled = !dynamicActive,
+                    onSelect = { viewModel.settings.update(appearance.copy(palette = it)) },
+                )
+            }
+            item {
+                SettingLabel(stringResource(R.string.contrast), null)
+                ConnectedChoices(
+                    options = AiContrast.entries,
+                    selected = appearance.contrast,
+                    onSelect = { viewModel.settings.update(appearance.copy(contrast = it)) },
+                    tag = { "contrast-${it.name.lowercase()}" },
+                ) { level ->
+                    Text(
+                        stringResource(
+                            when (level) {
+                                AiContrast.STANDARD -> R.string.contrast_standard
+                                AiContrast.MEDIUM -> R.string.contrast_medium
+                                AiContrast.HIGH -> R.string.contrast_high
+                            },
+                        ),
+                        maxLines = 1,
+                    )
                 }
             }
             item { LanguageItem() }

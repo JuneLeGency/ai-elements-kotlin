@@ -55,6 +55,8 @@ class MainActivity : ComponentActivity() {
             AiElementsTheme(
                 darkTheme = dark,
                 dynamicColor = appearance.dynamicColor,
+                palette = appearance.palette,
+                contrast = appearance.contrast,
                 fontFamily = appearance.font.family,
                 codeFontFamily = appearance.font.codeFamily,
             ) {

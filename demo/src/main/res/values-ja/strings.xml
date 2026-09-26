@@ -122,4 +122,17 @@
     <string name="copy_code">コードをコピー</string>
     <string name="waiting_approval">承認を待っています…</string>
     <string name="cancel">キャンセル</string>
+    <string name="color_palette">カラーパレット</string>
+    <string name="palette_dynamic_hint">ダイナミックカラーをオフにすると使用できます</string>
+    <string name="palette_violet">バイオレット</string>
+    <string name="palette_ocean">オーシャン</string>
+    <string name="palette_jade">ジェイド</string>
+    <string name="palette_forest">フォレスト</string>
+    <string name="palette_sunset">サンセット</string>
+    <string name="palette_sakura">サクラ</string>
+    <string name="palette_graphite">グラファイト</string>
+    <string name="contrast">コントラスト</string>
+    <string name="contrast_standard">標準</string>
+    <string name="contrast_medium">中</string>
+    <string name="contrast_high">高</string>
 </resources>

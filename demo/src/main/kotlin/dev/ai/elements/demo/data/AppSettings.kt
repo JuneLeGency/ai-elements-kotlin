@@ -1,6 +1,8 @@
 package dev.ai.elements.demo.data
 
 import android.content.Context
+import dev.ai.elements.ui.theme.AiContrast
+import dev.ai.elements.ui.theme.AiPalette
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +27,8 @@ data class Appearance(
     val textSize: TextSize = TextSize.DEFAULT,
     /** Offer subscription sign-ins through vendors' CLI clients (see OAuthProvider). */
     val subscriptionSignIn: Boolean = false,
+    val palette: AiPalette = AiPalette.VIOLET,
+    val contrast: AiContrast = AiContrast.STANDARD,
 )
 
 class AppSettings(context: Context) {
@@ -39,6 +43,8 @@ class AppSettings(context: Context) {
             font = runCatching { AppFont.valueOf(prefs.getString("font", null)!!) }.getOrDefault(AppFont.SYSTEM),
             textSize = runCatching { TextSize.valueOf(prefs.getString("text_size", null)!!) }.getOrDefault(TextSize.DEFAULT),
             subscriptionSignIn = prefs.getBoolean("subscription_sign_in", false),
+            palette = runCatching { AiPalette.valueOf(prefs.getString("palette", null)!!) }.getOrDefault(AiPalette.VIOLET),
+            contrast = runCatching { AiContrast.valueOf(prefs.getString("contrast", null)!!) }.getOrDefault(AiContrast.STANDARD),
         ),
     )
     val appearance: StateFlow<Appearance> = _appearance.asStateFlow()
@@ -53,6 +59,8 @@ class AppSettings(context: Context) {
             .putString("font", appearance.font.name)
             .putString("text_size", appearance.textSize.name)
             .putBoolean("subscription_sign_in", appearance.subscriptionSignIn)
+            .putString("palette", appearance.palette.name)
+            .putString("contrast", appearance.contrast.name)
             .apply()
     }
 }
