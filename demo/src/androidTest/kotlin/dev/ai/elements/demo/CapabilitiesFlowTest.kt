@@ -97,7 +97,7 @@ class CapabilitiesFlowTest {
     /** Generative UI round trip: the agent sends an A2UI form, the user fills and submits it, the agent acts on it. */
     private fun a2uiBookingRoundTrip(kind: ProviderKind) {
         launchWith(kind)
-        send("find me a hotel")
+        send("Find me a hotel in Kyoto.")
         compose.waitUntil(60_000) { runCatching { scrollTo("a2ui-surface-booking-kyoto") }.isSuccess }
         compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("a2ui-book"))
         compose.onNodeWithTag("a2ui-book").assertIsNotEnabled() // the guest name is required
@@ -106,8 +106,15 @@ class CapabilitiesFlowTest {
         // The action's userMessage becomes the user's turn; wait for the agent's tool call on it
         // (an earlier turn's actions row would satisfy awaitTurnEnd too early).
         compose.waitUntil(60_000) { runCatching { scrollTo("tool-confirm_booking") }.isSuccess }
+        // The tool's result carries the submitted form (a real model may word its reply differently):
+        // open the tool call and find it there.
+        val booked = hasText("Booked a deluxe room at Hotel Lumen for Jane", substring = true)
         compose.waitUntil(60_000) {
-            runCatching { compose.onNodeWithTag("conversation").performScrollToNode(hasText("Booked a deluxe room at Hotel Lumen for Jane", substring = true)) }.isSuccess
+            runCatching { compose.onNodeWithTag("conversation").performScrollToNode(booked) }.isSuccess || runCatching {
+                scrollTo("tool-confirm_booking")
+                compose.onNodeWithTag("tool-confirm_booking").performClick()
+                compose.onNodeWithTag("conversation").performScrollToNode(booked)
+            }.isSuccess
         }
     }
 

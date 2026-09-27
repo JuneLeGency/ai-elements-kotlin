@@ -1,11 +1,5 @@
 package dev.ai.elements.demo
 
-import android.view.View
-import android.view.ViewGroup
-import android.webkit.WebView
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
-import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -31,8 +25,6 @@ import org.junit.runner.RunWith
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 /**
  * MCP Apps end to end: the offline agent calls `show_notes_board` on the reference MCP server
@@ -58,38 +50,9 @@ class McpAppsTest {
         scenario?.close()
     }
 
-    /** Runs [script] in the sandbox page (the view is its same-origin inner frame) and returns the JSON result. */
-    private fun js(script: String): String {
-        val latch = CountDownLatch(1)
-        var result = "null"
-        scenario!!.onActivity { activity ->
-            val webView = activity.window.decorView.findWebView()
-            if (webView == null) latch.countDown() else webView.evaluateJavascript(script) { result = it; latch.countDown() }
-        }
-        latch.await(10, TimeUnit.SECONDS)
-        return result
-    }
-
-    private fun View.findWebView(): WebView? = when {
-        this is WebView && tag?.toString()?.startsWith("mcp-app-webview") == true -> this
-        this is ViewGroup -> (0 until childCount).firstNotNullOfOrNull { getChildAt(it).findWebView() }
-        else -> null
-    }
-
-    /** The view's item, scrolled into sight (its WebView is attached only while shown). */
-    private fun showView() = runCatching {
-        compose.onNodeWithTag("conversation").performScrollToNode(
-            SemanticsMatcher("an MCP App") { it.config.getOrNull(SemanticsProperties.TestTag)?.startsWith("mcp-app-call") == true },
-        )
-    }
-
-    private fun view(expression: String) = showView().let { js("(() => { const d = document.querySelector('iframe')?.contentDocument; return d ? ($expression) : null; })()") }
-
-    private fun awaitView(expression: String, expected: String, timeoutMs: Long = 60_000) {
-        val met = runCatching { compose.waitUntil(timeoutMs) { view(expression) == "\"$expected\"" } }.isSuccess
-        // On failure, say what the view shows (its value and status line).
-        if (!met) assertEquals("view status: ${view("d.getElementById('status').textContent")}", "\"$expected\"", view(expression))
-    }
+    private val probe = McpAppProbe(compose) { scenario!! }
+    private fun view(expression: String) = probe.view(expression)
+    private fun awaitView(expression: String, expected: String, timeoutMs: Long = 60_000) = probe.await(expression, expected, timeoutMs)
 
     @Test
     fun notesBoard_rendersCallsToolsAndTalksToTheChat() {

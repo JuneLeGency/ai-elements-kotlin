@@ -12,6 +12,8 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import dev.ai.elements.core.mcp.McpServerConfig
 import dev.ai.elements.core.auth.OAuthProvider
 import dev.ai.elements.core.auth.OAuthTokens
 import dev.ai.elements.core.auth.jwtClaims
@@ -68,8 +70,8 @@ class CodexLiveTest {
         )
     }
 
-    @Test
-    fun chatgptSubscription_fullChainOnDevice() {
+    /** Signs the live ChatGPT profile in with the copied tokens (refresh token dropped) and runs [setup]. */
+    private fun signIn(setup: (DemoApplication) -> Unit = {}): DemoApplication {
         assumeTrue("copy a Codex CLI auth.json to files/live_codex_auth.json", authFile.exists())
         val tokens = try {
             readWithoutRefresh(authFile)
@@ -77,7 +79,6 @@ class CodexLiveTest {
             authFile.delete()
         }
         assumeTrue("access token expired — run `codex` once to renew it", !tokens.expiresSoon(slackMs = 120_000))
-
         val app = resetDemoApp()
         val provider = OAuthProvider.CHATGPT
         val profile = ProviderProfile(
@@ -89,15 +90,43 @@ class CodexLiveTest {
             tokenStore(PROFILE_ID).save(tokens)
             select(PROFILE_ID)
         }
+        setup(app)
         scenario = ActivityScenario.launch(MainActivity::class.java)
+        return app
+    }
 
-        compose.onNodeWithTag("prompt-input").performClick().performTextInput("Use the calculate tool to compute 1234 * 5678, then state the result.")
+    private fun send(prompt: String) {
+        compose.onNodeWithTag("prompt-input").performClick().performTextInput(prompt)
         compose.onNodeWithTag("send-button").performClick()
+    }
+
+    @Test
+    fun chatgptSubscription_fullChainOnDevice() {
+        signIn()
+        send("Use the calculate tool to compute 1234 * 5678, then state the result.")
         compose.awaitTurnEnd(180_000)
         compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("tool-calculate"))
         compose.onNodeWithTag("conversation").performScrollToNode(
             hasText("7,006,652", substring = true) or hasText("7006652", substring = true),
         )
+    }
+
+    /**
+     * A real model picks an MCP tool that has a view (MCP Apps); the view renders in the sandbox with
+     * the tool's result. Needs the reference server (`agentServer`, default the emulator's host).
+     */
+    @Test
+    fun chatgptSubscription_mcpAppOnDevice() {
+        val server = InstrumentationRegistry.getArguments().getString("agentServer") ?: "http://10.0.2.2:8788"
+        signIn { app ->
+            app.agents.update { it.copy(mcpEnabled = true) }
+            app.mcpServers.upsert(McpServerConfig("notes", "Notes", "$server/mcp"))
+        }
+        send("Open my notes board so I can see my notes.")
+        compose.waitUntil(180_000) { McpAppProbe(compose) { scenario!! }.show().isSuccess }
+        compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("tool-notes__show_notes_board"))
+        val probe = McpAppProbe(compose) { scenario!! }
+        compose.waitUntil(60_000) { probe.view("d.getElementById('title').textContent").matches(Regex("\"Notes \\(\\d+\\)\"")) }
     }
 
     @After
