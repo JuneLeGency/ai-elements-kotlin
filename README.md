@@ -131,6 +131,28 @@ fun ChatScreen(vm: ChatViewModel) {
 Sub-agents, plans, shared state and activities from the server render on their own: a
 `delegate_task` call or an AG-UI `SUBAGENT_*` run becomes a `Subagent` card with the nested run.
 
+## Bring your own protocol
+
+Every backend is a `ChatBackend`: a function from the conversation to a stream of `ChatEvent`s.
+Map your protocol onto those events and all the elements — streaming Markdown, tools, approvals,
+sub-agents, plans — work unchanged (`ai-elements-chat` + `ai-elements-ui` are all you need):
+
+```kotlin
+class MyBackend(private val client: MyClient) : ChatBackend {
+    override fun stream(history: List<Message>): Flow<ChatEvent> = flow {
+        client.run(history.last().text).collect { e ->
+            when (e) {
+                is MyText -> emit(ChatEvent.TextDelta("answer", e.chunk))
+                is MyToolCall -> emit(ChatEvent.ToolInputAvailable(e.id, e.name, e.argsJson, kind = ToolKind.Function))
+                is MyToolResult -> emit(ChatEvent.ToolOutput(e.id, e.text))
+                is MyHandoff -> emit(ChatEvent.ToolInputAvailable(e.id, "handoff", "{}", kind = ToolKind.Delegation(e.agent, e.task)))
+            }
+        }
+        emit(ChatEvent.Finish)
+    }
+}
+```
+
 ## Customising the elements
 
 Elements are protocol-independent: they render `ToolPart.kind` / `source`, data parts and
