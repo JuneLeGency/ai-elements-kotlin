@@ -23,6 +23,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.foundation.layout.height
 import dev.ai.elements.core.chat.ChatState
 import dev.ai.elements.core.chat.InputRequest
 import dev.ai.elements.core.chat.InputResponse
@@ -269,6 +270,21 @@ class ElementsTest {
             ),
             decisions,
         )
+    }
+
+    /** Landscape with the keyboard up leaves the input very little height: buttons keep their size. */
+    @Test fun promptInput_inAShortSpace_keepsItsButtonsWhole() {
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.height(72.dp)) {
+                    dev.ai.elements.ui.chat.PromptInput("", {}, {}, {}, false, onAddAttachment = {})
+                }
+            }
+        }
+        val attach = compose.onNodeWithTag("add-attachment").fetchSemanticsNode().size.height
+        val density = compose.density.density
+        // Its design size (the extra-small icon button), not whatever height was left.
+        assertEquals("attach button height (dp)", 32f, attach / density, 0.5f)
     }
 
     @Test fun checkpoint_restoresOnlyAfterConfirming() {

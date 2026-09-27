@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -136,7 +137,9 @@ fun PromptInput(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                // Its own height even when the screen is shorter (landscape with the keyboard up):
+                // the card clips it instead of squashing the buttons.
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp).wrapContentHeight(unbounded = true),
             ) {
                 // Toolbar takes the remaining width and scrolls, so large font scales
                 // can never push the submit button off screen.
