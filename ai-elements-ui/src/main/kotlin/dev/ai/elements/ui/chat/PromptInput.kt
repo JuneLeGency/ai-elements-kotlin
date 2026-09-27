@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
@@ -27,11 +28,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AddPhotoAlternate
-import androidx.compose.material.icons.outlined.ArrowUpward
-import androidx.compose.material.icons.outlined.PlaylistAdd
-import androidx.compose.material.icons.outlined.Stop
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -173,7 +169,7 @@ fun PromptInput(
                                     onClick = onAddAttachment,
                                     shapes = IconButtonDefaults.shapes(),
                                     modifier = Modifier.compactIconButton().testTag("add-attachment"),
-                                ) { Icon(Icons.Outlined.AddPhotoAlternate, stringResource(R.string.ai_attach_image)) }
+                                ) { Icon(AiIcons.AddPhotoAlternate, stringResource(R.string.ai_attach_image)) }
                             }
                             toolbar()
                         }
@@ -240,9 +236,9 @@ private fun SubmitButton(mode: SubmitMode, enabled: Boolean, onClick: () -> Unit
         ) { target ->
             Icon(
                 when (target) {
-                    SubmitMode.SEND -> Icons.Outlined.ArrowUpward
-                    SubmitMode.QUEUE -> Icons.Outlined.PlaylistAdd
-                    SubmitMode.STOP -> Icons.Outlined.Stop
+                    SubmitMode.SEND -> AiIcons.ArrowUpward
+                    SubmitMode.QUEUE -> AiIcons.PlaylistAdd
+                    SubmitMode.STOP -> AiIcons.Stop
                 },
                 contentDescription = when (target) {
                     SubmitMode.SEND -> stringResource(R.string.ai_send)

@@ -11,12 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.Build
-import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.Download
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -298,8 +292,8 @@ private val GallerySamples: List<Pair<String, @Composable () -> Unit>> = listOf<
             title = "fibonacci.kt",
             description = "Generated code",
             actions = {
-                IconButton(onClick = {}) { Icon(Icons.Outlined.ContentCopy, "Copy") }
-                IconButton(onClick = {}) { Icon(Icons.Outlined.Download, "Download") }
+                IconButton(onClick = {}) { Icon(DemoIcons.ContentCopy, "Copy") }
+                IconButton(onClick = {}) { Icon(DemoIcons.Download, "Download") }
             },
         ) {
             CodeBlock("fun fib(n: Int): Long =\n    if (n < 2) n.toLong() else fib(n - 1) + fib(n - 2)", "kotlin")
@@ -366,10 +360,10 @@ private val GallerySamples: List<Pair<String, @Composable () -> Unit>> = listOf<
     },
     "Canvas / Node / Edge" to {
         val nodes = listOf(
-            CanvasNode("a", "Prompt", "User question", DpOffset(80.dp, 0.dp), Icons.Outlined.Person, NodeTone.NEUTRAL),
-            CanvasNode("b", "search_docs", "3 results", DpOffset(0.dp, 120.dp), Icons.Outlined.Build, NodeTone.TERTIARY),
-            CanvasNode("c", "calculate", "42", DpOffset(220.dp, 120.dp), Icons.Outlined.Build, NodeTone.TERTIARY),
-            CanvasNode("d", "Answer", "Streaming…", DpOffset(80.dp, 240.dp), Icons.Outlined.AutoAwesome, status = StepStatus.ACTIVE),
+            CanvasNode("a", "Prompt", "User question", DpOffset(80.dp, 0.dp), DemoIcons.Person, NodeTone.NEUTRAL),
+            CanvasNode("b", "search_docs", "3 results", DpOffset(0.dp, 120.dp), DemoIcons.Build, NodeTone.TERTIARY),
+            CanvasNode("c", "calculate", "42", DpOffset(220.dp, 120.dp), DemoIcons.Build, NodeTone.TERTIARY),
+            CanvasNode("d", "Answer", "Streaming…", DpOffset(80.dp, 240.dp), DemoIcons.AutoAwesome, status = StepStatus.ACTIVE),
         )
         val edges = listOf(
             CanvasEdge("a", "b"), CanvasEdge("a", "c"),

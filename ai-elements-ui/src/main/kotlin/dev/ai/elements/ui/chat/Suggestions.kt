@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -13,8 +14,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
@@ -95,7 +94,7 @@ fun ChatEmptyState(
                     .clip(MaterialShapes.Cookie9Sided.toShape())
                     .background(Brush.linearGradient(listOf(scheme.primary, scheme.tertiary))),
             )
-            Icon(Icons.Outlined.AutoAwesome, null, Modifier.size(40.dp), scheme.onPrimary)
+            Icon(AiIcons.AutoAwesome, null, Modifier.size(40.dp), scheme.onPrimary)
         }
         Text(title, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
         Text(

@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.code
 
+import dev.ai.elements.ui.icons.AiIcons
 import android.annotation.SuppressLint
 import android.webkit.WebChromeClient
 import android.webkit.WebView
@@ -12,10 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.OpenInNew
-import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -104,10 +101,10 @@ fun WebPreview(
         Column {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(4.dp)) {
                 IconButton(onClick = { webView?.takeIf { it.canGoBack() }?.goBack() }, shapes = IconButtonDefaults.shapes()) {
-                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.ai_back), Modifier.size(20.dp))
+                    Icon(AiIcons.ArrowBack, stringResource(R.string.ai_back), Modifier.size(20.dp))
                 }
                 IconButton(onClick = { webView?.reload() }, shapes = IconButtonDefaults.shapes()) {
-                    Icon(Icons.Outlined.Refresh, stringResource(R.string.ai_reload), Modifier.size(20.dp))
+                    Icon(AiIcons.Refresh, stringResource(R.string.ai_reload), Modifier.size(20.dp))
                 }
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceContainerHighest,
@@ -126,7 +123,7 @@ fun WebPreview(
                     onClick = { runCatching { uriHandler.openUri(currentUrl) } },
                     enabled = html == null,
                     shapes = IconButtonDefaults.shapes(),
-                ) { Icon(Icons.AutoMirrored.Outlined.OpenInNew, stringResource(R.string.ai_open_in_browser), Modifier.size(20.dp)) }
+                ) { Icon(AiIcons.OpenInNew, stringResource(R.string.ai_open_in_browser), Modifier.size(20.dp)) }
             }
             if (progress in 1..99) {
                 LinearWavyProgressIndicator(progress = { progress / 100f }, modifier = Modifier.fillMaxWidth())

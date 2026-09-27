@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -19,9 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ExpandMore
-import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
@@ -101,7 +99,7 @@ fun Subagent(
         // One line like a tool call — agent, what it is doing, status — opening to its run.
         Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.heightIn(min = 24.dp)) {
-                Icon(Icons.Outlined.SmartToy, null, Modifier.size(16.dp), scheme.onSurfaceVariant)
+                Icon(AiIcons.SmartToy, null, Modifier.size(16.dp), scheme.onSurfaceVariant)
                 Text(agentName, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 160.dp))
                 Text(
                     text = activity(part, run, task),
@@ -113,7 +111,7 @@ fun Subagent(
                 )
                 StatusPill(part.state)
                 Icon(
-                    Icons.Outlined.ExpandMore,
+                    AiIcons.ExpandMore,
                     contentDescription = stringResource(if (open) R.string.ai_collapse else R.string.ai_expand),
                     tint = scheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp).rotate(if (open) 180f else 0f),

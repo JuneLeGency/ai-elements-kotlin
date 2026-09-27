@@ -10,13 +10,6 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.automirrored.outlined.Chat
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +18,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.IconButton
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.getValue
@@ -46,9 +40,9 @@ import dev.ai.elements.demo.ChatViewModel
 import dev.ai.elements.demo.R
 
 enum class Destination(@StringRes val label: Int, val icon: ImageVector, val selectedIcon: ImageVector) {
-    CHAT(R.string.nav_chat, Icons.AutoMirrored.Outlined.Chat, Icons.AutoMirrored.Filled.Chat),
-    COMPONENTS(R.string.nav_components, Icons.Outlined.Widgets, Icons.Filled.Widgets),
-    SETTINGS(R.string.nav_settings, Icons.Outlined.Settings, Icons.Filled.Settings),
+    CHAT(R.string.nav_chat, DemoIcons.Chat, DemoIcons.ChatFilled),
+    COMPONENTS(R.string.nav_components, DemoIcons.Widgets, DemoIcons.WidgetsFilled),
+    SETTINGS(R.string.nav_settings, DemoIcons.Settings, DemoIcons.SettingsFilled),
 }
 
 /** Size buckets used across screens (M3 window size classes). */
@@ -127,6 +121,21 @@ fun transparentAppBarColors() = TopAppBarDefaults.topAppBarColors(
 @Composable
 internal fun BackArrow(onBack: () -> Unit) {
     IconButton(onClick = onBack, modifier = Modifier.testTag("back")) {
-        Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.back))
+        Icon(DemoIcons.ArrowBack, stringResource(R.string.back))
     }
 }
+
+/**
+ * Colours for a list row with a switch: no "selected" tint when it is on — the switch already
+ * says so, and a tint that comes and goes with it makes a settings list look uneven.
+ */
+@Composable
+internal fun switchRowColors(): ListItemColors = ListItemDefaults.colors(
+    containerColor = Color.Transparent,
+    selectedContainerColor = Color.Transparent,
+    selectedContentColor = MaterialTheme.colorScheme.onSurface,
+    selectedLeadingContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    selectedTrailingContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    selectedSupportingContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    leadingContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+)

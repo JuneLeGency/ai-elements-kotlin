@@ -1,14 +1,12 @@
 package dev.ai.elements.ui.markdown
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -91,9 +89,10 @@ fun CodeBlock(
                     modifier = Modifier.compactIconButton(),
                 ) {
                     Icon(
-                        if (copied) Icons.Outlined.Check else Icons.Outlined.ContentCopy,
+                        if (copied) AiIcons.Check else AiIcons.ContentCopy,
                         contentDescription = stringResource(R.string.ai_copy_code),
-                        modifier = Modifier.size(AiSize.compactIcon),
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }

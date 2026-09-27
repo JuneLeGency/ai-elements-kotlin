@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.code
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,13 +12,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Api
-import androidx.compose.material.icons.outlined.Commit
-import androidx.compose.material.icons.outlined.Inventory2
-import androidx.compose.material.icons.outlined.Key
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -103,7 +97,7 @@ fun Commit(
     ElementCard(
         title = subject,
         subtitle = listOfNotNull(author, timestampMs?.let { DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(it)) }).joinToString(" · ").ifEmpty { null },
-        icon = Icons.Outlined.Commit,
+        icon = AiIcons.Commit,
         modifier = modifier.testTag("commit"),
         actions = {
             Text(hash.take(7), style = AiType.code, color = MaterialTheme.colorScheme.primary)
@@ -184,7 +178,7 @@ fun SchemaDisplay(
     ElementCard(
         title = path,
         subtitle = description,
-        icon = Icons.Outlined.Api,
+        icon = AiIcons.Api,
         modifier = modifier.testTag("schema-display"),
         actions = { Pill(method.uppercase(), container, content, Modifier.padding(end = 12.dp)) },
     ) {
@@ -251,7 +245,7 @@ fun PackageInfo(
     ElementCard(
         title = name,
         subtitle = description,
-        icon = Icons.Outlined.Inventory2,
+        icon = AiIcons.Inventory2,
         modifier = modifier.testTag("package-info"),
         actions = {
             change?.let {
@@ -295,7 +289,7 @@ data class EnvironmentVariable(val name: String, val value: String, val secret: 
 @Composable
 fun EnvironmentVariables(variables: List<EnvironmentVariable>, modifier: Modifier = Modifier, title: String = stringResource(R.string.ai_environment_variables)) {
     val revealed = remember { mutableStateMapOf<String, Boolean>() }
-    ElementCard(title = title, icon = Icons.Outlined.Key, modifier = modifier.testTag("environment-variables")) {
+    ElementCard(title = title, icon = AiIcons.Key, modifier = modifier.testTag("environment-variables")) {
         Column(Modifier.padding(vertical = 4.dp)) {
             variables.forEachIndexed { i, v ->
                 if (i > 0) HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -311,7 +305,7 @@ fun EnvironmentVariables(variables: List<EnvironmentVariable>, modifier: Modifie
                     if (v.secret) {
                         IconButton(onClick = { revealed[v.name] = !show }, shapes = IconButtonDefaults.shapes(), modifier = Modifier.compactIconButton()) {
                             Icon(
-                                if (show) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                                if (show) AiIcons.VisibilityOff else AiIcons.Visibility,
                                 stringResource(if (show) R.string.ai_hide_value else R.string.ai_show_value),
                                 Modifier.size(AiSize.compactIcon),
                             )

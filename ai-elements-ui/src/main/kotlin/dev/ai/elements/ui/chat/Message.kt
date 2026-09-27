@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -21,12 +22,6 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountTree
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -136,8 +131,8 @@ fun AssistantMessage(
 ) {
     val streaming = message.isStreaming
     val sources = message.parts.filterIsInstance<SourcePart>()
-    Row(modifier.fillMaxWidth().testTag("assistant-message"), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        AssistantAvatar(active = streaming)
+    // Full width, as in the conversation: no avatar column.
+    Row(modifier.fillMaxWidth().testTag("assistant-message")) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
             message.parts.forEach { part ->
                 when (part) {
@@ -173,7 +168,7 @@ fun AssistantAvatar(active: Boolean, modifier: Modifier = Modifier) {
                 .clip(MaterialShapes.SoftBurst.toShape())
                 .background(MaterialTheme.colorScheme.primary),
         )
-        Icon(Icons.Outlined.AutoAwesome, null, Modifier.size(14.dp), MaterialTheme.colorScheme.onPrimary)
+        Icon(AiIcons.AutoAwesome, null, Modifier.size(14.dp), MaterialTheme.colorScheme.onPrimary)
     }
 }
 
@@ -194,19 +189,19 @@ internal fun MessageActions(
             onClick = { clipboard.setText(AnnotatedString(message.text)) },
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.compactIconButton(),
-        ) { Icon(Icons.Outlined.ContentCopy, stringResource(R.string.ai_copy), Modifier.size(AiSize.compactIcon)) }
+        ) { Icon(AiIcons.ContentCopy, stringResource(R.string.ai_copy), Modifier.size(AiSize.compactIcon)) }
         if (onRegenerate != null) {
             IconButton(
                 onClick = onRegenerate,
                 shapes = IconButtonDefaults.shapes(),
                 modifier = Modifier.compactIconButton().testTag("regenerate"),
-            ) { Icon(Icons.Outlined.Refresh, stringResource(R.string.ai_regenerate), Modifier.size(AiSize.compactIcon)) }
+            ) { Icon(AiIcons.Refresh, stringResource(R.string.ai_regenerate), Modifier.size(AiSize.compactIcon)) }
         }
         IconButton(
             onClick = { showGraph = true },
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.compactIconButton().testTag("run-graph"),
-        ) { Icon(Icons.Outlined.AccountTree, stringResource(R.string.ai_view_agent_run), Modifier.size(AiSize.compactIcon)) }
+        ) { Icon(AiIcons.AccountTree, stringResource(R.string.ai_view_agent_run), Modifier.size(AiSize.compactIcon)) }
         if (!prompt.isNullOrBlank()) OpenInChat(prompt)
         message.usage?.takeIf { it.totalTokens > 0 }?.let { ContextUsage(it, Modifier.padding(start = 4.dp)) }
     }
@@ -231,7 +226,7 @@ fun AgentRunDialog(message: Message, prompt: String?, onDismiss: () -> Unit) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    IconButton(onClick = onDismiss, shapes = IconButtonDefaults.shapes()) { Icon(Icons.Outlined.Close, stringResource(R.string.ai_close)) }
+                    IconButton(onClick = onDismiss, shapes = IconButtonDefaults.shapes()) { Icon(AiIcons.Close, stringResource(R.string.ai_close)) }
                 }
                 WorkflowCanvas(nodes, edges, Modifier.fillMaxSize().padding(top = 8.dp))
             }

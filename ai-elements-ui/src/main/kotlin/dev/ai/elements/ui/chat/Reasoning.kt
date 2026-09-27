@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
@@ -15,9 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ExpandMore
-import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
@@ -70,7 +68,7 @@ fun Reasoning(part: ReasoningPart, modifier: Modifier = Modifier) {
                 .padding(end = 4.dp),
         ) {
             if (part.isStreaming) LoadingIndicator(Modifier.size(18.dp))
-            else Icon(Icons.Outlined.Psychology, null, Modifier.size(18.dp), muted)
+            else Icon(AiIcons.Neurology, null, Modifier.size(18.dp), muted)
             ShimmerText(
                 text = if (part.isStreaming) stringResource(R.string.ai_thinking) else thoughtLabel(part.durationMs),
                 active = part.isStreaming,
@@ -78,7 +76,7 @@ fun Reasoning(part: ReasoningPart, modifier: Modifier = Modifier) {
             )
             if (part.text.isNotBlank()) {
                 Icon(
-                    Icons.Outlined.ExpandMore,
+                    AiIcons.ExpandMore,
                     contentDescription = if (open) stringResource(R.string.ai_collapse) else stringResource(R.string.ai_expand),
                     tint = muted,
                     modifier = Modifier.size(18.dp).rotate(rotation),

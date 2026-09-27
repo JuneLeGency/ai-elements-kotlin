@@ -12,8 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -71,7 +69,7 @@ fun PalettePicker(selected: AiPalette, enabled: Boolean, onSelect: (AiPalette) -
                     drawArc(scheme.tertiaryContainer, 0f, 90f, useCenter = true, size = Size(d, d))
                     drawCircle(scheme.surfaceContainerHighest, radius = d * 0.18f, center = Offset(d / 2, d / 2))
                 }
-                if (isSelected) Icon(Icons.Outlined.Check, null, Modifier.size(18.dp), tint = scheme.onSurface)
+                if (isSelected) Icon(DemoIcons.Check, null, Modifier.size(18.dp), tint = scheme.onSurface)
             }
         }
     }

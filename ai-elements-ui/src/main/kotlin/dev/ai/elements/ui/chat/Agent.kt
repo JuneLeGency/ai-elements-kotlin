@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,10 +11,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Build
-import androidx.compose.material.icons.outlined.ExpandMore
-import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -63,7 +60,7 @@ fun Agent(
     Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, shape = MaterialTheme.shapes.large, modifier = modifier.fillMaxWidth().testTag("agent")) {
         Column(Modifier.padding(vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(horizontal = 16.dp)) {
-                Icon(Icons.Outlined.SmartToy, null, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.primary)
+                Icon(AiIcons.SmartToy, null, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.primary)
                 Text(name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 model?.let {
                     Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = MaterialTheme.shapes.small) {
@@ -111,13 +108,13 @@ private fun ToolSpecRow(tool: AgentToolSpec) {
                 .heightIn(min = 48.dp)
                 .padding(horizontal = 16.dp, vertical = 6.dp),
         ) {
-            Icon(Icons.Outlined.Build, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.tertiary)
+            Icon(AiIcons.Function, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             Column(Modifier.weight(1f)) {
                 Text(tool.name, style = AiType.code)
                 tool.description?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             }
             if (tool.schema != null) {
-                Icon(Icons.Outlined.ExpandMore, stringResource(if (open) R.string.ai_collapse else R.string.ai_expand), Modifier.rotate(if (open) 180f else 0f))
+                Icon(AiIcons.ExpandMore, stringResource(if (open) R.string.ai_collapse else R.string.ai_expand), Modifier.rotate(if (open) 180f else 0f))
             }
         }
         if (open) tool.schema?.let { Schema(it) }

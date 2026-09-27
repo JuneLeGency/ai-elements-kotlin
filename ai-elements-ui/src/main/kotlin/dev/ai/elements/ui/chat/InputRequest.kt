@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -8,9 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.HelpOutline
-import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -61,7 +59,7 @@ fun InputRequestCard(request: InputRequest, onRespond: (InputResponse) -> Unit, 
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
-                Icon(Icons.AutoMirrored.Outlined.HelpOutline, null, Modifier.size(20.dp))
+                Icon(AiIcons.HelpOutline, null, Modifier.size(20.dp))
                 Column(Modifier.weight(1f)) {
                     Text(request.message, style = MaterialTheme.typography.titleSmall)
                     request.source?.let { Text(stringResource(R.string.ai_input_from, it), style = MaterialTheme.typography.bodySmall) }
@@ -79,7 +77,7 @@ fun InputRequestCard(request: InputRequest, onRespond: (InputResponse) -> Unit, 
                         onPrimary = { onRespond(InputResponse.Accept()) },
                     ) {
                         OutlinedButton(onClick = { uriHandler.openUri(url) }, modifier = Modifier.testTag("input-open-url")) {
-                            Icon(Icons.AutoMirrored.Outlined.OpenInNew, null, Modifier.size(18.dp))
+                            Icon(AiIcons.OpenInNew, null, Modifier.size(18.dp))
                             Text(stringResource(R.string.ai_input_open_link), Modifier.padding(start = 6.dp))
                         }
                     }

@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.code
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,10 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -87,7 +84,7 @@ internal fun ElementCard(
                 actions()
                 if (collapsible) {
                     Icon(
-                        Icons.Outlined.ExpandMore,
+                        AiIcons.ExpandMore,
                         stringResource(if (expanded) R.string.ai_collapse else R.string.ai_expand),
                         Modifier.padding(end = 12.dp).rotate(if (expanded) 180f else 0f),
                     )
@@ -116,7 +113,7 @@ internal fun CopyButton(text: () -> String, modifier: Modifier = Modifier, tint:
         shapes = IconButtonDefaults.shapes(),
         modifier = modifier.compactIconButton(),
     ) {
-        Icon(if (copied) Icons.Outlined.Check else Icons.Outlined.ContentCopy, stringResource(R.string.ai_copy), Modifier.size(AiSize.compactIcon), tint = tint)
+        Icon(if (copied) AiIcons.Check else AiIcons.ContentCopy, stringResource(R.string.ai_copy), Modifier.size(AiSize.compactIcon), tint = tint)
     }
 }
 

@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.code
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,15 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Code
-import androidx.compose.material.icons.outlined.DataObject
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.Folder
-import androidx.compose.material.icons.outlined.FolderOpen
-import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.InsertDriveFile
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -90,7 +82,7 @@ fun FileTree(
                     .padding(start = 8.dp + 16.dp * row.depth, end = 8.dp),
             ) {
                 Icon(
-                    if (node.isFolder) (if (isOpen) Icons.Outlined.FolderOpen else Icons.Outlined.Folder) else fileIcon(node.name),
+                    if (node.isFolder) (if (isOpen) AiIcons.FolderOpen else AiIcons.Folder) else fileIcon(node.name),
                     null,
                     Modifier.size(18.dp),
                     tint = if (node.isFolder) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -121,10 +113,10 @@ private fun badgeColor(badge: String) = when (badge.firstOrNull()) {
 }
 
 private fun fileIcon(name: String): ImageVector = when (name.substringAfterLast('.', "").lowercase()) {
-    "kt", "kts", "java", "js", "ts", "tsx", "jsx", "py", "rs", "go", "swift", "c", "cpp", "h", "rb", "sh" -> Icons.Outlined.Code
-    "json", "yaml", "yml", "toml", "xml" -> Icons.Outlined.DataObject
-    "md", "txt", "rst" -> Icons.Outlined.Description
-    "png", "jpg", "jpeg", "gif", "webp", "svg" -> Icons.Outlined.Image
-    "gradle", "properties", "env", "gitignore", "lock" -> Icons.Outlined.Settings
-    else -> Icons.Outlined.InsertDriveFile
+    "kt", "kts", "java", "js", "ts", "tsx", "jsx", "py", "rs", "go", "swift", "c", "cpp", "h", "rb", "sh" -> AiIcons.Code
+    "json", "yaml", "yml", "toml", "xml" -> AiIcons.DataObject
+    "md", "txt", "rst" -> AiIcons.Description
+    "png", "jpg", "jpeg", "gif", "webp", "svg" -> AiIcons.Image
+    "gradle", "properties", "env", "gitignore", "lock" -> AiIcons.Settings
+    else -> AiIcons.InsertDriveFile
 }

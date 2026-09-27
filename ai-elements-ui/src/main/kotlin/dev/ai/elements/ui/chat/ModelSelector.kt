@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -11,11 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowDropDown
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Memory
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -74,8 +70,8 @@ fun ModelSelector(
     AssistChip(
         onClick = { open = true },
         label = { Text(selected?.name ?: selectedId ?: stringResource(R.string.ai_select_model), maxLines = 1, overflow = TextOverflow.Ellipsis) },
-        leadingIcon = { Icon(Icons.Outlined.Memory, null, Modifier.size(AssistChipDefaults.IconSize)) },
-        trailingIcon = { Icon(Icons.Outlined.ArrowDropDown, null, Modifier.size(AssistChipDefaults.IconSize)) },
+        leadingIcon = { Icon(AiIcons.Memory, null, Modifier.size(AssistChipDefaults.IconSize)) },
+        trailingIcon = { Icon(AiIcons.ArrowDropDown, null, Modifier.size(AssistChipDefaults.IconSize)) },
         shape = MaterialTheme.shapes.extraLarge,
         modifier = modifier.testTag("model-selector"),
     )
@@ -102,7 +98,7 @@ private fun ModelList(models: List<ModelOption>, selectedId: String?, onSelect: 
             expanded = false,
             onExpandedChange = {},
             placeholder = { Text(stringResource(R.string.ai_search_models)) },
-            leadingIcon = { Icon(Icons.Outlined.Search, null) },
+            leadingIcon = { Icon(AiIcons.Search, null) },
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         )
         if (groups.isEmpty()) {
@@ -128,7 +124,7 @@ private fun ModelList(models: List<ModelOption>, selectedId: String?, onSelect: 
                                 }
                             }
                         },
-                        trailingContent = if (m.id == selectedId) ({ Icon(Icons.Outlined.Check, null, tint = MaterialTheme.colorScheme.primary) }) else null,
+                        trailingContent = if (m.id == selectedId) ({ Icon(AiIcons.Check, null, tint = MaterialTheme.colorScheme.primary) }) else null,
                         colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("model-option-${m.id}"),
                     ) { Text(m.name) }

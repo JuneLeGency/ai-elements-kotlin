@@ -190,7 +190,7 @@
     <string name="cap_workspace">ワークスペースのファイル</string>
     <string name="cap_workspace_desc">エージェントのワークスペースと共有したフォルダでファイルを読み書き・検索</string>
     <string name="cap_sandbox">Linux サンドボックス</string>
-    <string name="sandbox_not_installed">Alpine Linux、初回使用時にインストール（約 4 MB）</string>
+    <string name="sandbox_not_installed">Alpine Linux、初回使用時にインストール（約 4 MB）</string>
     <string name="sandbox_installing">インストール中… %1$s</string>
     <string name="sandbox_ready">Alpine Linux 準備完了 · apk でパッケージを追加できます</string>
     <string name="sandbox_failed">セットアップに失敗：%1$s</string>

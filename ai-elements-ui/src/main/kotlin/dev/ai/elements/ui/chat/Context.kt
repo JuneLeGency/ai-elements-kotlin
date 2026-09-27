@@ -1,13 +1,12 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DataUsage
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
@@ -58,7 +57,7 @@ fun ContextUsage(
                 if (fraction != null) {
                     CircularProgressIndicator(progress = { fraction }, modifier = Modifier.size(AiSize.badgeIcon), strokeWidth = 2.dp)
                 } else {
-                    Icon(Icons.Outlined.DataUsage, null, Modifier.size(AiSize.badgeIcon))
+                    Icon(AiIcons.DataUsage, null, Modifier.size(AiSize.badgeIcon))
                 }
                 Text(
                     fraction?.let { "${(it * 100).toInt()}%" } ?: compact(usage.totalTokens),

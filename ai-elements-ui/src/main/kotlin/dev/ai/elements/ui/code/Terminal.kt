@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.code
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,11 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.DeleteSweep
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -83,12 +79,12 @@ fun Terminal(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
             ) {
-                Icon(Icons.Outlined.Terminal, null, Modifier.size(18.dp), tint = foreground.copy(alpha = 0.8f))
+                Icon(AiIcons.Terminal, null, Modifier.size(18.dp), tint = foreground.copy(alpha = 0.8f))
                 Text(title, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f), maxLines = 1)
                 when (status) {
                     TerminalStatus.RUNNING -> LoadingIndicator(Modifier.size(24.dp), color = foreground)
-                    TerminalStatus.SUCCESS -> Icon(Icons.Outlined.CheckCircle, stringResource(R.string.ai_step_done), Modifier.size(18.dp), tint = AnsiText.Green)
-                    TerminalStatus.ERROR -> Icon(Icons.Outlined.ErrorOutline, stringResource(R.string.ai_tool_error), Modifier.size(18.dp), tint = AnsiText.Red)
+                    TerminalStatus.SUCCESS -> Icon(AiIcons.CheckCircle, stringResource(R.string.ai_step_done), Modifier.size(18.dp), tint = AnsiText.Green)
+                    TerminalStatus.ERROR -> Icon(AiIcons.ErrorOutline, stringResource(R.string.ai_tool_error), Modifier.size(18.dp), tint = AnsiText.Red)
                     null -> Unit
                 }
                 if (exitCode != null && status != TerminalStatus.RUNNING) {
@@ -97,7 +93,7 @@ fun Terminal(
                 CopyButton({ AnsiText.strip(output) }, tint = foreground.copy(alpha = 0.8f))
                 if (onClear != null) {
                     IconButton(onClick = onClear, shapes = IconButtonDefaults.shapes(), modifier = Modifier.compactIconButton()) {
-                        Icon(Icons.Outlined.DeleteSweep, stringResource(R.string.ai_clear), Modifier.size(AiSize.compactIcon), tint = foreground.copy(alpha = 0.8f))
+                        Icon(AiIcons.DeleteSweep, stringResource(R.string.ai_clear), Modifier.size(AiSize.compactIcon), tint = foreground.copy(alpha = 0.8f))
                     }
                 }
             }

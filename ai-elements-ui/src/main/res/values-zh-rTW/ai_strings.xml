@@ -2,7 +2,7 @@
 <resources>
     <string name="ai_thinking">思考中…</string>
     <string name="ai_thought_moment">已思考片刻</string>
-    <string name="ai_thought_seconds">已思考 %1$d 秒</string>
+    <string name="ai_thought_seconds">已思考 %1$d 秒</string>
     <string name="ai_collapse">收合</string>
     <string name="ai_expand">展開</string>
     <string name="ai_approve">允許</string>
@@ -77,7 +77,7 @@
     <string name="ai_usage_output">輸出</string>
     <string name="ai_usage_total">合計</string>
     <string name="ai_usage_context_window">上下文視窗</string>
-    <string name="ai_tokens">%1$s tokens</string>
+    <string name="ai_tokens">%1$s tokens</string>
     <string name="ai_image">圖片</string>
     <string name="ai_remove_attachment">移除附件</string>
     <plurals name="ai_used_sources">
@@ -136,8 +136,8 @@
     <string name="ai_persona_thinking">助理正在思考</string>
     <string name="ai_persona_speaking">助理正在說話</string>
     <string name="ai_persona_asleep">助理已休眠</string>
-    <string name="ai_seek_back">倒退 10 秒</string>
-    <string name="ai_seek_forward">快轉 10 秒</string>
+    <string name="ai_seek_back">倒退 10 秒</string>
+    <string name="ai_seek_forward">快轉 10 秒</string>
     <string name="ai_play">播放</string>
     <string name="ai_pause">暫停</string>
     <string name="ai_mic_permission">語音輸入需要麥克風權限</string>

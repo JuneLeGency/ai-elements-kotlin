@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.code
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
@@ -12,12 +13,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Block
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Cancel
-import androidx.compose.material.icons.outlined.ExpandMore
-import androidx.compose.material.icons.outlined.Science
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
@@ -78,7 +73,7 @@ fun TestResults(suites: List<TestSuiteResult>, modifier: Modifier = Modifier, du
             if (skipped > 0) stringResource(R.string.ai_tests_skipped, skipped) else null,
             durationMs?.let(::formatDuration),
         ).joinToString(" · "),
-        icon = Icons.Outlined.Science,
+        icon = AiIcons.Science,
         iconTint = if (failed > 0) MaterialTheme.colorScheme.error else colors.pass,
         modifier = modifier.testTag("test-results"),
         actions = { if (running) LoadingIndicator(Modifier.size(28.dp)) },
@@ -113,7 +108,7 @@ private fun SuiteRow(suite: TestSuiteResult, colors: StatusColors) {
             StatusIcon(if (failed > 0) TestStatus.FAILED else if (suite.tests.any { it.status == TestStatus.RUNNING }) TestStatus.RUNNING else TestStatus.PASSED, colors)
             Text(suite.name, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text("${suite.tests.count { it.status == TestStatus.PASSED }}/${suite.tests.size}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Icon(Icons.Outlined.ExpandMore, stringResource(if (open) R.string.ai_collapse else R.string.ai_expand), Modifier.size(20.dp).rotate(if (open) 180f else 0f))
+            Icon(AiIcons.ExpandMore, stringResource(if (open) R.string.ai_collapse else R.string.ai_expand), Modifier.size(20.dp).rotate(if (open) 180f else 0f))
         }
         if (open) suite.tests.forEach { test ->
             Column(Modifier.fillMaxWidth().padding(start = 44.dp, end = 16.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -137,9 +132,9 @@ private fun SuiteRow(suite: TestSuiteResult, colors: StatusColors) {
 private fun StatusIcon(status: TestStatus, colors: StatusColors, small: Boolean = false) {
     val size = if (small) 16.dp else 20.dp
     when (status) {
-        TestStatus.PASSED -> Icon(Icons.Outlined.CheckCircle, stringResource(R.string.ai_test_status_passed), Modifier.size(size), tint = colors.pass)
-        TestStatus.FAILED -> Icon(Icons.Outlined.Cancel, stringResource(R.string.ai_test_status_failed), Modifier.size(size), tint = colors.fail)
-        TestStatus.SKIPPED -> Icon(Icons.Outlined.Block, stringResource(R.string.ai_test_status_skipped), Modifier.size(size), tint = colors.skip)
+        TestStatus.PASSED -> Icon(AiIcons.CheckCircle, stringResource(R.string.ai_test_status_passed), Modifier.size(size), tint = colors.pass)
+        TestStatus.FAILED -> Icon(AiIcons.Cancel, stringResource(R.string.ai_test_status_failed), Modifier.size(size), tint = colors.fail)
+        TestStatus.SKIPPED -> Icon(AiIcons.Block, stringResource(R.string.ai_test_status_skipped), Modifier.size(size), tint = colors.skip)
         TestStatus.RUNNING -> LoadingIndicator(Modifier.size(size + 4.dp))
     }
 }

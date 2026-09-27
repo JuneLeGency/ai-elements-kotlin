@@ -1,5 +1,7 @@
 package dev.ai.elements.ui.workflow
 
+import dev.ai.elements.ui.chat.icon
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.ui.layout.Layout
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxScope
@@ -23,18 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.Build
-import androidx.compose.material.icons.outlined.Checklist
-import androidx.compose.material.icons.outlined.FitScreen
-import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.Link
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Psychology
-import androidx.compose.material.icons.outlined.Remove
-import androidx.compose.material.icons.outlined.Subject
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -316,10 +306,10 @@ fun WorkflowCanvas(
                     offset = (offset - center) * (newScale / scale) + center
                     scale = newScale
                 }
-                FilledTonalIconButton(onClick = { zoomBy(1.25f) }, shapes = IconButtonDefaults.shapes()) { Icon(Icons.Outlined.Add, stringResource(R.string.ai_zoom_in)) }
-                FilledTonalIconButton(onClick = { zoomBy(0.8f) }, shapes = IconButtonDefaults.shapes()) { Icon(Icons.Outlined.Remove, stringResource(R.string.ai_zoom_out)) }
+                FilledTonalIconButton(onClick = { zoomBy(1.25f) }, shapes = IconButtonDefaults.shapes()) { Icon(AiIcons.Add, stringResource(R.string.ai_zoom_in)) }
+                FilledTonalIconButton(onClick = { zoomBy(0.8f) }, shapes = IconButtonDefaults.shapes()) { Icon(AiIcons.Remove, stringResource(R.string.ai_zoom_out)) }
                 FilledTonalIconButton(onClick = { fit() }, shapes = IconButtonDefaults.shapes(), modifier = Modifier.testTag("canvas-fit")) {
-                    Icon(Icons.Outlined.FitScreen, stringResource(R.string.ai_fit_screen))
+                    Icon(AiIcons.FitScreen, stringResource(R.string.ai_fit_screen))
                 }
             }
         }
@@ -405,7 +395,7 @@ fun agentRunGraph(
     labels: AgentRunLabels = AgentRunLabels(),
 ): Pair<List<CanvasNode>, List<CanvasEdge>> {
     val rows = mutableListOf<List<CanvasNode>>()
-    prompt?.let { rows += listOf(CanvasNode("prompt", labels.prompt, it.lineSequence().first(), icon = Icons.Outlined.Person, tone = NodeTone.NEUTRAL)) }
+    prompt?.let { rows += listOf(CanvasNode("prompt", labels.prompt, it.lineSequence().first(), icon = AiIcons.Person, tone = NodeTone.NEUTRAL)) }
     var toolRow = mutableListOf<CanvasNode>()
     fun flushTools() {
         if (toolRow.isNotEmpty()) rows += toolRow.toList()
@@ -415,38 +405,38 @@ fun agentRunGraph(
         if (part !is ToolPart) flushTools()
         when (part) {
             is ReasoningPart -> rows += listOf(
-                CanvasNode(part.id, labels.thinking, part.durationMs?.let { "${(it + 500) / 1000}s" } ?: "…", icon = Icons.Outlined.Psychology,
+                CanvasNode(part.id, labels.thinking, part.durationMs?.let { "${(it + 500) / 1000}s" } ?: "…", icon = AiIcons.Psychology,
                     tone = NodeTone.SECONDARY, status = if (part.isStreaming) StepStatus.ACTIVE else StepStatus.COMPLETE),
             )
             is ToolPart -> toolRow += CanvasNode(
                 part.id, part.name, part.output?.take(40) ?: part.errorText ?: part.state.name.lowercase().replace('_', ' '),
-                icon = Icons.Outlined.Build,
+                icon = part.icon,
                 tone = if (part.state == ToolState.OUTPUT_ERROR || part.state == ToolState.OUTPUT_DENIED) NodeTone.ERROR else NodeTone.TERTIARY,
                 status = if (part.isStreaming) StepStatus.ACTIVE else StepStatus.COMPLETE,
             )
             is TextPart -> if (part.text.isNotBlank()) rows += listOf(
                 CanvasNode(part.id, labels.answer, part.text.lineSequence().firstOrNull { it.isNotBlank() }?.trim('#', ' ')?.take(48),
-                    icon = Icons.Outlined.Subject, status = if (part.isStreaming) StepStatus.ACTIVE else StepStatus.COMPLETE),
+                    icon = AiIcons.Subject, status = if (part.isStreaming) StepStatus.ACTIVE else StepStatus.COMPLETE),
             )
             is DataPart -> rows += listOf(
                 CanvasNode(
                     part.id,
                     part.name.replaceFirstChar { it.uppercase() },
                     ((part.data as? JsonObject)?.get("title") as? JsonPrimitive)?.contentOrNull ?: "data-${part.name}",
-                    icon = Icons.Outlined.Checklist,
+                    icon = AiIcons.Checklist,
                     tone = NodeTone.NEUTRAL,
                 ),
             )
-            is FilePart -> rows += listOf(CanvasNode(part.id, labels.file, part.mediaType, icon = Icons.Outlined.Image, tone = NodeTone.NEUTRAL))
+            is FilePart -> rows += listOf(CanvasNode(part.id, labels.file, part.mediaType, icon = AiIcons.Image, tone = NodeTone.NEUTRAL))
             is SourcePart -> Unit
         }
     }
     flushTools()
     val sources = message.parts.filterIsInstance<SourcePart>()
     if (sources.isNotEmpty()) {
-        rows += listOf(CanvasNode("sources", labels.sources(sources.size), sources.joinToString { host(it.url) }, icon = Icons.Outlined.Link, tone = NodeTone.NEUTRAL))
+        rows += listOf(CanvasNode("sources", labels.sources(sources.size), sources.joinToString { host(it.url) }, icon = AiIcons.Link, tone = NodeTone.NEUTRAL))
     }
-    if (rows.isEmpty()) rows += listOf(CanvasNode("empty", labels.empty, icon = Icons.Outlined.AutoAwesome))
+    if (rows.isEmpty()) rows += listOf(CanvasNode("empty", labels.empty, icon = AiIcons.AutoAwesome))
 
     val gapX = 24.dp
     val rowStep = nodeSize.height + 56.dp

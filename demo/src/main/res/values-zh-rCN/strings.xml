@@ -140,7 +140,7 @@
     <string name="cap_mcp">MCP 服务器</string>
     <string name="cap_skills">技能</string>
     <string name="cap_agents">智能体</string>
-    <string name="cap_enabled_count">已启用 %1$d 个</string>
+    <string name="cap_enabled_count">已启用 %1$d 个</string>
     <string name="cap_builtin_tools">内置工具</string>
     <string name="cap_builtin_tools_desc">时钟、计算器与剪贴板</string>
     <string name="mcp_use">使用 MCP 工具</string>
@@ -190,7 +190,7 @@
     <string name="cap_workspace">工作区文件</string>
     <string name="cap_workspace_desc">在智能体工作区和你共享的文件夹中读写和搜索文件</string>
     <string name="cap_sandbox">Linux 沙箱</string>
-    <string name="sandbox_not_installed">Alpine Linux，首次使用时安装（约 4 MB）</string>
+    <string name="sandbox_not_installed">Alpine Linux，首次使用时安装（约 4 MB）</string>
     <string name="sandbox_installing">安装中… %1$s</string>
     <string name="sandbox_ready">Alpine Linux 已就绪 · 智能体可用 apk 安装软件包</string>
     <string name="sandbox_failed">安装失败：%1$s</string>
@@ -208,7 +208,7 @@
     <string name="cap_schedule">定时任务</string>
     <string name="cap_schedule_desc">在后台按时运行提示词并通知你</string>
     <string name="cap_schedule_none">暂无定时任务</string>
-    <string name="schedule_every">每 %1$d 分钟</string>
+    <string name="schedule_every">每 %1$d 分钟</string>
     <string name="schedule_cancel">取消</string>
     <string name="folders_add">添加文件夹</string>
     <string name="cap_koog">使用 JetBrains Koog 运行</string>

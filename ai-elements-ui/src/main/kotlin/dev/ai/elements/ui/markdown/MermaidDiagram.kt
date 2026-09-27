@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.markdown
 
+import dev.ai.elements.ui.icons.AiIcons
 import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Looper
@@ -18,13 +19,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountTree
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.OpenInFull
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -88,20 +86,20 @@ fun MermaidDiagram(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 2.dp),
             ) {
-                Icon(Icons.Outlined.AccountTree, null, Modifier.size(16.dp), MaterialTheme.colorScheme.primary)
+                Icon(AiIcons.AccountTree, null, Modifier.size(16.dp), MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(
                     "Mermaid",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
                 )
-                FilledTonalIconButton(
+                IconButton(
                     onClick = { fullscreen = true },
                     enabled = complete,
                     shapes = IconButtonDefaults.shapes(),
                     modifier = Modifier.compactIconButton(),
                 ) {
-                    Icon(Icons.Outlined.OpenInFull, stringResource(R.string.ai_open_diagram_full), Modifier.size(16.dp))
+                    Icon(AiIcons.OpenInFull, stringResource(R.string.ai_open_diagram_full), Modifier.size(18.dp), MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             if (!complete) {
@@ -131,7 +129,7 @@ fun MermaidDiagram(
                         onClick = { fullscreen = false },
                         shapes = IconButtonDefaults.shapes(),
                         modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
-                    ) { Icon(Icons.Outlined.Close, stringResource(R.string.ai_close)) }
+                    ) { Icon(AiIcons.Close, stringResource(R.string.ai_close)) }
                 }
             }
         }

@@ -29,12 +29,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowDropDown
-import androidx.compose.material.icons.outlined.EditNote
-import androidx.compose.material.icons.outlined.Memory
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -49,8 +43,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -207,14 +199,14 @@ fun ChatScreen(
                         footer = {
                             NavigationDrawerItem(
                                 label = { Text(stringResource(R.string.nav_components)) },
-                                icon = { Icon(Icons.Outlined.Widgets, null) },
+                                icon = { Icon(DemoIcons.Widgets, null) },
                                 selected = false,
                                 onClick = { scope.launch { drawer.close() }; onOpenComponents() },
                                 modifier = Modifier.testTag("drawer-components"),
                             )
                             NavigationDrawerItem(
                                 label = { Text(stringResource(R.string.settings)) },
-                                icon = { Icon(Icons.Outlined.Settings, null) },
+                                icon = { Icon(DemoIcons.Settings, null) },
                                 selected = false,
                                 onClick = { scope.launch { drawer.close() }; onOpenSettings() },
                                 modifier = Modifier.testTag("drawer-settings"),
@@ -277,13 +269,13 @@ private fun ChatPane(
             if (!hideTopBar) TopAppBar(
                 navigationIcon = {
                     if (showMenu) IconButton(onClick = onMenu, shapes = IconButtonDefaults.shapes()) {
-                        Icon(Icons.Outlined.Menu, stringResource(R.string.conversations))
+                        Icon(DemoIcons.Menu, stringResource(R.string.conversations))
                     }
                 },
                 title = { ProviderButton(provider, onClick = { providerSheet = true }) },
                 actions = {
                     IconButton(onClick = viewModel::newChat, shapes = IconButtonDefaults.shapes(), modifier = Modifier.testTag("new-chat")) {
-                        Icon(Icons.Outlined.EditNote, stringResource(R.string.new_chat))
+                        Icon(DemoIcons.EditNote, stringResource(R.string.new_chat))
                     }
                 },
                 colors = transparentAppBarColors(),
@@ -387,7 +379,7 @@ private fun ProviderButton(provider: ProviderProfile, onClick: () -> Unit) {
             .testTag("provider-button"),
     ) {
         Text(provider.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-        Icon(Icons.Outlined.ArrowDropDown, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(DemoIcons.ArrowDropDown, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -420,7 +412,7 @@ private fun ProviderSheet(
             }
             item {
                 TextButton(onClick = onManage, modifier = Modifier.padding(16.dp)) {
-                    Icon(Icons.Outlined.Tune, null, Modifier.size(AiSize.compactIcon))
+                    Icon(DemoIcons.Tune, null, Modifier.size(AiSize.compactIcon))
                     Text("  " + stringResource(R.string.manage_providers))
                 }
             }
@@ -457,17 +449,16 @@ private fun ModelChip(viewModel: ChatViewModel, provider: ProviderProfile) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(AiSpacing.s),
-                modifier = Modifier.padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+                modifier = Modifier.padding(start = 12.dp, end = 4.dp, top = 6.dp, bottom = 6.dp),
             ) {
-                Icon(Icons.Outlined.Memory, null, Modifier.size(16.dp))
                 Text(
                     provider.model.ifBlank { stringResource(R.string.default_model) },
                     style = MaterialTheme.typography.labelLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.widthIn(max = 180.dp),
+                    modifier = Modifier.widthIn(max = 120.dp),
                 )
-                Icon(Icons.Outlined.ArrowDropDown, null, Modifier.size(AiSize.compactIcon))
+                Icon(DemoIcons.ArrowDropDown, null, Modifier.size(AiSize.compactIcon))
             }
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {

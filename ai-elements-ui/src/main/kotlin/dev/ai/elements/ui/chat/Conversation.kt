@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
@@ -16,9 +17,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
@@ -181,7 +179,7 @@ fun Conversation(
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp),
         ) {
             SmallFloatingActionButton(onClick = { scope.launch { stick.jumpToLatest(animated = true) } }) {
-                Icon(Icons.Outlined.KeyboardArrowDown, stringResource(R.string.ai_scroll_to_latest))
+                Icon(AiIcons.KeyboardArrowDown, stringResource(R.string.ai_scroll_to_latest))
             }
         }
     }
@@ -197,7 +195,7 @@ private fun ErrorCard(error: String, onRetry: () -> Unit, onDismiss: () -> Unit,
     ) {
         Column(Modifier.padding(start = 16.dp, end = 8.dp, top = AiSpacing.l, bottom = 4.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
-                Icon(Icons.Outlined.ErrorOutline, null, Modifier.size(20.dp))
+                Icon(AiIcons.ErrorOutline, null, Modifier.size(20.dp))
                 Text(error, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
             }
             Row(Modifier.align(Alignment.End)) {

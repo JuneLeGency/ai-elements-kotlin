@@ -18,11 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.EditNote
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -99,14 +94,14 @@ internal fun HistoryPane(
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)) {
             ExtendedFloatingActionButton(
                 onClick = onNew,
-                icon = { Icon(Icons.Outlined.EditNote, null) },
+                icon = { Icon(DemoIcons.EditNote, null) },
                 text = { Text(stringResource(R.string.new_chat)) },
                 modifier = Modifier.padding(start = 4.dp),
             )
             Spacer(Modifier.weight(1f))
             if (conversations.size > 3 && !searching) {
                 IconButton(onClick = { searching = true }, shapes = IconButtonDefaults.shapes(), modifier = Modifier.testTag("history-search-open")) {
-                    Icon(Icons.Outlined.Search, stringResource(R.string.search_chats))
+                    Icon(DemoIcons.Search, stringResource(R.string.search_chats))
                 }
             }
         }
@@ -120,10 +115,10 @@ internal fun HistoryPane(
                 expanded = false,
                 onExpandedChange = {},
                 placeholder = { Text(stringResource(R.string.search_chats)) },
-                leadingIcon = { Icon(Icons.Outlined.Search, null) },
+                leadingIcon = { Icon(DemoIcons.Search, null) },
                 trailingIcon = {
                     IconButton(onClick = { query.edit { replace(0, length, "") }; searching = false }) {
-                        Icon(Icons.Outlined.Close, stringResource(R.string.close_search))
+                        Icon(DemoIcons.Close, stringResource(R.string.close_search))
                     }
                 },
                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).focusRequester(focus).testTag("history-search"),
@@ -220,7 +215,7 @@ private fun HistoryRow(row: ChatSummary, selected: Boolean, time: String, onOpen
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.delete)) },
-                leadingIcon = { Icon(Icons.Outlined.DeleteOutline, null, Modifier.size(AiSize.compactIcon)) },
+                leadingIcon = { Icon(DemoIcons.DeleteOutline, null, Modifier.size(AiSize.compactIcon)) },
                 onClick = { menu = false; onDelete() },
             )
         }

@@ -22,28 +22,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.Login
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.CloudQueue
-import androidx.compose.material.icons.outlined.Computer
-import androidx.compose.material.icons.outlined.DarkMode
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.Hub
-import androidx.compose.material.icons.outlined.Key
-import androidx.compose.material.icons.outlined.Language
-import androidx.compose.material.icons.outlined.LightMode
-import androidx.compose.material.icons.outlined.OfflineBolt
-import androidx.compose.material.icons.outlined.PhoneAndroid
-import androidx.compose.material.icons.outlined.Psychology
-import androidx.compose.material.icons.outlined.SmartToy
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.VisibilityOff
-import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -193,7 +171,7 @@ private fun SettingsList(
     if (confirmSubscription) {
         AlertDialog(
             onDismissRequest = { confirmSubscription = false },
-            icon = { Icon(Icons.Outlined.WarningAmber, null) },
+            icon = { Icon(DemoIcons.WarningAmber, null) },
             title = { Text(stringResource(R.string.subscription_signin)) },
             text = { Text(stringResource(R.string.subscription_warning)) },
             confirmButton = {
@@ -220,9 +198,9 @@ private fun SettingsList(
                     modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
                 ) {
                     val modes = listOf(
-                        Triple(ThemeMode.SYSTEM, stringResource(R.string.theme_system), Icons.Outlined.PhoneAndroid),
-                        Triple(ThemeMode.LIGHT, stringResource(R.string.theme_light), Icons.Outlined.LightMode),
-                        Triple(ThemeMode.DARK, stringResource(R.string.theme_dark), Icons.Outlined.DarkMode),
+                        Triple(ThemeMode.SYSTEM, stringResource(R.string.theme_system), DemoIcons.PhoneAndroid),
+                        Triple(ThemeMode.LIGHT, stringResource(R.string.theme_light), DemoIcons.LightMode),
+                        Triple(ThemeMode.DARK, stringResource(R.string.theme_dark), DemoIcons.DarkMode),
                     )
                     modes.forEachIndexed { index, (mode, label, icon) ->
                         ToggleButton(
@@ -245,7 +223,8 @@ private fun SettingsList(
                 item {
                     ListItem(
                         checked = appearance.dynamicColor,
-                        onCheckedChange = { viewModel.settings.update(appearance.copy(dynamicColor = it)) },
+                        colors = switchRowColors(),
+        onCheckedChange = { viewModel.settings.update(appearance.copy(dynamicColor = it)) },
                         supportingContent = { Text(stringResource(R.string.dynamic_color_desc)) },
                         trailingContent = { Switch(checked = appearance.dynamicColor, onCheckedChange = null) },
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -330,7 +309,8 @@ private fun SettingsList(
             item {
                 ListItem(
                     checked = appearance.nativeMermaid,
-                    onCheckedChange = { viewModel.settings.update(appearance.copy(nativeMermaid = it)) },
+                    colors = switchRowColors(),
+        onCheckedChange = { viewModel.settings.update(appearance.copy(nativeMermaid = it)) },
                     supportingContent = { Text(stringResource(R.string.native_mermaid_desc)) },
                     trailingContent = { Switch(checked = appearance.nativeMermaid, onCheckedChange = null) },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp).testTag("native-mermaid"),
@@ -368,7 +348,7 @@ private fun SettingsList(
                     SectionHeader(stringResource(R.string.agent_providers), Modifier.weight(1f))
                     Box {
                         TextButton(onClick = { addMenu = true }, modifier = Modifier.padding(end = 8.dp)) {
-                            Icon(Icons.Outlined.Add, null, Modifier.size(AiSize.compactIcon))
+                            Icon(DemoIcons.Add, null, Modifier.size(AiSize.compactIcon))
                             Text(stringResource(R.string.add), Modifier.padding(start = 4.dp))
                         }
                         DropdownMenu(expanded = addMenu, onDismissRequest = { addMenu = false }) {
@@ -406,7 +386,7 @@ private fun SettingsList(
                             OAuthProvider.entries.filter { !it.experimental || appearance.subscriptionSignIn }.forEach { provider ->
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.sign_in_with, provider.label)) },
-                                    leadingIcon = { Icon(Icons.AutoMirrored.Outlined.Login, null) },
+                                    leadingIcon = { Icon(DemoIcons.Login, null) },
                                     trailingIcon = if (provider.experimental) ({
                                         Text(stringResource(R.string.experimental), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary)
                                     }) else null,
@@ -457,7 +437,7 @@ private fun SettingsList(
                     },
                     trailingContent = {
                         if (profile.id == selectedId) {
-                            Icon(Icons.Outlined.CheckCircle, stringResource(R.string.active), tint = MaterialTheme.colorScheme.primary)
+                            Icon(DemoIcons.CheckCircle, stringResource(R.string.active), tint = MaterialTheme.colorScheme.primary)
                         }
                     },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("settings-provider-${profile.id}"),
@@ -474,6 +454,7 @@ private fun SettingsList(
             item {
                 ListItem(
                     checked = appearance.subscriptionSignIn,
+                    colors = switchRowColors(),
                     onCheckedChange = {
                         if (it) confirmSubscription = true else viewModel.settings.update(appearance.copy(subscriptionSignIn = false))
                     },
@@ -517,7 +498,7 @@ private fun ProviderEditor(
                 colors = transparentAppBarColors(),
                 title = { Text(draft.name.ifBlank { stringResource(R.string.provider) }, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
-                    if (showBack) IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.back)) }
+                    if (showBack) IconButton(onClick = onClose) { Icon(DemoIcons.ArrowBack, stringResource(R.string.back)) }
                 },
                 actions = {
                     TextButton(onClick = ::save, enabled = dirty, modifier = Modifier.testTag("provider-save")) { Text(stringResource(R.string.save)) }
@@ -567,7 +548,7 @@ private fun ProviderEditor(
                         singleLine = true,
                         trailingIcon = {
                             if (testResult?.getOrNull()?.isNotEmpty() == true) {
-                                IconButton(onClick = { modelMenu = true }) { Icon(Icons.Outlined.Hub, stringResource(R.string.pick_model)) }
+                                IconButton(onClick = { modelMenu = true }) { Icon(DemoIcons.Hub, stringResource(R.string.pick_model)) }
                             }
                         },
                         modifier = Modifier.fillMaxWidth().testTag("provider-model"),
@@ -583,10 +564,10 @@ private fun ProviderEditor(
                     onValueChange = { apiKey = it },
                     label = { Text(if (draft.kind.needsKey) stringResource(R.string.api_key) else stringResource(R.string.api_key_optional)) },
                     singleLine = true,
-                    leadingIcon = { Icon(Icons.Outlined.Key, null) },
+                    leadingIcon = { Icon(DemoIcons.Key, null) },
                     trailingIcon = {
                         IconButton(onClick = { showKey = !showKey }) {
-                            Icon(if (showKey) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility, stringResource(R.string.show_key))
+                            Icon(if (showKey) DemoIcons.VisibilityOff else DemoIcons.Visibility, stringResource(R.string.show_key))
                         }
                     },
                     visualTransformation = if (showKey) VisualTransformation.None else PasswordVisualTransformation(),
@@ -598,7 +579,8 @@ private fun ProviderEditor(
             if (draft.kind != ProviderKind.MOCK && !draft.kind.serverSideAgent) {
                 ListItem(
                     checked = draft.useTools,
-                    onCheckedChange = { draft = draft.copy(useTools = it) },
+                    colors = switchRowColors(),
+        onCheckedChange = { draft = draft.copy(useTools = it) },
                     supportingContent = { Text(stringResource(R.string.on_device_tools_desc)) },
                     trailingContent = { Switch(checked = draft.useTools, onCheckedChange = null) },
                 ) { Text(stringResource(R.string.on_device_tools)) }
@@ -641,7 +623,7 @@ private fun ProviderEditor(
                     modifier = Modifier.fillMaxWidth().testTag("provider-test-result"),
                 ) {
                     Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(if (ok) Icons.Outlined.CheckCircle else Icons.Outlined.ErrorOutline, null)
+                        Icon(if (ok) DemoIcons.CheckCircle else DemoIcons.ErrorOutline, null)
                         Text(
                             if (ok) pluralStringResource(R.plurals.connected_models, result.getOrThrow().size, result.getOrThrow().size)
                             else result.exceptionOrNull()?.message ?: stringResource(R.string.failed),
@@ -680,14 +662,14 @@ internal fun SectionHeader(text: String, modifier: Modifier = Modifier) {
 
 private val ProviderKind.icon: ImageVector
     get() = when (this) {
-        ProviderKind.MOCK -> Icons.Outlined.OfflineBolt
-        ProviderKind.AGENT_SERVER -> Icons.Outlined.SmartToy
-        ProviderKind.AG_UI -> Icons.Outlined.Hub
-        ProviderKind.OPENAI, ProviderKind.OPENAI_RESPONSES -> Icons.Outlined.CloudQueue
-        ProviderKind.ANTHROPIC -> Icons.Outlined.Psychology
-        ProviderKind.GEMINI -> Icons.Outlined.AutoAwesome
-        ProviderKind.OLLAMA -> Icons.Outlined.Computer
-        ProviderKind.A2A -> Icons.Outlined.Hub
+        ProviderKind.MOCK -> DemoIcons.OfflineBolt
+        ProviderKind.AGENT_SERVER -> DemoIcons.SmartToy
+        ProviderKind.AG_UI -> DemoIcons.Hub
+        ProviderKind.OPENAI, ProviderKind.OPENAI_RESPONSES -> DemoIcons.CloudQueue
+        ProviderKind.ANTHROPIC -> DemoIcons.Psychology
+        ProviderKind.GEMINI -> DemoIcons.AutoAwesome
+        ProviderKind.OLLAMA -> DemoIcons.Computer
+        ProviderKind.A2A -> DemoIcons.Hub
     }
 
 @get:StringRes
@@ -714,14 +696,14 @@ private fun LanguageItem() {
         ListItem(
             onClick = { menu = true },
             supportingContent = { Text(current.autonym ?: stringResource(R.string.language_system)) },
-            leadingContent = { Icon(Icons.Outlined.Language, null) },
+            leadingContent = { Icon(DemoIcons.Language, null) },
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("language"),
         ) { Text(stringResource(R.string.language)) }
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, offset = DpOffset(24.dp, 0.dp)) {
             AppLanguage.entries.forEach { language ->
                 DropdownMenuItem(
                     text = { Text(language.autonym ?: stringResource(R.string.language_system)) },
-                    trailingIcon = if (language == current) ({ Icon(Icons.Outlined.Check, null) }) else null,
+                    trailingIcon = if (language == current) ({ Icon(DemoIcons.Check, null) }) else null,
                     onClick = {
                         menu = false
                         if (language != current) {

@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -14,15 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.OpenInNew
-import androidx.compose.material.icons.automirrored.outlined.Send
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.ChevronLeft
-import androidx.compose.material.icons.outlined.ChevronRight
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -69,14 +61,14 @@ fun BranchSelector(index: Int, count: Int, onSelect: (Int) -> Unit, modifier: Mo
             enabled = enabled && index > 0,
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.compactIconButton().testTag("branch-previous"),
-        ) { Icon(Icons.Outlined.ChevronLeft, stringResource(R.string.ai_previous_version)) }
+        ) { Icon(AiIcons.ChevronLeft, stringResource(R.string.ai_previous_version)) }
         Text("${index + 1} / $count", style = MaterialTheme.typography.labelMedium, modifier = Modifier.testTag("branch-label"))
         IconButton(
             onClick = { onSelect(index + 1) },
             enabled = enabled && index < count - 1,
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.compactIconButton().testTag("branch-next"),
-        ) { Icon(Icons.Outlined.ChevronRight, stringResource(R.string.ai_next_version)) }
+        ) { Icon(AiIcons.ChevronRight, stringResource(R.string.ai_next_version)) }
     }
 }
 
@@ -89,7 +81,7 @@ fun Checkpoint(onRestore: () -> Unit, modifier: Modifier = Modifier, label: Stri
     var confirm by remember { mutableStateOf(false) }
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         HorizontalDivider(Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
-        Icon(Icons.Outlined.BookmarkBorder, null, Modifier.size(16.dp), MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(AiIcons.BookmarkBorder, null, Modifier.size(16.dp), MaterialTheme.colorScheme.onSurfaceVariant)
         Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         // Same type size as the label beside it; compact visually, still a 48dp touch target.
         TextButton(
@@ -102,7 +94,7 @@ fun Checkpoint(onRestore: () -> Unit, modifier: Modifier = Modifier, label: Stri
     if (confirm) {
         AlertDialog(
             onDismissRequest = { confirm = false },
-            icon = { Icon(Icons.Outlined.BookmarkBorder, null) },
+            icon = { Icon(AiIcons.BookmarkBorder, null) },
             title = { Text(stringResource(R.string.ai_restore_checkpoint_title)) },
             text = { Text(stringResource(R.string.ai_restore_checkpoint_text)) },
             confirmButton = {
@@ -138,7 +130,7 @@ fun Queue(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp),
                 ) {
-                    Icon(Icons.Outlined.Schedule, null, Modifier.size(16.dp), MaterialTheme.colorScheme.primary)
+                    Icon(AiIcons.Schedule, null, Modifier.size(16.dp), MaterialTheme.colorScheme.primary)
                     Text(
                         if (paused) stringResource(R.string.ai_queued_paused, items.size) else stringResource(R.string.ai_queued, items.size),
                         style = MaterialTheme.typography.labelLarge,
@@ -160,11 +152,11 @@ fun Queue(
                         )
                         if (paused) {
                             IconButton(onClick = { onSendNow(item) }, modifier = Modifier.compactIconButton().testTag("queue-send")) {
-                                Icon(Icons.AutoMirrored.Outlined.Send, stringResource(R.string.ai_send_now), Modifier.size(AiSize.compactIcon))
+                                Icon(AiIcons.Send, stringResource(R.string.ai_send_now), Modifier.size(AiSize.compactIcon))
                             }
                         }
                         IconButton(onClick = { onRemove(item) }, modifier = Modifier.compactIconButton().testTag("queue-remove")) {
-                            Icon(Icons.Outlined.Close, stringResource(R.string.ai_remove_from_queue), Modifier.size(AiSize.compactIcon))
+                            Icon(AiIcons.Close, stringResource(R.string.ai_remove_from_queue), Modifier.size(AiSize.compactIcon))
                         }
                     }
                 }
@@ -200,7 +192,7 @@ fun OpenInChat(prompt: String, modifier: Modifier = Modifier, targets: List<Open
             onClick = { open = true },
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.compactIconButton().testTag("open-in"),
-        ) { Icon(Icons.AutoMirrored.Outlined.OpenInNew, stringResource(R.string.ai_open_in_menu), Modifier.size(AiSize.compactIcon)) }
+        ) { Icon(AiIcons.OpenInNew, stringResource(R.string.ai_open_in_menu), Modifier.size(AiSize.compactIcon)) }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             Text(
                 stringResource(R.string.ai_open_in),
@@ -221,7 +213,7 @@ fun OpenInChat(prompt: String, modifier: Modifier = Modifier, targets: List<Open
             HorizontalDivider()
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.ai_share)) },
-                leadingIcon = { Icon(Icons.Outlined.Share, null) },
+                leadingIcon = { Icon(AiIcons.Share, null) },
                 onClick = {
                     open = false
                     val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, prompt)

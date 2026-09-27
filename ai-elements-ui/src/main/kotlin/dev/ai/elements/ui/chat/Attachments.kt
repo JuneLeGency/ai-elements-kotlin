@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import android.graphics.BitmapFactory
 import android.util.Base64
 import androidx.compose.foundation.Image
@@ -16,10 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BrokenImage
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -77,7 +74,7 @@ fun FileImage(
         if (image != null) {
             Image(image, file.filename ?: stringResource(R.string.ai_image), Modifier.matchParentSize(), contentScale = contentScale)
         } else {
-            Icon(Icons.Outlined.BrokenImage, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(AiIcons.BrokenImage, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -98,7 +95,7 @@ fun FileAttachment(file: FilePart, modifier: Modifier = Modifier, imageHeight: D
     } else {
         Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium, modifier = modifier) {
             Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.Description, null)
+                Icon(AiIcons.Description, null)
                 Text(file.filename ?: file.mediaType, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
@@ -135,7 +132,7 @@ fun AttachmentStrip(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier.size(20.dp).clip(MaterialTheme.shapes.extraLarge).background(MaterialTheme.colorScheme.inverseSurface),
                     ) {
-                        Icon(Icons.Outlined.Close, stringResource(R.string.ai_remove_attachment), Modifier.size(AiSpacing.l), MaterialTheme.colorScheme.inverseOnSurface)
+                        Icon(AiIcons.Close, stringResource(R.string.ai_remove_attachment), Modifier.size(AiSpacing.l), MaterialTheme.colorScheme.inverseOnSurface)
                     }
                 }
             }

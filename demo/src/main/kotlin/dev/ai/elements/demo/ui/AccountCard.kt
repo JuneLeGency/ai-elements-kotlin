@@ -7,11 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Login
-import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -66,7 +61,7 @@ fun AccountCard(viewModel: ChatViewModel, profile: ProviderProfile, modifier: Mo
     Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.large, modifier = modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Icon(Icons.Outlined.AccountCircle, null, tint = MaterialTheme.colorScheme.primary)
+                Icon(DemoIcons.AccountCircle, null, tint = MaterialTheme.colorScheme.primary)
                 Column(Modifier.weight(1f)) {
                     Text(provider.label, style = MaterialTheme.typography.titleSmall)
                     Text(
@@ -84,7 +79,7 @@ fun AccountCard(viewModel: ChatViewModel, profile: ProviderProfile, modifier: Mo
             }
             if (provider.experimental) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(Icons.Outlined.WarningAmber, null, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.tertiary)
+                    Icon(DemoIcons.WarningAmber, null, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.tertiary)
                     Text(
                         stringResource(R.string.subscription_warning),
                         style = MaterialTheme.typography.bodySmall,
@@ -103,14 +98,14 @@ fun AccountCard(viewModel: ChatViewModel, profile: ProviderProfile, modifier: Mo
                 }
                 else -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = { viewModel.signIn.signIn(activity, profile) }, modifier = Modifier.testTag("sign-in")) {
-                        Icon(Icons.AutoMirrored.Outlined.Login, null, Modifier.size(ButtonDefaults.IconSize))
+                        Icon(DemoIcons.Login, null, Modifier.size(ButtonDefaults.IconSize))
                         Text(
                             stringResource(if (signedIn) R.string.sign_in_again else R.string.sign_in),
                             Modifier.padding(start = ButtonDefaults.IconSpacing),
                         )
                     }
                     if (signedIn) OutlinedButton(onClick = { viewModel.signIn.signOut(profile) }, modifier = Modifier.testTag("sign-out")) {
-                        Icon(Icons.AutoMirrored.Outlined.Logout, null, Modifier.size(ButtonDefaults.IconSize))
+                        Icon(DemoIcons.Logout, null, Modifier.size(ButtonDefaults.IconSize))
                         Text(stringResource(R.string.sign_out), Modifier.padding(start = ButtonDefaults.IconSpacing))
                     }
                 }
@@ -130,7 +125,7 @@ fun AccountCard(viewModel: ChatViewModel, profile: ProviderProfile, modifier: Mo
         val clipboard = LocalClipboardManager.current
         AlertDialog(
             onDismissRequest = {},
-            icon = { Icon(Icons.AutoMirrored.Outlined.Login, null) },
+            icon = { Icon(DemoIcons.Login, null) },
             title = { Text(stringResource(R.string.device_title, provider.label)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {

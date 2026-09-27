@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.voice
 
+import dev.ai.elements.ui.icons.AiIcons
 import android.content.Context
 import android.media.AudioDeviceCallback
 import android.media.AudioDeviceInfo
@@ -16,17 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowDropDown
-import androidx.compose.material.icons.outlined.Bluetooth
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Headset
-import androidx.compose.material.icons.outlined.Mic
-import androidx.compose.material.icons.outlined.PlayCircle
-import androidx.compose.material.icons.outlined.RecordVoiceOver
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.StopCircle
-import androidx.compose.material.icons.outlined.Usb
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.DropdownMenu
@@ -76,23 +66,23 @@ fun MicSelector(selected: AudioDeviceInfo?, onSelect: (AudioDeviceInfo?) -> Unit
         AssistChip(
             onClick = { open = true },
             label = { Text(selected?.let { deviceName(it) } ?: default, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-            leadingIcon = { Icon(selected?.let(::deviceIcon) ?: Icons.Outlined.Mic, null, Modifier.size(AssistChipDefaults.IconSize)) },
-            trailingIcon = { Icon(Icons.Outlined.ArrowDropDown, stringResource(R.string.ai_microphone), Modifier.size(AssistChipDefaults.IconSize)) },
+            leadingIcon = { Icon(selected?.let(::deviceIcon) ?: AiIcons.Mic, null, Modifier.size(AssistChipDefaults.IconSize)) },
+            trailingIcon = { Icon(AiIcons.ArrowDropDown, stringResource(R.string.ai_microphone), Modifier.size(AssistChipDefaults.IconSize)) },
             shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier.testTag("mic-selector"),
         )
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             DropdownMenuItem(
                 text = { Text(default) },
-                leadingIcon = { Icon(Icons.Outlined.Mic, null) },
-                trailingIcon = if (selected == null) ({ Icon(Icons.Outlined.Check, null) }) else null,
+                leadingIcon = { Icon(AiIcons.Mic, null) },
+                trailingIcon = if (selected == null) ({ Icon(AiIcons.Check, null) }) else null,
                 onClick = { onSelect(null); open = false },
             )
             devices.forEach { d ->
                 DropdownMenuItem(
                     text = { Text(deviceName(d)) },
                     leadingIcon = { Icon(deviceIcon(d), null) },
-                    trailingIcon = if (selected?.id == d.id) ({ Icon(Icons.Outlined.Check, null) }) else null,
+                    trailingIcon = if (selected?.id == d.id) ({ Icon(AiIcons.Check, null) }) else null,
                     onClick = { onSelect(d); open = false },
                 )
             }
@@ -134,10 +124,10 @@ private fun deviceName(d: AudioDeviceInfo): String {
 }
 
 private fun deviceIcon(d: AudioDeviceInfo): ImageVector = when (d.type) {
-    AudioDeviceInfo.TYPE_BLUETOOTH_SCO -> Icons.Outlined.Bluetooth
-    AudioDeviceInfo.TYPE_WIRED_HEADSET -> Icons.Outlined.Headset
-    AudioDeviceInfo.TYPE_USB_DEVICE, AudioDeviceInfo.TYPE_USB_HEADSET -> Icons.Outlined.Usb
-    else -> Icons.Outlined.Mic
+    AudioDeviceInfo.TYPE_BLUETOOTH_SCO -> AiIcons.Bluetooth
+    AudioDeviceInfo.TYPE_WIRED_HEADSET -> AiIcons.Headset
+    AudioDeviceInfo.TYPE_USB_DEVICE, AudioDeviceInfo.TYPE_USB_HEADSET -> AiIcons.Usb
+    else -> AiIcons.Mic
 }
 
 // ---------------------------------------------------------------- VoiceSelector
@@ -167,8 +157,8 @@ fun VoiceSelector(voices: List<VoiceOption>, selectedId: String?, onSelect: (Voi
     AssistChip(
         onClick = { open = true },
         label = { Text(selected?.name ?: stringResource(R.string.ai_voice), maxLines = 1, overflow = TextOverflow.Ellipsis) },
-        leadingIcon = { Icon(Icons.Outlined.RecordVoiceOver, null, Modifier.size(AssistChipDefaults.IconSize)) },
-        trailingIcon = { Icon(Icons.Outlined.ArrowDropDown, null, Modifier.size(AssistChipDefaults.IconSize)) },
+        leadingIcon = { Icon(AiIcons.RecordVoiceOver, null, Modifier.size(AssistChipDefaults.IconSize)) },
+        trailingIcon = { Icon(AiIcons.ArrowDropDown, null, Modifier.size(AssistChipDefaults.IconSize)) },
         shape = MaterialTheme.shapes.extraLarge,
         modifier = modifier.testTag("voice-selector"),
     )
@@ -182,7 +172,7 @@ fun VoiceSelector(voices: List<VoiceOption>, selectedId: String?, onSelect: (Voi
             SearchBarDefaults.InputField(
                 state = query, onSearch = {}, expanded = false, onExpandedChange = {},
                 placeholder = { Text(stringResource(R.string.ai_search_voices)) },
-                leadingIcon = { Icon(Icons.Outlined.Search, null) },
+                leadingIcon = { Icon(AiIcons.Search, null) },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             )
             if (shown.isEmpty()) Text(stringResource(R.string.ai_no_results), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(24.dp))
@@ -198,12 +188,12 @@ fun VoiceSelector(voices: List<VoiceOption>, selectedId: String?, onSelect: (Voi
                             {
                                 val playing = previewing == v.id
                                 IconButton(onClick = { previewing = if (playing) null else v.id }) {
-                                    Icon(if (playing) Icons.Outlined.StopCircle else Icons.Outlined.PlayCircle, stringResource(R.string.ai_preview_voice))
+                                    Icon(if (playing) AiIcons.StopCircle else AiIcons.PlayCircle, stringResource(R.string.ai_preview_voice))
                                 }
                                 if (playing) VoicePreview(url) { previewing = null }
                             }
                         },
-                        trailingContent = if (v.id == selectedId) ({ Icon(Icons.Outlined.Check, null, tint = MaterialTheme.colorScheme.primary) }) else null,
+                        trailingContent = if (v.id == selectedId) ({ Icon(AiIcons.Check, null, tint = MaterialTheme.colorScheme.primary) }) else null,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
                     ) { Text(v.name) }
                 }

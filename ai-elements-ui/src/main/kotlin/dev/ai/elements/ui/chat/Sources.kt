@@ -1,13 +1,12 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Icon
@@ -58,7 +57,7 @@ fun Sources(sources: List<SourcePart>, modifier: Modifier = Modifier) {
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.heightIn(min = 28.dp).padding(horizontal = 10.dp),
                     ) {
-                        Icon(Icons.Outlined.Link, null, Modifier.size(14.dp), MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(AiIcons.Link, null, Modifier.size(14.dp), MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(source.title, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 160.dp))
                     }
                 }

@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.voice
 
+import dev.ai.elements.ui.icons.AiIcons
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
@@ -10,11 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Forward10
-import androidx.compose.material.icons.outlined.Pause
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Replay10
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -153,7 +149,7 @@ fun AudioPlayer(state: AudioPlayerState, modifier: Modifier = Modifier, title: S
             title?.let { Text(it, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 4.dp)) }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 IconButton(onClick = { state.seekBy(-10_000) }, enabled = state.isReady, shapes = IconButtonDefaults.shapes()) {
-                    Icon(Icons.Outlined.Replay10, stringResource(R.string.ai_seek_back))
+                    Icon(AiIcons.Replay10, stringResource(R.string.ai_seek_back))
                 }
                 FilledIconButton(
                     onClick = state::toggle,
@@ -163,12 +159,12 @@ fun AudioPlayer(state: AudioPlayerState, modifier: Modifier = Modifier, title: S
                 ) {
                     when {
                         !state.isReady && state.error == null -> LoadingIndicator(Modifier.size(24.dp))
-                        state.isPlaying -> Icon(Icons.Outlined.Pause, stringResource(R.string.ai_pause))
-                        else -> Icon(Icons.Outlined.PlayArrow, stringResource(R.string.ai_play))
+                        state.isPlaying -> Icon(AiIcons.Pause, stringResource(R.string.ai_pause))
+                        else -> Icon(AiIcons.PlayArrow, stringResource(R.string.ai_play))
                     }
                 }
                 IconButton(onClick = { state.seekBy(10_000) }, enabled = state.isReady, shapes = IconButtonDefaults.shapes()) {
-                    Icon(Icons.Outlined.Forward10, stringResource(R.string.ai_seek_forward))
+                    Icon(AiIcons.Forward10, stringResource(R.string.ai_seek_forward))
                 }
                 Column(Modifier.weight(1f)) {
                     Slider(

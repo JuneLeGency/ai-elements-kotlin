@@ -91,8 +91,9 @@ class ElementsTest {
         assertEquals(listOf(Role.USER, Role.ASSISTANT), messages.map { it.role })
         assertEquals("hello", (messages.first().parts.single() as TextPart).text)
         assertTrue(messages.last().parts.isNotEmpty())
+        // The text only: a real keyboard can leave composition annotations on the (empty) value.
         compose.onNodeWithTag("prompt-input").assert(
-            androidx.compose.ui.test.SemanticsMatcher.expectValue(androidx.compose.ui.semantics.SemanticsProperties.EditableText, androidx.compose.ui.text.AnnotatedString("")),
+            androidx.compose.ui.test.SemanticsMatcher("prompt cleared") { it.config.getOrElseNullable(androidx.compose.ui.semantics.SemanticsProperties.EditableText) { null }?.text == "" },
         )
     }
 

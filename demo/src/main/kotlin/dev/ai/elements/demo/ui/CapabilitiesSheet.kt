@@ -5,12 +5,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AutoStories
-import androidx.compose.material.icons.outlined.Extension
-import androidx.compose.material.icons.outlined.Groups
-import androidx.compose.material.icons.outlined.Hub
-import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,7 +53,7 @@ internal fun CapabilitiesButton(viewModel: ChatViewModel, provider: ProviderProf
 
     IconButton(onClick = { open = true }, modifier = Modifier.testTag("capabilities-button")) {
         BadgedBox(badge = { if (active > 0) Badge { Text("$active") } }) {
-            Icon(Icons.Outlined.Extension, stringResource(R.string.capabilities))
+            Icon(DemoIcons.Extension, stringResource(R.string.capabilities))
         }
     }
     if (open) CapabilitiesSheet(viewModel, inApp, onManage = { open = false; onManage() }, onDismiss = { open = false })
@@ -78,7 +72,7 @@ private fun CapabilitiesSheet(viewModel: ChatViewModel, inApp: Boolean, onManage
             SheetHeader(stringResource(R.string.cap_mcp))
             if (servers.isEmpty()) Hint(stringResource(R.string.mcp_empty))
             servers.forEach { server ->
-                Toggle(Icons.Outlined.Hub, server.name, server.url, settings.mcpEnabled && server.enabled, "sheet-mcp-${server.id}") { on ->
+                Toggle(DemoIcons.Hub, server.name, server.url, settings.mcpEnabled && server.enabled, "sheet-mcp-${server.id}") { on ->
                     if (on && !settings.mcpEnabled) viewModel.agents.update { it.copy(mcpEnabled = true) }
                     viewModel.mcpServers.upsert(server.copy(enabled = on))
                 }
@@ -87,18 +81,18 @@ private fun CapabilitiesSheet(viewModel: ChatViewModel, inApp: Boolean, onManage
                 SheetHeader(stringResource(R.string.cap_skills))
                 skills.forEach { entry ->
                     val name = entry.skill.name
-                    Toggle(Icons.Outlined.AutoStories, name, entry.skill.description, settings.skillsEnabled && name !in settings.disabledSkills, "sheet-skill-$name") { on ->
+                    Toggle(DemoIcons.AutoStories, name, entry.skill.description, settings.skillsEnabled && name !in settings.disabledSkills, "sheet-skill-$name") { on ->
                         viewModel.agents.update { s -> s.copy(skillsEnabled = s.skillsEnabled || on, disabledSkills = if (on) s.disabledSkills - name else s.disabledSkills + name) }
                     }
                 }
                 SheetHeader(stringResource(R.string.cap_agents))
                 settings.subAgents.forEach { def ->
-                    Toggle(Icons.Outlined.SmartToy, def.name, def.description, def.enabled, "sheet-agent-${def.name}") { on ->
+                    Toggle(DemoIcons.SmartToy, def.name, def.description, def.enabled, "sheet-agent-${def.name}") { on ->
                         viewModel.agents.update { s -> s.copy(subAgents = s.subAgents.map { if (it.id == def.id) it.copy(enabled = on) else it }) }
                     }
                 }
                 settings.remoteAgents.forEach { def ->
-                    Toggle(Icons.Outlined.Groups, def.name.ifBlank { def.url }, "A2A · ${def.url}", def.enabled, "sheet-remote-${def.id}") { on ->
+                    Toggle(DemoIcons.Groups, def.name.ifBlank { def.url }, "A2A · ${def.url}", def.enabled, "sheet-remote-${def.id}") { on ->
                         viewModel.agents.update { s -> s.copy(remoteAgents = s.remoteAgents.map { if (it.id == def.id) it.copy(enabled = on) else it }) }
                     }
                 }
@@ -120,10 +114,10 @@ private fun Toggle(icon: ImageVector, title: String, description: String, checke
     ListItem(
         checked = checked,
         onCheckedChange = onChange,
-        leadingContent = { Icon(icon, null, tint = MaterialTheme.colorScheme.primary) },
+        leadingContent = { Icon(icon, null) },
         supportingContent = { Text(description, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         trailingContent = { Switch(checked = checked, onCheckedChange = null) },
-        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+        colors = switchRowColors(),
         modifier = Modifier.padding(horizontal = 12.dp).testTag(tag),
     ) { Text(title) }
 }

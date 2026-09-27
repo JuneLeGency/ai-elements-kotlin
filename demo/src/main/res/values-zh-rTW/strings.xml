@@ -190,7 +190,7 @@
     <string name="cap_workspace">工作區檔案</string>
     <string name="cap_workspace_desc">在代理程式工作區和你共享的資料夾中讀寫和搜尋檔案</string>
     <string name="cap_sandbox">Linux 沙箱</string>
-    <string name="sandbox_not_installed">Alpine Linux，首次使用時安裝（約 4 MB）</string>
+    <string name="sandbox_not_installed">Alpine Linux，首次使用時安裝（約 4 MB）</string>
     <string name="sandbox_installing">安裝中… %1$s</string>
     <string name="sandbox_ready">Alpine Linux 已就緒 · 代理程式可用 apk 安裝套件</string>
     <string name="sandbox_failed">安裝失敗：%1$s</string>

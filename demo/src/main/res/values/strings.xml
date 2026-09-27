@@ -192,7 +192,7 @@
     <string name="cap_workspace">Workspace files</string>
     <string name="cap_workspace_desc">Read, write and search files in the agent\'s workspace and in folders you share</string>
     <string name="cap_sandbox">Linux sandbox</string>
-    <string name="sandbox_not_installed">Alpine Linux, installed on first use (about 4 MB)</string>
+    <string name="sandbox_not_installed">Alpine Linux, installed on first use (about 4 MB)</string>
     <string name="sandbox_installing">Installing… %1$s</string>
     <string name="sandbox_ready">Alpine Linux ready · the agent can apk add packages</string>
     <string name="sandbox_failed">Setup failed: %1$s</string>
@@ -210,7 +210,7 @@
     <string name="cap_schedule">Scheduled tasks</string>
     <string name="cap_schedule_desc">Runs prompts later in the background and notifies you</string>
     <string name="cap_schedule_none">No tasks scheduled</string>
-    <string name="schedule_every">every %1$d min</string>
+    <string name="schedule_every">every %1$d min</string>
     <string name="schedule_cancel">Cancel</string>
     <string name="folders_add">Add folder</string>
     <string name="cap_koog">Run on JetBrains Koog</string>

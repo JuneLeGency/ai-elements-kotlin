@@ -1,5 +1,6 @@
 package dev.ai.elements.genui.a2ui
 
+import dev.ai.elements.genui.icons.GenUiIcons
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -21,66 +22,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.ArrowForward
-import androidx.compose.material.icons.automirrored.outlined.Send
-import androidx.compose.material.icons.automirrored.outlined.VolumeDown
-import androidx.compose.material.icons.automirrored.outlined.VolumeMute
-import androidx.compose.material.icons.automirrored.outlined.VolumeOff
-import androidx.compose.material.icons.automirrored.outlined.VolumeUp
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.AttachFile
-import androidx.compose.material.icons.outlined.CalendarToday
-import androidx.compose.material.icons.outlined.Call
-import androidx.compose.material.icons.outlined.CameraAlt
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Download
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.Event
-import androidx.compose.material.icons.outlined.FastForward
-import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Folder
-import androidx.compose.material.icons.automirrored.outlined.HelpOutline
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.LockOpen
-import androidx.compose.material.icons.outlined.Mail
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.MoreHoriz
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.NotificationsOff
-import androidx.compose.material.icons.outlined.Pause
-import androidx.compose.material.icons.outlined.Payment
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Phone
-import androidx.compose.material.icons.outlined.Photo
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Print
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material.icons.outlined.SkipNext
-import androidx.compose.material.icons.outlined.SkipPrevious
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material.icons.outlined.StarBorder
-import androidx.compose.material.icons.outlined.StarHalf
-import androidx.compose.material.icons.outlined.Stop
-import androidx.compose.material.icons.outlined.Upload
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.VisibilityOff
-import androidx.compose.material.icons.outlined.WarningAmber
-import androidx.compose.material.icons.outlined.FastRewind
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
@@ -173,24 +114,24 @@ object BasicComponents {
 
     /** Basic Catalog icon names → Material icons. */
     val icons: Map<String, ImageVector> = mapOf(
-        "accountCircle" to Icons.Outlined.AccountCircle, "add" to Icons.Outlined.Add, "arrowBack" to Icons.AutoMirrored.Outlined.ArrowBack,
-        "arrowForward" to Icons.AutoMirrored.Outlined.ArrowForward, "attachFile" to Icons.Outlined.AttachFile, "calendarToday" to Icons.Outlined.CalendarToday,
-        "call" to Icons.Outlined.Call, "camera" to Icons.Outlined.CameraAlt, "check" to Icons.Outlined.Check, "close" to Icons.Outlined.Close,
-        "delete" to Icons.Outlined.Delete, "download" to Icons.Outlined.Download, "edit" to Icons.Outlined.Edit, "event" to Icons.Outlined.Event,
-        "error" to Icons.Outlined.ErrorOutline, "fastForward" to Icons.Outlined.FastForward, "favorite" to Icons.Outlined.Favorite,
-        "favoriteOff" to Icons.Outlined.FavoriteBorder, "folder" to Icons.Outlined.Folder, "help" to Icons.AutoMirrored.Outlined.HelpOutline,
-        "home" to Icons.Outlined.Home, "info" to Icons.Outlined.Info, "locationOn" to Icons.Outlined.LocationOn, "lock" to Icons.Outlined.Lock,
-        "lockOpen" to Icons.Outlined.LockOpen, "mail" to Icons.Outlined.Mail, "menu" to Icons.Outlined.Menu, "moreVert" to Icons.Outlined.MoreVert,
-        "moreHoriz" to Icons.Outlined.MoreHoriz, "notificationsOff" to Icons.Outlined.NotificationsOff, "notifications" to Icons.Outlined.Notifications,
-        "pause" to Icons.Outlined.Pause, "payment" to Icons.Outlined.Payment, "person" to Icons.Outlined.Person, "phone" to Icons.Outlined.Phone,
-        "photo" to Icons.Outlined.Photo, "play" to Icons.Outlined.PlayArrow, "print" to Icons.Outlined.Print, "refresh" to Icons.Outlined.Refresh,
-        "rewind" to Icons.Outlined.FastRewind, "search" to Icons.Outlined.Search, "send" to Icons.AutoMirrored.Outlined.Send,
-        "settings" to Icons.Outlined.Settings, "share" to Icons.Outlined.Share, "shoppingCart" to Icons.Outlined.ShoppingCart,
-        "skipNext" to Icons.Outlined.SkipNext, "skipPrevious" to Icons.Outlined.SkipPrevious, "star" to Icons.Outlined.Star,
-        "starHalf" to Icons.Outlined.StarHalf, "starOff" to Icons.Outlined.StarBorder, "stop" to Icons.Outlined.Stop, "upload" to Icons.Outlined.Upload,
-        "visibility" to Icons.Outlined.Visibility, "visibilityOff" to Icons.Outlined.VisibilityOff, "volumeDown" to Icons.AutoMirrored.Outlined.VolumeDown,
-        "volumeMute" to Icons.AutoMirrored.Outlined.VolumeMute, "volumeOff" to Icons.AutoMirrored.Outlined.VolumeOff,
-        "volumeUp" to Icons.AutoMirrored.Outlined.VolumeUp, "warning" to Icons.Outlined.WarningAmber,
+        "accountCircle" to GenUiIcons.AccountCircle, "add" to GenUiIcons.Add, "arrowBack" to GenUiIcons.ArrowBack,
+        "arrowForward" to GenUiIcons.ArrowForward, "attachFile" to GenUiIcons.AttachFile, "calendarToday" to GenUiIcons.CalendarToday,
+        "call" to GenUiIcons.Call, "camera" to GenUiIcons.CameraAlt, "check" to GenUiIcons.Check, "close" to GenUiIcons.Close,
+        "delete" to GenUiIcons.Delete, "download" to GenUiIcons.Download, "edit" to GenUiIcons.Edit, "event" to GenUiIcons.Event,
+        "error" to GenUiIcons.ErrorOutline, "fastForward" to GenUiIcons.FastForward, "favorite" to GenUiIcons.Favorite,
+        "favoriteOff" to GenUiIcons.FavoriteBorder, "folder" to GenUiIcons.Folder, "help" to GenUiIcons.HelpOutline,
+        "home" to GenUiIcons.Home, "info" to GenUiIcons.Info, "locationOn" to GenUiIcons.LocationOn, "lock" to GenUiIcons.Lock,
+        "lockOpen" to GenUiIcons.LockOpen, "mail" to GenUiIcons.Mail, "menu" to GenUiIcons.Menu, "moreVert" to GenUiIcons.MoreVert,
+        "moreHoriz" to GenUiIcons.MoreHoriz, "notificationsOff" to GenUiIcons.NotificationsOff, "notifications" to GenUiIcons.Notifications,
+        "pause" to GenUiIcons.Pause, "payment" to GenUiIcons.Payment, "person" to GenUiIcons.Person, "phone" to GenUiIcons.Phone,
+        "photo" to GenUiIcons.Photo, "play" to GenUiIcons.PlayArrow, "print" to GenUiIcons.Print, "refresh" to GenUiIcons.Refresh,
+        "rewind" to GenUiIcons.FastRewind, "search" to GenUiIcons.Search, "send" to GenUiIcons.Send,
+        "settings" to GenUiIcons.Settings, "share" to GenUiIcons.Share, "shoppingCart" to GenUiIcons.ShoppingCart,
+        "skipNext" to GenUiIcons.SkipNext, "skipPrevious" to GenUiIcons.SkipPrevious, "star" to GenUiIcons.Star,
+        "starHalf" to GenUiIcons.StarHalf, "starOff" to GenUiIcons.StarBorder, "stop" to GenUiIcons.Stop, "upload" to GenUiIcons.Upload,
+        "visibility" to GenUiIcons.Visibility, "visibilityOff" to GenUiIcons.VisibilityOff, "volumeDown" to GenUiIcons.VolumeDown,
+        "volumeMute" to GenUiIcons.VolumeMute, "volumeOff" to GenUiIcons.VolumeOff,
+        "volumeUp" to GenUiIcons.VolumeUp, "warning" to GenUiIcons.WarningAmber,
     )
 }
 
@@ -281,7 +222,7 @@ private fun VideoComponent(s: ComponentScope, m: Modifier) {
     // No bundled media player: show the poster and open the video in the system player.
     Box(m.padding(LeafMargin).fillWidth().widthIn(min = 160.dp).aspectRatio(16f / 9f).clip(MaterialTheme.shapes.medium).clickable { uri.openUri(url) }, contentAlignment = Alignment.Center) {
         s.string("posterUrl")?.let { FileImage(FilePart("${s.id}-poster", "image/*", it), Modifier.matchParentSize()) }
-        Icon(Icons.Outlined.PlayArrow, contentDescription = "Play video", modifier = Modifier.size(48.dp))
+        Icon(GenUiIcons.PlayArrow, contentDescription = "Play video", modifier = Modifier.size(48.dp))
     }
 }
 
@@ -510,7 +451,7 @@ private fun DateTimeComponent(s: ComponentScope, m: Modifier) {
     Column(m.padding(LeafMargin)) {
         s.string("label")?.takeIf { current != null }?.let { Text(it, style = MaterialTheme.typography.labelLarge) }
         OutlinedButton(onClick = { picking = if (enableDate) "date" else "time" }, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)) {
-            Icon(if (enableDate) Icons.Outlined.CalendarToday else Icons.Outlined.Event, null, Modifier.size(18.dp))
+            Icon(if (enableDate) GenUiIcons.CalendarToday else GenUiIcons.Event, null, Modifier.size(18.dp))
             Text(shown, Modifier.padding(start = 8.dp))
         }
     }

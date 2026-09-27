@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -14,13 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Block
-import androidx.compose.material.icons.outlined.Build
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.ExpandMore
-import androidx.compose.material.icons.outlined.PanTool
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
@@ -30,6 +24,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material3.HorizontalDivider
 import dev.ai.elements.ui.theme.AiType
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.heightIn
@@ -82,7 +78,8 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
     ) {
         Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.heightIn(min = 24.dp)) {
-                Icon(Icons.Outlined.Build, null, Modifier.size(16.dp), scheme.onSurfaceVariant)
+                // What kind of tool: a skill, a provider's (e.g. an MCP server's), or a plain function.
+                Icon(part.icon, null, Modifier.size(16.dp), scheme.onSurfaceVariant)
                 ToolTitle(part)
                 Text(
                     text = subtitle(part),
@@ -94,19 +91,20 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
                 )
                 StatusPill(part.state)
                 Icon(
-                    Icons.Outlined.ExpandMore,
+                    AiIcons.ExpandMore,
                     contentDescription = if (open) stringResource(R.string.ai_collapse) else stringResource(R.string.ai_expand),
                     tint = scheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp).rotate(if (open) 180f else 0f),
                 )
             }
             if (part.state == ToolState.APPROVAL_REQUESTED) {
-                Confirmation(
+                HorizontalDivider(Modifier.padding(top = 8.dp), color = scheme.outlineVariant.copy(alpha = 0.5f))
+                ConfirmationContent(
                     title = stringResource(R.string.ai_allow_tool, part.displayName),
                     description = part.input.compactJson().ifBlank { stringResource(R.string.ai_no_arguments) },
                     onApprove = onApproval?.let { { it(true) } },
                     onDeny = onApproval?.let { { it(false) } },
-                    modifier = Modifier.padding(top = 12.dp),
+                    modifier = Modifier.padding(top = 8.dp),
                     input = part.input,
                     onDecide = onApproval?.let { LocalToolDecision.current }?.let { cb -> { decision -> cb(part.id, decision) } },
                 )
@@ -128,6 +126,14 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
         }
     }
 }
+
+/** What kind of tool: a skill, a provider's (e.g. an MCP server's), or a plain function. */
+internal val ToolPart.icon: ImageVector
+    get() = when {
+        kind is ToolKind.Skill -> AiIcons.MenuBook
+        source != null -> AiIcons.Extension
+        else -> AiIcons.Function
+    }
 
 /**
  * The tool's name line: its title when it has one, else the raw name in code type, with a chip
@@ -180,10 +186,10 @@ internal fun StatusPill(state: ToolState) {
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             when (state) {
-                ToolState.OUTPUT_AVAILABLE -> Icon(Icons.Outlined.CheckCircle, null, Modifier.size(AiSize.badgeIcon))
-                ToolState.OUTPUT_ERROR -> Icon(Icons.Outlined.ErrorOutline, null, Modifier.size(AiSize.badgeIcon))
-                ToolState.OUTPUT_DENIED -> Icon(Icons.Outlined.Block, null, Modifier.size(AiSize.badgeIcon))
-                ToolState.APPROVAL_REQUESTED -> Icon(Icons.Outlined.PanTool, null, Modifier.size(AiSize.badgeIcon))
+                ToolState.OUTPUT_AVAILABLE -> Icon(AiIcons.CheckCircle, null, Modifier.size(AiSize.badgeIcon))
+                ToolState.OUTPUT_ERROR -> Icon(AiIcons.ErrorOutline, null, Modifier.size(AiSize.badgeIcon))
+                ToolState.OUTPUT_DENIED -> Icon(AiIcons.Block, null, Modifier.size(AiSize.badgeIcon))
+                ToolState.APPROVAL_REQUESTED -> Icon(AiIcons.PanTool, null, Modifier.size(AiSize.badgeIcon))
                 else -> LoadingIndicator(Modifier.size(16.dp), color = content)
             }
             Text(label, style = MaterialTheme.typography.labelMedium, color = content)

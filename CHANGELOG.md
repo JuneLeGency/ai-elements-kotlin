@@ -111,6 +111,15 @@
 - `calculate` returns 10 significant digits (`778516.8889`, not `778516.8888888889`).
 - `LocalMermaidRenderer` now holds a `MermaidRenderer` (was an enum).
 - Denser chat reading type scale (`AiType`).
+- Icons are Material Symbols Rounded, generated as `ImageVector`s per module by
+  `tools/generate-icons.py` (`AiIcons`, only the icons in use); the frozen
+  `material-icons-extended` dependency is gone. Tools show what they are with one icon everywhere
+  (chat, canvas, agent cards): ƒx for functions, a puzzle piece for a provider's (MCP) tools, a book
+  for skills.
+- Approvals sit inside the tool call (no card in a card) with all answers — deny with reason, edit
+  and approve, deny, approve — on one row when they fit.
+- Things that belong on one line stay on one line: short inline code, "number unit" pairs,
+  the composer's model chip, settings switch rows (no selected tint).
 
 ### Fixed
 - xAI sign-in used `/oauth/*`; the endpoints are `/oauth2/authorize` and `/oauth2/token` (per its

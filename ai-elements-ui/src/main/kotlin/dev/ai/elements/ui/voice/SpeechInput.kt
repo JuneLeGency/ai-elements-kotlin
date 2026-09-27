@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.voice
 
+import dev.ai.elements.ui.icons.AiIcons
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -13,9 +14,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Mic
-import androidx.compose.material.icons.outlined.Stop
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -23,6 +21,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import dev.ai.elements.ui.theme.compactIconButton
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -157,16 +156,17 @@ fun SpeechInput(
                 }
             },
             shapes = IconButtonDefaults.shapes(),
+            // Quiet like the composer's other buttons until it listens; then red and pulsing.
             colors = if (state.phase == SpeechInputPhase.LISTENING) {
                 IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError)
             } else {
-                IconButtonDefaults.filledTonalIconButtonColors()
+                IconButtonDefaults.filledIconButtonColors(containerColor = androidx.compose.ui.graphics.Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
             },
-            modifier = Modifier.scale(if (state.phase == SpeechInputPhase.LISTENING) pulse else 1f).testTag("speech-input"),
+            modifier = Modifier.compactIconButton().scale(if (state.phase == SpeechInputPhase.LISTENING) pulse else 1f).testTag("speech-input"),
         ) {
             when (state.phase) {
-                SpeechInputPhase.IDLE -> Icon(Icons.Outlined.Mic, stringResource(R.string.ai_start_voice))
-                SpeechInputPhase.LISTENING -> Icon(Icons.Outlined.Stop, stringResource(R.string.ai_stop_voice))
+                SpeechInputPhase.IDLE -> Icon(AiIcons.Mic, stringResource(R.string.ai_start_voice))
+                SpeechInputPhase.LISTENING -> Icon(AiIcons.Stop, stringResource(R.string.ai_stop_voice))
                 SpeechInputPhase.PROCESSING -> LoadingIndicator(Modifier.size(24.dp))
             }
         }

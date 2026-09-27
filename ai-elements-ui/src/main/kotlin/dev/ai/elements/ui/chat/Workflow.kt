@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
@@ -20,12 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Checklist
-import androidx.compose.material.icons.outlined.ExpandMore
-import androidx.compose.material.icons.outlined.RadioButtonUnchecked
-import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
@@ -69,7 +64,7 @@ data class WorkflowStep(
  */
 @Composable
 fun ChainOfThought(steps: List<WorkflowStep>, modifier: Modifier = Modifier, title: String = stringResource(R.string.ai_chain_of_thought)) {
-    Collapsible(title, Icons.Outlined.Route, streaming = steps.any { it.status == StepStatus.ACTIVE }, modifier = modifier) {
+    Collapsible(title, AiIcons.Route, streaming = steps.any { it.status == StepStatus.ACTIVE }, modifier = modifier) {
         steps.forEachIndexed { index, step -> TimelineStep(step, isLast = index == steps.lastIndex) }
     }
 }
@@ -86,7 +81,7 @@ fun Plan(
     modifier: Modifier = Modifier,
     streaming: Boolean = false,
 ) {
-    Collapsible(title, Icons.Outlined.Checklist, streaming = streaming, subtitle = description, modifier = modifier) {
+    Collapsible(title, AiIcons.Checklist, streaming = streaming, subtitle = description, modifier = modifier) {
         steps.forEach { step ->
             Row(horizontalArrangement = Arrangement.spacedBy(AiSpacing.s), verticalAlignment = Alignment.Top) {
                 StatusIcon(step.status, Modifier.padding(top = 2.dp))
@@ -102,7 +97,7 @@ fun Plan(
  */
 @Composable
 fun Task(title: String, items: List<WorkflowStep>, modifier: Modifier = Modifier) {
-    Collapsible(title, Icons.Outlined.Checklist, streaming = items.any { it.status == StepStatus.ACTIVE }, modifier = modifier) {
+    Collapsible(title, AiIcons.Checklist, streaming = items.any { it.status == StepStatus.ACTIVE }, modifier = modifier) {
         items.forEach { item ->
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(item.label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -158,9 +153,9 @@ private fun Badges(badges: List<String>) {
 private fun StatusIcon(status: StepStatus, modifier: Modifier = Modifier) {
     val scheme = MaterialTheme.colorScheme
     when (status) {
-        StepStatus.COMPLETE -> Icon(Icons.Outlined.CheckCircle, stringResource(R.string.ai_step_done), modifier.size(18.dp), scheme.primary)
+        StepStatus.COMPLETE -> Icon(AiIcons.CheckCircle, stringResource(R.string.ai_step_done), modifier.size(18.dp), scheme.primary)
         StepStatus.ACTIVE -> LoadingIndicator(modifier.size(18.dp))
-        StepStatus.PENDING -> Icon(Icons.Outlined.RadioButtonUnchecked, stringResource(R.string.ai_step_pending), modifier.size(18.dp), scheme.outline)
+        StepStatus.PENDING -> Icon(AiIcons.RadioButtonUnchecked, stringResource(R.string.ai_step_pending), modifier.size(18.dp), scheme.outline)
     }
 }
 
@@ -197,7 +192,7 @@ private fun Collapsible(
                     modifier = Modifier.weight(1f),
                 )
                 Icon(
-                    Icons.Outlined.ExpandMore,
+                    AiIcons.ExpandMore,
                     if (open) stringResource(R.string.ai_collapse) else stringResource(R.string.ai_expand),
                     Modifier.size(18.dp).rotate(rotation),
                     MaterialTheme.colorScheme.onSurfaceVariant,

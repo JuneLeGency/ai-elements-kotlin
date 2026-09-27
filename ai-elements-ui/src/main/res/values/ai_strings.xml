@@ -77,7 +77,7 @@
     <string name="ai_usage_output">Output</string>
     <string name="ai_usage_total">Total</string>
     <string name="ai_usage_context_window">Context window</string>
-    <string name="ai_tokens">%1$s tokens</string>
+    <string name="ai_tokens">%1$s tokens</string>
     <string name="ai_image">Image</string>
     <string name="ai_remove_attachment">Remove attachment</string>
     <plurals name="ai_used_sources">

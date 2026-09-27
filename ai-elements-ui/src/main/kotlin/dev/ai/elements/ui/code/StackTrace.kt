@@ -1,12 +1,11 @@
 package dev.ai.elements.ui.code
 
+import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -90,7 +89,7 @@ fun StackTrace(trace: String, modifier: Modifier = Modifier, collapsedFrames: In
     ElementCard(
         title = parsed.type.substringAfterLast('.'),
         subtitle = pluralStringResource(R.plurals.ai_stack_frames, parsed.frames.size, parsed.frames.size),
-        icon = Icons.Outlined.BugReport,
+        icon = AiIcons.BugReport,
         iconTint = colors.error,
         modifier = modifier.testTag("stack-trace"),
         actions = { CopyButton({ trace }) },

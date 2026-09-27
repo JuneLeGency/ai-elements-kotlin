@@ -18,32 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.Login
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.ArrowDropDown
-import androidx.compose.material.icons.outlined.AutoStories
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.Checklist
-import androidx.compose.material.icons.outlined.Extension
-import androidx.compose.material.icons.outlined.CreateNewFolder
-import androidx.compose.material.icons.outlined.Folder
-import androidx.compose.material.icons.outlined.FolderOpen
-import androidx.compose.material.icons.outlined.Language
-import androidx.compose.material.icons.outlined.PhoneAndroid
-import androidx.compose.material.icons.outlined.Psychology
-import androidx.compose.material.icons.outlined.RecordVoiceOver
-import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material.icons.outlined.Terminal
-import androidx.compose.material.icons.outlined.FileUpload
-import androidx.compose.material.icons.outlined.Groups
-import androidx.compose.material.icons.outlined.Hub
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
@@ -112,9 +86,9 @@ internal fun LazyListScope.capabilityItems(viewModel: ChatViewModel, highlighted
         val servers by viewModel.mcpServers.servers.collectAsStateWithLifecycle()
         val skills by viewModel.skills.skills.collectAsStateWithLifecycle()
         val rows = listOf(
-            Triple(CapabilityPage.MCP, Icons.Outlined.Hub, R.string.cap_mcp) to servers.count { it.enabled }.takeIf { settings.mcpEnabled },
-            Triple(CapabilityPage.SKILLS, Icons.Outlined.AutoStories, R.string.cap_skills) to skills.count { it.skill.name !in settings.disabledSkills }.takeIf { settings.skillsEnabled },
-            Triple(CapabilityPage.AGENTS, Icons.Outlined.Groups, R.string.cap_agents) to (settings.subAgents.count { it.enabled } + settings.remoteAgents.count { it.enabled }),
+            Triple(CapabilityPage.MCP, DemoIcons.Hub, R.string.cap_mcp) to servers.count { it.enabled }.takeIf { settings.mcpEnabled },
+            Triple(CapabilityPage.SKILLS, DemoIcons.AutoStories, R.string.cap_skills) to skills.count { it.skill.name !in settings.disabledSkills }.takeIf { settings.skillsEnabled },
+            Triple(CapabilityPage.AGENTS, DemoIcons.Groups, R.string.cap_agents) to (settings.subAgents.count { it.enabled } + settings.remoteAgents.count { it.enabled }),
         )
         Column {
             rows.forEach { (row, count) ->
@@ -122,7 +96,7 @@ internal fun LazyListScope.capabilityItems(viewModel: ChatViewModel, highlighted
                 ListItem(
                     selected = key == highlighted,
                     onClick = { onOpen(key) },
-                    leadingContent = { Icon(icon, null, tint = MaterialTheme.colorScheme.primary) },
+                    leadingContent = { Icon(icon, null) },
                     supportingContent = { Text(if (count == null) stringResource(R.string.off) else stringResource(R.string.cap_enabled_count, count)) },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("settings-$key"),
                 ) { Text(stringResource(title)) }
@@ -130,8 +104,9 @@ internal fun LazyListScope.capabilityItems(viewModel: ChatViewModel, highlighted
             InAppAgentItems(viewModel, settings)
             ListItem(
                 checked = settings.builtinTools,
-                onCheckedChange = { on -> viewModel.agents.update { it.copy(builtinTools = on) } },
-                leadingContent = { Icon(Icons.Outlined.Extension, null, tint = MaterialTheme.colorScheme.primary) },
+                colors = switchRowColors(),
+        onCheckedChange = { on -> viewModel.agents.update { it.copy(builtinTools = on) } },
+                leadingContent = { Icon(DemoIcons.Extension, null, tint = MaterialTheme.colorScheme.primary) },
                 supportingContent = { Text(stringResource(R.string.cap_builtin_tools_desc)) },
                 trailingContent = { Switch(checked = settings.builtinTools, onCheckedChange = null) },
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
@@ -147,11 +122,11 @@ private fun InAppAgentItems(viewModel: ChatViewModel, settings: dev.ai.elements.
     val sandbox by viewModel.runtime.sandbox.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     SectionHeader(stringResource(R.string.cap_in_app))
-    CapabilitySwitch(Icons.Outlined.Hub, R.string.cap_koog, stringResource(R.string.cap_koog_desc), settings.koogRuntime, "cap-koog") { on -> viewModel.agents.update { it.copy(koogRuntime = on) } }
-    CapabilitySwitch(Icons.Outlined.FolderOpen, R.string.cap_workspace, stringResource(R.string.cap_workspace_desc), settings.workspaceFiles, "cap-workspace") { on -> viewModel.agents.update { it.copy(workspaceFiles = on) } }
+    CapabilitySwitch(DemoIcons.Hub, R.string.cap_koog, stringResource(R.string.cap_koog_desc), settings.koogRuntime, "cap-koog") { on -> viewModel.agents.update { it.copy(koogRuntime = on) } }
+    CapabilitySwitch(DemoIcons.FolderOpen, R.string.cap_workspace, stringResource(R.string.cap_workspace_desc), settings.workspaceFiles, "cap-workspace") { on -> viewModel.agents.update { it.copy(workspaceFiles = on) } }
     if (settings.workspaceFiles) SharedFolderItems(viewModel.runtime.sharedFolders)
     CapabilitySwitch(
-        Icons.Outlined.Terminal, R.string.cap_sandbox,
+        DemoIcons.Terminal, R.string.cap_sandbox,
         when (val s = sandbox) {
             dev.ai.elements.harness.sandbox.AlpineSandbox.State.NotInstalled -> stringResource(R.string.sandbox_not_installed)
             is dev.ai.elements.harness.sandbox.AlpineSandbox.State.Installing -> stringResource(R.string.sandbox_installing, s.progress?.let { "${(it * 100).toInt()}%" } ?: s.step)
@@ -164,12 +139,12 @@ private fun InAppAgentItems(viewModel: ChatViewModel, settings: dev.ai.elements.
             else if (sandbox == dev.ai.elements.harness.sandbox.AlpineSandbox.State.Ready) TextButton(onClick = { scope.launch { viewModel.runtime.sandbox.reset() } }) { Text(stringResource(R.string.sandbox_reset)) }
         },
     ) { on -> viewModel.agents.update { it.copy(sandboxShell = on) } }
-    CapabilitySwitch(Icons.Outlined.Psychology, R.string.cap_memory, stringResource(R.string.cap_memory_desc), settings.memory, "cap-memory") { on -> viewModel.agents.update { it.copy(memory = on) } }
-    CapabilitySwitch(Icons.Outlined.Language, R.string.cap_browser, stringResource(R.string.cap_browser_desc), settings.webBrowser, "cap-browser") { on -> viewModel.agents.update { it.copy(webBrowser = on) } }
-    CapabilitySwitch(Icons.Outlined.PhoneAndroid, R.string.cap_device, stringResource(R.string.cap_device_desc), settings.deviceTools, "cap-device") { on -> viewModel.agents.update { it.copy(deviceTools = on) } }
-    CapabilitySwitch(Icons.Outlined.Checklist, R.string.cap_planning, stringResource(R.string.cap_planning_desc), settings.planning, "cap-planning") { on -> viewModel.agents.update { it.copy(planning = on) } }
-    CapabilitySwitch(Icons.Outlined.RecordVoiceOver, R.string.cap_speech, stringResource(R.string.cap_speech_desc), settings.speech, "cap-speech") { on -> viewModel.agents.update { it.copy(speech = on) } }
-    CapabilitySwitch(Icons.Outlined.Schedule, R.string.cap_schedule, stringResource(R.string.cap_schedule_desc), settings.scheduledTasks, "cap-schedule") { on -> viewModel.agents.update { it.copy(scheduledTasks = on) } }
+    CapabilitySwitch(DemoIcons.Psychology, R.string.cap_memory, stringResource(R.string.cap_memory_desc), settings.memory, "cap-memory") { on -> viewModel.agents.update { it.copy(memory = on) } }
+    CapabilitySwitch(DemoIcons.Language, R.string.cap_browser, stringResource(R.string.cap_browser_desc), settings.webBrowser, "cap-browser") { on -> viewModel.agents.update { it.copy(webBrowser = on) } }
+    CapabilitySwitch(DemoIcons.PhoneAndroid, R.string.cap_device, stringResource(R.string.cap_device_desc), settings.deviceTools, "cap-device") { on -> viewModel.agents.update { it.copy(deviceTools = on) } }
+    CapabilitySwitch(DemoIcons.Checklist, R.string.cap_planning, stringResource(R.string.cap_planning_desc), settings.planning, "cap-planning") { on -> viewModel.agents.update { it.copy(planning = on) } }
+    CapabilitySwitch(DemoIcons.RecordVoiceOver, R.string.cap_speech, stringResource(R.string.cap_speech_desc), settings.speech, "cap-speech") { on -> viewModel.agents.update { it.copy(speech = on) } }
+    CapabilitySwitch(DemoIcons.Schedule, R.string.cap_schedule, stringResource(R.string.cap_schedule_desc), settings.scheduledTasks, "cap-schedule") { on -> viewModel.agents.update { it.copy(scheduledTasks = on) } }
     if (settings.scheduledTasks) ScheduledTaskItems(viewModel.runtime.scheduler)
 }
 
@@ -181,14 +156,14 @@ private fun SharedFolderItems(folders: dev.ai.elements.harness.filesystem.Shared
     shared.forEach { folder ->
         ListItem(
             onClick = {},
-            leadingContent = { Icon(Icons.Outlined.Folder, null) },
+            leadingContent = { Icon(DemoIcons.Folder, null) },
             supportingContent = { Text("${dev.ai.elements.harness.filesystem.Mount.ROOT}/${folder.name}") },
             trailingContent = { TextButton(onClick = { folders.remove(folder.name) }) { Text(stringResource(R.string.remove)) } },
             modifier = Modifier.padding(start = 56.dp, end = 12.dp).testTag("folder-${folder.name}"),
         ) { Text(folder.name) }
     }
     TextButton(onClick = { pick.launch(null) }, modifier = Modifier.padding(start = 64.dp).testTag("folder-add")) {
-        Icon(Icons.Outlined.CreateNewFolder, null, Modifier.size(18.dp))
+        Icon(DemoIcons.CreateNewFolder, null, Modifier.size(18.dp))
         Text(stringResource(R.string.folders_add), Modifier.padding(start = 8.dp))
     }
 }
@@ -214,8 +189,9 @@ private fun ScheduledTaskItems(scheduler: dev.ai.elements.harness.scheduler.Sche
 private fun CapabilitySwitch(icon: androidx.compose.ui.graphics.vector.ImageVector, title: Int, description: String, checked: Boolean, tag: String, extra: @Composable () -> Unit = {}, onChange: (Boolean) -> Unit) {
     ListItem(
         checked = checked,
+        colors = switchRowColors(),
         onCheckedChange = onChange,
-        leadingContent = { Icon(icon, null, tint = MaterialTheme.colorScheme.primary) },
+        leadingContent = { Icon(icon, null) },
         supportingContent = { Text(description) },
         trailingContent = { Row(verticalAlignment = Alignment.CenterVertically) { extra(); Switch(checked = checked, onCheckedChange = null) } },
         modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag(tag),
@@ -249,7 +225,7 @@ private fun PaneScaffold(
             TopAppBar(
                 colors = transparentAppBarColors(),
                 title = { Text(title) },
-                navigationIcon = { if (showBack) IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.back)) } },
+                navigationIcon = { if (showBack) IconButton(onClick = onClose) { Icon(DemoIcons.ArrowBack, stringResource(R.string.back)) } },
                 actions = { actions() },
             )
         },
@@ -261,7 +237,8 @@ private fun MasterSwitch(title: String, description: String, checked: Boolean, t
     Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         ListItem(
             checked = checked,
-            onCheckedChange = onChange,
+            colors = switchRowColors(),
+        onCheckedChange = onChange,
             supportingContent = { Text(description) },
             trailingContent = { Switch(checked = checked, onCheckedChange = null) },
             modifier = Modifier.testTag(tag),
@@ -288,7 +265,7 @@ private fun McpServersPane(viewModel: ChatViewModel, showBack: Boolean, onClose:
 
     PaneScaffold(
         stringResource(R.string.cap_mcp), showBack, onClose, modifier,
-        actions = { TextButton(onClick = { adding = true }, modifier = Modifier.testTag("mcp-add")) { Icon(Icons.Outlined.Add, null); Text(stringResource(R.string.add), Modifier.padding(start = 4.dp)) } },
+        actions = { TextButton(onClick = { adding = true }, modifier = Modifier.testTag("mcp-add")) { Icon(DemoIcons.Add, null); Text(stringResource(R.string.add), Modifier.padding(start = 4.dp)) } },
     ) {
         item {
             MasterSwitch(stringResource(R.string.mcp_use), stringResource(R.string.mcp_empty).takeIf { servers.isEmpty() } ?: stringResource(R.string.cap_enabled_count, servers.count { it.enabled }), settings.mcpEnabled, "mcp-enabled") { on ->
@@ -312,10 +289,10 @@ private fun McpServerCard(viewModel: ChatViewModel, server: McpServerConfig, sta
                 leadingContent = {
                     when {
                         checked && status == null -> LoadingIndicator(Modifier.size(24.dp))
-                        status is McpServerStatus.Connected -> Icon(Icons.Outlined.CheckCircle, null, tint = scheme.primary)
-                        status is McpServerStatus.NeedsSignIn -> Icon(Icons.Outlined.Lock, null, tint = scheme.tertiary)
-                        status is McpServerStatus.Failed -> Icon(Icons.Outlined.ErrorOutline, null, tint = scheme.error)
-                        else -> Icon(Icons.Outlined.Hub, null, tint = scheme.onSurfaceVariant)
+                        status is McpServerStatus.Connected -> Icon(DemoIcons.CheckCircle, null, tint = scheme.primary)
+                        status is McpServerStatus.NeedsSignIn -> Icon(DemoIcons.Lock, null, tint = scheme.tertiary)
+                        status is McpServerStatus.Failed -> Icon(DemoIcons.ErrorOutline, null, tint = scheme.error)
+                        else -> Icon(DemoIcons.Hub, null, tint = scheme.onSurfaceVariant)
                     }
                 },
                 supportingContent = {
@@ -369,13 +346,13 @@ private fun McpServerCard(viewModel: ChatViewModel, server: McpServerConfig, sta
                     }
                 }
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = { viewModel.checkMcp(server) }) { Icon(Icons.Outlined.Refresh, null); Text(stringResource(R.string.mcp_test), Modifier.padding(start = 6.dp)) }
+                    OutlinedButton(onClick = { viewModel.checkMcp(server) }) { Icon(DemoIcons.Refresh, null); Text(stringResource(R.string.mcp_test), Modifier.padding(start = 6.dp)) }
                     if (status is McpServerStatus.NeedsSignIn || server.auth == McpServerConfig.Auth.OAUTH) {
                         FilledTonalButton(onClick = { activity?.let { viewModel.signInMcp(it, server.copy(auth = McpServerConfig.Auth.OAUTH)); viewModel.mcpServers.upsert(server.copy(auth = McpServerConfig.Auth.OAUTH)) } }) {
-                            Icon(Icons.AutoMirrored.Outlined.Login, null); Text(stringResource(R.string.sign_in), Modifier.padding(start = 6.dp))
+                            Icon(DemoIcons.Login, null); Text(stringResource(R.string.sign_in), Modifier.padding(start = 6.dp))
                         }
                     }
-                    TextButton(onClick = { viewModel.removeMcp(server.id) }) { Icon(Icons.Outlined.Delete, null); Text(stringResource(R.string.remove), Modifier.padding(start = 6.dp)) }
+                    TextButton(onClick = { viewModel.removeMcp(server.id) }) { Icon(DemoIcons.Delete, null); Text(stringResource(R.string.remove), Modifier.padding(start = 6.dp)) }
                 }
             }
         }
@@ -391,7 +368,7 @@ private fun AddMcpServerDialog(onDismiss: () -> Unit, onAdd: (McpServerConfig, S
     val valid = url.startsWith("http://") || url.startsWith("https://")
     AlertDialog(
         onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Outlined.Hub, null) },
+        icon = { Icon(DemoIcons.Hub, null) },
         title = { Text(stringResource(R.string.mcp_add)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -434,7 +411,7 @@ private fun SkillsPane(viewModel: ChatViewModel, showBack: Boolean, onClose: () 
     }
     PaneScaffold(
         stringResource(R.string.cap_skills), showBack, onClose, modifier,
-        actions = { TextButton(onClick = { picker.launch(arrayOf("application/zip", "application/octet-stream")) }) { Icon(Icons.Outlined.FileUpload, null); Text(stringResource(R.string.skills_import), Modifier.padding(start = 4.dp)) } },
+        actions = { TextButton(onClick = { picker.launch(arrayOf("application/zip", "application/octet-stream")) }) { Icon(DemoIcons.FileUpload, null); Text(stringResource(R.string.skills_import), Modifier.padding(start = 4.dp)) } },
     ) {
         item {
             MasterSwitch(stringResource(R.string.skills_use), stringResource(R.string.skills_desc), settings.skillsEnabled, "skills-enabled") { on ->
@@ -449,7 +426,7 @@ private fun SkillsPane(viewModel: ChatViewModel, showBack: Boolean, onClose: () 
                 Column(Modifier.animateContentSize()) {
                     ListItem(
                         onClick = { open = !open },
-                        leadingContent = { Icon(Icons.Outlined.AutoStories, null, tint = MaterialTheme.colorScheme.primary) },
+                        leadingContent = { Icon(DemoIcons.AutoStories, null, tint = MaterialTheme.colorScheme.primary) },
                         overlineContent = { Text(stringResource(if (entry.bundled) R.string.skills_bundled else R.string.skills_installed)) },
                         supportingContent = { Text(entry.skill.description, maxLines = if (open) Int.MAX_VALUE else 2, overflow = TextOverflow.Ellipsis) },
                         trailingContent = {
@@ -462,7 +439,7 @@ private fun SkillsPane(viewModel: ChatViewModel, showBack: Boolean, onClose: () 
                     if (open) Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         HorizontalDivider()
                         MarkdownContent(entry.skill.instructions)
-                        if (!entry.bundled) TextButton(onClick = { viewModel.uninstallSkill(entry.skill.name) }) { Icon(Icons.Outlined.Delete, null); Text(stringResource(R.string.remove), Modifier.padding(start = 6.dp)) }
+                        if (!entry.bundled) TextButton(onClick = { viewModel.uninstallSkill(entry.skill.name) }) { Icon(DemoIcons.Delete, null); Text(stringResource(R.string.remove), Modifier.padding(start = 6.dp)) }
                     }
                 }
             }
@@ -497,7 +474,7 @@ private fun AgentsPane(viewModel: ChatViewModel, showBack: Boolean, onClose: () 
             Row(verticalAlignment = Alignment.Bottom) {
                 SectionHeader(stringResource(R.string.agents_local), Modifier.weight(1f))
                 TextButton(onClick = { editing = SubAgentDef(UUID.randomUUID().toString().take(8), "", "", "") }, modifier = Modifier.padding(end = 8.dp).testTag("agents-add-local")) {
-                    Icon(Icons.Outlined.Add, null); Text(stringResource(R.string.add), Modifier.padding(start = 4.dp))
+                    Icon(DemoIcons.Add, null); Text(stringResource(R.string.add), Modifier.padding(start = 4.dp))
                 }
             }
             Text(stringResource(R.string.agents_local_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 16.dp))
@@ -505,7 +482,7 @@ private fun AgentsPane(viewModel: ChatViewModel, showBack: Boolean, onClose: () 
         items(settings.subAgents, key = { it.id }) { def ->
             ListItem(
                 onClick = { editing = def },
-                leadingContent = { Icon(Icons.Outlined.SmartToy, null, tint = MaterialTheme.colorScheme.primary) },
+                leadingContent = { Icon(DemoIcons.SmartToy, null, tint = MaterialTheme.colorScheme.primary) },
                 supportingContent = { Text(def.description, maxLines = 2, overflow = TextOverflow.Ellipsis) },
                 trailingContent = {
                     Switch(checked = def.enabled, onCheckedChange = { on -> viewModel.agents.update { s -> s.copy(subAgents = s.subAgents.map { if (it.id == def.id) it.copy(enabled = on) else it }) } })
@@ -517,7 +494,7 @@ private fun AgentsPane(viewModel: ChatViewModel, showBack: Boolean, onClose: () 
             Row(verticalAlignment = Alignment.Bottom) {
                 SectionHeader(stringResource(R.string.agents_remote), Modifier.weight(1f))
                 TextButton(onClick = { addingRemote = true }, modifier = Modifier.padding(end = 8.dp).testTag("agents-add-remote")) {
-                    Icon(Icons.Outlined.Add, null); Text(stringResource(R.string.add), Modifier.padding(start = 4.dp))
+                    Icon(DemoIcons.Add, null); Text(stringResource(R.string.add), Modifier.padding(start = 4.dp))
                 }
             }
         }
@@ -542,14 +519,14 @@ private fun RemoteAgentCard(viewModel: ChatViewModel, def: RemoteAgentDef) {
             )
         } else {
             ListItem(
-                leadingContent = { if (card == null) LoadingIndicator(Modifier.size(24.dp)) else Icon(Icons.Outlined.ErrorOutline, null, tint = MaterialTheme.colorScheme.error) },
+                leadingContent = { if (card == null) LoadingIndicator(Modifier.size(24.dp)) else Icon(DemoIcons.ErrorOutline, null, tint = MaterialTheme.colorScheme.error) },
                 supportingContent = { card?.exceptionOrNull()?.let { Text(stringResource(R.string.agent_unreachable, it.message ?: it.javaClass.simpleName), maxLines = 2, overflow = TextOverflow.Ellipsis) } },
             ) { Text(def.name.ifBlank { def.url }) }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(def.url, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             Switch(checked = def.enabled, onCheckedChange = { on -> viewModel.agents.update { s -> s.copy(remoteAgents = s.remoteAgents.map { if (it.id == def.id) it.copy(enabled = on) else it }) } })
-            IconButton(onClick = { viewModel.agents.update { s -> s.copy(remoteAgents = s.remoteAgents.filterNot { it.id == def.id }) } }) { Icon(Icons.Outlined.Delete, stringResource(R.string.remove)) }
+            IconButton(onClick = { viewModel.agents.update { s -> s.copy(remoteAgents = s.remoteAgents.filterNot { it.id == def.id }) } }) { Icon(DemoIcons.Delete, stringResource(R.string.remove)) }
         }
     }
 }
@@ -563,7 +540,7 @@ private fun SubAgentDialog(viewModel: ChatViewModel, initial: SubAgentDef, onDis
     val nameOk = Regex("^[A-Za-z0-9_-]{1,64}$").matches(draft.name)
     AlertDialog(
         onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Outlined.SmartToy, null) },
+        icon = { Icon(DemoIcons.SmartToy, null) },
         title = { Text(stringResource(R.string.agents_add_local)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -574,7 +551,7 @@ private fun SubAgentDialog(viewModel: ChatViewModel, initial: SubAgentDef, onDis
                     OutlinedTextField(
                         value = profiles.firstOrNull { it.id == draft.providerId }?.name ?: stringResource(R.string.agent_same_model),
                         onValueChange = {}, readOnly = true, label = { Text(stringResource(R.string.agent_model)) },
-                        trailingIcon = { Icon(Icons.Outlined.ArrowDropDown, null) },
+                        trailingIcon = { Icon(DemoIcons.ArrowDropDown, null) },
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Box(Modifier.matchParentSize().clickable(role = Role.DropdownList) { menu = true })
@@ -604,7 +581,7 @@ private fun RemoteAgentDialog(onDismiss: () -> Unit, onAdd: (String) -> Unit) {
     val valid = url.startsWith("http://") || url.startsWith("https://")
     AlertDialog(
         onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Outlined.Hub, null) },
+        icon = { Icon(DemoIcons.Hub, null) },
         title = { Text(stringResource(R.string.agents_add_remote)) },
         text = { OutlinedTextField(url, { url = it.trim() }, label = { Text(stringResource(R.string.agent_url)) }, singleLine = true, isError = !valid, modifier = Modifier.fillMaxWidth().testTag("remote-agent-url")) },
         confirmButton = { TextButton(enabled = valid, onClick = { onAdd(url) }) { Text(stringResource(R.string.add)) } },

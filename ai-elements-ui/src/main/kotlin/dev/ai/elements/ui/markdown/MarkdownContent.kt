@@ -74,9 +74,25 @@ fun MarkdownContent(
     }
 }
 
-/** Preprocess (citations, LaTeX) and split Markdown into top-level blocks. */
+/** Preprocess (citations, LaTeX, short inline code) and split Markdown into top-level blocks. */
 internal fun markdownBlocks(markdown: String, citations: List<SourcePart>): List<String> =
-    MarkdownStreaming.split(LatexPreprocessor.process(CitationPreprocessor.process(markdown, citations)))
+    MarkdownStreaming.split(keepShortCodeTogether(LatexPreprocessor.process(CitationPreprocessor.process(markdown, citations))))
+
+private val FENCE = Regex("^\\s*(```|~~~)")
+private val SHORT_CODE = Regex("`([^`\\n]{1,24})`")
+
+/**
+ * Short inline code (`` `inline code` ``, an identifier with a space) wraps as one piece: its
+ * spaces become non-breaking, so a code chip never splits across lines. Fenced blocks are untouched.
+ */
+internal fun keepShortCodeTogether(markdown: String): String {
+    if ('`' !in markdown) return markdown
+    var fenced = false
+    return markdown.lineSequence().joinToString("\n") { line ->
+        if (FENCE.containsMatchIn(line)) { fenced = !fenced; return@joinToString line }
+        if (fenced) line else SHORT_CODE.replace(line) { m -> "`" + m.groupValues[1].replace(' ', '\u00A0') + "`" }
+    }
+}
 
 /** Routes `aicite:` links to a sheet of the cited sources; other links open the browser. */
 @Composable
