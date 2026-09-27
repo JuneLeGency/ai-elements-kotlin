@@ -32,6 +32,9 @@ import androidx.compose.ui.unit.dp
  * @param fontFamily applied to every Material type style (null keeps the platform font).
  *   Glyphs it lacks (e.g. CJK in a Latin font) fall back to the system fonts.
  * @param codeFontFamily code blocks, inline code and tool arguments.
+ * @param colorScheme your brand's colors; overrides [dynamicColor] and [palette].
+ * @param typography your type scale; overrides [fontFamily].
+ * @param shapes your shapes; the Material 3 Expressive set by default.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -42,20 +45,23 @@ fun AiElementsTheme(
     contrast: AiContrast = AiContrast.STANDARD,
     fontFamily: FontFamily? = null,
     codeFontFamily: FontFamily = FontFamily.Monospace,
+    colorScheme: ColorScheme? = null,
+    typography: Typography? = null,
+    shapes: Shapes = ExpressiveShapes,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val colorScheme = when {
+    val scheme = colorScheme ?: when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         else -> aiColorScheme(palette, darkTheme, contrast)
     }
-    val typography = remember(fontFamily) { fontFamily?.let { Typography().withFontFamily(it) } ?: Typography() }
+    val type = typography ?: remember(fontFamily) { fontFamily?.let { Typography().withFontFamily(it) } ?: Typography() }
     MaterialExpressiveTheme(
-        colorScheme = colorScheme,
+        colorScheme = scheme,
         motionScheme = MotionScheme.expressive(),
-        shapes = ExpressiveShapes,
-        typography = typography,
+        shapes = shapes,
+        typography = type,
     ) {
         CompositionLocalProvider(LocalCodeFontFamily provides codeFontFamily, content = content)
     }

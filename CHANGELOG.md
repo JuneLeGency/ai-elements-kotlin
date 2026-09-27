@@ -20,6 +20,7 @@
   `Agent` descriptions and skill lists (A2A cards).
 - `ai-elements-koog`: a JetBrains Koog agent as a `ChatBackend` (and as an `AgentHarness` model
   binding), with AI Elements tools as Koog tools; approvals and progress work as with the built-in loop.
+- `AiElementsTheme` takes a brand `colorScheme`, `typography` and `shapes`.
 - Protocol-independent elements: `ToolPart.kind` (`ToolKind.Function` / `Delegation` / `Skill`) and
   `ToolPart.source` replace tool-name checks and `"title · server"` labels in the UI; protocols map
   onto them in `core` (`ToolConventions`, AG-UI `SUBAGENT_*`), on-device tools declare them

@@ -147,6 +147,9 @@ CompositionLocalProvider(
 }
 ```
 
+Bring your brand with `AiElementsTheme(colorScheme = …, typography = …, shapes = …)`; links open
+through Compose's `LocalUriHandler`, so provide your own to route them in-app.
+
 On-device tools say what they are (`AgentTool.kindFor` → `ToolKind.Delegation` / `Skill`,
 `AgentTool.source` for a provider chip), so custom tools get the same rendering as built-in ones.
 

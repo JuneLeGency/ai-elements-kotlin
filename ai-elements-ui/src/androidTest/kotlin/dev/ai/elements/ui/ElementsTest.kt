@@ -84,6 +84,16 @@ class ElementsTest {
         )
     }
 
+    @Test fun theme_acceptsABrandColorScheme() {
+        val brand = androidx.compose.material3.lightColorScheme(primary = androidx.compose.ui.graphics.Color(0xFF00897B))
+        var primary: androidx.compose.ui.graphics.Color? = null
+        compose.setContent {
+            AiElementsTheme(dynamicColor = true, colorScheme = brand) { primary = androidx.compose.material3.MaterialTheme.colorScheme.primary }
+        }
+        compose.waitForIdle()
+        assertEquals(androidx.compose.ui.graphics.Color(0xFF00897B), primary)
+    }
+
     @Test fun renderers_overrideToolsAndDataAppWide() {
         compose.setContent {
             AiElementsTheme(dynamicColor = false) {
