@@ -11,7 +11,8 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        minSdk = 24
+        // 26: A2UI date and time functions use java.time.
+        minSdk = 26
     }
 
     buildFeatures {
