@@ -1,5 +1,7 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.voice.LocalSpeechOutput
+import dev.ai.elements.ui.voice.speakableText
 import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
@@ -190,6 +192,21 @@ internal fun MessageActions(
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.compactIconButton(),
         ) { Icon(AiIcons.ContentCopy, stringResource(R.string.ai_copy), Modifier.size(AiSize.compactIcon)) }
+        val speech = LocalSpeechOutput.current
+        if (speech != null && speech.isAvailable && message.text.isNotBlank()) {
+            val speaking = speech.speakingId == message.id
+            IconButton(
+                onClick = { if (speaking) speech.stop() else speech.speak(message.id, speakableText(message.text)) },
+                shapes = IconButtonDefaults.shapes(),
+                modifier = Modifier.compactIconButton().testTag("read-aloud"),
+            ) {
+                Icon(
+                    if (speaking) AiIcons.Stop else AiIcons.VolumeUp,
+                    stringResource(if (speaking) R.string.ai_stop_reading else R.string.ai_read_aloud),
+                    Modifier.size(AiSize.compactIcon),
+                )
+            }
+        }
         if (onRegenerate != null) {
             IconButton(
                 onClick = onRegenerate,

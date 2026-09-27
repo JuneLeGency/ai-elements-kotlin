@@ -3,6 +3,7 @@ package dev.ai.elements.core.chat
 import dev.ai.elements.core.model.ChatStatus
 import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.FilePart
+import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.TextPart
@@ -77,13 +78,21 @@ class ChatController(
     private var live: Pair<List<Message>, Message>? = null
     private val pendingApprovals = ConcurrentHashMap<String, CompletableDeferred<ToolDecision>>()
     private val pendingInputs = ConcurrentHashMap<String, CompletableDeferred<InputResponse>>()
+
+    /** Tools (name, source) the user allowed for the rest of this conversation ([ToolDecision.remember]). */
+    private val alwaysAllowed = mutableSetOf<Pair<String, String?>>()
+
+    private fun liveToolPart(id: String): ToolPart? =
+        (live?.second ?: _state.value.messages.lastOrNull())?.parts?.filterIsInstance<ToolPart>()?.firstOrNull { it.id == id }
     private val approver = object : ToolApprover {
         override suspend fun approve(toolCallId: String) = decide(toolCallId).approved
 
         override suspend fun decide(toolCallId: String): ToolDecision {
+            val tool = liveToolPart(toolCallId)?.let { it.name to it.source }
+            if (tool != null && synchronized(alwaysAllowed) { tool in alwaysAllowed }) return ToolDecision(approved = true, remember = true)
             val decision = pendingApprovals.getOrPut(toolCallId) { CompletableDeferred() }
             try {
-                return decision.await()
+                return decision.await().also { if (it.approved && it.remember && tool != null) synchronized(alwaysAllowed) { alwaysAllowed += tool } }
             } finally {
                 pendingApprovals.remove(toolCallId)
             }
@@ -204,6 +213,7 @@ class ChatController(
     /** Replace the conversation (e.g. when switching threads). */
     fun load(messages: List<Message>) {
         stop()
+        synchronized(alwaysAllowed) { alwaysAllowed.clear() }
         _state.value = ChatState(messages = messages)
     }
 

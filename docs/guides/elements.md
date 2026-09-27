@@ -1,8 +1,20 @@
 # Elements
 
-The elements are Compose counterparts of [Vercel AI Elements](https://elements.ai-sdk.dev). All 50
-AI Elements are covered except the web-only `JSXPreview`, which `ai-elements-genui` replaces with a
-native `JsxPreview`. The demo app's **Components** screen shows each one.
+The elements are Compose counterparts of [Vercel AI Elements](https://elements.ai-sdk.dev): every one
+of its 49 components has one. The demo app's **Components** screen shows each.
+
+Where the names differ:
+
+| AI Elements | Here |
+|---|---|
+| `Canvas`, `Node`, `Edge`, `Connection`, `Controls`, `Panel`, `Toolbar` | `WorkflowCanvas` (custom nodes, toolbar and panel slots) |
+| `Image` | `FileImage` (and `FileAttachment` in messages) |
+| `Attachments` | `FileAttachment`, `AttachmentStrip` |
+| `Context` | `ContextUsage` |
+| `Suggestion` | `Suggestions` |
+| `Shimmer` | `ShimmerText` |
+| `JSXPreview` | `JsxPreview` in `ai-elements-genui` |
+| `Question` | `Question`, and the choice lists of `InputRequestCard` when an agent asks |
 
 | Group (package) | Elements |
 |---|---|
@@ -10,7 +22,7 @@ native `JsxPreview`. The demo app's **Components** screen shows each one.
 | Agent structure (`ui.chat`) | `ChainOfThought` · `Plan` · `Task` · `DataPartView` |
 | Workflow (`ui.workflow`) | `WorkflowCanvas` · `agentRunGraph` |
 | Content (`ui.markdown`) | `MarkdownContent` · `CodeBlock` · `MermaidDiagram` · `MathBlock` · attachments |
-| Voice (`ui.voice`) | `Persona` · `SpeechInput` · `AudioPlayer` · `Transcription` · `MicSelector` · `VoiceSelector` |
+| Voice (`ui.voice`) | `VoiceMode` · `Persona` · `SpeechInput` · read aloud (`SpeechOutputState`) · `AudioPlayer` · `Transcription` · `MicSelector` · `VoiceSelector` |
 | Vibe coding (`ui.code`) | `Artifact` · `WebPreview` · `Terminal` · `StackTrace` · `TestResults` · `FileTree` · `Commit` · `SchemaDisplay` · `PackageInfo` · `EnvironmentVariables` · `Sandbox` · `Snippet` |
 
 ## Conversation
@@ -31,6 +43,23 @@ native `JsxPreview`. The demo app's **Components** screen shows each one.
 | `DataPart` | `Plan`, `Task`, A2UI surfaces, MCP Apps views, or your own renderer |
 
 Long conversations stay at the bottom while they stream, unless the user scrolls up.
+
+## Voice
+
+- **Read aloud.** Every reply has a read-aloud action (platform text-to-speech; code, diagrams and
+  math are skipped). `Conversation` creates the engine; provide `LocalSpeechOutput` to share one.
+- **Dictation.** `SpeechInput` in the composer; with `onCancel` it shows the input level with
+  cancel and done while listening.
+- **Voice mode.** With nothing typed, the send button of `Chat` (or `PromptInput(onVoiceMode = …)`)
+  opens `VoiceMode`: a hands-free conversation over the same `ChatController`. It listens, sends what
+  the user said, reads the reply sentence by sentence while it streams, and listens again. Tap the
+  persona to interrupt; mute or end at any time. When the agent asks for approval or an answer it
+  pauses and offers to go back to the chat.
+
+Voice uses the platform speech engines (`SpeechRecognizer`, `TextToSpeech`) and works with every
+backend; no protocol is involved. `ai-elements-ui` declares the package-visibility `<queries>` for
+both services; the app declares `RECORD_AUDIO`. Voice features hide themselves on devices without a
+speech recognizer.
 
 ## Layout
 

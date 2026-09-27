@@ -54,7 +54,8 @@ import java.util.UUID
  * sources), `agent_thought_chunk` → reasoning, `tool_call` / `tool_call_update` → tool calls
  * (`title` as the title, `kind` as the name, `content` — text, diffs, terminals — as the output,
  * `rawInput` as the input), `plan` → the `plan` data part. `session/request_permission` asks
- * [approver]: approve picks the agent's allow-once option, deny its reject-once option (ACP
+ * [approver]: approve picks the agent's allow-once option (allow-always when the user said to
+ * remember), deny its reject-once option (ACP
  * answers carry an option id only, so the UI offers no reason or edits). Stopping the turn sends
  * `session/cancel`.
  */
@@ -115,8 +116,9 @@ class AcpBackend(
         val decision = approver.decide(id)
         mapper.decided(id, decision.approved)
         send(if (decision.approved) ChatEvent.ToolApproved(id) else ChatEvent.ToolDenied(id, decision.reason))
+        val allow = if (decision.remember) listOf(PermissionOptionKind.ALLOW_ALWAYS, PermissionOptionKind.ALLOW_ONCE) else listOf(PermissionOptionKind.ALLOW_ONCE, PermissionOptionKind.ALLOW_ALWAYS)
         val choice = if (decision.approved) {
-            options.firstOrNull { it.kind == PermissionOptionKind.ALLOW_ONCE } ?: options.firstOrNull { it.kind == PermissionOptionKind.ALLOW_ALWAYS }
+            allow.firstNotNullOfOrNull { kind -> options.firstOrNull { it.kind == kind } }
         } else {
             options.firstOrNull { it.kind == PermissionOptionKind.REJECT_ONCE } ?: options.firstOrNull { it.kind == PermissionOptionKind.REJECT_ALWAYS }
         }

@@ -314,6 +314,39 @@ class ElementsTest {
         assertTrue("send button squashed to $send dp", send >= 40f)
     }
 
+    /** An empty composer offers voice mode where send would be; typing brings send back. */
+    @Test fun promptInput_emptyOffersVoiceMode() {
+        var voice = 0
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                var text by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
+                dev.ai.elements.ui.chat.PromptInput(text, { text = it }, {}, {}, false, onVoiceMode = { voice++ })
+            }
+        }
+        compose.onNodeWithTag("voice-mode-button").performClick()
+        assertEquals(1, voice)
+        compose.onNodeWithTag("send-button").assertDoesNotExist()
+        compose.onNodeWithTag("prompt-input").performTextInput("hi")
+        compose.onNodeWithTag("send-button").assertExists()
+        compose.onNodeWithTag("voice-mode-button").assertDoesNotExist()
+    }
+
+    @Test fun confirmation_alwaysAllow_remembersForTheConversation() {
+        val decisions = mutableListOf<ToolDecision>()
+        val part = ToolPart("t1", "save_note", ToolState.APPROVAL_REQUESTED, "{}")
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                Conversation(
+                    ChatState(messages = listOf(Message("a1", Role.ASSISTANT, listOf(part)))),
+                    onToolApproval = { _, _ -> },
+                    onToolDecision = { _, decision -> decisions += decision },
+                )
+            }
+        }
+        compose.onNodeWithTag("approve-always", useUnmergedTree = true).performClick()
+        assertEquals(listOf(ToolDecision(true, remember = true)), decisions)
+    }
+
     @Test fun checkpoint_restoresOnlyAfterConfirming() {
         var restored = 0
         compose.setContent { AiElementsTheme(dynamicColor = false) { Checkpoint(onRestore = { restored++ }) } }

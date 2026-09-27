@@ -166,6 +166,18 @@
     <string name="ai_skill">スキル</string>
     <string name="ai_tool_via">%1$s 経由</string>
     <string name="ai_skills_count">スキル（%1$d）</string>
+    <string name="ai_read_aloud">読み上げ</string>
+    <string name="ai_stop_reading">読み上げを停止</string>
+    <string name="ai_voice_mode">音声モード</string>
+    <string name="ai_voice_listening">聞いています…</string>
+    <string name="ai_voice_thinking">考えています…</string>
+    <string name="ai_voice_tap_to_interrupt">タップで中断</string>
+    <string name="ai_voice_muted">マイクはオフです</string>
+    <string name="ai_voice_needs_you">エージェントが承認か回答を待っています</string>
+    <string name="ai_voice_open_chat">チャットに戻る</string>
+    <string name="ai_voice_mute">ミュート</string>
+    <string name="ai_voice_unmute">ミュート解除</string>
+    <string name="ai_voice_end">音声モードを終了</string>
     <string name="ai_input_other">その他…</string>
     <string name="ai_input_decline">断る</string>
     <string name="ai_input_open_link">リンクを開く</string>
@@ -178,6 +190,7 @@
     <string name="ai_input_invalid_email">メールアドレスを入力してください</string>
     <string name="ai_deny_with_reason">理由を添えて拒否</string>
     <string name="ai_deny_reason">理由（エージェントに伝わります）</string>
+    <string name="ai_approve_always">常に許可</string>
     <string name="ai_edit_and_approve">編集して許可</string>
     <string name="ai_edit_arguments">引数（JSON）</string>
     <string name="ai_invalid_json">JSON オブジェクトではありません</string>

@@ -69,6 +69,14 @@ class AcpRecordedTest {
         assertEquals("allow_once", selectedOption(sent))
     }
 
+    @Test fun approval_rememberedPicksAllowAlways() = runBlocking {
+        val (_, sent) = replay("note", approver = object : ToolApprover {
+            override suspend fun approve(toolCallId: String) = true
+            override suspend fun decide(toolCallId: String) = ToolDecision(true, remember = true)
+        })
+        assertEquals("allow_always", selectedOption(sent))
+    }
+
     @Test fun approval_deniedPicksRejectOnceAndStaysDenied() = runBlocking {
         val (events, sent) = replay("note-denied", approver = object : ToolApprover {
             override suspend fun approve(toolCallId: String) = false

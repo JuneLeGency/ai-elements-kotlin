@@ -172,6 +172,18 @@
     <string name="ai_skill">Skill</string>
     <string name="ai_tool_via">via %1$s</string>
     <string name="ai_skills_count">Skills (%1$d)</string>
+    <string name="ai_read_aloud">Read aloud</string>
+    <string name="ai_stop_reading">Stop reading</string>
+    <string name="ai_voice_mode">Voice mode</string>
+    <string name="ai_voice_listening">Listening…</string>
+    <string name="ai_voice_thinking">Thinking…</string>
+    <string name="ai_voice_tap_to_interrupt">Tap to interrupt</string>
+    <string name="ai_voice_muted">Microphone off</string>
+    <string name="ai_voice_needs_you">The agent needs your approval or an answer</string>
+    <string name="ai_voice_open_chat">Open the chat</string>
+    <string name="ai_voice_mute">Mute</string>
+    <string name="ai_voice_unmute">Unmute</string>
+    <string name="ai_voice_end">End voice mode</string>
     <string name="ai_input_other">Other…</string>
     <string name="ai_input_decline">Decline</string>
     <string name="ai_input_open_link">Open link</string>
@@ -184,6 +196,7 @@
     <string name="ai_input_invalid_email">Enter an email address</string>
     <string name="ai_deny_with_reason">Deny with a reason</string>
     <string name="ai_deny_reason">Why? (the agent sees this)</string>
+    <string name="ai_approve_always">Always allow</string>
     <string name="ai_edit_and_approve">Edit and approve</string>
     <string name="ai_edit_arguments">Arguments (JSON)</string>
     <string name="ai_invalid_json">Not a JSON object</string>

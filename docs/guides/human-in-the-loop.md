@@ -37,7 +37,9 @@ alternative for the user's own answer. The form shows such choices as a list, li
 `Chat` wires it all:
 
 - An approval shows inside the tool call, with approve and deny, plus **deny with a reason** and
-  **edit and approve** when the protocol can carry them back. The backend declares what it
+  **edit and approve** when the protocol can carry them back, and **always allow**: the tool is
+  approved for the rest of the conversation without asking (`ToolDecision.remember`, kept by
+  `ChatController`; an ACP agent receives its own `allow_always` option). The backend declares what it
   supports (`ApprovalAnswers` on the approval request), so the UI never offers an answer the agent
   would not receive.
 - A question shows as an `InputRequestCard`: a form built from the request's JSON Schema (text,

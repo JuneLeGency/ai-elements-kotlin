@@ -108,4 +108,40 @@ class HumanInTheLoopTest {
         assertTrue(result, result.endsWith("Reason: Not that note"))
         assertEquals("Not that note", events.filterIsInstance<ChatEvent.ToolDenied>().single().reason)
     }
+
+    /** A backend that asks approval for two calls of the same tool, then one of another. */
+    private val twoNotesAndAList = { human: ToolApprover ->
+        ChatBackend {
+            flow {
+                listOf("c1" to "save_note", "c2" to "save_note", "c3" to "delete_list").forEach { (id, name) ->
+                    emit(ChatEvent.ToolInputAvailable(id, name, "{}"))
+                    emit(ChatEvent.ToolApprovalRequest(id))
+                    val decision = human.decide(id)
+                    emit(if (decision.approved) ChatEvent.ToolApproved(id) else ChatEvent.ToolDenied(id))
+                }
+                emit(ChatEvent.Finish)
+            }
+        }
+    }
+
+    @Test
+    fun alwaysAllow_skipsTheSameToolForTheConversation() = runTest(StandardTestDispatcher()) {
+        val chat = ChatController(twoNotesAndAList, backgroundScope)
+        chat.send("go")
+        runCurrent()
+        chat.respondToApproval("c1", ToolDecision(true, remember = true))
+        runCurrent()
+        // c2 (same tool) was approved without asking; c3 (another tool) still asks.
+        fun state(id: String) = chat.state.value.messages.last().parts.filterIsInstance<ToolPart>().single { it.id == id }.state
+        assertEquals(ToolState.INPUT_AVAILABLE, state("c2"))
+        assertEquals(ToolState.APPROVAL_REQUESTED, state("c3"))
+        chat.respondToApproval("c3", true)
+        runCurrent()
+
+        // A new conversation forgets it.
+        chat.load(emptyList())
+        chat.send("again")
+        runCurrent()
+        assertEquals(ToolState.APPROVAL_REQUESTED, state("c1"))
+    }
 }

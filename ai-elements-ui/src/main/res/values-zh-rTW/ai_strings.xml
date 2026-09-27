@@ -166,6 +166,18 @@
     <string name="ai_skill">技能</string>
     <string name="ai_tool_via">來自 %1$s</string>
     <string name="ai_skills_count">技能（%1$d）</string>
+    <string name="ai_read_aloud">朗讀</string>
+    <string name="ai_stop_reading">停止朗讀</string>
+    <string name="ai_voice_mode">語音模式</string>
+    <string name="ai_voice_listening">正在聆聽…</string>
+    <string name="ai_voice_thinking">思考中…</string>
+    <string name="ai_voice_tap_to_interrupt">輕觸即可打斷</string>
+    <string name="ai_voice_muted">麥克風已關閉</string>
+    <string name="ai_voice_needs_you">代理程式需要你核准或回答</string>
+    <string name="ai_voice_open_chat">回到對話</string>
+    <string name="ai_voice_mute">靜音</string>
+    <string name="ai_voice_unmute">取消靜音</string>
+    <string name="ai_voice_end">結束語音模式</string>
     <string name="ai_input_other">其他…</string>
     <string name="ai_input_decline">拒絕</string>
     <string name="ai_input_open_link">開啟連結</string>
@@ -178,6 +190,7 @@
     <string name="ai_input_invalid_email">請輸入電子郵件地址</string>
     <string name="ai_deny_with_reason">拒絕並說明理由</string>
     <string name="ai_deny_reason">理由（會告訴 agent）</string>
+    <string name="ai_approve_always">一律允許</string>
     <string name="ai_edit_and_approve">修改後允許</string>
     <string name="ai_edit_arguments">參數（JSON）</string>
     <string name="ai_invalid_json">不是 JSON 物件</string>

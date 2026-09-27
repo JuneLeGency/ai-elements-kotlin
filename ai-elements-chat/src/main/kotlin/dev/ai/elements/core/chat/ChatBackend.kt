@@ -109,11 +109,14 @@ fun interface ToolApprover {
  *
  * @property reason why they denied (or a note on approving); passed to the agent.
  * @property editedInput arguments the user changed before approving; they replace the proposed ones.
+ * @property remember approve this tool for the rest of the conversation without asking again
+ *   ([ChatController] remembers it; ACP answers with the agent's `allow_always` option).
  */
 data class ToolDecision(
     val approved: Boolean,
     val reason: String? = null,
     val editedInput: kotlinx.serialization.json.JsonObject? = null,
+    val remember: Boolean = false,
 )
 
 /**

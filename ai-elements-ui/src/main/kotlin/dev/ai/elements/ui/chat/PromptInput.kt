@@ -85,6 +85,7 @@ fun PromptInput(
     onAddAttachment: (() -> Unit)? = null,
     onRemoveAttachment: (FilePart) -> Unit = {},
     allowQueue: Boolean = false,
+    onVoiceMode: (() -> Unit)? = null,
     toolbar: @Composable RowScope.() -> Unit = {},
 ) {
     val hasInput = value.isNotBlank() || attachments.isNotEmpty()
@@ -133,7 +134,9 @@ fun PromptInput(
                 )
             }
             val submit = @Composable {
-                SubmitButton(
+                // Nothing typed: the send button starts a voice conversation, as assistant apps do.
+                if (mode == SubmitMode.SEND && !hasInput && onVoiceMode != null) VoiceModeButton(onVoiceMode)
+                else SubmitButton(
                     mode = mode,
                     enabled = mode == SubmitMode.STOP || hasInput,
                     onClick = if (mode == SubmitMode.STOP) onStop else onSubmit,
@@ -179,6 +182,19 @@ fun PromptInput(
             }
         }
     }
+}
+
+@Composable
+private fun VoiceModeButton(onClick: () -> Unit) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primary)
+            .clickable(role = Role.Button, onClick = onClick)
+            .testTag("voice-mode-button"),
+    ) { Icon(AiIcons.GraphicEq, stringResource(R.string.ai_voice_mode), tint = MaterialTheme.colorScheme.onPrimary) }
 }
 
 /** Below this the composer drops its toolbar row rather than squash it. */

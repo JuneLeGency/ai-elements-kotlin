@@ -50,6 +50,9 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
     val runtime = demo.runtime
 
     private val chat = ChatController(backend = runtime::backend, scope = viewModelScope)
+
+    /** For voice mode, which drives the conversation itself (persistence follows its state). */
+    val controller: ChatController get() = chat
     val chatState: StateFlow<ChatState> = chat.state
 
     private val _conversationId = MutableStateFlow(newId())

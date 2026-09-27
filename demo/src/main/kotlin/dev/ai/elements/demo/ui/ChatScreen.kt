@@ -1,5 +1,9 @@
 package dev.ai.elements.demo.ui
 
+import dev.ai.elements.ui.voice.VoiceMode
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Dialog
+import android.speech.SpeechRecognizer
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -243,6 +247,14 @@ private fun ChatPane(
     val provider = profiles.firstOrNull { it.id == selectedId } ?: profiles.first()
     var input by rememberSaveable { mutableStateOf("") }
     var dictationBase by remember { mutableStateOf<String?>(null) }
+    val appContext = LocalContext.current
+    var talking by rememberSaveable { mutableStateOf(false) }
+    val canTalk = remember { SpeechRecognizer.isRecognitionAvailable(appContext) }
+    if (talking) {
+        Dialog(onDismissRequest = { talking = false }, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
+            VoiceMode(viewModel.controller, onClose = { talking = false })
+        }
+    }
     var attachments by remember { mutableStateOf<List<FilePart>>(emptyList()) }
     var providerSheet by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -336,12 +348,17 @@ private fun ChatPane(
                     pickImages.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 },
                 onRemoveAttachment = { removed -> attachments = attachments.filterNot { it.id == removed.id } },
+                onVoiceMode = if (canTalk) ({ talking = true }) else null,
                 toolbar = {
                     // Dictation appends to what's typed; partial results update in place.
                     SpeechInput(onTranscript = { text, isFinal ->
                         val base = dictationBase ?: input.also { dictationBase = it }
                         input = listOf(base, text).filter { it.isNotBlank() }.joinToString(" ")
                         if (isFinal) dictationBase = null
+                    }, onCancel = {
+                        // Cancelled: back to what was typed before dictating.
+                        dictationBase?.let { input = it }
+                        dictationBase = null
                     })
                     ModelChip(viewModel, provider)
                     CapabilitiesButton(viewModel, provider, onManage = onOpenSettings)

@@ -1,5 +1,10 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.voice.VoiceMode
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.platform.LocalContext
+import android.speech.SpeechRecognizer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -39,18 +44,28 @@ fun rememberChat(backend: (ToolApprover) -> ChatBackend): ChatController {
 /**
  * A complete chat screen body: the [Conversation] (streaming Markdown, tools and approvals,
  * sub-agents, plans, branches, checkpoints) above a [PromptInput] with stop and queueing,
- * all wired to [controller]. Wrap it in `AiElementsTheme`; add your own buttons to the
- * input with [toolbar].
+ * all wired to [controller]. With [voiceMode] (and speech recognition on the device), the send
+ * button of an empty input starts a [VoiceMode] conversation. Wrap it in `AiElementsTheme`; add
+ * your own buttons to the input with [toolbar].
  */
 @Composable
 fun Chat(
     controller: ChatController,
     modifier: Modifier = Modifier,
     placeholder: String? = null,
+    voiceMode: Boolean = true,
     toolbar: @Composable RowScope.() -> Unit = {},
 ) {
     val state by controller.state.collectAsStateWithLifecycle()
     var input by rememberSaveable { mutableStateOf("") }
+    var talking by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+    val canTalk = voiceMode && remember { SpeechRecognizer.isRecognitionAvailable(context) }
+    if (talking) {
+        Dialog(onDismissRequest = { talking = false }, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
+            VoiceMode(controller, onClose = { talking = false })
+        }
+    }
     Column(Modifier.background(MaterialTheme.colorScheme.background).then(modifier).fillMaxSize().imePadding()) {
         Conversation(
             state = state,
@@ -64,10 +79,11 @@ fun Chat(
         )
         val submit = { if (controller.send(input)) input = "" }
         val onChange = { text: String -> input = text }
+        val voice = if (canTalk) ({ talking = true }) else null
         if (placeholder != null) {
-            PromptInput(input, onChange, submit, controller::stop, state.isBusy, Modifier.padding(8.dp), placeholder = placeholder, allowQueue = true, toolbar = toolbar)
+            PromptInput(input, onChange, submit, controller::stop, state.isBusy, Modifier.padding(8.dp), placeholder = placeholder, allowQueue = true, onVoiceMode = voice, toolbar = toolbar)
         } else {
-            PromptInput(input, onChange, submit, controller::stop, state.isBusy, Modifier.padding(8.dp), allowQueue = true, toolbar = toolbar)
+            PromptInput(input, onChange, submit, controller::stop, state.isBusy, Modifier.padding(8.dp), allowQueue = true, onVoiceMode = voice, toolbar = toolbar)
         }
     }
 }

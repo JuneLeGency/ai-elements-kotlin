@@ -1,5 +1,7 @@
 package dev.ai.elements.ui.chat
 
+import dev.ai.elements.ui.voice.LocalSpeechOutput
+import dev.ai.elements.ui.voice.rememberSpeechOutputState
 import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
@@ -77,7 +79,11 @@ fun Conversation(
     onToolDecision: ((toolCallId: String, decision: ToolDecision) -> Unit)? = null,
     /** Answers [ChatState.inputRequests], shown as [InputRequestCard]s after the last message. */
     onInputResponse: ((requestId: String, response: InputResponse) -> Unit)? = null,
-) = CompositionLocalProvider(LocalToolDecision provides onToolDecision) {
+) = CompositionLocalProvider(
+    LocalToolDecision provides onToolDecision,
+    // "Read aloud" works without setup; an app can provide its own engine to share it.
+    LocalSpeechOutput provides (LocalSpeechOutput.current ?: rememberSpeechOutputState()),
+) {
     val scope = rememberCoroutineScope()
     val stick = rememberStickToBottomState(listState)
     // The prompt each reply answers, for "Open in…".

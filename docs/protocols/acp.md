@@ -48,12 +48,12 @@ earlier turns as context.
 | `agent_thought_chunk` | reasoning |
 | `tool_call`, `tool_call_update` | a tool call: `title` as its name, `rawInput` as input; `content` (text, diffs as unified diffs, terminals) or `rawOutput` as output; `failed` as an error |
 | `plan` | the Plan element |
-| `session/request_permission` | an approval: approve picks the agent's allow-once option, deny its reject-once option |
+| `session/request_permission` | an approval: approve picks the agent's allow-once option, always allow its allow-always option, deny its reject-once option |
 | stop | `session/cancel` |
 | `PromptResponse` | usage; `refusal`, `max_tokens`, `max_turn_requests` end the turn with an error |
 
-ACP permission answers carry only the chosen option, so the approval offers yes / no, without a
-reason or edited arguments. See [Human in the loop](../guides/human-in-the-loop.md).
+ACP permission answers carry only the chosen option, so the approval offers yes / no and always
+allow, without a reason or edited arguments. See [Human in the loop](../guides/human-in-the-loop.md).
 
 ## Offering files
 

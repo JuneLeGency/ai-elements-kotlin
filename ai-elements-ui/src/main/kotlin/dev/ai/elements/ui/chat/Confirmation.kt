@@ -145,6 +145,8 @@ internal fun ConfirmationContent(
             if (onDecide != null) {
                 if (withReason) TextButton(onClick = { mode = DecisionMode.REASON }, contentPadding = CompactPadding, modifier = Modifier.testTag("deny-with-reason")) { Text(stringResource(R.string.ai_deny_with_reason), maxLines = 1) }
                 if (input != null) TextButton(onClick = { mode = DecisionMode.EDIT }, contentPadding = CompactPadding, modifier = Modifier.testTag("edit-and-approve")) { Text(stringResource(R.string.ai_edit_and_approve), maxLines = 1) }
+                // Allow this tool for the rest of the conversation.
+                TextButton(onClick = { onDecide(ToolDecision(true, remember = true)) }, contentPadding = CompactPadding, modifier = Modifier.testTag("approve-always")) { Text(stringResource(R.string.ai_approve_always), maxLines = 1) }
             }
             if (onApprove != null && onDeny != null) {
                 // Text-only and tight, so all four answers fit one row on a phone.

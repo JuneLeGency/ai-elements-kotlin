@@ -109,6 +109,14 @@
   Questions arrive as standard JSON Schema; `SchemaForm` shows choices with descriptions as a list
   and accepts the user's own answer (a plain string `anyOf` alternative), plus `minItems` / `maxItems`.
 
+- Voice: "Read aloud" on every reply (platform text-to-speech, Markdown read as prose), dictation
+  with input level, cancel and done, and `VoiceMode`, a hands-free conversation over any
+  `ChatController` (listens, streams the reply aloud sentence by sentence, tap to interrupt, mute,
+  pauses for approvals and questions). `Chat` and `PromptInput(onVoiceMode)` open it from an empty
+  composer. `ai-elements-ui` declares the speech services' package-visibility `<queries>`.
+- Approvals: **always allow** a tool for the rest of the conversation (`ToolDecision.remember`);
+  ACP answers with the agent's `allow_always` option.
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

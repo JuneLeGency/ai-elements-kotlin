@@ -1,5 +1,14 @@
 package dev.ai.elements.ui.voice
 
+import androidx.compose.ui.draw.clip
+import androidx.compose.material3.IconButton
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
 import dev.ai.elements.ui.icons.AiIcons
 import android.Manifest
 import android.content.Context
@@ -105,6 +114,13 @@ class SpeechInputState internal constructor(private val context: Context) {
         }
     }
 
+    /** Stop listening and drop what was heard: no final transcript is delivered. */
+    fun cancel() {
+        recognizer?.cancel()
+        phase = SpeechInputPhase.IDLE
+        level = 0f
+    }
+
     internal fun destroy() {
         recognizer?.destroy()
         recognizer = null
@@ -124,8 +140,10 @@ fun rememberSpeechInputState(): SpeechInputState {
 /**
  * Voice input (AI Elements `<SpeechInput>`): tap to dictate, tap again to
  * stop. [onTranscript] receives partial text while speaking and the final
- * text (isFinal = true) at the end. Asks for the microphone permission the
- * first time; the host app must declare `RECORD_AUDIO` in its manifest.
+ * text (isFinal = true) at the end. With [onCancel], dictation shows the input
+ * level with cancel (drop what was heard; restore your text in [onCancel]) and
+ * done. Asks for the microphone permission the first time; the host app must
+ * declare `RECORD_AUDIO` in its manifest.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -134,6 +152,7 @@ fun SpeechInput(
     modifier: Modifier = Modifier,
     state: SpeechInputState = rememberSpeechInputState(),
     locale: Locale? = null,
+    onCancel: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val latest by rememberUpdatedState(onTranscript)
@@ -144,6 +163,23 @@ fun SpeechInput(
         if (granted) state.start(locale) else state.error = deniedText
     }
     val pulse by animateFloatAsState(1f + 0.18f * state.level, label = "mic-level")
+    if (onCancel != null && state.phase == SpeechInputPhase.LISTENING) {
+        // Dictating: how loud it hears you, cancel, and done.
+        Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+            LevelBars(state.level)
+            IconButton(
+                onClick = { state.cancel(); onCancel() },
+                shapes = IconButtonDefaults.shapes(),
+                modifier = Modifier.compactIconButton().testTag("speech-cancel"),
+            ) { Icon(AiIcons.Close, stringResource(R.string.ai_cancel)) }
+            FilledIconButton(
+                onClick = { state.stop() },
+                shapes = IconButtonDefaults.shapes(),
+                modifier = Modifier.compactIconButton().testTag("speech-done"),
+            ) { Icon(AiIcons.Check, stringResource(R.string.ai_stop_voice)) }
+        }
+        return
+    }
     Box(modifier, contentAlignment = Alignment.Center) {
         FilledIconButton(
             onClick = {
@@ -173,3 +209,20 @@ fun SpeechInput(
     }
 }
 
+/** Five bars following the input [level] (0–1), the middle ones taller. */
+@Composable
+private fun LevelBars(level: Float) {
+    val animated by animateFloatAsState(level, label = "level")
+    val color = MaterialTheme.colorScheme.primary
+    Row(horizontalArrangement = Arrangement.spacedBy(3.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 8.dp).height(24.dp)) {
+        listOf(0.5f, 0.8f, 1f, 0.8f, 0.5f).forEach { weight ->
+            Box(
+                Modifier
+                    .width(3.dp)
+                    .height((6 + 18 * animated * weight).dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(color),
+            )
+        }
+    }
+}
