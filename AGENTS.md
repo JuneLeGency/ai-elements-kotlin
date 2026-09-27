@@ -1,7 +1,7 @@
 # AGENTS.md
 
 Instructions for AI coding agents (and humans) working in this repository. The goal and order of work live in
-[docs/GOAL.md](docs/GOAL.md), workstream status in [docs/ROADMAP.md](docs/ROADMAP.md); update it as work lands. These rules are
+[GOAL.md](GOAL.md), workstream status in [docs/project/roadmap.md](docs/project/roadmap.md); update it as work lands. These rules are
 binding; `CONTRIBUTING.md` has the day-to-day conventions.
 
 ## 1. Open protocols only — no private protocols
@@ -17,6 +17,7 @@ crosses a process boundary must follow one of them, exactly as specified:
 | Interactive tool views | **MCP Apps** 2026-01-26 (`io.modelcontextprotocol/ui`: `ui://` views, `ui/*` bridge, sandbox + CSP) | `core/mcp/McpApps.kt` (negotiation, `_meta.ui`), `ai-elements-mcp-apps` (host) |
 | Generative UI | **A2UI** v1.0 (Basic Catalog; AG-UI, A2A and AI SDK bindings) | `ai-elements-genui` (renderer), transports in `core` / `a2a` |
 | Agent ↔ agent | **A2A** 1.0 JSON-RPC binding, with 0.3 compatibility | `ai-elements-a2a` (official `a2a-java-sdk`) |
+| Client ↔ coding agent | **Agent Client Protocol** v1 (stdio; the Kotlin SDK's WebSocket transport until the spec's remote transport lands) | `ai-elements-acp` (official ACP Kotlin SDK) |
 | Skills | **Agent Skills** (`SKILL.md` + YAML frontmatter) | `core/skills/` |
 | Sign-in | OAuth 2.1 / RFC 6749, 7636, 8252, 8628, 8414, 9728, 7591, 8707 | `core/auth/`, `core/mcp/McpAuth.kt` |
 | Model APIs | OpenAI Chat Completions / Responses, Anthropic Messages, Gemini, Ollama | `core/provider/*` |
@@ -32,6 +33,7 @@ Rules:
      `RUN_FINISHED.outcome` interrupts + `RunAgentInput.resume`, `CUSTOM` as a last resort;
    - MCP: `_meta`, tool annotations, `notifications/progress`;
    - A2A: `metadata`, `DataPart`, artifacts.
+   - ACP: `_meta`.
 2. **Follow the current revision** of each spec, and keep the documented fallbacks for
    older peers (MCP legacy sessions, A2A 0.3, AI SDK v4). Read the spec before changing
    a parser; cite the section in the KDoc when behaviour is subtle.
@@ -55,7 +57,7 @@ Rules:
 `ai-elements-chat` (packages `model`, `chat`: models, `ChatEvent`, `ChatBackend`, `ChatController`; no
 networking, no Compose) ← `ai-elements-core` (protocols, providers, agent, MCP, skills, auth) and
 `ai-elements-ui` (Compose elements; depends on `ai-elements-chat` **only**) ← optional artifacts
-(`ai-elements-a2a`, `ai-elements-koog`, `harness/*`). A new protocol is a `ChatBackend` in core or in
+(`ai-elements-a2a`, `ai-elements-acp`, `ai-elements-koog`, `harness/*`). A new protocol is a `ChatBackend` in core or in
 its own artifact; it never needs a UI change. UI formats that need more than the chat model sit on
 top of `ai-elements-ui`: `ai-elements-genui` (A2UI, JSX; ui only) and `ai-elements-mcp-apps` (ui +
 core, since a view talks to its MCP server). They plug in through `AiElementsRenderers`.
@@ -98,4 +100,4 @@ cd server && uv run uvicorn main:app --port 8788      # reference agent/MCP/A2A 
 ```
 
 A change is done when it builds, its tests (including live ones it affects) pass on the
-emulator, and the README/CHANGELOG describe it.
+emulator, and the docs site (`docs/`, code through `DocsSamples.kt`), README and CHANGELOG describe it.

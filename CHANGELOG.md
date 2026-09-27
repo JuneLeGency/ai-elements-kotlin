@@ -98,6 +98,11 @@
   edited arguments, AI SDK a reason, ACP yes / no. Previously AI SDK approvals showed "Edit and
   approve" and dropped the edits.
 
+- Documentation site (`docs/`, Zensical): getting started, every protocol, guides, architecture,
+  development and the API reference (Dokka) under `/api`; `tools/build-docs.sh` builds it, CI
+  uploads it. Its code comes from `DocsSamples.kt`, compiled with the demo (which caught a wrong
+  generative-UI example in the old README). The README is now a short entry point.
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

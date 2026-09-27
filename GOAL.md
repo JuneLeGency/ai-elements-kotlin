@@ -1,7 +1,7 @@
 # GOAL — 持续开发总纲（防跑偏）
 
 本文件是这个项目的**唯一目标来源**。每次动手前先读它，每完成一步回来对照。
-进度与状态记录在 [ROADMAP.md](ROADMAP.md)，硬性规约在 [../AGENTS.md](../AGENTS.md)。
+进度与状态记录在 [docs/project/roadmap.md](docs/project/roadmap.md)，硬性规约在 [AGENTS.md](AGENTS.md)。
 三者冲突时，优先级依次为：AGENTS.md（规约）→ GOAL.md（目标）→ ROADMAP.md（进度）。
 
 ---
@@ -200,9 +200,9 @@ dev.ai.elements.core
 
 ## 9. 可直接用于 `/goal` 的摘要
 
-> 按 docs/GOAL.md 推进：打造最优秀的开源 Kotlin Compose AI Elements / Agent 库和 Demo，覆盖前后端体验、支持独立前端、开发者便捷接入、分包合理。只用公开协议
+> 按 GOAL.md 推进：打造最优秀的开源 Kotlin Compose AI Elements / Agent 库和 Demo，覆盖前后端体验、支持独立前端、开发者便捷接入、分包合理。只用公开协议
 > （AI SDK 6 / AG-UI 1.0 / MCP 2026-07-28 / A2A 1.0 / Agent Skills），先查生态、用官方 SDK、不造轮子；
 > 服务端基于 Pydantic AI + Harness 最新版，端侧能力与 Harness 同构；支持「纯前端」（类 Codex/Claude App）和
 > 「内置 Kotlin Harness」（独立 group，多个 artifact，覆盖 OpenMinis 能力，重新实现）两种形态；
 > 合理的模块和包分层；Subagent 等组件补齐，UI 精致；每项都要在模拟器和平板上用真实链路验证，
-> 并在 docs/ROADMAP.md 记录进度与决策。
+> 并在 docs/project/roadmap.md 记录进度与决策。

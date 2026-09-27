@@ -1,7 +1,7 @@
 # Roadmap and workstreams
 
 The goals, decisions and status of each workstream, kept current as work lands.
-The goal and the order of work: [GOAL.md](GOAL.md). Rules for all of them: [AGENTS.md](../AGENTS.md). Open protocols only, official SDKs over hand-written code, and every
+The goal and the order of work: [GOAL.md](https://github.com/JuneLeGency/ai-elements-kotlin/blob/main/GOAL.md). Rules for all of them: [AGENTS.md](https://github.com/JuneLeGency/ai-elements-kotlin/blob/main/AGENTS.md). Open protocols only, official SDKs over hand-written code, and every
 protocol change is verified against a real implementation.
 
 Status: ✅ done and verified · 🟡 in progress · ⬜ planned
@@ -26,6 +26,7 @@ UI = this library.
 | `ai-elements-core` | Chat model, `ChatController`, protocol clients (AI SDK, AG-UI, MCP), model APIs, agent loop, capabilities (`SubAgents`, `Skills`), OAuth | kotlinx, OkHttp |
 | `ai-elements-ui` | Compose elements, theme | core |
 | `ai-elements-a2a` | A2A through the official `a2a-java-sdk` (optional: protobuf, Gson, desugaring) | core |
+| `ai-elements-acp` | Agent Client Protocol through the official ACP Kotlin SDK (optional: Ktor, kotlinx-io) | core |
 | `harness/*` (group `io.github.junelegency.harness`) | The in-app agent harness, one artifact per capability (see W2b) | core |
 | `ai-elements-koog` | Koog agents streaming into the UI; capabilities as Koog tools | core |
 | `ai-elements-mermaid-native` | Mermaid via Compose Canvas (optional) | ui |
@@ -41,6 +42,7 @@ UI = this library.
 | ✅ decoding on the official `com.ag-ui.community:kotlin-core` types. ⬜ upstream PR for `SUBAGENT_*` / `ACTIVITY_*` and the kotlinx-datetime 0.7 fix (#2772) | ag-ui Kotlin SDK | ⬜ |
 | MCP 2026-07-28 stateless + legacy session fallback, `Mcp-Method` / `Mcp-Name` / `x-mcp-header`, progress, OAuth discovery (RFC 9728 / 8414 / 7591 / 8707) | hand-written (official Kotlin SDK stops at 2025-11-25); switch when it ships 2026-07-28 | ✅ live vs official `mcp` 2.2 (stateless) and `mcp` 1.x (legacy fallback) + unit tests; OAuth ✅ live against the official `mcp` SDK OAuth server (`server/mcp_auth_server.py`: 401 → RFC 9728 → RFC 8414 → RFC 7591 → code + PKCE S256 + RFC 8707 → token → call → refresh) |
 | A2A 1.0 (0.3 compatible) as provider and as sub-agent | official `a2a-java-sdk` + its Android HTTP client | ✅ live 3/3 against the official Python `a2a-sdk` |
+| Agent Client Protocol v1 as provider: sessions per conversation (`session/load`), updates, permissions, `session/cancel`, plans, client file system | official ACP Kotlin SDK 0.30 (stdio; SDK WebSocket transport until the spec's Streamable HTTP lands) | ✅ fixtures recorded with the official ACP Python SDK client (`AcpRecordedTest` 5/5), live stdio + WebSocket vs the Pydantic AI Harness ACP adapter (`LiveAcpTest` 2/2), demo E2E (`acp_planThenPermission_inOneSession`) |
 
 ### W1b · Human in the loop
 
@@ -51,6 +53,7 @@ One neutral model (`ToolApprover.decide` / `input`, `ToolDecision`, `InputReques
 | Item | Spec | Status |
 |---|---|---|
 | Approve / deny tool calls | AI SDK 6 tool approval, AG-UI interrupts, on-device `requiresApproval`, MCP apps | ✅ (since W1) |
+| Approvals offer only what the protocol carries back (`ApprovalAnswers`) | AI SDK: reason; ACP: yes / no; AG-UI and on-device: reason + edits | ✅ |
 | Deny with a reason, edit arguments before approving | AG-UI approve-with-edits resume payload `{approved, editedArgs, reason}` (as Pydantic AI advertises it); AI SDK 6 `approval.reason`; on-device loop | ✅ fixtures (`RecordedProtocolTest`), unit (`HumanInTheLoopTest`), UI (`ElementsTest`), E2E on the reference server (`agUi_interrupt_editArgumentsBeforeApproving`, `aiSdk_approval_denyWithAReason`) |
 | Agent asks the user (form from a JSON Schema, URL, confirmation) | AG-UI interrupts with `responseSchema` (resume `resolved` + payload / `cancelled`, `expiresAt`) | ✅ fixtures from the official `ag_ui` encoder |
 | MCP elicitation (form and URL modes) | 2026-07-28 `InputRequiredResult` (SEP-2322: `inputResponses` + `requestState`, up to 10 rounds); 2025-xx `elicitation/create` on the session stream | ✅ fixtures + live on both eras (official `mcp` 2.x and 1.x SDKs); E2E: on-device agent → MCP `book_table`, edited approval, then the elicitation form |
@@ -150,6 +153,7 @@ The demo is a showcase of both modes, switchable per conversation:
 |---|---|
 | Review module and package layering: core packages by concern (`chat`, `protocol.aisdk`, `protocol.agui`, `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config`) | ✅ 98 unit tests + 11 live tests green after the move |
 | README, CHANGELOG, NOTICE (a2a-java-sdk, kotlin-json-patch, proot) | ✅ |
+| Documentation site: Zensical (`zensical.toml`, `docs/`), code from compiled `DocsSamples.kt` sections, Dokka API under `/api`, screenshots from `ScreenshotMatrixTest`; built in CI | ✅ builds locally and in CI; ⬜ publishing (GitHub Pages) once the repository is public |
 | API reference and CI | ✅ Dokka 2.2 over every published module (`./gradlew :dokkaGenerate`); CI: unit tests, lint, publish, Dokka, emulator E2E (x86_64, now with a bundled x86_64 PRoot) |
 | Public API tracking (API review, GOAL W6) | ⬜ blocked by tooling: Kotlin 2.4 `abiValidation()` finds no compiled classes under AGP 9 built-in Kotlin ("provider has no value"), and binary-compatibility-validator 0.18.2 needs the `kotlin-android` plugin AGP 9 no longer uses. Adopt the official one once it supports AGP 9 built-in Kotlin; no hand-rolled checker |
 | One-line integration and samples | ✅ `Chat(controller)` / `rememberChat(backend)` (component test); `samples/pure-client` (verified on emulator against the AG-UI server) and `samples/in-app-agent` |
@@ -171,3 +175,5 @@ The demo is a showcase of both modes, switchable per conversation:
 | 2026-09-27 | OpenMinis (GPL-3.0): ideas only, no code; sandbox uses upstream proot as a separate process | Licence compatibility with Apache-2.0 |
 | 2026-09-27 | In-app harness is its own Maven group `io.github.junelegency.harness`, one artifact per capability, covering OpenMinis' capability set | User requirement; apps pick only what they need |
 | 2026-09-27 | AG-UI: official `kotlin-core` 0.4.1 typed events; 1.0 gaps (SUBAGENT_*, subagentRunId, RUN_FINISHED.usage / pendingToolCallIds, array tool results) read from raw JSON until upstream | Official SDK first |
+| 2026-09-28 | ACP through the official Kotlin SDK in `ai-elements-acp`; server via Pydantic AI Harness's ACP adapter | Official SDKs; ACP defines only stdio, so remote agents use the SDK's WebSocket transport and are documented as such |
+| 2026-09-28 | Docs site on Zensical (successor of Material for MkDocs, which is in maintenance until 2027-05) with snippets from compiled sources | Current best practice; docs cannot drift from the API |

@@ -23,7 +23,7 @@ import org.junit.runner.RunWith
 import java.io.File
 
 /**
- * The UI review matrix of docs/GOAL.md (W4): the same conversation (offline provider: Markdown,
+ * The UI review matrix of GOAL.md (W4): the same conversation (offline provider: Markdown,
  * a tool call, a plan, Mermaid, code) in light and dark, in every shipped language. Screenshots
  * go to the app's external files dir (`screens/<size>-<theme>-<lang>.png`); run it once per
  * screen size (e.g. `adb shell wm size 2560x1600` for a tablet). Opt-in: `-e screenshots true`.

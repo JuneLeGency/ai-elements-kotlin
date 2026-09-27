@@ -10,5 +10,9 @@ Thanks for helping! Read [AGENTS.md](AGENTS.md) first (open protocols only, no p
 - **Strings** are resources with an `ai_` prefix in `ai-elements-ui`, translated into all shipped
   languages (`values`, `values-zh-rCN`, `values-zh-rTW`, `values-ja`).
 - **Public API** changes need a CHANGELOG entry; keep defaults source-compatible where possible.
-- **Protocol changes** come with a recorded fixture test in `ai-elements-core`.
+- **Protocol changes** come with a fixture test recorded from a real implementation (`server/record_fixtures.py`), and a live test when the reference server can exercise them.
+- **Icons** are Material Symbols Rounded: use `AiIcons.X` and run `python3 tools/generate-icons.py`.
+- **Documentation** lives in `docs/` (the site, `uvx zensical serve`); its code comes from `demo/src/main/kotlin/…/samples/DocsSamples.kt` sections, compiled with the demo. Update the page that describes what you change.
 - **Secrets** never appear in logs, exceptions or test output.
+
+More detail: [docs/develop/contributing.md](docs/develop/contributing.md) and [docs/develop/testing.md](docs/develop/testing.md).
