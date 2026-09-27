@@ -111,6 +111,7 @@ class AgentFlowTest {
     @Test
     fun realModel_ollamaNative_runsOnDeviceAgentLoop() {
         assumeTrue("Ollama not reachable at $ollama", reachable("$ollama/api/tags"))
+        assumeTrue("qwen3:4b is not pulled on $ollama", fetch("$ollama/api/tags").contains("\"qwen3:4b\""))
         launchWith(ProviderProfile("live-ollama", "Live Ollama", ProviderKind.OLLAMA, ollama, "qwen3:4b"))
         send("Use the calculate tool to compute 1234 * 5678.")
         awaitTurnEnd(240_000)
@@ -124,12 +125,19 @@ class AgentFlowTest {
         launchWith(ProviderProfile("live-agui", "Live AG-UI", ProviderKind.AG_UI, agentServer))
         send("Use the calculate tool to compute 1234 * 5678.")
         awaitTurnEnd(240_000)
-        scrollTo(hasTestTag("tool-calculate"))
+        // A real model calls `calculate`; the server's offline scripted model calls the clock.
+        scrollTo(hasTestTag("tool-calculate") or hasTestTag("tool-get_current_time"))
     }
 
     /** The Confirmation sits inside the clickable tool card, whose semantics merge it. */
     private fun awaitConfirmation() = compose.waitUntil(10_000) {
         compose.onAllNodesWithTag("confirmation", useUnmergedTree = true).fetchSemanticsNodes().size == 1
+    }
+
+    private fun fetch(url: String): String {
+        var body = ""
+        Thread { body = runCatching { URL(url).readText() }.getOrDefault("") }.apply { start(); join(5_000) }
+        return body
     }
 
     private fun reachable(url: String): Boolean {
