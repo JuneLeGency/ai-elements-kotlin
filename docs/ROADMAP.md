@@ -112,16 +112,17 @@ The demo is a showcase of both modes, switchable per conversation:
 |---|---|
 | Backend picker: in-app harness · AI SDK server · AG-UI server · A2A agent · direct model API | ✅ provider kinds incl. A2A; remote servers get device-only tools, the in-app harness gets skills + sub-agents |
 | Settings: MCP servers (add, test, tools, approval policy, OAuth sign-in), Skills (bundled + zip import), Agents (sub-agents, remote A2A agents) | ✅ verified on emulator (MCP 2026-07-28 connect, 5 tools; live A2A card); MCP OAuth sign-in untested against a real OAuth server |
-| Composer sheet to toggle MCP servers / skills / agents per chat | ⬜ |
+| Composer sheet to toggle MCP servers / skills / agents per chat | ✅ `CapabilitiesSheet` (composer button, badge count) |
 | Bundled skills from `/skills` (shared with the server) | ✅ `bundleSkills` Gradle task |
-| E2E on emulator and Xiaomi Pad: every capability over each protocol | 🟡 CapabilitiesFlowTest 4/4 on emulator (AG-UI delegation + interrupt approval, AI SDK skill + plan, A2A); Xiaomi Pad and in-app harness with a real model pending |
+| E2E on emulator and Xiaomi Pad: every capability over each protocol | 🟡 emulator: CapabilitiesFlowTest 4/4 (AG-UI delegation + interrupt approval, AI SDK skill + plan, A2A), AgentFlowTest, SandboxTest, BrowserTest, DeviceToolsTest, SpeechSchedulerTest 3/3, SharedFoldersTest (system picker); Xiaomi Pad and in-app harness with a real model pending (local Ollama too slow; Codex needs the authorized account) |
 
 ### W6 · Library structure
 
 | Item | Status |
 |---|---|
 | Review module and package layering: core packages by concern (`chat`, `protocol.aisdk`, `protocol.agui`, `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config`) | ✅ 98 unit tests + 11 live tests green after the move |
-| README, CHANGELOG, NOTICE (a2a-java-sdk, kotlin-json-patch, proot) | ⬜ |
+| README, CHANGELOG, NOTICE (a2a-java-sdk, kotlin-json-patch, proot) | ✅ |
+| API reference and CI | ✅ Dokka 2.2 over every published module (`./gradlew :dokkaGenerate`); CI: unit tests, lint, publish, Dokka, emulator E2E (x86_64, now with a bundled x86_64 PRoot) |
 
 ## Decisions log
 

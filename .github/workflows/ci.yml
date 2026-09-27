@@ -22,6 +22,12 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Unit tests, lint, publish to Maven Local
         run: ./gradlew testDebugUnitTest lintDebug :demo:assembleRelease publishToMavenLocal --continue
+      - name: API reference (Dokka)
+        run: ./gradlew :dokkaGenerate
+      - uses: actions/upload-artifact@v4
+        with:
+          name: api-reference
+          path: build/dokka/html/
       - uses: actions/upload-artifact@v4
         if: always()
         with:
