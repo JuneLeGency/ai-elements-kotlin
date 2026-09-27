@@ -1,5 +1,11 @@
 package dev.ai.elements.demo
 
+import dev.ai.elements.ui.chat.LocalAiElementsRenderers
+import dev.ai.elements.ui.chat.AiElementsRenderers
+import dev.ai.elements.genui.jsx.jsxCodeBlocks
+import dev.ai.elements.genui.a2ui.a2uiRenderer
+import dev.ai.elements.genui.a2ui.A2uiAction
+import dev.ai.elements.core.model.DataPart
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
@@ -73,10 +79,19 @@ class MainActivity : ComponentActivity() {
                 val scaled = remember(density, appearance.textSize) {
                     Density(density.density, density.fontScale * appearance.textSize.scale)
                 }
+                // Generative UI: A2UI surfaces from any transport, and ```jsx previews, rendered natively.
+                val renderers = remember(viewModel) {
+                    val send: (A2uiAction) -> Unit = { viewModel.sendA2uiAction(it) }
+                    AiElementsRenderers(
+                        data = mapOf(DataPart.A2UI to a2uiRenderer(onAction = send)),
+                        codeBlocks = mapOf("jsx" to jsxCodeBlocks(send), "tsx" to jsxCodeBlocks(send)),
+                    )
+                }
                 CompositionLocalProvider(
                     LocalMermaidRenderer provides renderer,
                     LocalMermaidSizing provides sizing,
                     LocalDensity provides scaled,
+                    LocalAiElementsRenderers provides renderers,
                 ) {
                     DemoApp(viewModel)
                 }

@@ -36,7 +36,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from ag_ui.core import StateSnapshotEvent
+from ag_ui.core import ActivitySnapshotEvent, StateSnapshotEvent
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, Response
 from mcp.server.transport_security import TransportSecuritySettings
@@ -62,6 +62,7 @@ from pydantic_ai.ui.ag_ui import AGUIAdapter
 from pydantic_ai.ui.vercel_ai import VercelAIAdapter
 from pydantic_ai.ui.vercel_ai.response_types import DataChunk, MessageMetadataChunk, SourceUrlChunk
 
+import a2ui_demo
 from a2a_agent import a2a_routes
 from mcp_server import mcp
 
@@ -98,6 +99,8 @@ class RunState:
     protocol: str = "vercel"
     plan: InMemoryPlanStore = field(default_factory=InMemoryPlanStore)
     sources: int = 0
+    # The A2UI user action that started this run, if any (see a2ui_demo.py).
+    a2ui_action: dict | None = None
 
 
 notes = MCPToolset(MCP_URL, id="notes").approval_required(lambda ctx, tool, args: tool.name in MCP_WRITE_TOOLS)
@@ -203,6 +206,47 @@ async def mirror_plan(ctx: RunContext[RunState], event) -> None:
     await ctx.emit(PlanSnapshot(protocol=ctx.deps.protocol, items=await ctx.deps.plan.get_items()))
 
 
+# --- Generative UI (A2UI) -----------------------------------------------------
+# Tools return interface as A2UI v1.0 messages, carried on each protocol's A2UI binding.
+
+
+@dataclass(kw_only=True)
+class A2uiSurface(CustomEvent, name="a2ui"):
+    protocol: str
+    surface: str
+    messages: list
+
+    def to_payload(self):
+        if self.protocol == "agui":
+            return ActivitySnapshotEvent(message_id=f"a2ui-surface-{self.surface}", activity_type="a2ui-surface",
+                                         content={"a2ui_operations": self.messages}, replace=True)
+        return DataChunk(type="data-a2ui", id=f"a2ui-{self.surface}", data=self.messages)
+
+
+@agent.tool
+async def show_booking_form(ctx: RunContext[RunState], city: str) -> str:
+    """Show the user an interactive hotel booking form for a city (name, check-in date, room)."""
+    messages = a2ui_demo.booking_form(city)
+    surface = messages[0]["createSurface"]["surfaceId"]
+    await ctx.emit(A2uiSurface(protocol=ctx.deps.protocol, surface=surface, messages=messages))
+    return f"Showed the booking form for {city} (surface {surface}); wait for the user to submit it."
+
+
+@agent.tool
+async def confirm_booking(ctx: RunContext[RunState], guest: str | None = None, date: str | None = None, room: str | None = None) -> str:
+    """Confirm a hotel booking the user submitted from the booking form."""
+    submitted = (ctx.deps.a2ui_action or {}).get("context") or {}
+    guest = guest or submitted.get("guest") or "the guest"
+    date = date or submitted.get("date") or "the chosen date"
+    room = room or ", ".join(submitted.get("room") or []) or "standard"
+    return f"Booked a {room} room at Hotel Lumen for {guest}, checking in {date}."
+
+
+@agent.instructions
+def a2ui_action_instructions(ctx: RunContext[RunState]) -> str | None:
+    return a2ui_demo.describe(ctx.deps.a2ui_action) + " Confirm it with `confirm_booking`." if ctx.deps.a2ui_action else None
+
+
 # A tiny local knowledge base, so citations work offline and deterministically.
 DOCS = [
     ("AI Elements", "https://elements.ai-sdk.dev",
@@ -295,6 +339,9 @@ _DEMO_SCRIPTS = [
     ("note", "save_note", {"title": "Demo", "content": "Saved from the scripted demo model."}),
     # A frontend tool the client advertises (AG-UI `tools`), executed on the device.
     ("device", "get_device_info", {}),
+    # Generative UI: "book" (the form's action) before "hotel" (asking for the form).
+    ("book", "confirm_booking", {}),
+    ("hotel", "show_booking_form", {"city": "Kyoto"}),
 ]
 
 
@@ -310,8 +357,10 @@ def _user_prompt(messages: list[ModelMessage]) -> str:
 def _demo_call(messages: list[ModelMessage], info: AgentInfo) -> ToolCallPart | None:
     """The scripted model's one tool call: a keyword-selected harness tool, else the clock or docs search."""
     # One tool call per user turn: stop once a result came back after the latest prompt.
-    last_prompt = max((i for i, m in enumerate(messages) if any(type(p).__name__ == "UserPromptPart" for p in getattr(m, "parts", []))), default=0)
-    if any(isinstance(p, (ToolReturnPart, RetryPromptPart)) for m in messages[last_prompt:] for p in getattr(m, "parts", [])):
+    # (A request can hold the previous turn's tool results *before* the new prompt, as AG-UI history maps.)
+    parts = [p for m in messages for p in getattr(m, "parts", [])]
+    last_prompt = max((i for i, p in enumerate(parts) if type(p).__name__ == "UserPromptPart"), default=0)
+    if any(isinstance(p, (ToolReturnPart, RetryPromptPart)) for p in parts[last_prompt:]):
         return None
     names = {t.name for t in info.function_tools}
     prompt = _user_prompt(messages)
@@ -411,10 +460,11 @@ async def chat(request: Request) -> Response:
         u = result.usage
         yield MessageMetadataChunk(message_metadata={"usage": {"inputTokens": u.input_tokens, "outputTokens": u.output_tokens}})
 
+    body = await request.json()
     return await VercelAIAdapter.dispatch_request(
         request,
         agent=agent,
-        deps=RunState(protocol="vercel"),
+        deps=RunState(protocol="vercel", a2ui_action=a2ui_demo.action_from_ui_messages(body)),
         model=resolve_model(model_name),
         sdk_version=6,  # AI SDK 6: tool approval (human in the loop)
         allow_uploaded_files=True,  # image attachments arrive as data: URLs
@@ -425,7 +475,9 @@ async def chat(request: Request) -> Response:
 @app.post("/api/agui")
 async def agui(request: Request) -> Response:
     model_name = request.query_params.get("model") or DEFAULT_MODEL
-    return await AGUIAdapter.dispatch_request(request, agent=agent, deps=RunState(protocol="agui"), model=resolve_model(model_name))
+    body = await request.json()
+    deps = RunState(protocol="agui", a2ui_action=a2ui_demo.action_from_agui(body))
+    return await AGUIAdapter.dispatch_request(request, agent=agent, deps=deps, model=resolve_model(model_name))
 
 
 # A small page for the in-app browser's end-to-end test (harness-browser).

@@ -44,6 +44,7 @@ dependencies {
     implementation("io.github.junelegency:ai-elements-ui")          // elements (protocol-independent)
     implementation("io.github.junelegency:ai-elements-core")        // AI SDK / AG-UI / model-API backends, agent loop, MCP
     // Optional, as needed:
+    implementation("io.github.junelegency:ai-elements-genui")       // generative UI: A2UI surfaces, JsxPreview
     implementation("io.github.junelegency:ai-elements-a2a")         // A2A agents (official a2a-java-sdk)
     implementation("io.github.junelegency:ai-elements-koog")        // JetBrains Koog as the agent runtime
     implementation("io.github.junelegency.harness:harness-core")    // in-app agent
@@ -59,6 +60,7 @@ dependencies {
 | `ai-elements-chat` | The protocol-independent layer: chat model (≈ AI SDK `UIMessage`), `ChatEvent`, `ChatBackend`, `ChatController` (≈ `useChat`). No networking, no Compose. | 24 |
 | `ai-elements-core` | Protocol clients (AI SDK, AG-UI), model APIs, agent loop, `SubAgents`, `Skills`, MCP, OAuth — each a `ChatBackend` or capability on top of `ai-elements-chat`. No Compose. | 24 |
 | `ai-elements-ui` | The Compose elements and `AiElementsTheme`; depends on `ai-elements-chat` only, so it renders any backend — including your own `ChatBackend`. | 24 |
+| `ai-elements-genui` | Generative UI on the elements: A2UI v1.0 surfaces rendered natively (Basic Catalog, extensible with your own components), `JsxPreview`. Depends on `ai-elements-ui` only; transports hand it A2UI messages. | 26 |
 | `ai-elements-a2a` | A2A 1.0 on the official Java SDK: remote agents as providers or sub-agents. Needs core library desugaring. | 26 |
 | `ai-elements-koog` | A JetBrains Koog agent as a `ChatBackend` or harness model binding (`KoogBackend`); AI Elements tools as Koog tools. | 26 |
 | `ai-elements-mermaid-native` | Mermaid drawn with Compose Canvas instead of a WebView (experimental). | 24 |
@@ -177,6 +179,24 @@ through Compose's `LocalUriHandler`, so provide your own to route them in-app.
 On-device tools say what they are (`AgentTool.kindFor` → `ToolKind.Delegation` / `Skill`,
 `AgentTool.source` for a provider chip), so custom tools get the same rendering as built-in ones.
 
+## Generative UI
+
+`ai-elements-genui` renders [A2UI](https://a2ui.org) v1.0 surfaces with native Compose components,
+whichever protocol carried them — AG-UI `a2ui-surface` activities, A2A `application/a2ui+json`
+parts or AI SDK `data-a2ui` parts all arrive as `DataPart.A2UI`. User actions go back on the same
+binding (`forwardedProps.a2uiAction`, an A2UI A2A part, a `data-a2ui` part):
+
+```kotlin
+LocalAiElementsRenderers provides AiElementsRenderers(
+    data = mapOf(DataPart.A2UI to a2uiRenderer { action -> controller.send(action) }),
+    codeBlocks = jsxCodeBlocks { action -> controller.send(action) },   // ```jsx fences → JsxPreview
+)
+```
+
+Add your design system with `A2uiCatalog.Basic.extend(id = "https://example.com/catalog", components = …)`;
+`A2uiSurfaceView` / `A2uiState` render a surface outside the chat. `JsxPreview` compiles a JSX subset
+onto the same components (bindings only, no code execution) and keeps state while the JSX streams.
+
 ## Quick start: in-app agent
 
 ```kotlin
@@ -243,7 +263,8 @@ uv run uvicorn main:app --host 0.0.0.0 --port 8788                 # offline scr
 AGENT_BASE_URL=… AGENT_API_KEY=… AGENT_MODEL=… uv run uvicorn main:app --host 0.0.0.0 --port 8788
 ```
 
-The scripted model picks a capability by keyword (`delegate`, `plan`, `skill`, `note`, `device`), so
+The scripted model picks a capability by keyword (`delegate`, `plan`, `skill`, `note`, `device`, `hotel` → an A2UI booking form whose
+**Book** action comes back as `book`), so
 every flow can be exercised without a model; `server/record_fixtures.py` records the client's
 protocol fixtures from it. `10.0.2.2` is the emulator's alias for your computer.
 

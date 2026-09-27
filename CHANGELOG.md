@@ -20,6 +20,12 @@
   `Agent` descriptions and skill lists (A2A cards).
 - `ai-elements-koog`: a JetBrains Koog agent as a `ChatBackend` (and as an `AgentHarness` model
   binding), with AI Elements tools as Koog tools; approvals and progress work as with the built-in loop.
+- New artifact `ai-elements-genui`: A2UI v1.0 surfaces rendered natively (`a2uiRenderer`,
+  `A2uiSurfaceView`, extensible `A2uiCatalog`; passes the official conformance suite) and
+  `JsxPreview`. A2UI rides each transport's binding: AG-UI `a2ui-surface` activities and
+  `forwardedProps.a2uiAction`, A2A `application/a2ui+json` parts, AI SDK `data-a2ui` parts.
+  The reference server's `hotel` script sends a booking form; the demo renders it and the
+  round trip runs on the emulator over AG-UI and AI SDK.
 - MCP authorization verified live end to end against the official `mcp` SDK OAuth server
   (`server/mcp_auth_server.py`, `LiveMcpOAuthTest`).
 - New artifact `ai-elements-chat` (models, `ChatEvent`, `ChatBackend`, `ChatController`; same packages):

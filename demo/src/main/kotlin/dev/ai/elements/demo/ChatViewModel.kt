@@ -1,5 +1,6 @@
 package dev.ai.elements.demo
 
+import dev.ai.elements.genui.a2ui.send
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -63,6 +64,9 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
 
     fun send(text: String, attachments: List<FilePart> = emptyList()): Boolean = chat.send(text, attachments)
     fun respondToApproval(toolCallId: String, approved: Boolean) = chat.respondToApproval(toolCallId, approved)
+
+    /** A user's action on an agent-sent A2UI surface, back to the agent over the provider's protocol. */
+    fun sendA2uiAction(action: dev.ai.elements.genui.a2ui.A2uiAction): Boolean = chat.send(action)
     fun stop() = chat.stop()
     fun selectVersion(messageId: String, index: Int) = chat.selectVersion(messageId, index)
     fun restoreCheckpoint(messageId: String) = chat.restoreCheckpoint(messageId)
