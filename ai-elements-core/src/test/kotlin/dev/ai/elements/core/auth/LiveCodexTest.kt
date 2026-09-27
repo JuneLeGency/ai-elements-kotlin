@@ -1,6 +1,6 @@
 package dev.ai.elements.core.auth
 
-import dev.ai.elements.core.ChatEvent
+import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role

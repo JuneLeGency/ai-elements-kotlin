@@ -1,8 +1,8 @@
 package dev.ai.elements.a2a
 
 import com.google.gson.Gson
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ChatEvent
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.agent.SubAgent
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Role

@@ -1,6 +1,6 @@
 package dev.ai.elements.core.mcp
 
-import dev.ai.elements.core.backend.DefaultHttpClient
+import dev.ai.elements.core.http.DefaultHttpClient
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

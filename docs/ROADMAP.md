@@ -120,7 +120,7 @@ The demo is a showcase of both modes, switchable per conversation:
 
 | Item | Status |
 |---|---|
-| Review module and package layering: core packages by concern (`protocol.aisdk`, `protocol.agui`, `mcp`, `provider.*`, `agent`, `skills`, `auth`, `config`) | ⬜ after W1/W2 stabilise |
+| Review module and package layering: core packages by concern (`chat`, `protocol.aisdk`, `protocol.agui`, `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config`) | ✅ 98 unit tests + 11 live tests green after the move |
 | README, CHANGELOG, NOTICE (a2a-java-sdk, kotlin-json-patch, proot) | ⬜ |
 
 ## Decisions log

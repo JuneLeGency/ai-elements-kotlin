@@ -1,8 +1,8 @@
 package dev.ai.elements.harness
 
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ChatEvent
-import dev.ai.elements.core.ToolApprover
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.StaticCapability
 import dev.ai.elements.core.model.Message

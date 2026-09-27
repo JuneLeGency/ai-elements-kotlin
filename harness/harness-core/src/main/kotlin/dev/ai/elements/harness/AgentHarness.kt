@@ -1,7 +1,7 @@
 package dev.ai.elements.harness
 
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ToolApprover
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.Capability
 import dev.ai.elements.core.agent.SubAgent
@@ -9,7 +9,7 @@ import dev.ai.elements.core.agent.SubAgents
 import dev.ai.elements.core.agent.collectTools
 import dev.ai.elements.core.auth.TokenSource
 import dev.ai.elements.core.config.ProviderProfile
-import dev.ai.elements.core.deferredBackend
+import dev.ai.elements.core.chat.deferredBackend
 
 /**
  * How to reach a model: builds the backend of one agent run from its tools
@@ -39,7 +39,7 @@ data class LocalSubAgent(
 
 /**
  * An in-app agent: a [model] plus [capabilities] (tools, skills, MCP servers…),
- * served as a [ChatBackend] for [dev.ai.elements.core.ChatController] — the
+ * served as a [ChatBackend] for [dev.ai.elements.core.chat.ChatController] — the
  * Kotlin counterpart of a Pydantic AI agent with Harness capabilities.
  *
  * Every turn re-reads the providers (they are `suspend` so they can reflect

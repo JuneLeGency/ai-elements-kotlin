@@ -1,6 +1,6 @@
-package dev.ai.elements.core.backend
+package dev.ai.elements.core.http
 
-import dev.ai.elements.core.ChatBackendException
+import dev.ai.elements.core.chat.ChatBackendException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

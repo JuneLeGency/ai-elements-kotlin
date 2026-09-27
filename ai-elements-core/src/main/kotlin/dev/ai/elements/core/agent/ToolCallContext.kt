@@ -1,6 +1,6 @@
 package dev.ai.elements.core.agent
 
-import dev.ai.elements.core.ToolApprover
+import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.model.Message
 import kotlinx.coroutines.currentCoroutineContext
 import kotlin.coroutines.AbstractCoroutineContextElement

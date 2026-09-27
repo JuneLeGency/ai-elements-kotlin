@@ -82,7 +82,7 @@ private const val SampleTerminal = "\u001B[1m$ ./gradlew test\u001B[0m\n" +
 
 private const val SampleTrace = """java.lang.IllegalStateException: Tool 'calculate' returned no output
 	at dev.ai.elements.core.agent.AgentLoop.runTool(AgentLoop.kt:88)
-	at dev.ai.elements.core.backend.OpenAiChatBackend${'$'}stream${'$'}1.invokeSuspend(OpenAiChatBackend.kt:61)
+	at dev.ai.elements.core.provider.openai.OpenAiChatBackend${'$'}stream${'$'}1.invokeSuspend(OpenAiChatBackend.kt:61)
 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:108)
 	at kotlinx.coroutines.internal.LimitedDispatcher${'$'}Worker.run(LimitedDispatcher.kt:115)

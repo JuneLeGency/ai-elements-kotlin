@@ -1,13 +1,13 @@
 package dev.ai.elements.core.agent
 
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ChatEvent
-import dev.ai.elements.core.ToolApprover
-import dev.ai.elements.core.finishStreaming
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.chat.ToolApprover
+import dev.ai.elements.core.chat.finishStreaming
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.TextPart
-import dev.ai.elements.core.reduce
+import dev.ai.elements.core.chat.reduce
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -110,7 +110,7 @@ class SubAgents(
         val prompt = Message(UUID.randomUUID().toString(), Role.USER, listOf(TextPart("task", task)), clock())
         var reply = Message(UUID.randomUUID().toString(), Role.ASSISTANT, createdAt = clock())
         var error: String? = null
-        agent.backend(context?.approver ?: dev.ai.elements.core.ToolApprover.AlwaysApprove).stream(listOf(prompt)).collect { event ->
+        agent.backend(context?.approver ?: dev.ai.elements.core.chat.ToolApprover.AlwaysApprove).stream(listOf(prompt)).collect { event ->
             if (event is ChatEvent.Error) error = event.message
             reply = reply.reduce(event, clock())
             context?.subagent(reply)

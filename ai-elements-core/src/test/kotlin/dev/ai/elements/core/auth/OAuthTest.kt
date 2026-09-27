@@ -1,10 +1,10 @@
 package dev.ai.elements.core.auth
 
 import com.sun.net.httpserver.HttpServer
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ChatBackendException
-import dev.ai.elements.core.ChatEvent
-import dev.ai.elements.core.backend.OAuthBackend
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatBackendException
+import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.auth.OAuthBackend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

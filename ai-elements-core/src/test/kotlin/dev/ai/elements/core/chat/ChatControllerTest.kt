@@ -1,7 +1,7 @@
-package dev.ai.elements.core
+package dev.ai.elements.core.chat
 
 import dev.ai.elements.core.agent.CalculatorTool
-import dev.ai.elements.core.backend.MockAgentBackend
+import dev.ai.elements.core.provider.mock.MockAgentBackend
 import dev.ai.elements.core.model.ChatStatus
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.ReasoningPart
@@ -23,6 +23,11 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import dev.ai.elements.core.chat.reduce
+import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.chat.ChatController
+import dev.ai.elements.core.chat.ChatBackendException
+import dev.ai.elements.core.chat.ChatBackend
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ChatControllerTest {

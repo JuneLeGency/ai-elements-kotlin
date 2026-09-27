@@ -11,13 +11,13 @@ crosses a process boundary must follow one of them, exactly as specified:
 
 | Concern | Specification | Implemented in |
 |---|---|---|
-| Agent ↔ UI streaming | Vercel **AI SDK** UI Message Stream (v5/v6), v4 Data Stream | `core/backend/UiMessageStreamBackend.kt` |
-| Agent ↔ UI streaming | **AG-UI** 1.x (events, subagents, interrupts/resume, state, activities) | `core/backend/AgUiBackend.kt` |
+| Agent ↔ UI streaming | Vercel **AI SDK** UI Message Stream (v5/v6), v4 Data Stream | `core/protocol/aisdk/` |
+| Agent ↔ UI streaming | **AG-UI** 1.x (events, subagents, interrupts/resume, state, activities) | `core/protocol/agui/` (official AG-UI `kotlin-core` types) |
 | Tools and context from servers | **MCP** 2026-07-28 Streamable HTTP, with fallback to the 2025-xx session revisions | `core/mcp/` |
 | Agent ↔ agent | **A2A** 1.0 JSON-RPC binding, with 0.3 compatibility | `ai-elements-a2a` (official `a2a-java-sdk`) |
 | Skills | **Agent Skills** (`SKILL.md` + YAML frontmatter) | `core/skills/` |
 | Sign-in | OAuth 2.1 / RFC 6749, 7636, 8252, 8628, 8414, 9728, 7591, 8707 | `core/auth/`, `core/mcp/McpAuth.kt` |
-| Model APIs | OpenAI Chat Completions / Responses, Anthropic Messages, Gemini, Ollama | `core/backend/` |
+| Model APIs | OpenAI Chat Completions / Responses, Anthropic Messages, Gemini, Ollama | `core/provider/*` |
 
 Rules:
 
@@ -47,6 +47,14 @@ Rules:
 5. **Every protocol change ships with a fixture test** recorded from a real
    implementation (official SDK or reference server), plus a live test when a public
    endpoint or the local server can exercise it.
+
+### Package layering (ai-elements-core)
+
+`chat` (controller, events, reducer) · `model` · `protocol.aisdk` / `protocol.agui` · `provider.*`
+(on-device model APIs) · `http` (internal transport helpers) · `agent` (tools, capabilities, loop,
+sub-agents) · `mcp` · `skills` · `auth` · `config`. Dependencies point downwards (`protocol` and
+`provider` use `chat`, `agent`, `http`, `model`; never the reverse). Optional capabilities live in their
+own artifacts: `ai-elements-a2a`, `harness/*`.
 
 ## 2. Best practices over bespoke code
 

@@ -1,11 +1,11 @@
 package dev.ai.elements.a2a
 
-import dev.ai.elements.core.ChatEvent
+import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.agent.SubAgents
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.TextPart
-import dev.ai.elements.core.reduce
+import dev.ai.elements.core.chat.reduce
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonObject

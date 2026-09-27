@@ -1,8 +1,8 @@
-package dev.ai.elements.core.backend
+package dev.ai.elements.core.auth
 
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ChatBackendException
-import dev.ai.elements.core.ChatEvent
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatBackendException
+import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.auth.OAuthTokens
 import dev.ai.elements.core.auth.TokenSource
 import dev.ai.elements.core.model.Message

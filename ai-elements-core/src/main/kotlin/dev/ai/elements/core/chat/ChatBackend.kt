@@ -1,4 +1,4 @@
-package dev.ai.elements.core
+package dev.ai.elements.core.chat
 
 import dev.ai.elements.core.model.Message
 import kotlinx.coroutines.flow.Flow

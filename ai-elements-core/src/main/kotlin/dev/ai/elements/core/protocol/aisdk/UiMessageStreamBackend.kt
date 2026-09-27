@@ -1,8 +1,8 @@
-package dev.ai.elements.core.backend
+package dev.ai.elements.core.protocol.aisdk
 
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ChatEvent
-import dev.ai.elements.core.ToolApprover
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Message
@@ -13,7 +13,7 @@ import dev.ai.elements.core.model.SourcePart
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
-import dev.ai.elements.core.reduce
+import dev.ai.elements.core.chat.reduce
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
@@ -32,6 +32,14 @@ import kotlinx.serialization.json.putJsonObject
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import java.util.UUID
+import dev.ai.elements.core.http.DefaultHttpClient
+import dev.ai.elements.core.http.BackendJson
+import dev.ai.elements.core.http.int
+import dev.ai.elements.core.http.jsonPost
+import dev.ai.elements.core.http.obj
+import dev.ai.elements.core.agent.runTool
+import dev.ai.elements.core.http.sse
+import dev.ai.elements.core.http.str
 
 /**
  * Talks to an agent server speaking a **Vercel AI SDK** streaming protocol —

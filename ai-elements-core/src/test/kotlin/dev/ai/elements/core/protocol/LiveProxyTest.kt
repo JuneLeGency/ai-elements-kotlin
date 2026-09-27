@@ -1,7 +1,7 @@
-package dev.ai.elements.core.backend
+package dev.ai.elements.core.protocol
 
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ChatEvent
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.agent.BuiltinTools
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
@@ -12,6 +12,10 @@ import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
+import dev.ai.elements.core.provider.openai.OpenAiResponsesBackend
+import dev.ai.elements.core.provider.openai.OpenAiChatBackend
+import dev.ai.elements.core.provider.gemini.GeminiBackend
+import dev.ai.elements.core.provider.anthropic.AnthropicBackend
 
 /**
  * Opt-in live runs through a multi-format gateway (e.g. CLIProxyAPI), which

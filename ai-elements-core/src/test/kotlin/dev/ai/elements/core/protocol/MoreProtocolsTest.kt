@@ -1,9 +1,9 @@
-package dev.ai.elements.core.backend
+package dev.ai.elements.core.protocol
 
 import com.sun.net.httpserver.HttpServer
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ChatBackendException
-import dev.ai.elements.core.ChatEvent
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatBackendException
+import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.BuiltinTools
 import dev.ai.elements.core.model.FilePart
@@ -22,6 +22,13 @@ import org.junit.Before
 import org.junit.Test
 import java.net.InetSocketAddress
 import java.util.concurrent.CopyOnWriteArrayList
+import dev.ai.elements.core.protocol.agui.AgUiBackend
+import dev.ai.elements.core.provider.anthropic.AnthropicBackend
+import dev.ai.elements.core.provider.gemini.GeminiBackend
+import dev.ai.elements.core.provider.ollama.OllamaBackend
+import dev.ai.elements.core.provider.openai.OpenAiChatBackend
+import dev.ai.elements.core.provider.openai.OpenAiResponsesBackend
+import dev.ai.elements.core.protocol.aisdk.UiMessageStreamBackend
 
 /** Fixture tests for the remaining wire protocols and gateway edge cases. */
 class MoreProtocolsTest {

@@ -1,9 +1,9 @@
-package dev.ai.elements.core.backend
+package dev.ai.elements.core.provider.openai
 
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ChatBackendException
-import dev.ai.elements.core.ChatEvent
-import dev.ai.elements.core.ToolApprover
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatBackendException
+import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
@@ -23,6 +23,17 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import okhttp3.OkHttpClient
+import dev.ai.elements.core.model.hasContent
+import dev.ai.elements.core.http.str
+import dev.ai.elements.core.http.DefaultHttpClient
+import dev.ai.elements.core.http.BackendJson
+import dev.ai.elements.core.model.images
+import dev.ai.elements.core.http.int
+import dev.ai.elements.core.http.jsonPost
+import dev.ai.elements.core.http.obj
+import dev.ai.elements.core.agent.runTool
+import dev.ai.elements.core.http.sse
+import dev.ai.elements.core.http.errorMessage
 
 /**
  * The **OpenAI Responses API** (`POST /responses`, streaming) — OpenAI's

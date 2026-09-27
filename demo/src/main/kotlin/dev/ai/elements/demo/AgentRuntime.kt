@@ -3,8 +3,8 @@ package dev.ai.elements.demo
 import dev.ai.elements.a2a.A2aAgent
 import dev.ai.elements.a2a.A2aBackend
 import dev.ai.elements.a2a.asSubAgent
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ToolApprover
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.BuiltinTools
 import dev.ai.elements.core.agent.Capability

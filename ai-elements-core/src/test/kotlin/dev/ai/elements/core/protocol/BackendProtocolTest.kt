@@ -1,9 +1,9 @@
-package dev.ai.elements.core.backend
+package dev.ai.elements.core.protocol
 
 import com.sun.net.httpserver.HttpServer
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ChatBackendException
-import dev.ai.elements.core.ChatEvent
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatBackendException
+import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.agent.BuiltinTools
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
@@ -17,6 +17,9 @@ import org.junit.Before
 import org.junit.Test
 import java.net.InetSocketAddress
 import java.util.concurrent.CopyOnWriteArrayList
+import dev.ai.elements.core.provider.anthropic.AnthropicBackend
+import dev.ai.elements.core.provider.openai.OpenAiChatBackend
+import dev.ai.elements.core.protocol.aisdk.UiMessageStreamBackend
 
 /**
  * Drives each real backend against an in-process HTTP server replaying recorded

@@ -6,7 +6,7 @@ import dev.ai.elements.core.auth.OAuthClient
 import dev.ai.elements.core.auth.OAuthException
 import dev.ai.elements.core.auth.OAuthTokens
 import dev.ai.elements.core.auth.TokenStore
-import dev.ai.elements.core.backend.DefaultHttpClient
+import dev.ai.elements.core.http.DefaultHttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

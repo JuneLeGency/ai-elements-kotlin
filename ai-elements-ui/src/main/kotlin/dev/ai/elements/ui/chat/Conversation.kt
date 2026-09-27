@@ -39,7 +39,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import dev.ai.elements.core.ChatState
+import dev.ai.elements.core.chat.ChatState
 import dev.ai.elements.core.model.ChatStatus
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role

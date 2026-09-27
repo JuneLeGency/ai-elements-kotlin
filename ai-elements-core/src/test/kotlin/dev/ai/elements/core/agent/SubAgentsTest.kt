@@ -1,15 +1,15 @@
 package dev.ai.elements.core.agent
 
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ChatEvent
-import dev.ai.elements.core.ToolApprover
-import dev.ai.elements.core.backend.runTool
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.chat.ToolApprover
+import dev.ai.elements.core.agent.runTool
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
-import dev.ai.elements.core.reduce
+import dev.ai.elements.core.chat.reduce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking

@@ -1,7 +1,7 @@
-package dev.ai.elements.core.backend
+package dev.ai.elements.core.agent
 
-import dev.ai.elements.core.ChatEvent
-import dev.ai.elements.core.ToolApprover
+import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.ToolCallContext
 import kotlinx.coroutines.async
@@ -17,6 +17,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import dev.ai.elements.core.http.BackendJson
 
 /** Text fed back to the model when the user denies a tool call. */
 internal const val DENIED_RESULT = "The user denied this tool call. Do not retry it; continue without it."
@@ -91,24 +92,4 @@ private suspend fun FlowCollector<ChatEvent>.executeReporting(
     }
     result.await()
 }
-
-/** Image attachments of a message (only images are sent to models). */
-internal val Message.images: List<FilePart>
-    get() = parts.filterIsInstance<FilePart>().filter { it.isImage }
-
-internal val Message.hasContent: Boolean
-    get() = text.isNotBlank() || images.isNotEmpty()
-
-internal fun JsonElement.errorMessage(): String =
-    (this as? JsonObject)?.get("message")?.jsonPrimitive?.contentOrNull
-        ?: runCatching { jsonPrimitive.contentOrNull }.getOrNull()
-        ?: toString()
-
-internal fun JsonObject.str(key: String): String? =
-    runCatching { this[key]?.jsonPrimitive?.contentOrNull }.getOrNull()
-
-internal fun JsonObject.int(key: String): Int? =
-    runCatching { this[key]?.jsonPrimitive?.intOrNull }.getOrNull()
-
-internal fun JsonObject.obj(key: String): JsonObject? = this[key] as? JsonObject
 

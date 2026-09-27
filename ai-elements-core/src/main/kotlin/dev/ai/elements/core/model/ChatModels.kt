@@ -20,7 +20,7 @@ enum class ChatStatus {
     /** Parts are streaming in. */
     STREAMING,
 
-    /** The last request failed; see [dev.ai.elements.core.ChatState.error]. */
+    /** The last request failed; see [dev.ai.elements.core.chat.ChatState.error]. */
     ERROR,
 }
 

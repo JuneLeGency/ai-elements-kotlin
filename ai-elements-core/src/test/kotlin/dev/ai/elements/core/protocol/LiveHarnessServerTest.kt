@@ -1,8 +1,8 @@
-package dev.ai.elements.core.backend
+package dev.ai.elements.core.protocol
 
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ChatEvent
-import dev.ai.elements.core.ToolApprover
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.Message
@@ -10,7 +10,7 @@ import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
-import dev.ai.elements.core.reduce
+import dev.ai.elements.core.chat.reduce
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonObject
@@ -20,6 +20,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
+import dev.ai.elements.core.protocol.aisdk.UiMessageStreamBackend
+import dev.ai.elements.core.protocol.agui.AgUiBackend
 
 /**
  * Every Pydantic AI Harness capability of the reference server (`server/main.py`), end to end

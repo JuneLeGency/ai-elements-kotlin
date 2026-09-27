@@ -1,6 +1,6 @@
 package dev.ai.elements.core.auth
 
-import dev.ai.elements.core.backend.DefaultHttpClient
+import dev.ai.elements.core.http.DefaultHttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext

@@ -3,8 +3,8 @@ package dev.ai.elements.demo
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import dev.ai.elements.core.ChatController
-import dev.ai.elements.core.ChatState
+import dev.ai.elements.core.chat.ChatController
+import dev.ai.elements.core.chat.ChatState
 import dev.ai.elements.core.config.McpServerStore
 import dev.ai.elements.core.mcp.McpAuthRequiredException
 import dev.ai.elements.core.mcp.McpServerConfig

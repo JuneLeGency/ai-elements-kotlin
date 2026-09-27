@@ -1,8 +1,8 @@
-package dev.ai.elements.core.backend
+package dev.ai.elements.core.provider.mock
 
-import dev.ai.elements.core.ChatBackend
-import dev.ai.elements.core.ChatEvent
-import dev.ai.elements.core.ToolApprover
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.BuiltinTools
 import dev.ai.elements.core.model.Message
@@ -15,6 +15,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import java.util.UUID
+import dev.ai.elements.core.agent.runTool
 
 /**
  * An offline agent that exercises every part type — reasoning, a real tool call

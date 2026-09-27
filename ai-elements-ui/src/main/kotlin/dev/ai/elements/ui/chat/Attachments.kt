@@ -38,7 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.ai.elements.core.backend.DefaultHttpClient
+import dev.ai.elements.core.http.DefaultHttpClient
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
