@@ -23,6 +23,19 @@ demo app only (res/font/, licenses in demo/src/main/assets/licenses/)
   * WenKai GB Screen Subset — SIL Open Font License 1.1, a renamed subset of
     LXGW WenKai Screen, Copyright 2021-2026 LXGW
 
+harness-sandbox-proot (src/main/jniLibs/, separate executables)
+  * PRoot — GNU General Public License v2.0, built unmodified from https://github.com/termux/proot
+    (commit d4d2a19081c3c07f75250e4ce2980b9fa2f5720f); the corresponding source is available there.
+  * talloc 2.4.3 (statically linked into PRoot) — GNU Lesser General Public License v3.0.
+  See harness/harness-sandbox-proot/NOTICE. The Alpine Linux root filesystem is downloaded at run
+  time, not bundled.
+
+skills/ (bundled by the demo, used by server/) — Apache License 2.0, this project.
+
 Runtime dependencies (not bundled, resolved from Maven)
   * AndroidX / Jetpack Compose, OkHttp, kotlinx.coroutines, kotlinx.serialization,
     multiplatform-markdown-renderer, Highlights — Apache License 2.0
+  * AG-UI Kotlin SDK (com.ag-ui.community:kotlin-core) — MIT License
+  * kotlin-json-patch (io.github.reidsync) — Apache License 2.0
+  * A2A Java SDK (org.a2aproject.sdk), protobuf-java, Gson — Apache License 2.0 / BSD-3-Clause
+  * Apache Commons Compress — Apache License 2.0

@@ -2,6 +2,25 @@
 
 ## 0.3.0 (unreleased)
 
+### Added — agents
+- **Protocols**: AI SDK 6 (full `UIMessage` history, tool approval, client-side tools, preliminary
+  output, `UIMessage` sub-agent output); AG-UI 1.0 on the official `kotlin-core` types (frontend
+  tools, interrupts / resume, `SUBAGENT_*`, state and activity JSON Patch, steps, usage);
+  MCP 2026-07-28 client with legacy-session fallback, OAuth discovery and `McpToolset`;
+  A2A 1.0 (`ai-elements-a2a`, official `a2a-java-sdk`) as provider and as sub-agent.
+- **Capabilities** mirroring Pydantic AI Harness: `Capability`, `SubAgents` (`delegate_task`),
+  `Skills` (Agent Skills, `load_capability`), `ToolCallContext` (progress, nested runs, data parts).
+- **In-app harness** (group `io.github.junelegency.harness`): `harness-core` (`AgentHarness`),
+  `harness-filesystem`, `harness-memory`, `harness-planning`, `harness-shell`, and
+  `harness-sandbox-proot` (Alpine Linux on PRoot).
+- **Elements**: `Subagent`; `ToolCall` titles, MCP server and skill badges, live progress;
+  `Agent` descriptions and skill lists (A2A cards).
+- `ai-elements-bom`; `server/` rebuilt on Pydantic AI 2.51 + Harness 0.36 with MCP and A2A endpoints.
+
+### Changed — agents
+- `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
+  `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).
+
 ### Added
 - 17 elements to match AI Elements: `Agent`, `ModelSelector`, `Question`, `Persona`, `SpeechInput`,
   `AudioPlayer` (+ `rememberAudioPlayerState`), `Transcription`, `MicSelector`, `VoiceSelector`,
