@@ -99,6 +99,21 @@ reference only, never copied).
 | A2A agent card view (extend `Agent`) | ✅ `description` + `toolsTitle` (skills) |
 | UI review matrix (GOAL W4 DoD): light/dark × en/zh-CN/zh-TW/ja × phone/tablet | ✅ `ScreenshotMatrixTest` (opt-in `-e screenshots true`, `-e size tablet` after `wm size 2560x1600`); 16 shots reviewed: translations, dark Mermaid/code, list-detail tablet layout OK. An early collapsed-table/diagram artefact was the Compose test clock (streaming fade-ins frozen during `Thread.sleep`); the test now advances `mainClock` first — all 16 shots correct |
 
+### W4b · Generative UI (open specs)
+
+Agents that return interface, not just text. Layering: `ai-elements-ui` knows no UI format;
+`ai-elements-genui` holds a neutral node tree (`UiNode`) + component registry (Compose) shared by the
+formats; transports map onto neutral data parts in `core` / `a2a`; MCP Apps (host side, needs the MCP
+client) is its own artifact.
+
+| Item | Spec / reference | Status |
+|---|---|---|
+| `WorkflowCanvas` slots: custom node content, toolbar / panel | AI Elements canvas, node, controls, panel, toolbar | ✅ `nodeContent`, `nodeToolbar` (on selection), `panel`, per-node `size` / `data`, temporary edges; component test |
+| `ai-elements-genui` base: `UiNode`, `GenUiComponents` registry (Material defaults, app-extensible), actions | — | 🟡 |
+| `JsxPreview`: streaming-tolerant JSX subset → `UiNode`, bindings only (no code execution) | AI Elements `jsx-preview` (`react-jsx-parser`) | ⬜ |
+| A2UI surface: messages → surface model, data binding, user actions; transports (AG-UI, A2A) → `DataPart` | A2UI spec + official renderer fixtures | ⬜ |
+| MCP Apps host (`ai-elements-mcp-apps`): `ui://` resources, sandboxed WebView, `ui/*` JSON-RPC bridge | MCP Apps extension + official `ext-apps` SDK fixtures | ⬜ |
+
 ### W5 · Demo app
 
 The demo is a showcase of both modes, switchable per conversation:

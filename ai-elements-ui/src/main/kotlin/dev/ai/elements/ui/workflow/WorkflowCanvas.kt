@@ -1,5 +1,8 @@
 package dev.ai.elements.ui.workflow
 
+import androidx.compose.ui.layout.Layout
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -94,7 +97,11 @@ import kotlinx.serialization.json.contentOrNull
 /** Color role of a [CanvasNode]. */
 enum class NodeTone { PRIMARY, SECONDARY, TERTIARY, ERROR, NEUTRAL }
 
-/** A node on a [WorkflowCanvas] (AI Elements `<Node>`); [position] is its top-left in canvas dp. */
+/**
+ * A node on a [WorkflowCanvas] (AI Elements `<Node>`); [position] is its top-left in canvas dp.
+ * [size] overrides the canvas' node size for this node; [data] carries your own payload for a
+ * custom `nodeContent`.
+ */
 data class CanvasNode(
     val id: String,
     val title: String,
@@ -103,15 +110,30 @@ data class CanvasNode(
     val icon: ImageVector? = null,
     val tone: NodeTone = NodeTone.PRIMARY,
     val status: StepStatus? = null,
+    val size: DpSize? = null,
+    val data: Any? = null,
 )
 
-/** A connection between two nodes (AI Elements `<Edge>`); animated edges show flowing dashes. */
-data class CanvasEdge(val from: String, val to: String, val label: String? = null, val animated: Boolean = false)
+/**
+ * A connection between two nodes (AI Elements `<Edge>`): [animated] edges show flowing dashes,
+ * [temporary] edges are dashed and muted (e.g. a proposed or pending link).
+ */
+data class CanvasEdge(
+    val from: String,
+    val to: String,
+    val label: String? = null,
+    val animated: Boolean = false,
+    val temporary: Boolean = false,
+)
 
 /**
  * A pannable, pinch-zoomable node graph (AI Elements `<Canvas>`): dot-grid
  * background, curved edges with arrowheads and optional labels, and zoom /
- * fit controls. Edges run from a node's bottom to the next node's top.
+ * fit controls (`<Controls>`). Edges run from a node's bottom to the next node's top.
+ *
+ * Extension points: [nodeContent] replaces the default node card (`<Node>`), [nodeToolbar]
+ * floats above the selected node (`<Toolbar>`; tapping a node selects it, tapping it again
+ * clears), and [panel] overlays the canvas (`<Panel>`; align it with `Modifier.align`).
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -122,7 +144,11 @@ fun WorkflowCanvas(
     nodeSize: DpSize = DpSize(200.dp, 64.dp),
     showControls: Boolean = true,
     onNodeClick: ((CanvasNode) -> Unit)? = null,
+    nodeContent: (@Composable (CanvasNode) -> Unit)? = null,
+    nodeToolbar: (@Composable (CanvasNode) -> Unit)? = null,
+    panel: @Composable BoxScope.() -> Unit = {},
 ) {
+    var selected by remember { mutableStateOf<String?>(null) }
     val density = LocalDensity.current
     val scheme = MaterialTheme.colorScheme
     var scale by remember { mutableFloatStateOf(1f) }
@@ -132,10 +158,9 @@ fun WorkflowCanvas(
     val phase by rememberInfiniteTransition(label = "edges").animateFloat(
         0f, 24f, infiniteRepeatable(tween(900, easing = LinearEasing)), label = "dash",
     )
-    val nodeW = with(density) { nodeSize.width.toPx() }
-    val nodeH = with(density) { nodeSize.height.toPx() }
     val byId = nodes.associateBy { it.id }
     fun positionPx(node: CanvasNode) = with(density) { Offset(node.position.x.toPx(), node.position.y.toPx()) }
+    fun sizePx(node: CanvasNode) = with(density) { (node.size ?: nodeSize).let { Size(it.width.toPx(), it.height.toPx()) } }
 
     BoxWithConstraints(
         modifier
@@ -148,8 +173,8 @@ fun WorkflowCanvas(
             if (nodes.isEmpty()) return
             val left = nodes.minOf { positionPx(it).x }
             val top = nodes.minOf { positionPx(it).y }
-            val right = nodes.maxOf { positionPx(it).x } + nodeW
-            val bottom = nodes.maxOf { positionPx(it).y } + nodeH
+            val right = nodes.maxOf { positionPx(it).x + sizePx(it).width }
+            val bottom = nodes.maxOf { positionPx(it).y + sizePx(it).height }
             val pad = with(density) { 32.dp.toPx() }
             scale = minOf((viewport.width - 2 * pad) / (right - left), (viewport.height - 2 * pad) / (bottom - top), 1.5f).coerceIn(0.3f, 3f)
             offset = Offset(
@@ -189,20 +214,28 @@ fun WorkflowCanvas(
             edges.forEach { edge ->
                 val from = byId[edge.from] ?: return@forEach
                 val to = byId[edge.to] ?: return@forEach
-                val start = offset + (positionPx(from) + Offset(nodeW / 2, nodeH)) * scale
-                val end = offset + (positionPx(to) + Offset(nodeW / 2, 0f)) * scale
+                val start = offset + (positionPx(from) + Offset(sizePx(from).width / 2, sizePx(from).height)) * scale
+                val end = offset + (positionPx(to) + Offset(sizePx(to).width / 2, 0f)) * scale
                 val bend = (end.y - start.y).coerceAtLeast(40f) / 2
                 val path = Path().apply {
                     moveTo(start.x, start.y)
                     cubicTo(start.x, start.y + bend, end.x, end.y - bend, end.x, end.y)
                 }
-                val color = if (edge.animated) scheme.primary else scheme.outline
+                val color = when {
+                    edge.animated -> scheme.primary
+                    edge.temporary -> scheme.outlineVariant
+                    else -> scheme.outline
+                }
                 drawPath(
                     path,
                     color,
                     style = Stroke(
                         width = 2.dp.toPx() * scale.coerceAtMost(1.5f),
-                        pathEffect = if (edge.animated) PathEffect.dashPathEffect(floatArrayOf(12f, 12f), -phase) else null,
+                        pathEffect = when {
+                            edge.animated -> PathEffect.dashPathEffect(floatArrayOf(12f, 12f), -phase)
+                            edge.temporary -> PathEffect.dashPathEffect(floatArrayOf(6f, 8f))
+                            else -> null
+                        },
                     ),
                 )
                 val arrow = 6.dp.toPx() * scale
@@ -233,19 +266,44 @@ fun WorkflowCanvas(
 
         nodes.forEach { node ->
             val p = offset + positionPx(node) * scale
-            NodeCard(
-                node = node,
-                onClick = onNodeClick?.let { { it(node) } },
-                modifier = Modifier
-                    .offset { IntOffset(p.x.roundToInt(), p.y.roundToInt()) }
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                        transformOrigin = TransformOrigin(0f, 0f)
+            val placed = Modifier
+                .offset { IntOffset(p.x.roundToInt(), p.y.roundToInt()) }
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    transformOrigin = TransformOrigin(0f, 0f)
+                }
+                .requiredSize(node.size ?: nodeSize)
+            val select = {
+                selected = if (selected == node.id) null else node.id
+                onNodeClick?.invoke(node)
+                Unit
+            }
+            if (nodeContent != null) {
+                Box(placed.testTag("canvas-node-${node.id}").clickable(onClick = select)) { nodeContent(node) }
+            } else {
+                NodeCard(node = node, onClick = select, modifier = placed.testTag("canvas-node-${node.id}"))
+            }
+        }
+
+        // The selected node's toolbar, centred just above it (it does not scale with the canvas).
+        val chosen = selected?.let(byId::get)
+        if (chosen != null && nodeToolbar != null) {
+            val top = offset + positionPx(chosen) * scale
+            val width = sizePx(chosen).width * scale
+            Layout(
+                content = { Box(Modifier.testTag("canvas-node-toolbar")) { nodeToolbar(chosen) } },
+                measurePolicy = { measurables, constraints ->
+                    val bar = measurables.single().measure(constraints.copy(minWidth = 0, minHeight = 0))
+                    layout(constraints.maxWidth, constraints.maxHeight) {
+                        val gap = 8.dp.roundToPx()
+                        bar.place((top.x + width / 2 - bar.width / 2).roundToInt(), (top.y - bar.height - gap).roundToInt())
                     }
-                    .requiredSize(nodeSize),
+                },
             )
         }
+
+        panel()
 
         if (showControls) {
             Column(

@@ -52,6 +52,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Assert.assertTrue
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.size
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -82,6 +84,33 @@ class ElementsTest {
         compose.onNodeWithTag("prompt-input").assert(
             androidx.compose.ui.test.SemanticsMatcher.expectValue(androidx.compose.ui.semantics.SemanticsProperties.EditableText, androidx.compose.ui.text.AnnotatedString("")),
         )
+    }
+
+    @Test fun workflowCanvas_customNodesToolbarAndPanel() {
+        val nodes = listOf(
+            dev.ai.elements.ui.workflow.CanvasNode("a", "Plan", data = "custom-a"),
+            dev.ai.elements.ui.workflow.CanvasNode("b", "Act", position = androidx.compose.ui.unit.DpOffset(0.dp, 160.dp), size = androidx.compose.ui.unit.DpSize(240.dp, 80.dp)),
+        )
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                dev.ai.elements.ui.workflow.WorkflowCanvas(
+                    nodes = nodes,
+                    edges = listOf(dev.ai.elements.ui.workflow.CanvasEdge("a", "b", temporary = true)),
+                    modifier = androidx.compose.ui.Modifier.size(360.dp, 480.dp),
+                    nodeContent = { node -> androidx.compose.material3.Text("Custom ${node.data ?: node.title}") },
+                    nodeToolbar = { node -> androidx.compose.material3.Text("Toolbar for ${node.id}") },
+                    panel = { androidx.compose.material3.Text("Panel", androidx.compose.ui.Modifier.align(androidx.compose.ui.Alignment.TopStart)) },
+                )
+            }
+        }
+        compose.onNodeWithText("Custom custom-a").assertExists()
+        compose.onNodeWithText("Custom Act").assertExists()
+        compose.onNodeWithText("Panel").assertExists()
+        compose.onNodeWithTag("canvas-node-toolbar").assertDoesNotExist()
+        compose.onNodeWithTag("canvas-node-a").performClick()
+        compose.onNodeWithText("Toolbar for a").assertExists()
+        compose.onNodeWithTag("canvas-node-a").performClick()
+        compose.onNodeWithTag("canvas-node-toolbar").assertDoesNotExist()
     }
 
     @Test fun theme_acceptsABrandColorScheme() {
