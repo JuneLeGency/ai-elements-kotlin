@@ -16,6 +16,12 @@ interface Capability {
 
     /** Tools the capability contributes. */
     suspend fun tools(): List<AgentTool> = emptyList()
+
+    /**
+     * Per-turn context read when a turn starts (e.g. a memory snapshot), placed after the
+     * static [instructions]. It may change between turns, so keep it small and at the end.
+     */
+    suspend fun context(): String? = null
 }
 
 /** A capability made of fixed [tools] and [instructions]. */
@@ -23,9 +29,10 @@ class StaticCapability(override val instructions: String? = null, private val to
     override suspend fun tools(): List<AgentTool> = tools
 }
 
-/** [base] followed by every capability's instructions, separated by blank lines. */
-fun composeInstructions(base: String, capabilities: List<Capability>): String =
-    (listOf(base) + capabilities.mapNotNull { it.instructions }).filter { it.isNotBlank() }.joinToString("\n\n")
+/** [base], every capability's static instructions, then their per-turn [Capability.context], separated by blank lines. */
+suspend fun composeInstructions(base: String, capabilities: List<Capability>): String =
+    (listOf(base) + capabilities.mapNotNull { it.instructions } + capabilities.mapNotNull { it.context() })
+        .filter { it.isNotBlank() }.joinToString("\n\n")
 
 /** All tools of [capabilities]; the first tool of a given name wins. */
 suspend fun collectTools(capabilities: List<Capability>): List<AgentTool> =

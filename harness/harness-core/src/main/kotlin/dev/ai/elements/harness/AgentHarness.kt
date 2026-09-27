@@ -7,6 +7,7 @@ import dev.ai.elements.core.agent.Capability
 import dev.ai.elements.core.agent.SubAgent
 import dev.ai.elements.core.agent.SubAgents
 import dev.ai.elements.core.agent.collectTools
+import dev.ai.elements.core.agent.composeInstructions
 import dev.ai.elements.core.auth.TokenSource
 import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.core.chat.deferredBackend
@@ -74,7 +75,7 @@ class AgentHarness(
 
     private suspend fun run(model: ModelBinding, ownInstructions: String, approver: ToolApprover, depth: Int): ChatBackend {
         val all = capabilities() + listOfNotNull(if (depth < maxDepth) subAgents(depth) else null)
-        val instructions = (listOf(ownInstructions) + all.mapNotNull { it.instructions }).filter { it.isNotBlank() }.joinToString("\n\n")
+        val instructions = composeInstructions(ownInstructions, all)
         return model.backend(collectTools(all), instructions, approver)
     }
 

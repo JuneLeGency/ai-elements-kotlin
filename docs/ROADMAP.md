@@ -67,10 +67,10 @@ reference only, never copied).
 | Artifact | Capability | OpenMinis counterpart | Status |
 |---|---|---|---|
 | `harness-core` | `AgentHarness`: model + capabilities → `ChatBackend`; local / remote sub-agents, `maxDepth`; `ModelBinding` for any provider | agent loop | ✅ unit tests; the demo runs on it |
-| `harness-filesystem` | Workspace + SAF-mounted folders: `read_file`, `write_file`, `edit_file`, `list_directory`, `search_files`, `find_files`, `create_directory`, `file_info` | file tools, mounted folders | ⬜ |
+| `harness-filesystem` | Workspace + SAF-mounted folders: `read_file`, `write_file`, `edit_file`, `list_directory`, `search_files`, `find_files`, `create_directory`, `file_info` | file tools, mounted folders | ✅ workspace (5 tests: format, hashes, sandbox, protected, approvals); SAF mounts ⬜ |
 | `harness-shell` | `run_command`, `start_command`, `check_command`, `stop_command` over a pluggable `ShellRuntime` | `shell_execute` | ⬜ |
 | `harness-sandbox-proot` | Alpine Linux via upstream proot (separate process, GPL-2 binary + source offer), rootfs downloaded on first use | proot sandbox | ⬜ |
-| `harness-memory` | `write_memory`, `read_memory`, `delete_memory`, `search_memory` (file store) | memory tools | ⬜ |
+| `harness-memory` | `write_memory`, `read_memory`, `delete_memory`, `search_memory` (file store) | memory tools | ✅ 4 tests; `<memory>` injection via `Capability.context()` |
 | `harness-planning` | `write_plan`, `read_plan`, `add_task`, `update_task_status(es)`, `remove_task` | — | ⬜ |
 | `harness-browser` | WebView browsing / page reading / actions | `browser_use` | ⬜ |
 | `harness-device` | Clipboard, calendar, contacts, notifications, location, alarms (runtime permissions) | device integrations | ⬜ |
