@@ -1,0 +1,176 @@
+data: {"type":"start"}
+
+data: {"type":"start-step"}
+
+data: {"type":"tool-input-start","toolCallId":"pyd_ai_171e15d0414c4a7ab47df74f9958cdd1","toolName":"confirm_booking"}
+
+data: {"type":"tool-input-delta","toolCallId":"pyd_ai_171e15d0414c4a7ab47df74f9958cdd1","inputTextDelta":"{}"}
+
+data: {"type":"tool-input-available","toolCallId":"pyd_ai_171e15d0414c4a7ab47df74f9958cdd1","toolName":"confirm_booking","input":{}}
+
+data: {"type":"tool-output-available","toolCallId":"pyd_ai_171e15d0414c4a7ab47df74f9958cdd1","output":"Booked a deluxe room at Hotel Lumen for Jane, checking in 2026-10-01."}
+
+data: {"type":"finish-step"}
+
+data: {"type":"start-step"}
+
+data: {"type":"text-start","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"## Agent run","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":" complete\n\nT","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"he request w","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"ent **app → ","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"agent server","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":" → PydanticA","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"I agent → to","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"ol → model**","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":" and\nback as","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":" a UI Messag","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"e Stream. Th","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"e tool repor","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"ted: `Booked","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":" a deluxe ro","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"om at Hotel ","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"Lumen for Ja","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"ne, checking","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":" in 2026-10-","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"01.`.\n\n| Sta","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"ge | Protoco","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"l |\n|---|---","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"|\n| App → se","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"rver | `POST","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":" /api/chat` ","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"(AI SDK `UIM","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"essage[]`) |","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"\n| Server → ","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"app | SSE UI","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":" Message Str","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"eam v1 |\n| A","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"gent → tools","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":" | PydanticA","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"I function t","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"ools |\n\n```m","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"ermaid\nseque","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"nceDiagram\n ","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"   participa","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"nt App as An","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"droid app\n  ","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"  participan","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"t S as Agent","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":" server\n    ","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"participant ","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"A as Pydanti","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"cAI agent\n  ","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"  participan","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"t T as get_c","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"urrent_time\n","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"    App->>S:","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":" POST /api/c","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"hat\n    S->>","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"A: run(messa","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"ges)\n    A->","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":">T: call()\n ","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"   T-->>A: B","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"ooked a delu","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"xe room at H","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"otel Lumen f","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"or Jane, che","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"cking in 202","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"6-10-01.\n   ","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":" A-->>S: tex","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"t deltas\n   ","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":" S-->>App: S","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"SE text-delt","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"a\n```\n\n```ko","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"tlin\nval con","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"troller = Ch","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"atController","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"(backend)\nco","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"ntroller.sen","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"d(\"Hello\")\n`","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-delta","delta":"``\n","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"text-end","id":"31d251f2-df2f-4401-a7d0-bfd098fc5fe7"}
+
+data: {"type":"message-metadata","messageMetadata":{"usage":{"inputTokens":100,"outputTokens":186}}}
+
+data: {"type":"message-metadata","messageMetadata":{"pydantic_ai":{"timestamp":"2026-09-27T05:37:47.420819Z"}}}
+
+data: {"type":"finish-step"}
+
+data: {"type":"finish"}
+
+data: [DONE]
+

@@ -63,7 +63,9 @@ from pydantic_ai.ui.vercel_ai import VercelAIAdapter
 from pydantic_ai.ui.vercel_ai.response_types import DataChunk, MessageMetadataChunk, SourceUrlChunk
 
 import a2ui_demo
+from a2a.types import AgentExtension, AgentSkill
 from a2a_agent import a2a_routes
+from starlette.routing import Mount
 from mcp_server import mcp
 
 BASE_URL = os.environ.get("AGENT_BASE_URL", os.environ.get("CLIPROXY_BASE_URL", "http://localhost:8317/v1"))
@@ -222,8 +224,11 @@ class A2uiSurface(CustomEvent, name="a2ui"):
                                          content={"a2ui_operations": self.messages}, replace=True)
         return DataChunk(type="data-a2ui", id=f"a2ui-{self.surface}", data=self.messages)
 
+    def to_a2a_parts(self):
+        # A2UI A2A extension: a DataPart holding the message list, tagged with the A2UI media type.
+        return "a2ui", [a2ui_demo.a2a_part(self.messages)]
 
-@agent.tool
+
 async def show_booking_form(ctx: RunContext[RunState], city: str) -> str:
     """Show the user an interactive hotel booking form for a city (name, check-in date, room)."""
     messages = a2ui_demo.booking_form(city)
@@ -232,7 +237,6 @@ async def show_booking_form(ctx: RunContext[RunState], city: str) -> str:
     return f"Showed the booking form for {city} (surface {surface}); wait for the user to submit it."
 
 
-@agent.tool
 async def confirm_booking(ctx: RunContext[RunState], guest: str | None = None, date: str | None = None, room: str | None = None) -> str:
     """Confirm a hotel booking the user submitted from the booking form."""
     submitted = (ctx.deps.a2ui_action or {}).get("context") or {}
@@ -242,9 +246,21 @@ async def confirm_booking(ctx: RunContext[RunState], guest: str | None = None, d
     return f"Booked a {room} room at Hotel Lumen for {guest}, checking in {date}."
 
 
-@agent.instructions
 def a2ui_action_instructions(ctx: RunContext[RunState]) -> str | None:
     return a2ui_demo.describe(ctx.deps.a2ui_action) + " Confirm it with `confirm_booking`." if ctx.deps.a2ui_action else None
+
+
+# The same tools on the main agent and on a small A2A concierge (served at /concierge).
+concierge = Agent(
+    name="concierge",
+    description="Books hotels with an interactive form (A2UI).",
+    instructions="Help the user book a hotel: show the booking form, then confirm what they submit.",
+    deps_type=RunState,
+)
+for _a in (agent, concierge):
+    _a.tool(show_booking_form)
+    _a.tool(confirm_booking)
+    _a.instructions(a2ui_action_instructions)
 
 
 # A tiny local knowledge base, so citations work offline and deterministically.
@@ -348,7 +364,7 @@ _DEMO_SCRIPTS = [
 def _user_prompt(messages: list[ModelMessage]) -> str:
     """The latest user prompt (earlier turns must not re-trigger their capability)."""
     for message in reversed(messages):
-        for part in getattr(message, "parts", []):
+        for part in reversed(getattr(message, "parts", [])):
             if type(part).__name__ == "UserPromptPart" and isinstance(part.content, str):
                 return part.content.lower()
     return ""
@@ -356,11 +372,15 @@ def _user_prompt(messages: list[ModelMessage]) -> str:
 
 def _demo_call(messages: list[ModelMessage], info: AgentInfo) -> ToolCallPart | None:
     """The scripted model's one tool call: a keyword-selected harness tool, else the clock or docs search."""
-    # One tool call per user turn: stop once a result came back after the latest prompt.
-    # (A request can hold the previous turn's tool results *before* the new prompt, as AG-UI history maps.)
+    # One tool call per user turn: stop once a result came back after the latest prompt (by part:
+    # AG-UI history can put the previous turn's tool result before the new prompt in one request),
+    # or once this run has called a tool (capabilities such as Planning add prompts after results).
     parts = [p for m in messages for p in getattr(m, "parts", [])]
     last_prompt = max((i for i, p in enumerate(parts) if type(p).__name__ == "UserPromptPart"), default=0)
     if any(isinstance(p, (ToolReturnPart, RetryPromptPart)) for p in parts[last_prompt:]):
+        return None
+    run_id = getattr(messages[-1], "run_id", None) if messages else None
+    if run_id and any(isinstance(m, ModelResponse) and m.run_id == run_id and m.tool_calls for m in messages):
         return None
     names = {t.name for t in info.function_tools}
     prompt = _user_prompt(messages)
@@ -449,7 +469,17 @@ mcp_app = mcp.streamable_http_app(
 app.router.routes.extend(mcp_app.routes)
 
 # A2A: agent card at /.well-known/agent-card.json, JSON-RPC at /a2a.
-app.router.routes.extend(a2a_routes(researcher, lambda: resolve_model(DEFAULT_MODEL), PUBLIC_URL, deps=RunState))
+app.router.routes.extend(a2a_routes(researcher, lambda: resolve_model(DEFAULT_MODEL), PUBLIC_URL, deps=lambda _: RunState()))
+# A second A2A agent that answers with A2UI (A2UI A2A extension), under /concierge.
+app.router.routes.append(Mount("/concierge", routes=a2a_routes(
+    concierge, lambda: resolve_model(DEFAULT_MODEL), f"{PUBLIC_URL}/concierge",
+    deps=lambda message: RunState(protocol="a2a", a2ui_action=a2ui_demo.action_from_a2a(message)),
+    name="Hotel concierge", description="Books hotels with an interactive form.",
+    skills=[AgentSkill(id="book-hotel", name="Book a hotel", description="Shows a booking form and confirms the booking.",
+                       tags=["hotel", "a2ui"], examples=["Find me a hotel in Kyoto"])],
+    extensions=[AgentExtension(uri=a2ui_demo.A2A_EXTENSION, description="Renders A2UI v1.0 surfaces.",
+                               params={"supportedCatalogIds": [a2ui_demo.BASIC_CATALOG]})],
+)))
 
 
 @app.post("/api/chat")

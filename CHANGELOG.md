@@ -24,8 +24,9 @@
   `A2uiSurfaceView`, extensible `A2uiCatalog`; passes the official conformance suite) and
   `JsxPreview`. A2UI rides each transport's binding: AG-UI `a2ui-surface` activities and
   `forwardedProps.a2uiAction`, A2A `application/a2ui+json` parts, AI SDK `data-a2ui` parts.
-  The reference server's `hotel` script sends a booking form; the demo renders it and the
-  round trip runs on the emulator over AG-UI and AI SDK.
+  The reference server's `hotel` script sends a booking form (validated with the official
+  `a2ui-core`); the demo renders it and the round trip runs on the emulator over AG-UI and AI SDK,
+  and live over A2A against the server's A2UI concierge (`/concierge`).
 - MCP authorization verified live end to end against the official `mcp` SDK OAuth server
   (`server/mcp_auth_server.py`, `LiveMcpOAuthTest`).
 - New artifact `ai-elements-chat` (models, `ChatEvent`, `ChatBackend`, `ChatController`; same packages):

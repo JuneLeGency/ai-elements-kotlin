@@ -1,0 +1,182 @@
+data: {"type":"start"}
+
+data: {"type":"start-step"}
+
+data: {"type":"tool-input-start","toolCallId":"pyd_ai_0c263f94d4634e3f9014ba9038319cb6","toolName":"show_booking_form"}
+
+data: {"type":"tool-input-delta","toolCallId":"pyd_ai_0c263f94d4634e3f9014ba9038319cb6","inputTextDelta":"{\"city\":\"Kyoto\"}"}
+
+data: {"type":"tool-input-available","toolCallId":"pyd_ai_0c263f94d4634e3f9014ba9038319cb6","toolName":"show_booking_form","input":{"city":"Kyoto"}}
+
+data: {"type":"data-a2ui","id":"a2ui-booking-kyoto","data":[{"version":"v1.0","createSurface":{"surfaceId":"booking-kyoto","catalogId":"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json","sendDataModel":true}},{"version":"v1.0","updateComponents":{"surfaceId":"booking-kyoto","components":[{"id":"root","component":"Card","child":"form"},{"id":"form","component":"Column","children":["title","subtitle","guest","date","room","actions"]},{"id":"title","component":"Text","text":{"call":"formatString","args":{"value":"## Stay in ${/city}"}}},{"id":"subtitle","component":"Text","text":"Hotel Lumen · from $180 / night","variant":"caption"},{"id":"guest","component":"TextField","label":"Guest name","value":{"path":"/booking/guest"},"checks":[{"condition":{"call":"required","args":{"value":{"path":"/booking/guest"}}},"message":"Enter the guest's name"}]},{"id":"date","component":"DateTimeInput","label":"Check-in","value":{"path":"/booking/date"},"enableDate":true},{"id":"room","component":"ChoicePicker","label":"Room","variant":"mutuallyExclusive","displayStyle":"chips","options":[{"label":"Standard","value":"standard"},{"label":"Deluxe","value":"deluxe"},{"label":"Suite","value":"suite"}],"value":{"path":"/booking/room"}},{"id":"actions","component":"Row","children":["book"],"justify":"end"},{"id":"book_label","component":"Text","text":"Book"},{"id":"book","component":"Button","child":"book_label","variant":"primary","checks":[{"condition":{"call":"required","args":{"value":{"path":"/booking/guest"}}},"message":"Enter the guest's name"}],"action":{"event":{"name":"book_hotel","userMessage":{"call":"formatString","args":{"value":"Book Hotel Lumen for ${/booking/guest}"}},"context":{"city":{"path":"/city"},"guest":{"path":"/booking/guest"},"date":{"path":"/booking/date"},"room":{"path":"/booking/room"}}}}}]}},{"version":"v1.0","updateDataModel":{"surfaceId":"booking-kyoto","value":{"city":"Kyoto","booking":{"guest":"","date":"2026-10-01","room":["deluxe"]}}}}]}
+
+data: {"type":"tool-output-available","toolCallId":"pyd_ai_0c263f94d4634e3f9014ba9038319cb6","output":"Showed the booking form for Kyoto (surface booking-kyoto); wait for the user to submit it."}
+
+data: {"type":"finish-step"}
+
+data: {"type":"start-step"}
+
+data: {"type":"text-start","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"## Agent run","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" complete\n\nT","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"he request w","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"ent **app → ","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"agent server","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" → PydanticA","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"I agent → to","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"ol → model**","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" and\nback as","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" a UI Messag","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"e Stream. Th","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"e tool repor","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"ted: `Showed","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" the booking","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" form for Ky","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"oto (surface","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" booking-kyo","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"to); wait fo","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"r the user t","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"o `.\n\n| Stag","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"e | Protocol","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" |\n|---|---|","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"\n| App → ser","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"ver | `POST ","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"/api/chat` (","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"AI SDK `UIMe","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"ssage[]`) |\n","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"| Server → a","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"pp | SSE UI ","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"Message Stre","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"am v1 |\n| Ag","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"ent → tools ","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"| PydanticAI","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" function to","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"ols |\n\n```me","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"rmaid\nsequen","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"ceDiagram\n  ","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"  participan","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"t App as And","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"roid app\n   ","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" participant","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" S as Agent ","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"server\n    p","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"articipant A","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" as Pydantic","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"AI agent\n   ","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" participant","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" T as get_cu","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"rrent_time\n ","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"   App->>S: ","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"POST /api/ch","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"at\n    S->>A","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":": run(messag","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"es)\n    A->>","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"T: call()\n  ","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"  T-->>A: Sh","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"owed the boo","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"king form fo","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"r Kyoto (sur","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"face booking","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"-kyoto); wai","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"t for the us","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"er to \n    A","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"-->>S: text ","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"deltas\n    S","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"-->>App: SSE","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":" text-delta\n","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"```\n\n```kotl","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"in\nval contr","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"oller = Chat","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"Controller(b","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"ackend)\ncont","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"roller.send(","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"\"Hello\")\n```","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-delta","delta":"\n","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"text-end","id":"fec00154-ef2d-493b-a7b1-3c3b0c514752"}
+
+data: {"type":"message-metadata","messageMetadata":{"usage":{"inputTokens":100,"outputTokens":189}}}
+
+data: {"type":"message-metadata","messageMetadata":{"pydantic_ai":{"timestamp":"2026-09-27T05:37:45.640055Z"}}}
+
+data: {"type":"finish-step"}
+
+data: {"type":"finish"}
+
+data: [DONE]
+

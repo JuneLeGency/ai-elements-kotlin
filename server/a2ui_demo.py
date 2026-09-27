@@ -6,7 +6,8 @@ with the official `a2ui-core` SDK. Each protocol carries them on its A2UI bindin
 - AG-UI: an `a2ui-surface` ACTIVITY_SNAPSHOT with `a2ui_operations` (as `@ag-ui/a2ui-middleware`);
   a user action returns in `RunAgentInput.forwardedProps.a2uiAction.userAction`.
 - AI SDK: a `data-a2ui` part; a user action returns as a `data-a2ui` part of the user message.
-- A2A: a DataPart with `metadata.mimeType = "application/a2ui+json"` (A2UI A2A extension).
+- A2A: a DataPart with `metadata.mimeType = "application/a2ui+json"` (A2UI A2A extension), both ways;
+  the concierge's card lists the extension.
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ from typing import Any
 VERSION = "v1.0"
 BASIC_CATALOG = "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json"
 MEDIA_TYPE = "application/a2ui+json"
+A2A_EXTENSION = "https://a2ui.org/a2a-extension/a2ui/v1.0"
 
 
 def booking_form(city: str) -> list[dict[str, Any]]:
@@ -60,6 +62,23 @@ def action_from_ui_messages(body: dict[str, Any]) -> dict[str, Any] | None:
             if part.get("type") == "data-a2ui":
                 return next((m["action"] for m in part.get("data") or [] if isinstance(m, dict) and "action" in m), None)
         return None
+    return None
+
+
+def a2a_part(messages: list[dict[str, Any]]):
+    """An A2A DataPart carrying A2UI messages (A2UI A2A extension §"Data encoding")."""
+    from a2a.types import Part
+    from google.protobuf import struct_pb2
+    from google.protobuf.json_format import ParseDict
+
+    return Part(data=ParseDict(messages, struct_pb2.Value()), metadata=ParseDict({"mimeType": MEDIA_TYPE}, struct_pb2.Struct()))
+
+
+def action_from_a2a(message: dict[str, Any]) -> dict[str, Any] | None:
+    """The A2UI user action in an A2A message (as JSON): an `application/a2ui+json` DataPart."""
+    for part in message.get("parts") or []:
+        if (part.get("metadata") or {}).get("mimeType") == MEDIA_TYPE:
+            return next((m["action"] for m in part.get("data") or [] if isinstance(m, dict) and "action" in m), None)
     return None
 
 

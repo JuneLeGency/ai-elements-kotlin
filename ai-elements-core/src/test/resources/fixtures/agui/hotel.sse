@@ -1,0 +1,172 @@
+data: {"type":"RUN_STARTED","timestamp":1790487462221,"threadId":"t","runId":"r1"}
+
+data: {"type":"TEXT_MESSAGE_START","timestamp":1790487462232,"messageId":"8a06ab26-a7d9-44de-abbb-2fdb375d9f77"}
+
+data: {"type":"TEXT_MESSAGE_END","timestamp":1790487462232,"messageId":"8a06ab26-a7d9-44de-abbb-2fdb375d9f77"}
+
+data: {"type":"TOOL_CALL_START","timestamp":1790487462232,"toolCallId":"pyd_ai_8ad6e07edcdb41ff85d7d2e23000b0e1","toolCallName":"show_booking_form","parentMessageId":"8a06ab26-a7d9-44de-abbb-2fdb375d9f77"}
+
+data: {"type":"TOOL_CALL_ARGS","timestamp":1790487462232,"toolCallId":"pyd_ai_8ad6e07edcdb41ff85d7d2e23000b0e1","delta":"{\"city\":\"Kyoto\"}"}
+
+data: {"type":"TOOL_CALL_END","timestamp":1790487462233,"toolCallId":"pyd_ai_8ad6e07edcdb41ff85d7d2e23000b0e1"}
+
+data: {"type":"ACTIVITY_SNAPSHOT","timestamp":1790487462233,"messageId":"a2ui-surface-booking-kyoto","activityType":"a2ui-surface","content":{"a2ui_operations":[{"version":"v1.0","createSurface":{"surfaceId":"booking-kyoto","catalogId":"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json","sendDataModel":true}},{"version":"v1.0","updateComponents":{"surfaceId":"booking-kyoto","components":[{"id":"root","component":"Card","child":"form"},{"id":"form","component":"Column","children":["title","subtitle","guest","date","room","actions"]},{"id":"title","component":"Text","text":{"call":"formatString","args":{"value":"## Stay in ${/city}"}}},{"id":"subtitle","component":"Text","text":"Hotel Lumen · from $180 / night","variant":"caption"},{"id":"guest","component":"TextField","label":"Guest name","value":{"path":"/booking/guest"},"checks":[{"condition":{"call":"required","args":{"value":{"path":"/booking/guest"}}},"message":"Enter the guest's name"}]},{"id":"date","component":"DateTimeInput","label":"Check-in","value":{"path":"/booking/date"},"enableDate":true},{"id":"room","component":"ChoicePicker","label":"Room","variant":"mutuallyExclusive","displayStyle":"chips","options":[{"label":"Standard","value":"standard"},{"label":"Deluxe","value":"deluxe"},{"label":"Suite","value":"suite"}],"value":{"path":"/booking/room"}},{"id":"actions","component":"Row","children":["book"],"justify":"end"},{"id":"book_label","component":"Text","text":"Book"},{"id":"book","component":"Button","child":"book_label","variant":"primary","checks":[{"condition":{"call":"required","args":{"value":{"path":"/booking/guest"}}},"message":"Enter the guest's name"}],"action":{"event":{"name":"book_hotel","userMessage":{"call":"formatString","args":{"value":"Book Hotel Lumen for ${/booking/guest}"}},"context":{"city":{"path":"/city"},"guest":{"path":"/booking/guest"},"date":{"path":"/booking/date"},"room":{"path":"/booking/room"}}}}}]}},{"version":"v1.0","updateDataModel":{"surfaceId":"booking-kyoto","value":{"city":"Kyoto","booking":{"guest":"","date":"2026-10-01","room":["deluxe"]}}}}]},"replace":true}
+
+data: {"type":"TOOL_CALL_RESULT","timestamp":1790487462233,"messageId":"5423328f-c03a-4686-beb8-a227f3859c7a","toolCallId":"pyd_ai_8ad6e07edcdb41ff85d7d2e23000b0e1","content":"Showed the booking form for Kyoto (surface booking-kyoto); wait for the user to submit it.","role":"tool"}
+
+data: {"type":"TEXT_MESSAGE_START","timestamp":1790487462256,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462256,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"## Agent run"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462277,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" complete\n\nT"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462298,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"he request w"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462319,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"ent **app → "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462342,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"agent server"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462364,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" → PydanticA"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462385,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"I agent → to"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462408,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"ol → model**"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462430,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" and\nback as"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462453,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" a UI Messag"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462475,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"e Stream. Th"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462498,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"e tool repor"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462520,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"ted: `Showed"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462543,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" the booking"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462564,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" form for Ky"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462587,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"oto (surface"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462608,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" booking-kyo"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462629,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"to); wait fo"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462651,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"r the user t"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462674,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"o `.\n\n| Stag"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462695,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"e | Protocol"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462717,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" |\n|---|---|"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462739,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"\n| App → ser"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462761,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"ver | `POST "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462783,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"/api/chat` ("}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462804,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"AI SDK `UIMe"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462826,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"ssage[]`) |\n"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462847,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"| Server → a"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462869,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"pp | SSE UI "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462890,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"Message Stre"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462913,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"am v1 |\n| Ag"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462936,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"ent → tools "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462958,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"| PydanticAI"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487462980,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" function to"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463002,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"ols |\n\n```me"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463024,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"rmaid\nsequen"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463046,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"ceDiagram\n  "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463068,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"  participan"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463090,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"t App as And"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463111,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"roid app\n   "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463134,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" participant"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463155,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" S as Agent "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463178,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"server\n    p"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463200,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"articipant A"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463222,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" as Pydantic"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463244,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"AI agent\n   "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463265,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" participant"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463288,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" T as get_cu"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463310,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"rrent_time\n "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463332,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"   App->>S: "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463354,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"POST /api/ch"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463377,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"at\n    S->>A"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463398,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":": run(messag"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463420,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"es)\n    A->>"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463443,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"T: call()\n  "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463465,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"  T-->>A: Sh"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463486,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"owed the boo"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463508,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"king form fo"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463530,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"r Kyoto (sur"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463552,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"face booking"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463575,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"-kyoto); wai"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463596,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"t for the us"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463618,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"er to \n    A"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463640,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"-->>S: text "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463661,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"deltas\n    S"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463682,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"-->>App: SSE"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463703,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":" text-delta\n"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463725,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"```\n\n```kotl"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463747,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"in\nval contr"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463768,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"oller = Chat"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463790,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"Controller(b"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463811,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"ackend)\ncont"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463833,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"roller.send("}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463854,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"\"Hello\")\n```"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790487463876,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d","delta":"\n"}
+
+data: {"type":"TEXT_MESSAGE_END","timestamp":1790487463877,"messageId":"fcd6e8aa-a34d-426f-9d10-6b4ec4fd819d"}
+
+data: {"type":"RUN_FINISHED","timestamp":1790487463880,"threadId":"t","runId":"r1","outcome":{"type":"success"}}
+

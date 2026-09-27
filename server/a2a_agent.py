@@ -6,7 +6,8 @@ JSON-RPC:    POST /a2a   (A2A 1.0, plus 0.3 compatibility)
 The executor streams the Pydantic AI run as A2A events: a `working` status,
 the answer as appended artifact chunks, then `completed`. If the request is
 empty it asks for input (`input-required`), so clients can exercise
-multi-turn tasks.
+multi-turn tasks. Tools' custom events that define `to_a2a_parts()` become
+artifacts of their own (e.g. A2UI surfaces, per the A2UI A2A extension).
 """
 
 from __future__ import annotations
@@ -25,15 +26,16 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Route
 from a2a.server.tasks import InMemoryTaskStore, TaskUpdater
-from a2a.types import AgentCapabilities, AgentCard, AgentInterface, AgentProvider, AgentSkill, TaskState
-from pydantic_ai import Agent
+from a2a.types import AgentCapabilities, AgentCard, AgentExtension, AgentInterface, AgentProvider, AgentSkill, TaskState
+from google.protobuf.json_format import MessageToDict
+from pydantic_ai import Agent, AgentRunResultEvent, CustomEvent, PartDeltaEvent, PartStartEvent, TextPart, TextPartDelta
 from pydantic_ai.models import Model
 
 
 class PydanticAIExecutor(AgentExecutor):
     """Runs a Pydantic AI agent for each A2A message, keeping history per A2A context."""
 
-    def __init__(self, agent: Agent, model: Callable[[], Model], deps: Callable[[], object] | None = None) -> None:
+    def __init__(self, agent: Agent, model: Callable[[], Model], deps: Callable[[dict], object] | None = None) -> None:
         self.agent = agent
         self.model = model
         self.deps = deps
@@ -54,16 +56,25 @@ class PydanticAIExecutor(AgentExecutor):
         history = self.history.get(task.context_id, [])
         artifact_id = f"answer-{task.id}"
         first = True
-        deps = self.deps() if self.deps else None
-        async with self.agent.run_stream(prompt, message_history=history, model=self.model(), deps=deps) as run:
-            await updater.update_status(TaskState.TASK_STATE_WORKING, updater.new_agent_message([new_text_part("Writing the answer…")]))
-            async for delta in run.stream_text(delta=True):
-                if not delta:
-                    continue
-                await updater.add_artifact([new_text_part(delta)], artifact_id=artifact_id, name="answer", append=not first)
-                first = False
-            self.history[task.context_id] = run.all_messages()
-        await updater.add_artifact([new_text_part("")], artifact_id=artifact_id, name="answer", append=True, last_chunk=True)
+        # `deps` sees the request message as A2A JSON (e.g. to read an A2UI action part).
+        deps = self.deps(MessageToDict(context.message)) if self.deps else None
+        await updater.update_status(TaskState.TASK_STATE_WORKING, updater.new_agent_message([new_text_part("Writing the answer…")]))
+        async with self.agent.run_stream_events(prompt, message_history=history, model=self.model(), deps=deps) as events:
+            async for event in events:
+                delta = ""
+                if isinstance(event, PartStartEvent) and isinstance(event.part, TextPart):
+                    delta = event.part.content
+                elif isinstance(event, PartDeltaEvent) and isinstance(event.delta, TextPartDelta):
+                    delta = event.delta.content_delta
+                elif isinstance(event, CustomEvent) and hasattr(event, "to_a2a_parts"):
+                    artifact, parts = event.to_a2a_parts()
+                    await updater.add_artifact(parts, artifact_id=f"{artifact}-{task.id}", name=artifact, last_chunk=True)
+                elif isinstance(event, AgentRunResultEvent):
+                    self.history[task.context_id] = event.result.all_messages()
+                if delta:
+                    await updater.add_artifact([new_text_part(delta)], artifact_id=artifact_id, name="answer", append=not first)
+                    first = False
+        await updater.add_artifact([new_text_part("")], artifact_id=artifact_id, name="answer", append=not first, last_chunk=True)
         await updater.complete()
 
     async def cancel(self, context: RequestContext, event_queue: EventQueue) -> None:
@@ -72,38 +83,49 @@ class PydanticAIExecutor(AgentExecutor):
             await TaskUpdater(event_queue, task.id, task.context_id).cancel()
 
 
-def a2a_routes(agent: Agent, model: Callable[[], Model], base_url: str, deps: Callable[[], object] | None = None) -> list:
-    """Starlette routes for the agent card and the JSON-RPC endpoint."""
+RESEARCH_SKILL = AgentSkill(
+    id="research",
+    name="Research",
+    description="Explain protocols such as AG-UI, the AI SDK stream, MCP and A2A, with trade-offs.",
+    tags=["research", "protocols"],
+    examples=["Compare AG-UI and the AI SDK UI message stream"],
+)
+
+
+def a2a_routes(
+    agent: Agent,
+    model: Callable[[], Model],
+    base_url: str,
+    deps: Callable[[dict], object] | None = None,
+    *,
+    name: str = "Research agent",
+    description: str = "Answers research questions about AI UI protocols and Android UI with concise, sourced summaries.",
+    skills: list[AgentSkill] | None = None,
+    extensions: list[AgentExtension] | None = None,
+) -> list:
+    """Starlette routes for the agent card and the JSON-RPC endpoint (mount them under a path for more agents)."""
     card = AgentCard(
-        name="Research agent",
-        description="Answers research questions about AI UI protocols and Android UI with concise, sourced summaries.",
+        name=name,
+        description=description,
         version="0.3.0",
         provider=AgentProvider(organization="AI Elements demo", url="https://github.com/junelegency"),
         supported_interfaces=[AgentInterface(url=f"{base_url}/a2a", protocol_binding="JSONRPC", protocol_version="1.0")],
-        capabilities=AgentCapabilities(streaming=True),
+        capabilities=AgentCapabilities(streaming=True, extensions=extensions or []),
         default_input_modes=["text/plain"],
         default_output_modes=["text/markdown"],
-        skills=[
-            AgentSkill(
-                id="research",
-                name="Research",
-                description="Explain protocols such as AG-UI, the AI SDK stream, MCP and A2A, with trade-offs.",
-                tags=["research", "protocols"],
-                examples=["Compare AG-UI and the AI SDK UI message stream"],
-            )
-        ],
+        skills=skills or [RESEARCH_SKILL],
     )
     handler = DefaultRequestHandler(agent_executor=PydanticAIExecutor(agent, model, deps), task_store=InMemoryTaskStore(), agent_card=card)
 
     async def card_for_request(request: Request) -> JSONResponse:
         # Advertise the interface at the address the client used (emulator alias, LAN IP,
-        # localhost), unless PUBLIC_URL pins it.
+        # localhost) and mount path, unless PUBLIC_URL pins it.
         served = AgentCard()
         served.CopyFrom(card)
         if not os.environ.get("PUBLIC_URL"):
             del served.supported_interfaces[:]
             served.supported_interfaces.append(
-                AgentInterface(url=f"{str(request.base_url).rstrip('/')}/a2a", protocol_binding="JSONRPC", protocol_version="1.0")
+                AgentInterface(url=f"{str(request.url).split(AGENT_CARD_WELL_KNOWN_PATH)[0]}/a2a", protocol_binding="JSONRPC", protocol_version="1.0")
             )
         return JSONResponse(agent_card_to_dict(served))
 

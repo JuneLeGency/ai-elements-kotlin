@@ -5,6 +5,15 @@ two protocols via PydanticAI's UI adapters:
 
 - `POST /api/chat[?model=]` — Vercel AI SDK v5 **UI Message Stream** (`VercelAIAdapter`), accepts image `file` parts
 - `POST /api/agui[?model=]` — **AG-UI** (`AGUIAdapter`)
+- `POST /a2a` — **A2A** research agent (official `a2a-sdk`; card at `/.well-known/agent-card.json`)
+- `POST /concierge/a2a` — **A2A** hotel concierge that answers with **A2UI** v1.0 (A2UI A2A extension;
+  card at `/concierge/.well-known/agent-card.json`)
+
+Generative UI: say "hotel" and the agent sends an A2UI booking form (`a2ui_demo.py`) on the
+protocol's A2UI binding — an AG-UI `a2ui-surface` activity, an AI SDK `data-a2ui` part or an A2A
+`application/a2ui+json` DataPart. Its **Book** action comes back on the same binding and the agent
+confirms it with `confirm_booking`. `record_fixtures.py` checks each form with the official
+`a2ui-core` message processor (strict validation).
 
 ```bash
 uv sync

@@ -143,6 +143,48 @@ class RecordedProtocolTest {
         assertTrue(reply.text.contains("Pixel 10"))
     }
 
+    // --- A2UI (generative UI) on each transport's binding -------------------------------
+
+    private val bookAction = Json.parseToJsonElement(
+        """{"version":"v1.0","action":{"name":"book_hotel","surfaceId":"booking-kyoto","sourceComponentId":"book","timestamp":"2026-09-27T10:00:00Z","context":{"city":"Kyoto","guest":"Jane","date":"2026-10-01","room":["deluxe"]}}}""",
+    )
+
+    /** Asks for the form, submits it, and returns the form reply and the reply to the action. */
+    private fun a2uiRoundTrip(backend: ChatBackend): Pair<Message, Message> = runBlocking {
+        val ask = Message("u1", Role.USER, listOf(TextPart("t", "find me a hotel")))
+        var form = Message("a1", Role.ASSISTANT)
+        backend.stream(listOf(ask)).toList().forEach { form = form.reduce(it, 0) }
+        val submit = Message("u2", Role.USER, listOf(TextPart("t", "Book Hotel Lumen for Jane"), DataPart("d", DataPart.A2UI, JsonArray(listOf(bookAction)))))
+        var done = Message("a2", Role.ASSISTANT)
+        backend.stream(listOf(ask, form, submit)).toList().forEach { done = done.reduce(it, 0) }
+        form to done
+    }
+
+    private fun assertBookingForm(form: Message) {
+        val surface = form.parts.filterIsInstance<DataPart>().single { it.name == DataPart.A2UI }.data.jsonArray
+        assertEquals("booking-kyoto", surface[0].jsonObject["createSurface"]!!.jsonObject["surfaceId"]!!.jsonPrimitive.content)
+        assertEquals(ToolState.OUTPUT_AVAILABLE, form.tool("show_booking_form").state)
+    }
+
+    @Test
+    fun agUi_a2uiSurface_thenActionInForwardedProps() {
+        replay("agui/hotel.sse", "agui/hotel-action.sse")
+        val (form, done) = a2uiRoundTrip(agUi())
+        assertBookingForm(form)
+        assertEquals(bookAction.jsonObject["action"], requests[1]["forwardedProps"]!!.jsonObject["a2uiAction"]!!.jsonObject["userAction"])
+        assertTrue(done.tool("confirm_booking").output!!.contains("Booked a deluxe room at Hotel Lumen for Jane"))
+    }
+
+    @Test
+    fun aiSdk_a2uiDataPart_thenActionAsDataPart() {
+        replay("aisdk/hotel.sse", "aisdk/hotel-action.sse")
+        val (form, done) = a2uiRoundTrip(aiSdk())
+        assertBookingForm(form)
+        val parts = requests[1]["messages"]!!.jsonArray.last().jsonObject["parts"]!!.jsonArray
+        assertEquals(JsonArray(listOf(bookAction)), parts.single { it.jsonObject["type"]!!.jsonPrimitive.content == "data-a2ui" }.jsonObject["data"])
+        assertTrue(done.tool("confirm_booking").output!!.contains("Booked a deluxe room at Hotel Lumen for Jane"))
+    }
+
     @Test
     fun agUi_v1_subagentStateActivityAndUsage() {
         replay("agui/subagent-state-activity.sse")

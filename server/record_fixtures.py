@@ -3,6 +3,8 @@
 - `agui/*.sse`, `aisdk/*.sse`: responses of this server (Pydantic AI + Harness through the official
   AG-UI and Vercel AI adapters) for each capability, including the follow-up request of multi-step
   flows (tool approval, frontend tools).
+- `agui/hotel*.sse`, `aisdk/hotel*.sse`: an A2UI v1.0 form and the run its user action starts,
+  each surface checked by the official `a2ui-core` message processor (strict validation).
 - `agui/subagent-state-activity.sse`: AG-UI 1.0 events the server does not emit yet
   (SUBAGENT_*, STATE_DELTA, ACTIVITY_*, usage), encoded by the official `ag_ui` Python SDK.
 
@@ -35,6 +37,9 @@ from ag_ui.core import (
     ToolCallStartEvent,
 )
 from ag_ui.encoder import EventEncoder
+from a2ui.core.basic_catalog.v1_0 import BasicCatalog
+from a2ui.core.processing.message_processor import MessageProcessor, MessageProcessorOptions
+from a2ui.core.validation.payload_validator import STRICT_VALIDATION
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8788"
 OUT = Path(__file__).resolve().parent.parent / "ai-elements-core/src/test/resources/fixtures"
@@ -108,6 +113,44 @@ def aisdk(keyword: str) -> None:
     save(f"aisdk/{keyword}-approved.sse", second)
 
 
+def validate_a2ui(messages: list[dict]) -> None:
+    """Fails unless the official A2UI processor accepts [messages] under strict validation."""
+    MessageProcessor([BasicCatalog()], options=MessageProcessorOptions(validation_config=STRICT_VALIDATION)).process_messages(messages)
+
+
+A2UI_ACTION = {
+    "name": "book_hotel", "surfaceId": "booking-kyoto", "sourceComponentId": "book", "timestamp": "2026-09-27T10:00:00Z",
+    "context": {"city": "Kyoto", "guest": "Jane", "date": "2026-10-01", "room": ["deluxe"]},
+}
+
+
+def agui_a2ui() -> None:
+    """The form as an `a2ui-surface` activity, then the run its action starts (`forwardedProps.a2uiAction`)."""
+    user = {"id": "u1", "role": "user", "content": "find me a hotel"}
+    body = {"threadId": "t", "runId": "r1", "state": {}, "messages": [user], "tools": [], "context": [], "forwardedProps": {}}
+    first = post("/api/agui", body)
+    activity = next(e for e in events(first) if e["type"] == "ACTIVITY_SNAPSHOT" and e["activityType"] == "a2ui-surface")
+    validate_a2ui(activity["content"]["a2ui_operations"])
+    save("agui/hotel.sse", first)
+    action = {"id": "u2", "role": "user", "content": "Book Hotel Lumen for Jane"}
+    second = post("/api/agui", {**body, "runId": "r2", "messages": [user, action], "forwardedProps": {"a2uiAction": {"userAction": A2UI_ACTION}}})
+    save("agui/hotel-action.sse", second)
+
+
+def aisdk_a2ui() -> None:
+    """The form as a `data-a2ui` part, then the run its action starts (a `data-a2ui` part of the user turn)."""
+    user = {"id": "u1", "role": "user", "parts": [{"type": "text", "text": "find me a hotel"}]}
+    first = post("/api/chat", {"trigger": "submit-message", "id": "c1", "messages": [user]})
+    validate_a2ui(next(e for e in events(first) if e["type"] == "data-a2ui")["data"])
+    save("aisdk/hotel.sse", first)
+    action = {"id": "u2", "role": "user", "parts": [
+        {"type": "text", "text": "Book Hotel Lumen for Jane"},
+        {"type": "data-a2ui", "data": [{"version": "v1.0", "action": A2UI_ACTION}]},
+    ]}
+    second = post("/api/chat", {"trigger": "submit-message", "id": "c1", "messages": [user, action]})
+    save("aisdk/hotel-action.sse", second)
+
+
 def agui_spec_events() -> None:
     """AG-UI 1.0 events encoded by the official Python SDK (subagents, state/activity deltas, usage)."""
     encoder = EventEncoder()
@@ -139,4 +182,6 @@ if __name__ == "__main__":
         agui(keyword)
     for keyword in ["delegate", "plan", "skill", "note"]:
         aisdk(keyword)
+    agui_a2ui()
+    aisdk_a2ui()
     agui_spec_events()

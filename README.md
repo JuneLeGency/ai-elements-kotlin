@@ -255,7 +255,8 @@ in [AGENTS.md](AGENTS.md).
 
 `server/` is a Pydantic AI + Pydantic AI Harness agent (Planning, SubAgents, Skills, an MCP toolset
 with approval) served over AI SDK 6 (`/api/chat`) and AG-UI 1.0 (`/api/agui`), with an MCP server
-(`/mcp`, official `mcp` SDK) and an A2A agent (`/.well-known/agent-card.json`, official `a2a-sdk`).
+(`/mcp`, official `mcp` SDK) and A2A agents (official `a2a-sdk`: a researcher at `/a2a`, and a hotel
+concierge at `/concierge/a2a` that answers with A2UI).
 
 ```bash
 cd server && uv sync

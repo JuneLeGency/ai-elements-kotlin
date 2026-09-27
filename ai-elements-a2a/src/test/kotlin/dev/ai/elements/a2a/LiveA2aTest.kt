@@ -2,13 +2,18 @@ package dev.ai.elements.a2a
 
 import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.agent.SubAgents
+import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.chat.reduce
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.a2aproject.sdk.client.http.android.AndroidA2AHttpClient
@@ -69,5 +74,26 @@ class LiveA2aTest {
         val tool = subAgents.tools().single()
         val answer = tool.execute(buildJsonObject { put("agent_name", "research-agent"); put("task", "Explain A2A briefly.") })
         assertTrue(answer, answer.contains("Agent run complete"))
+    }
+
+    /** The concierge (`/concierge`) answers with A2UI (A2UI A2A extension); the user's action goes back as an A2UI part. */
+    @Test
+    fun a2uiSurface_andActionRoundTrip() = runBlocking {
+        assumeTrue(url != null)
+        val concierge = A2aAgent("$url/concierge", httpClient = AndroidA2AHttpClient())
+        assertEquals("https://a2ui.org/a2a-extension/a2ui/v1.0", concierge.card().capabilities().extensions()!!.single().uri())
+
+        val ask = Message("u1", Role.USER, listOf(TextPart("t", "Find me a hotel")))
+        val (events, form) = ask(concierge, listOf(ask))
+        assertTrue("no error: $events", events.none { it is ChatEvent.Error })
+        val surface = form.parts.filterIsInstance<DataPart>().single { it.name == DataPart.A2UI }.data as JsonArray
+        assertEquals("booking-kyoto", surface[0].jsonObject["createSurface"]!!.jsonObject["surfaceId"]!!.jsonPrimitive.content)
+
+        val action = Json.parseToJsonElement(
+            """{"version":"v1.0","action":{"name":"book_hotel","surfaceId":"booking-kyoto","sourceComponentId":"book","timestamp":"2026-09-27T10:00:00Z","context":{"guest":"Jane","date":"2026-10-01","room":["suite"]}}}""",
+        )
+        val submit = Message("u2", Role.USER, listOf(TextPart("t", "Book Hotel Lumen for Jane"), DataPart("a", DataPart.A2UI, JsonArray(listOf(action)))))
+        val (_, done) = ask(concierge, listOf(ask, form, submit))
+        assertTrue(done.text, done.text.contains("Booked a suite room at Hotel Lumen for Jane"))
     }
 }
