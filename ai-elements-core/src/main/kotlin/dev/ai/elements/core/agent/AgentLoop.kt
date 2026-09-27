@@ -75,7 +75,7 @@ private suspend fun FlowCollector<ChatEvent>.executeReporting(
     id: String,
     approver: ToolApprover,
 ): String = coroutineScope {
-    val updates = Channel<ToolCallContext.Update>(Channel.CONFLATED)
+    val updates = Channel<ToolCallContext.Update>(Channel.BUFFERED)
     val context = ToolCallContext(id, approver) { updates.send(it) }
     val result = async(context) {
         try {
@@ -88,6 +88,7 @@ private suspend fun FlowCollector<ChatEvent>.executeReporting(
         when (update) {
             is ToolCallContext.Update.Preliminary -> emit(ChatEvent.ToolOutput(id, update.output, preliminary = true))
             is ToolCallContext.Update.Subagent -> emit(ChatEvent.SubagentUpdate(id, update.message))
+            is ToolCallContext.Update.Data -> emit(ChatEvent.Data(update.id, update.name, update.data))
         }
     }
     result.await()
