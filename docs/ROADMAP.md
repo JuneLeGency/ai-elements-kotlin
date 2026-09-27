@@ -74,8 +74,8 @@ reference only, never copied).
 | `harness-planning` | `write_plan`, `read_plan`, `add_task`, `update_task_status(es)`, `remove_task` | — | ✅ 3 tests; live `data-plan` via `ToolCallContext.data` |
 | `harness-browser` | Harness browser tools (`navigate`, `snapshot`, `click`, `type_text`, `press_key`, `select_option`, `hover`, `wait_for`, `get_text`, `scroll`, `go_back`, `go_forward`) on an off-screen WebView | `browser_use` | ✅ in-app E2E on emulator (form fill + submit + history) |
 | `harness-device` | Device info, clipboard, calendar, contacts, location, alarms / timers, notifications (runtime permissions via `PermissionGate`, approvals for changes) | device integrations | ✅ on-device test against the real providers |
-| `harness-speech` | Speech recognition and TTS for agents | speech | ⬜ |
-| `harness-scheduler` | Scheduled / background agent runs (WorkManager, foreground service) | scheduled agents | ⬜ |
+| `harness-speech` | `speak` / `stop_speaking` on the platform TextToSpeech (speech input stays in the UI: `SpeechInput`) | speech | ✅ on-device test (emulator TTS) |
+| `harness-scheduler` | `schedule_task` / `list_scheduled_tasks` / `cancel_scheduled_task` on WorkManager; `ScheduledAgentHost` on the Application; headless runs (`runHeadless`) deny approval tools; result notification | scheduled agents | ✅ E2E on emulator (real WorkManager, offline provider) |
 
 ### W3 · Reference server (`server/`)
 

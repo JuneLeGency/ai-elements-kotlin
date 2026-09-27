@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AI Elements</string>
+    <string name="app_name" translatable="false">AI Elements</string>
     <string name="nav_chat">Chat</string>
     <string name="nav_components">Components</string>
     <string name="nav_settings">Settings</string>
@@ -205,4 +205,11 @@
     <string name="cap_browser_desc">Open pages, read them and fill in forms</string>
     <string name="cap_device">Device</string>
     <string name="cap_device_desc">Calendar, contacts, location, clipboard, alarms and notifications — asks for permission first</string>
+    <string name="cap_speech">Speech</string>
+    <string name="cap_speech_desc">Reads answers aloud with the device\'s text-to-speech</string>
+    <string name="cap_schedule">Scheduled tasks</string>
+    <string name="cap_schedule_desc">Runs prompts later in the background and notifies you</string>
+    <string name="cap_schedule_none">No tasks scheduled</string>
+    <string name="schedule_every">every %1$d min</string>
+    <string name="schedule_cancel">Cancel</string>
 </resources>

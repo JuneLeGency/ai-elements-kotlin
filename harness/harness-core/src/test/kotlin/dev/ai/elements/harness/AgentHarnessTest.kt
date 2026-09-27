@@ -74,4 +74,15 @@ class AgentHarnessTest {
         turn(AgentHarness(model, localSubAgents = { listOf(LocalSubAgent("researcher", "Researches", "x")) }, maxDepth = 1))
         assertEquals(emptyList<String>(), runs.single().tools)
     }
+
+    @Test
+    fun runHeadless_returnsTheFinalAnswer() = runBlocking<Unit> {
+        val reply = AgentHarness(model).runHeadless("hi")
+        assertEquals("run 1", reply.parts.filterIsInstance<TextPart>().joinToString("") { it.text })
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun runHeadless_throwsOnError() = runBlocking<Unit> {
+        runHeadless(ChatBackend { flow { emit(ChatEvent.Error("boom")) } }, "hi")
+    }
 }

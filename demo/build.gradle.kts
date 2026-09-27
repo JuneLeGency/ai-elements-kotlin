@@ -85,6 +85,8 @@ dependencies {
     implementation(project(":harness:harness-sandbox-proot"))
     implementation(project(":harness:harness-browser"))
     implementation(project(":harness:harness-device"))
+    implementation(project(":harness:harness-speech"))
+    implementation(project(":harness:harness-scheduler"))
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(libs.activity.compose)
@@ -103,6 +105,7 @@ dependencies {
     androidTestImplementation(libs.junit.ext)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.work.testing)
     androidTestImplementation(libs.compose.ui.test.junit4)
     debugImplementation(libs.compose.ui.test.manifest)
 }

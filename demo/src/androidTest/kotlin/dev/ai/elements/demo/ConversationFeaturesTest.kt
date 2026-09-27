@@ -29,7 +29,6 @@ import dev.ai.elements.ui.R as UiR
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.ai.elements.core.config.ProviderKind
 import dev.ai.elements.core.config.ProviderProfile
-import dev.ai.elements.core.config.ProviderStore
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -57,9 +56,7 @@ class ConversationFeaturesTest {
 
     @Before
     fun launch() {
-        context.getSharedPreferences("ai_elements_providers", Context.MODE_PRIVATE).edit().clear().commit()
-        File(context.filesDir, "conversations.json").delete()
-        ProviderStore(context).select(ProviderProfile.Presets.first { it.kind == ProviderKind.MOCK }.id)
+        resetDemoApp(ProviderProfile.Presets.first { it.kind == ProviderKind.MOCK })
         scenario = ActivityScenario.launch(MainActivity::class.java)
     }
 

@@ -9,7 +9,7 @@ Use it two ways, with the same UI:
 | Mode | Where the agent runs | You add |
 |---|---|---|
 | **Pure client** (like the Codex or Claude apps) | On your server — Pydantic AI, LangGraph, Mastra, any AI SDK / AG-UI server — or a remote A2A agent | `ai-elements-ui` |
-| **In-app agent** | On the device, over any model API | `ai-elements-ui` + `harness-*` capabilities: files, a Linux sandbox, memory, planning, sub-agents, skills, MCP |
+| **In-app agent** | On the device, over any model API | `ai-elements-ui` + `harness-*` capabilities: files, a Linux sandbox, memory, planning, a browser, device tools, speech, scheduled tasks, sub-agents, skills, MCP |
 
 ```mermaid
 flowchart TD
@@ -65,6 +65,10 @@ dependencies {
 | `harness-planning` | `write_plan`, `read_plan`, `add_task`, `update_task_status(es)`, `remove_task`; drives the `Plan` element. | 26 |
 | `harness-shell` | `run_command`, `start_command`, `check_command`, `stop_command` over a pluggable runtime. | 26 |
 | `harness-sandbox-proot` | Alpine Linux via PRoot (bundled executable, GPL-2.0 — see its NOTICE). | 26 |
+| `harness-browser` | `navigate`, `snapshot`, `click`, `type_text`, `get_text`, … on an off-screen WebView. | 26 |
+| `harness-device` | Device info, clipboard, calendar, contacts, location, alarms, notifications (asks for permissions). | 26 |
+| `harness-speech` | `speak`, `stop_speaking` on the platform text-to-speech engine. | 26 |
+| `harness-scheduler` | `schedule_task`, `list_scheduled_tasks`, `cancel_scheduled_task`: background runs on WorkManager; implement `ScheduledAgentHost` on your `Application`. | 26 |
 
 R8 rules ship with the libraries.
 

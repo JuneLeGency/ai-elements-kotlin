@@ -70,8 +70,8 @@ Harness」两种形态，真实链路全部跑通，并在模拟器、手机和�
 | | `harness-planning` | `write_plan` `read_plan` `add_task` `update_task_status(es)` `remove_task` | core |
 | | `harness-browser` | WebView 浏览、页面读取和操作 | core |
 | | `harness-device` | 剪贴板、日历、联系人、通知、定位、闹钟（运行时权限） | core |
-| | `harness-speech` | 语音识别与朗读 | core |
-| | `harness-scheduler` | 定时和后台 Agent（WorkManager、前台服务） | core |
+| | `harness-speech` | 朗读（TextToSpeech）；语音输入由 UI 的 `SpeechInput` 负责 | core |
+| | `harness-scheduler` | 定时和后台 Agent（WorkManager，`ScheduledAgentHost`，无人值守时拒绝需审批的工具） | core |
 
 ### 3.2 core 包分层（按关注点，禁止把协议都堆进 `backend`）
 

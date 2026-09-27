@@ -16,7 +16,6 @@ import dev.ai.elements.core.auth.OAuthProvider
 import dev.ai.elements.core.auth.OAuthTokens
 import dev.ai.elements.core.auth.jwtClaims
 import dev.ai.elements.core.config.ProviderProfile
-import dev.ai.elements.core.config.ProviderStore
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -79,14 +78,13 @@ class CodexLiveTest {
         }
         assumeTrue("access token expired — run `codex` once to renew it", !tokens.expiresSoon(slackMs = 120_000))
 
-        context.getSharedPreferences("ai_elements_providers", Context.MODE_PRIVATE).edit().clear().commit()
-        File(context.filesDir, "conversations.json").delete()
+        val app = resetDemoApp()
         val provider = OAuthProvider.CHATGPT
         val profile = ProviderProfile(
             id = PROFILE_ID, name = "ChatGPT (live)", kind = provider.kind,
             baseUrl = provider.baseUrl, model = provider.defaultModel, oauth = provider,
         )
-        ProviderStore(context).apply {
+        app.providers.apply {
             upsert(profile)
             tokenStore(PROFILE_ID).save(tokens)
             select(PROFILE_ID)
@@ -106,7 +104,7 @@ class CodexLiveTest {
     fun cleanUp() {
         scenario?.close()
         authFile.delete()
-        ProviderStore(context).remove(PROFILE_ID)
+        resetDemoApp()
     }
 
     private companion object {

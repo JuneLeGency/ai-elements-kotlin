@@ -68,7 +68,7 @@ class SkillFormatException(message: String) : Exception(message)
  */
 internal object Frontmatter {
     fun split(markdown: String): Pair<String, String>? {
-        val text = markdown.removePrefix("﻿").replace("\r\n", "\n")
+        val text = markdown.removePrefix("\uFEFF").replace("\r\n", "\n")
         if (!text.startsWith("---\n")) return null
         val end = Regex("^---[ \\t]*$", RegexOption.MULTILINE).find(text, 4) ?: return null
         return text.substring(4, end.range.first) to text.substring(end.range.last + 1)

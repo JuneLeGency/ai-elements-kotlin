@@ -203,4 +203,11 @@
     <string name="cap_browser_desc">ページを開いて読み、フォームに入力</string>
     <string name="cap_device">デバイス</string>
     <string name="cap_device_desc">カレンダー・連絡先・位置情報・クリップボード・アラーム・通知（使用前に許可を求めます）</string>
+    <string name="cap_speech">読み上げ</string>
+    <string name="cap_speech_desc">端末の音声合成で回答を読み上げます</string>
+    <string name="cap_schedule">スケジュール</string>
+    <string name="cap_schedule_desc">プロンプトをバックグラウンドで予定どおり実行して通知します</string>
+    <string name="cap_schedule_none">予定されたタスクはありません</string>
+    <string name="schedule_every">%1$d 分ごと</string>
+    <string name="schedule_cancel">キャンセル</string>
 </resources>

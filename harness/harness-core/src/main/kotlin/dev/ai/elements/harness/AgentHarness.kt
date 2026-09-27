@@ -1,8 +1,14 @@
 package dev.ai.elements.harness
 
 import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.model.Message
+import dev.ai.elements.core.model.Role
+import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.chat.finishStreaming
+import dev.ai.elements.core.chat.reduce
 import dev.ai.elements.core.agent.Capability
 import dev.ai.elements.core.agent.SubAgent
 import dev.ai.elements.core.agent.SubAgents
@@ -87,3 +93,26 @@ class AgentHarness(
         return if (all.isEmpty()) null else SubAgents(all)
     }
 }
+
+/**
+ * Run one prompt on [backend] without a UI (scheduled or background work) and return the
+ * final answer. Throws when the run reports an error.
+ */
+suspend fun runHeadless(backend: ChatBackend, prompt: String, clock: () -> Long = System::currentTimeMillis): Message {
+    val user = Message("headless-user-${clock()}", Role.USER, listOf(TextPart("prompt", prompt)), clock())
+    var reply = Message("headless-${clock()}", Role.ASSISTANT, createdAt = clock())
+    var error: String? = null
+    backend.stream(listOf(user)).collect { event ->
+        if (event is ChatEvent.Error) error = event.message
+        reply = reply.reduce(event, clock())
+    }
+    error?.let { throw IllegalStateException(it) }
+    return reply.finishStreaming(clock())
+}
+
+/**
+ * [runHeadless] on this harness. Nobody can approve tools here, so calls that need
+ * approval are denied unless [approver] says otherwise.
+ */
+suspend fun AgentHarness.runHeadless(prompt: String, approver: ToolApprover = ToolApprover { false }): Message =
+    runHeadless(backend(approver), prompt)

@@ -19,13 +19,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.ai.elements.core.config.ProviderKind
 import dev.ai.elements.core.config.ProviderProfile
-import dev.ai.elements.core.config.ProviderStore
 import org.junit.After
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -54,12 +52,7 @@ class AgentFlowTest {
     private fun s(id: Int) = context.getString(id)
 
     private fun launchWith(profile: ProviderProfile) {
-        context.getSharedPreferences("ai_elements_providers", Context.MODE_PRIVATE).edit().clear().commit()
-        File(context.filesDir, "conversations.json").delete()
-        ProviderStore(context).apply {
-            upsert(profile)
-            select(profile.id)
-        }
+        resetDemoApp(profile)
         scenario = ActivityScenario.launch(MainActivity::class.java)
     }
 

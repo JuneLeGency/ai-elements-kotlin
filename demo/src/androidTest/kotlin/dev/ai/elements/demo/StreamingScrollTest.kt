@@ -22,7 +22,6 @@ import dev.ai.elements.ui.R as UiR
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.ai.elements.core.config.ProviderKind
 import dev.ai.elements.core.config.ProviderProfile
-import dev.ai.elements.core.config.ProviderStore
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -30,7 +29,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.File
 
 /**
  * Streaming + scroll control, with a long streamed answer from the offline agent:
@@ -58,9 +56,7 @@ class StreamingScrollTest {
 
     @Before
     fun launch() {
-        context.getSharedPreferences("ai_elements_providers", Context.MODE_PRIVATE).edit().clear().commit()
-        File(context.filesDir, "conversations.json").delete()
-        ProviderStore(context).select(ProviderProfile.Presets.first { it.kind == ProviderKind.MOCK }.id)
+        resetDemoApp(ProviderProfile.Presets.first { it.kind == ProviderKind.MOCK })
         scenario = ActivityScenario.launch(MainActivity::class.java)
     }
 

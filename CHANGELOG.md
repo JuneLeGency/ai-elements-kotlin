@@ -11,8 +11,11 @@
 - **Capabilities** mirroring Pydantic AI Harness: `Capability`, `SubAgents` (`delegate_task`),
   `Skills` (Agent Skills, `load_capability`), `ToolCallContext` (progress, nested runs, data parts).
 - **In-app harness** (group `io.github.junelegency.harness`): `harness-core` (`AgentHarness`),
-  `harness-filesystem`, `harness-memory`, `harness-planning`, `harness-shell`, and
-  `harness-sandbox-proot` (Alpine Linux on PRoot).
+  `harness-filesystem`, `harness-memory`, `harness-planning`, `harness-shell`,
+  `harness-sandbox-proot` (Alpine Linux on PRoot), `harness-browser` (off-screen WebView),
+  `harness-device` (calendar, contacts, location, clipboard, alarms, notifications),
+  `harness-speech` (text to speech) and `harness-scheduler` (scheduled background runs on
+  WorkManager, `runHeadless`).
 - **Elements**: `Subagent`; `ToolCall` titles, MCP server and skill badges, live progress;
   `Agent` descriptions and skill lists (A2A cards).
 - `ai-elements-bom`; `server/` rebuilt on Pydantic AI 2.51 + Harness 0.36 with MCP and A2A endpoints.

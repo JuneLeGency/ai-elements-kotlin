@@ -5,22 +5,17 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.ai.elements.core.chat.ChatController
 import dev.ai.elements.core.chat.ChatState
-import dev.ai.elements.core.config.McpServerStore
 import dev.ai.elements.core.mcp.McpAuthRequiredException
 import dev.ai.elements.core.mcp.McpServerConfig
 import dev.ai.elements.core.mcp.McpServerStatus
 import kotlinx.coroutines.flow.update
 import dev.ai.elements.core.auth.OAuthProvider
 import dev.ai.elements.core.config.ProviderProfile
-import dev.ai.elements.core.config.ProviderStore
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.demo.auth.SignInController
-import dev.ai.elements.demo.data.AgentsStore
 import dev.ai.elements.demo.data.AppSettings
-import dev.ai.elements.demo.data.SkillsRepository
 import dev.ai.elements.demo.data.Conversation
 import dev.ai.elements.demo.data.ConversationRepository
-import dev.ai.elements.demo.tools.ClipboardTool
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,17 +31,18 @@ import kotlinx.coroutines.launch
 private val ChatGptModels = listOf("gpt-5.5", "gpt-5.3-codex")
 
 class ChatViewModel(app: Application) : AndroidViewModel(app) {
-    val providers = ProviderStore(app)
+    private val demo = app as DemoApplication
+    val providers = demo.providers
     val settings = AppSettings(app)
     private val repository = ConversationRepository(app)
     val conversations: StateFlow<List<Conversation>> = repository.conversations
 
-    val mcpServers = McpServerStore(app, providers.secrets)
-    val agents = AgentsStore(app)
-    val skills = SkillsRepository(app)
+    val mcpServers = demo.mcpServers
+    val agents = demo.agents
+    val skills = demo.skills
 
     /** Each turn: the selected provider with the enabled skills, MCP servers and sub-agents. */
-    val runtime = AgentRuntime(app, providers, mcpServers, agents, skills, appTools = listOf(ClipboardTool(app)))
+    val runtime = demo.runtime
 
     private val chat = ChatController(backend = runtime::backend, scope = viewModelScope)
     val chatState: StateFlow<ChatState> = chat.state

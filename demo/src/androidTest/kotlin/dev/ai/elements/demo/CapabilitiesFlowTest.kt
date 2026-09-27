@@ -16,14 +16,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.ai.elements.core.config.ProviderKind
 import dev.ai.elements.core.config.ProviderProfile
-import dev.ai.elements.core.config.ProviderStore
 import org.junit.After
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -53,12 +51,7 @@ class CapabilitiesFlowTest {
     }
 
     private fun launchWith(kind: ProviderKind) {
-        listOf("ai_elements_providers", "ai_elements_capabilities", "ai_elements_mcp").forEach {
-            context.getSharedPreferences(it, Context.MODE_PRIVATE).edit().clear().commit()
-        }
-        File(context.filesDir, "conversations.json").delete()
-        val profile = ProviderProfile("e2e-${kind.name.lowercase()}", "E2E ${kind.label}", kind, server, "")
-        ProviderStore(context).apply { upsert(profile); select(profile.id) }
+        resetDemoApp(ProviderProfile("e2e-${kind.name.lowercase()}", "E2E ${kind.label}", kind, server, ""))
         scenario = ActivityScenario.launch(MainActivity::class.java)
     }
 

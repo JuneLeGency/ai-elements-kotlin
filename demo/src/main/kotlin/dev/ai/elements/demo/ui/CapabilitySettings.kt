@@ -1,6 +1,6 @@
 package dev.ai.elements.demo.ui
 
-import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
@@ -33,6 +33,8 @@ import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material.icons.outlined.Psychology
+import androidx.compose.material.icons.outlined.RecordVoiceOver
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material.icons.outlined.FileUpload
 import androidx.compose.material.icons.outlined.Groups
@@ -72,7 +74,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringResource
@@ -163,6 +164,26 @@ private fun InAppAgentItems(viewModel: ChatViewModel, settings: dev.ai.elements.
     CapabilitySwitch(Icons.Outlined.Language, R.string.cap_browser, stringResource(R.string.cap_browser_desc), settings.webBrowser, "cap-browser") { on -> viewModel.agents.update { it.copy(webBrowser = on) } }
     CapabilitySwitch(Icons.Outlined.PhoneAndroid, R.string.cap_device, stringResource(R.string.cap_device_desc), settings.deviceTools, "cap-device") { on -> viewModel.agents.update { it.copy(deviceTools = on) } }
     CapabilitySwitch(Icons.Outlined.Checklist, R.string.cap_planning, stringResource(R.string.cap_planning_desc), settings.planning, "cap-planning") { on -> viewModel.agents.update { it.copy(planning = on) } }
+    CapabilitySwitch(Icons.Outlined.RecordVoiceOver, R.string.cap_speech, stringResource(R.string.cap_speech_desc), settings.speech, "cap-speech") { on -> viewModel.agents.update { it.copy(speech = on) } }
+    CapabilitySwitch(Icons.Outlined.Schedule, R.string.cap_schedule, stringResource(R.string.cap_schedule_desc), settings.scheduledTasks, "cap-schedule") { on -> viewModel.agents.update { it.copy(scheduledTasks = on) } }
+    if (settings.scheduledTasks) ScheduledTaskItems(viewModel.runtime.scheduler)
+}
+
+/** Tasks the agent scheduled, with their last result; each can be cancelled. */
+@Composable
+private fun ScheduledTaskItems(scheduler: dev.ai.elements.harness.scheduler.Scheduler) {
+    val tasks by scheduler.tasks.collectAsStateWithLifecycle()
+    tasks.forEach { task ->
+        ListItem(
+            onClick = {},
+            supportingContent = {
+                val next = task.everyMinutes?.let { stringResource(R.string.schedule_every, it) } ?: task.firstRunAt
+                Text(listOfNotNull(next, task.lastError ?: task.lastResult).joinToString(" · "), maxLines = 2, overflow = TextOverflow.Ellipsis)
+            },
+            trailingContent = { TextButton(onClick = { scheduler.cancel(task.id) }) { Text(stringResource(R.string.schedule_cancel)) } },
+            modifier = Modifier.padding(start = 56.dp, end = 12.dp).testTag("scheduled-${task.id}"),
+        ) { Text(task.title) }
+    }
 }
 
 @Composable
@@ -258,7 +279,7 @@ private fun McpServersPane(viewModel: ChatViewModel, showBack: Boolean, onClose:
 @Composable
 private fun McpServerCard(viewModel: ChatViewModel, server: McpServerConfig, status: McpServerStatus?, checked: Boolean) {
     var open by rememberSaveable(server.id) { mutableStateOf(false) }
-    val activity = LocalContext.current as? Activity
+    val activity = LocalActivity.current
     val scheme = MaterialTheme.colorScheme
     Surface(color = scheme.surfaceContainerLow, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp).testTag("mcp-server-${server.id}")) {
         Column(Modifier.animateContentSize()) {
@@ -542,8 +563,9 @@ private fun SubAgentDialog(viewModel: ChatViewModel, initial: SubAgentDef, onDis
         },
         confirmButton = { TextButton(enabled = nameOk && draft.description.isNotBlank(), onClick = { onSave(draft) }, modifier = Modifier.testTag("subagent-save")) { Text(stringResource(R.string.save)) } },
         dismissButton = {
+            val settings by viewModel.agents.settings.collectAsStateWithLifecycle()
             Row {
-                if (viewModel.agents.settings.value.subAgents.any { it.id == initial.id }) {
+                if (settings.subAgents.any { it.id == initial.id }) {
                     TextButton(onClick = { viewModel.agents.update { s -> s.copy(subAgents = s.subAgents.filterNot { it.id == initial.id }) }; onDismiss() }) { Text(stringResource(R.string.remove)) }
                 }
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }

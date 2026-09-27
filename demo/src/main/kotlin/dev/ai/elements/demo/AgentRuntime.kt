@@ -28,6 +28,8 @@ import dev.ai.elements.harness.sandbox.AlpineSandbox
 import dev.ai.elements.harness.shell.Shell
 import dev.ai.elements.harness.browser.WebBrowser
 import dev.ai.elements.harness.device.DeviceTools
+import dev.ai.elements.harness.scheduler.Scheduler
+import dev.ai.elements.harness.speech.Speech
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -55,6 +57,8 @@ class AgentRuntime(
     private val fileSystem = FileSystem(workspace)
     private val browser = WebBrowser(context)
     private val device = DeviceTools(context, PermissionBroker)
+    private val speech = Speech(context)
+    val scheduler = Scheduler(context)
     private val memory = Memory(FileMemoryStore(java.io.File(context.filesDir, "memory")))
 
     /** One plan per conversation. */
@@ -119,6 +123,8 @@ class AgentRuntime(
                 if (settings.planning) add(planning)
                 if (settings.webBrowser) add(browser)
                 if (settings.deviceTools) add(device)
+                if (settings.speech) add(speech)
+                if (settings.scheduledTasks) add(scheduler)
             }
         }
     }

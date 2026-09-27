@@ -203,4 +203,11 @@
     <string name="cap_browser_desc">打开网页、阅读内容并填写表单</string>
     <string name="cap_device">设备</string>
     <string name="cap_device_desc">日历、通讯录、位置、剪贴板、闹钟和通知——使用前会请求权限</string>
+    <string name="cap_speech">语音朗读</string>
+    <string name="cap_speech_desc">用设备的文字转语音朗读回答</string>
+    <string name="cap_schedule">定时任务</string>
+    <string name="cap_schedule_desc">在后台按时运行提示词并通知你</string>
+    <string name="cap_schedule_none">暂无定时任务</string>
+    <string name="schedule_every">每 %1$d 分钟</string>
+    <string name="schedule_cancel">取消</string>
 </resources>
