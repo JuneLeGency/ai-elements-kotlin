@@ -40,6 +40,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        PermissionBroker.attach(this)
         setContent {
             val appearance by viewModel.settings.appearance.collectAsStateWithLifecycle()
             val dark = when (appearance.themeMode) {
@@ -87,5 +88,10 @@ class MainActivity : ComponentActivity() {
                 window.setBackgroundDrawable(null)
             }
         }
+    }
+
+    override fun onDestroy() {
+        PermissionBroker.detach(this)
+        super.onDestroy()
     }
 }

@@ -203,4 +203,6 @@
     <string name="cap_planning_desc">Task plans shown live in the chat</string>
     <string name="cap_browser">Web browser</string>
     <string name="cap_browser_desc">Open pages, read them and fill in forms</string>
+    <string name="cap_device">Device</string>
+    <string name="cap_device_desc">Calendar, contacts, location, clipboard, alarms and notifications — asks for permission first</string>
 </resources>

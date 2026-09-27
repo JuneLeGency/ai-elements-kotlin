@@ -201,4 +201,6 @@
     <string name="cap_planning_desc">タスク計画をチャットにライブ表示</string>
     <string name="cap_browser">ウェブブラウザー</string>
     <string name="cap_browser_desc">ページを開いて読み、フォームに入力</string>
+    <string name="cap_device">デバイス</string>
+    <string name="cap_device_desc">カレンダー・連絡先・位置情報・クリップボード・アラーム・通知（使用前に許可を求めます）</string>
 </resources>

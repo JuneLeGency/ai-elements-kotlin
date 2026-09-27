@@ -201,4 +201,6 @@
     <string name="cap_planning_desc">在对话中实时显示任务计划</string>
     <string name="cap_browser">网页浏览器</string>
     <string name="cap_browser_desc">打开网页、阅读内容并填写表单</string>
+    <string name="cap_device">设备</string>
+    <string name="cap_device_desc">日历、通讯录、位置、剪贴板、闹钟和通知——使用前会请求权限</string>
 </resources>

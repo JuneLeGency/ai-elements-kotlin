@@ -31,6 +31,7 @@ import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material.icons.outlined.FileUpload
@@ -160,6 +161,7 @@ private fun InAppAgentItems(viewModel: ChatViewModel, settings: dev.ai.elements.
     ) { on -> viewModel.agents.update { it.copy(sandboxShell = on) } }
     CapabilitySwitch(Icons.Outlined.Psychology, R.string.cap_memory, stringResource(R.string.cap_memory_desc), settings.memory, "cap-memory") { on -> viewModel.agents.update { it.copy(memory = on) } }
     CapabilitySwitch(Icons.Outlined.Language, R.string.cap_browser, stringResource(R.string.cap_browser_desc), settings.webBrowser, "cap-browser") { on -> viewModel.agents.update { it.copy(webBrowser = on) } }
+    CapabilitySwitch(Icons.Outlined.PhoneAndroid, R.string.cap_device, stringResource(R.string.cap_device_desc), settings.deviceTools, "cap-device") { on -> viewModel.agents.update { it.copy(deviceTools = on) } }
     CapabilitySwitch(Icons.Outlined.Checklist, R.string.cap_planning, stringResource(R.string.cap_planning_desc), settings.planning, "cap-planning") { on -> viewModel.agents.update { it.copy(planning = on) } }
 }
 

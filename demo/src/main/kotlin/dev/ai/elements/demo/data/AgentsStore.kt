@@ -42,6 +42,7 @@ data class CapabilitySettings(
     val memory: Boolean = true,
     val planning: Boolean = true,
     val webBrowser: Boolean = true,
+    val deviceTools: Boolean = true,
     val skillsEnabled: Boolean = true,
     val disabledSkills: Set<String> = emptySet(),
     val mcpEnabled: Boolean = true,

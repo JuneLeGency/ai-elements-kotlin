@@ -201,4 +201,6 @@
     <string name="cap_planning_desc">在對話中即時顯示任務計畫</string>
     <string name="cap_browser">網頁瀏覽器</string>
     <string name="cap_browser_desc">開啟網頁、閱讀內容並填寫表單</string>
+    <string name="cap_device">裝置</string>
+    <string name="cap_device_desc">日曆、通訊錄、位置、剪貼簿、鬧鐘和通知——使用前會請求權限</string>
 </resources>
