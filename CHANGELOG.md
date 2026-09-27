@@ -16,7 +16,7 @@
   `harness-device` (calendar, contacts, location, clipboard, alarms, notifications),
   `harness-speech` (text to speech) and `harness-scheduler` (scheduled background runs on
   WorkManager, `runHeadless`).
-- **Elements**: `Subagent`; `ToolCall` titles, MCP server and skill badges, live progress;
+- **Elements**: AG-UI `state` parts render their `plan` / `task` as the Plan / Task elements; `Subagent`; `ToolCall` titles, MCP server and skill badges, live progress;
   `Agent` descriptions and skill lists (A2A cards).
 - `ai-elements-koog`: a JetBrains Koog agent as a `ChatBackend` (and as an `AgentHarness` model
   binding), with AI Elements tools as Koog tools; approvals and progress work as with the built-in loop.

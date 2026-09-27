@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.chat
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,7 +33,11 @@ import kotlinx.serialization.json.jsonPrimitive
  * - `data-task` `{title, items: [{label, status?, files?: [..]}]}` → [Task]
  * - `data-chain-of-thought` `{title?, steps: [{label, description?, status?, badges?}]}` → [ChainOfThought]
  *
- * `status` is `pending` | `active` | `complete`. Anything else falls back to
+ * - `state` (AG-UI `STATE_SNAPSHOT` / `STATE_DELTA`, already patched): its `plan`, `task` and
+ *   `chain-of-thought` keys render as above, other keys as JSON
+ *
+ * `status` is `pending` | `active` | `complete`. Names match case-insensitively (AG-UI
+ * `ACTIVITY_*` parts are named by their `activityType`). Anything else falls back to
  * a JSON card; pass [renderers] to map your own part names.
  */
 @Composable
@@ -43,7 +48,13 @@ fun DataPartView(
 ) {
     renderers[part.name]?.let { it(part); return }
     val data = part.data as? JsonObject
-    when (part.name) {
+    when (part.name.lowercase()) {
+        STATE -> if (data != null) Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            val known = data.filterKeys { it in BUILT_IN }
+            known.forEach { (key, value) -> DataPartView(DataPart("${part.id}-$key", key, value), renderers = renderers) }
+            val rest = data.filterKeys { it !in BUILT_IN }
+            if (rest.isNotEmpty()) JsonCard(part.copy(data = JsonObject(rest)), Modifier)
+        } else JsonCard(part, modifier)
         "plan" -> if (data != null) Plan(
             title = data.string("title") ?: stringResource(R.string.ai_plan),
             description = data.string("description").orEmpty(),
@@ -81,6 +92,9 @@ private fun JsonCard(part: DataPart, modifier: Modifier) {
 }
 
 private val prettyJson = Json { prettyPrint = true }
+
+private const val STATE = "state"
+private val BUILT_IN = setOf("plan", "task", "chain-of-thought")
 
 private fun JsonObject.string(key: String): String? = (this[key] as? JsonPrimitive)?.contentOrNull
 

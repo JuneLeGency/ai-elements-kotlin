@@ -49,10 +49,10 @@ UI = this library.
 | Sub-agents | `delegate_task(agent_name, task)`, static roster instruction | ✅ unit tests (nested run, shared approver); on-device real-model run pending |
 | Skills | Agent Skills `SKILL.md`; `load_capability(id)` → `# Skill: <name>` | ✅ unit tests (parse rules, zip install, zip slip) |
 | MCP tools | `<server>__<tool>`, approval unless `readOnlyHint` | ✅ live (McpToolset across servers, failure isolation) |
-| Planning | `write_plan`, `read_plan`, `add_task`, `update_task_status(es)`, `remove_task` | ⬜ harness module |
-| FileSystem | `read_file`, `write_file`, `edit_file`, `list_directory`, `search_files`, `find_files`, `create_directory`, `file_info` | ⬜ harness module |
-| Shell | `run_command`, `start_command`, `check_command`, `stop_command` | ⬜ harness + sandbox |
-| Memory | `write_memory`, `read_memory`, `delete_memory`, `search_memory` | ⬜ harness module |
+| Planning | `write_plan`, `read_plan`, `add_task`, `update_task_status(es)`, `remove_task` | ✅ `harness-planning` |
+| FileSystem | `read_file`, `write_file`, `edit_file`, `list_directory`, `search_files`, `find_files`, `create_directory`, `file_info` | ✅ `harness-filesystem` (+ SAF mounts) |
+| Shell | `run_command`, `start_command`, `check_command`, `stop_command` | ✅ `harness-shell` + `harness-sandbox-proot` |
+| Memory | `write_memory`, `read_memory`, `delete_memory`, `search_memory` | ✅ `harness-memory` |
 | Koog adapter | Koog agent → `ChatBackend`; capabilities → Koog tools | ✅ `ai-elements-koog` (`KoogBackend`, `KoogTool`, JSON Schema → Koog descriptors) on Koog 1.3.0; tests on Koog's mock executor (tool events, approval); demo "Run on JetBrains Koog" switch (Koog OpenAI / Anthropic / Ollama clients on Ktor OkHttp) ✅; real-model E2E written (opt-in `-e ollama`), not yet green: local Ollama is CPU-only (~0.3 tok/s) |
 | (Planning, FileSystem, Shell, Memory move to the harness group, W2b) | | |
 
@@ -95,7 +95,7 @@ reference only, never copied).
 |---|---|
 | `Subagent` element (nested run, live activity, nested approvals) for `delegate_task` / AG-UI subagents / AI SDK `UIMessage` outputs | ✅ component tests 10/10 on emulator; Gallery sample |
 | Tool titles (`title`), preliminary output, skill and MCP badges in `ToolCall` | ✅ |
-| AG-UI state / activity rendering (`state.plan` → `Plan`) | ⬜ |
+| AG-UI state / activity rendering (`state.plan` → `Plan`) | ✅ `DataPartView` renders the `state` part's `plan` / `task` / `chain-of-thought` keys (rest as JSON), activity types case-insensitively; component test + AG-UI E2E (server STATE_SNAPSHOT → Plan) |
 | A2A agent card view (extend `Agent`) | ✅ `description` + `toolsTitle` (skills) |
 
 ### W5 · Demo app

@@ -91,6 +91,14 @@ class CapabilitiesFlowTest {
         compose.waitUntil(60_000) { runCatching { scrollTo("data-plan") }.isSuccess }
     }
 
+    /** The server mirrors its Harness plan as an AG-UI STATE_SNAPSHOT; the `state` part renders as a Plan. */
+    @Test
+    fun agUi_stateSnapshot_rendersThePlan() {
+        launchWith(ProviderKind.AG_UI)
+        send("make a plan")
+        compose.waitUntil(60_000) { runCatching { scrollTo("data-plan") }.isSuccess }
+    }
+
     @Test
     fun a2a_remoteAgent_streamsItsAnswer() {
         launchWith(ProviderKind.A2A)

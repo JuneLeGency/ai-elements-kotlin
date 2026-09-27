@@ -25,7 +25,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
+import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.ui.chat.BranchSelector
+import dev.ai.elements.ui.chat.DataPartView
 import dev.ai.elements.ui.chat.Checkpoint
 import dev.ai.elements.ui.chat.ModelOption
 import dev.ai.elements.ui.chat.ModelSelector
@@ -55,6 +57,19 @@ class ElementsTest {
     val compose = createComposeRule()
 
     private fun s(id: Int, vararg args: Any) = InstrumentationRegistry.getInstrumentation().targetContext.getString(id, *args)
+
+    @Test fun dataPart_agUiState_rendersPlanAndKeepsOtherKeysAsJson() {
+        val state = kotlinx.serialization.json.Json.parseToJsonElement(
+            """{"plan":{"title":"Release","steps":[{"label":"Write notes","status":"complete"},{"label":"Tag","status":"active"}]},"cursor":3}""",
+        )
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) { DataPartView(DataPart("s", "state", state)) }
+        }
+        compose.onNodeWithTag("data-plan").assertExists()
+        compose.onNodeWithText("Write notes").assertExists()
+        compose.onNodeWithText("data-state").assertExists()
+        compose.onNodeWithText("Release").assertExists()
+    }
 
     @Test fun question_multiSelect_submitsChosenIdsAndText() {
         var answer: QuestionAnswer? = null
