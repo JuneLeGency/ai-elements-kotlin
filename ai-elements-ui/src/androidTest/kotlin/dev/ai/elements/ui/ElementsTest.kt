@@ -243,6 +243,32 @@ class ElementsTest {
         assertEquals(listOf(InputResponse.Accept(expected), InputResponse.Decline), answers)
     }
 
+    /** A Pydantic AI Harness `ask_user_question` as its standard JSON Schema: options with meanings, and the user's own answer. */
+    @Test fun inputRequest_questions_optionsDescriptionsAndOwnAnswer() {
+        val schema = Json.parseToJsonElement(
+            """{"type":"object","required":["Database","Features"],"properties":{
+            "Database":{"title":"Database","description":"Which database?","type":"string","anyOf":[
+                {"const":"SQLite","title":"SQLite","description":"Local file, no server"},{"const":"Postgres","title":"Postgres"},{"type":"string"}]},
+            "Features":{"title":"Features","description":"What to include?","type":"array","minItems":1,"items":{"anyOf":[
+                {"const":"Sign-in","title":"Sign-in"},{"const":"Search","title":"Search"},{"type":"string"}]}}}}""",
+        ).jsonObject
+        val answers = mutableListOf<InputResponse>()
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                InputRequestCard(InputRequest("q1", "Database · Features", schema), onRespond = { answers += it })
+            }
+        }
+        compose.onNodeWithText("Local file, no server").assertExists()             // an option's meaning
+        compose.onNodeWithTag("input-submit").assertIsNotEnabled()
+        compose.onNodeWithTag("input-option-Database-SQLite").performClick()
+        compose.onNodeWithTag("input-other-Database").performTextInput("DuckDB")   // the user's own answer replaces it
+        compose.onNodeWithTag("input-option-Features-Search").performClick()
+        compose.onNodeWithTag("input-option-Features-Sign-in").performClick()
+        compose.onNodeWithTag("input-submit").assertIsEnabled().performClick()
+        val expected = Json.parseToJsonElement("""{"Database":"DuckDB","Features":["Sign-in","Search"]}""").jsonObject
+        assertEquals(listOf(InputResponse.Accept(expected)), answers)
+    }
+
     @Test fun confirmation_deniesWithAReason_orApprovesEditedArguments() {
         val decisions = mutableListOf<Pair<String, ToolDecision>>()
         val part = ToolPart("t1", "save_note", ToolState.APPROVAL_REQUESTED, """{"title":"Milk"}""")

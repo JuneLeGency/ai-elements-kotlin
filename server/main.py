@@ -45,6 +45,9 @@ from mcp.server.transport_security import TransportSecuritySettings
 from pydantic_ai import Agent, CustomEvent, DeferredToolRequests, RunContext
 from pydantic_ai.mcp import MCPToolset
 from pydantic_ai_harness import Planning, Skills, SubAgent, SubAgents
+from pydantic_ai_harness import AskUser
+from pydantic_ai_harness.ask_user import TOOL_NAME as ASK_USER_TOOL_NAME
+from pydantic_ai.toolsets import ExternalToolset
 from pydantic_ai_harness.planning import (
     InMemoryPlanStore,
     PlanCompletedEvent,
@@ -364,6 +367,14 @@ controller.send("Hello")
 # Keyword → the harness tool the scripted model calls first, so every capability can be
 # exercised end to end (and recorded as protocol fixtures) without an LLM.
 _DEMO_SCRIPTS = [
+    # Pydantic AI Harness `ask_user_question`, answered by the user on the device (a client tool).
+    ("ask", "ask_user_question", {"questions": [
+        {"header": "Database", "question": "Which database should the app use?", "options": [
+            {"label": "SQLite", "description": "Local file, no server"},
+            {"label": "Postgres", "description": "A managed server"}]},
+        {"header": "Features", "question": "What should the first release include?", "multi_select": True, "options": [
+            {"label": "Sign-in"}, {"label": "Payments"}, {"label": "Search"}]},
+    ]}),
     ("delegate", "delegate_task", {"agent_name": "researcher", "task": "Explain the AG-UI protocol in two sentences."}),
     ("plan", "write_plan", {"items": [
         {"content": "Read the question", "active_form": "Reading the question", "status": "completed"},
@@ -510,6 +521,14 @@ app.router.routes.append(Mount("/concierge", routes=a2a_routes(
 )))
 
 
+# Pydantic AI Harness `AskUser` answered by the app: the tool has no server-side answerer. AG-UI
+# clients advertise it as a frontend tool (`RunAgentInput.tools`); the AI SDK has no way for a client
+# to declare tools, so the chat endpoint declares it as a client-side (external) tool — AI SDK's own
+# pattern for tools without `execute` — and the app returns the answer as the tool's output.
+_ask_user = AskUser(answerer=lambda request: None)
+ask_user_client_tool = ExternalToolset([_ask_user.get_toolset().tools[ASK_USER_TOOL_NAME].tool_def], id="ask_user")
+
+
 @app.post("/api/chat")
 async def chat(request: Request) -> Response:
     model_name = request.query_params.get("model") or DEFAULT_MODEL
@@ -526,6 +545,8 @@ async def chat(request: Request) -> Response:
         model=resolve_model(model_name),
         sdk_version=6,  # AI SDK 6: tool approval (human in the loop)
         allow_uploaded_files=True,  # image attachments arrive as data: URLs
+        toolsets=[ask_user_client_tool],
+        instructions=_ask_user.get_instructions(),
         on_complete=on_complete,
     )
 

@@ -75,9 +75,16 @@ def save(name: str, text: str) -> None:
     print("wrote", path.relative_to(OUT.parent.parent.parent.parent.parent))
 
 
+# Pydantic AI Harness `ask_user_question`, advertised by the app as an AG-UI frontend tool.
+from pydantic_ai_harness import AskUser as _AskUser
+_ask_def = _AskUser(answerer=lambda r: None).get_toolset().tools["ask_user_question"].tool_def
+ASK_USER_TOOL = {"name": _ask_def.name, "description": _ask_def.description, "parameters": _ask_def.parameters_json_schema}
+ASK_USER_ANSWER = '{"Database":["Postgres"],"Features":["Sign-in","Search"]}'
+
+
 def agui(keyword: str) -> None:
     user = {"id": "u1", "role": "user", "content": f"please {keyword}"}
-    body = {"threadId": "t", "runId": "r1", "state": {}, "messages": [user], "tools": [DEVICE_TOOL], "context": [], "forwardedProps": {}}
+    body = {"threadId": "t", "runId": "r1", "state": {}, "messages": [user], "tools": [DEVICE_TOOL, ASK_USER_TOOL], "context": [], "forwardedProps": {}}
     first = post("/api/agui", body)
     save(f"agui/{keyword}.sse", first)
     evs = events(first)
@@ -98,8 +105,9 @@ def agui(keyword: str) -> None:
         resume = [{"interruptId": interrupt["id"], "status": "resolved", "payload": {"approved": True}}]
         second = post("/api/agui", {**body, "runId": "r2", "messages": [user, assistant], "resume": resume})
         save(f"agui/{keyword}-resumed.sse", second)
-    elif call["toolCallName"] == DEVICE_TOOL["name"]:
-        tool = {"id": "result-1", "role": "tool", "toolCallId": call["toolCallId"], "content": "Pixel 10, Android 17"}
+    elif call["toolCallName"] in (DEVICE_TOOL["name"], ASK_USER_TOOL["name"]):
+        content = ASK_USER_ANSWER if call["toolCallName"] == ASK_USER_TOOL["name"] else "Pixel 10, Android 17"
+        tool = {"id": "result-1", "role": "tool", "toolCallId": call["toolCallId"], "content": content}
         second = post("/api/agui", {**body, "runId": "r2", "messages": [user, assistant, tool]})
         save(f"agui/{keyword}-continued.sse", second)
 
@@ -110,6 +118,13 @@ def aisdk(keyword: str) -> None:
     save(f"aisdk/{keyword}.sse", first)
     evs = events(first)
     approval = next((e for e in evs if e["type"] == "tool-approval-request"), None)
+    asked = next((e for e in evs if e["type"] == "tool-input-available" and e["toolName"] == ASK_USER_TOOL["name"]), None)
+    if asked is not None:
+        # A client-side tool: the app answers and sends the output back (AI SDK `output-available`).
+        part = {"type": f"tool-{asked['toolName']}", "toolCallId": asked["toolCallId"], "state": "output-available",
+                "input": asked["input"], "output": ASK_USER_ANSWER}
+        second = post("/api/chat", {"trigger": "submit-message", "id": "c1", "messages": [user, {"id": "a1", "role": "assistant", "parts": [part]}]})
+        save(f"aisdk/{keyword}-answered.sse", second)
     if approval is None:
         return
     call = next(e for e in evs if e["type"] == "tool-input-available" and e["toolCallId"] == approval["toolCallId"])
@@ -289,9 +304,13 @@ if __name__ == "__main__":
         acp_session("note")
         acp_session("note", approve=False)
         sys.exit()
-    for keyword in ["delegate", "plan", "skill", "note", "device"]:
+    if sys.argv[2:] == ["ask"]:
+        agui("ask")
+        aisdk("ask")
+        sys.exit()
+    for keyword in ["delegate", "plan", "skill", "note", "device", "ask"]:
         agui(keyword)
-    for keyword in ["delegate", "plan", "skill", "note"]:
+    for keyword in ["delegate", "plan", "skill", "note", "ask"]:
         aisdk(keyword)
     agui_a2ui()
     aisdk_a2ui()

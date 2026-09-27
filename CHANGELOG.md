@@ -103,6 +103,12 @@
   uploads it. Its code comes from `DocsSamples.kt`, compiled with the demo (which caught a wrong
   generative-UI example in the old README). The README is now a short entry point.
 
+- `AskUser`: Pydantic AI Harness's `ask_user_question` on the device (same schema, limits,
+  instruction and result). On-device agents ask directly; agent servers get it as an AG-UI frontend
+  tool or an AI SDK client-side tool (the reference server declares it with an `ExternalToolset`).
+  Questions arrive as standard JSON Schema; `SchemaForm` shows choices with descriptions as a list
+  and accepts the user's own answer (a plain string `anyOf` alternative), plus `minItems` / `maxItems`.
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

@@ -1,5 +1,6 @@
 package dev.ai.elements.demo
 
+import dev.ai.elements.core.agent.AskUser
 import dev.ai.elements.a2a.A2aAgent
 import dev.ai.elements.a2a.A2aBackend
 import dev.ai.elements.acp.AcpAgent
@@ -130,6 +131,9 @@ class AgentRuntime(
                 if (enabled.isNotEmpty()) add(Skills(enabled))
             }
             if (settings.mcpEnabled && mcp.servers.value.any { it.enabled }) add(mcp.toolset())
+            // Harness `ask_user_question`: on-device agents ask directly; agent servers get it as an
+            // AG-UI frontend tool / AI SDK client-side tool, answered here.
+            add(AskUser())
             if (!serverSide) {
                 if (settings.workspaceFiles) add(fileSystem)
                 if (settings.sandboxShell) add(shell)

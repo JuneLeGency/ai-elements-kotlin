@@ -1,0 +1,14 @@
+data: {"type":"RUN_STARTED","timestamp":1790550360119,"threadId":"t","runId":"r1"}
+
+data: {"type":"TEXT_MESSAGE_START","timestamp":1790550360142,"messageId":"d0bc3775-e72a-42fd-880c-1a957e8353bf"}
+
+data: {"type":"TEXT_MESSAGE_END","timestamp":1790550360142,"messageId":"d0bc3775-e72a-42fd-880c-1a957e8353bf"}
+
+data: {"type":"TOOL_CALL_START","timestamp":1790550360142,"toolCallId":"pyd_ai_1056099ef77d4e13b8406920aecc82b1","toolCallName":"ask_user_question","parentMessageId":"d0bc3775-e72a-42fd-880c-1a957e8353bf"}
+
+data: {"type":"TOOL_CALL_ARGS","timestamp":1790550360142,"toolCallId":"pyd_ai_1056099ef77d4e13b8406920aecc82b1","delta":"{\"questions\":[{\"header\":\"Database\",\"question\":\"Which database should the app use?\",\"options\":[{\"label\":\"SQLite\",\"description\":\"Local file, no server\"},{\"label\":\"Postgres\",\"description\":\"A managed server\"}]},{\"header\":\"Features\",\"question\":\"What should the first release include?\",\"multi_select\":true,\"options\":[{\"label\":\"Sign-in\"},{\"label\":\"Payments\"},{\"label\":\"Search\"}]}]}"}
+
+data: {"type":"TOOL_CALL_END","timestamp":1790550360143,"toolCallId":"pyd_ai_1056099ef77d4e13b8406920aecc82b1"}
+
+data: {"type":"RUN_FINISHED","timestamp":1790550360144,"threadId":"t","runId":"r1","outcome":{"type":"success"}}
+

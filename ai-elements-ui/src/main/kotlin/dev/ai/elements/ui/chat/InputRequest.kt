@@ -1,5 +1,13 @@
 package dev.ai.elements.ui.chat
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.draw.clip
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Checkbox
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.selectable
 import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -101,7 +109,10 @@ private fun Actions(onDecline: () -> Unit, primary: String, onPrimary: () -> Uni
 /**
  * A form for a flat JSON Schema object (MCP elicitation's restricted schema, AG-UI
  * `responseSchema`): text (with `format` email / uri / date), numbers with `minimum` / `maximum`,
- * booleans, single choices (`enum`, `oneOf` of `const`) and multiple choices (arrays of those).
+ * booleans, single choices (`enum`, `oneOf` / `anyOf` of `{const, title, description}`) and multiple
+ * choices (arrays of those, `minItems` / `maxItems`). A choice whose `anyOf` also allows a plain
+ * `{"type": "string"}` offers the user's own answer ("Other"), as Pydantic AI Harness `AskUser`
+ * questions do. Choices with descriptions or an own answer show as a list, others as chips.
  * Defaults pre-fill; `required` fields must be set before submitting.
  */
 @Composable
@@ -132,20 +143,39 @@ private fun Field(field: SchemaField, value: Any?, error: FieldError?, onChange:
             }
             SchemaField.Kind.CHOICE, SchemaField.Kind.CHOICES -> {
                 Text(label, style = MaterialTheme.typography.bodyMedium)
-                val selected = (value as? Set<*>).orEmpty()
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = tag) {
-                    field.options.forEach { (id, title) ->
-                        FilterChip(
-                            selected = id in selected,
-                            onClick = {
-                                onChange(
-                                    if (field.kind == SchemaField.Kind.CHOICE) setOf(id)
-                                    else if (id in selected) selected - id else selected + id,
-                                )
-                            },
-                            label = { Text(title) },
-                            modifier = Modifier.testTag("input-option-${field.name}-$id"),
-                        )
+                // A question reads before its options.
+                field.description?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                val picked = value as? SchemaField.Picked ?: SchemaField.Picked()
+                val single = field.kind == SchemaField.Kind.CHOICE
+                fun toggle(id: String) = onChange(
+                    SchemaField.Picked(if (single) setOf(id) else if (id in picked.selected) picked.selected - id else picked.selected + id),
+                )
+                if (field.asList) {
+                    // Like AI Elements <Question>: options with what they mean, and the user's own answer.
+                    Column(tag.selectableGroup()) {
+                        field.options.forEach { option ->
+                            ChoiceRow(option, selected = option.value in picked.selected, single = single, fieldName = field.name) { toggle(option.value) }
+                        }
+                        if (field.allowsOther) {
+                            OutlinedTextField(
+                                value = picked.other,
+                                onValueChange = { onChange(SchemaField.Picked(other = it)) },
+                                placeholder = { Text(stringResource(R.string.ai_input_other)) },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth().padding(top = 4.dp).testTag("input-other-${field.name}"),
+                            )
+                        }
+                    }
+                } else {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = tag) {
+                        field.options.forEach { option ->
+                            FilterChip(
+                                selected = option.value in picked.selected,
+                                onClick = { toggle(option.value) },
+                                label = { Text(option.title) },
+                                modifier = Modifier.testTag("input-option-${field.name}-${option.value}"),
+                            )
+                        }
                     }
                 }
             }
@@ -160,7 +190,7 @@ private fun Field(field: SchemaField, value: Any?, error: FieldError?, onChange:
             )
         }
         val hint = when (error) {
-            null, FieldError.Missing -> field.description
+            null, FieldError.Missing -> field.description.takeIf { field.kind != SchemaField.Kind.CHOICE && field.kind != SchemaField.Kind.CHOICES }
             FieldError.NotANumber -> stringResource(R.string.ai_input_invalid_number)
             FieldError.NotAnEmail -> stringResource(R.string.ai_input_invalid_email)
             is FieldError.Below -> stringResource(R.string.ai_input_min, error.limit)
@@ -168,6 +198,28 @@ private fun Field(field: SchemaField, value: Any?, error: FieldError?, onChange:
         }
         hint?.let {
             Text(it, style = MaterialTheme.typography.bodySmall, color = if (error != null && error != FieldError.Missing) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun ChoiceRow(option: SchemaField.Option, selected: Boolean, single: Boolean, fieldName: String, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.small)
+            .then(
+                if (single) Modifier.selectable(selected, role = Role.RadioButton, onClick = onClick)
+                else Modifier.toggleable(selected, role = Role.Checkbox, onValueChange = { onClick() }),
+            )
+            .heightIn(min = 48.dp)
+            .testTag("input-option-$fieldName-${option.value}"),
+    ) {
+        if (single) RadioButton(selected = selected, onClick = null) else Checkbox(checked = selected, onCheckedChange = null)
+        Column(Modifier.padding(start = 8.dp, top = 4.dp, bottom = 4.dp)) {
+            Text(option.title, style = MaterialTheme.typography.bodyMedium)
+            option.description?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
     }
 }
@@ -189,7 +241,11 @@ internal data class SchemaField(
     val required: Boolean,
     val integer: Boolean = false,
     val format: String? = null,
-    val options: List<Pair<String, String>> = emptyList(),
+    val options: List<Option> = emptyList(),
+    /** The choice also accepts the user's own text (a plain string alternative). */
+    val allowsOther: Boolean = false,
+    val minItems: Int? = null,
+    val maxItems: Int? = null,
     val minimum: Double? = null,
     val maximum: Double? = null,
     val minLength: Int? = null,
@@ -197,6 +253,14 @@ internal data class SchemaField(
     val default: JsonElement? = null,
 ) {
     enum class Kind { TEXT, NUMBER, BOOLEAN, CHOICE, CHOICES }
+
+    data class Option(val value: String, val title: String, val description: String? = null)
+
+    /** A choice's value: the picked options, or the user's own answer (which replaces them). */
+    data class Picked(val selected: Set<String> = emptySet(), val other: String = "")
+
+    /** Options with descriptions, or an own answer, read better as a list than as chips. */
+    val asList: Boolean get() = allowsOther || options.any { it.description != null }
 
     val keyboard: KeyboardType
         get() = when {
@@ -209,8 +273,8 @@ internal data class SchemaField(
     /** The pre-filled value: the schema's `default`. */
     fun initial(): Any? = when (kind) {
         Kind.BOOLEAN -> (default as? JsonPrimitive)?.booleanOrNull ?: false
-        Kind.CHOICE -> (default as? JsonPrimitive)?.contentOrNull?.let { setOf(it) }
-        Kind.CHOICES -> (default as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull }?.toSet()
+        Kind.CHOICE -> (default as? JsonPrimitive)?.contentOrNull?.let { Picked(setOf(it)) }
+        Kind.CHOICES -> (default as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull }?.toSet()?.let { Picked(it) }
         Kind.TEXT, Kind.NUMBER -> (default as? JsonPrimitive)?.contentOrNull
     }
 
@@ -218,7 +282,7 @@ internal data class SchemaField(
         val text = (value as? String)?.trim()
         val empty = when (kind) {
             Kind.BOOLEAN -> false
-            Kind.CHOICE, Kind.CHOICES -> (value as? Set<*>).isNullOrEmpty()
+            Kind.CHOICE, Kind.CHOICES -> (value as? Picked).let { it == null || (it.selected.isEmpty() && it.other.isBlank()) }
             Kind.TEXT, Kind.NUMBER -> text.isNullOrEmpty()
         }
         if (empty) return if (required) FieldError.Missing else null
@@ -237,6 +301,14 @@ internal data class SchemaField(
                 maxLength != null && text!!.length > maxLength -> FieldError.Above(maxLength.toString())
                 else -> null
             }
+            Kind.CHOICES -> {
+                val count = (value as Picked).let { if (it.other.isNotBlank()) 1 else it.selected.size }
+                when {
+                    minItems != null && count < minItems -> FieldError.Below(minItems.toString())
+                    maxItems != null && count > maxItems -> FieldError.Above(maxItems.toString())
+                    else -> null
+                }
+            }
             else -> null
         }
     }
@@ -244,8 +316,11 @@ internal data class SchemaField(
     /** The value as JSON for the answer; null leaves an unset optional field out. */
     fun toJson(value: Any?): JsonElement? = when (kind) {
         Kind.BOOLEAN -> JsonPrimitive(value == true)
-        Kind.CHOICE -> (value as? Set<*>)?.firstOrNull()?.let { JsonPrimitive(it.toString()) }
-        Kind.CHOICES -> (value as? Set<*>)?.takeIf { it.isNotEmpty() }?.let { set -> JsonArray(options.map { it.first }.filter { it in set }.map(::JsonPrimitive)) }
+        Kind.CHOICE -> (value as? Picked)?.let { p -> p.other.trim().ifEmpty { null } ?: p.selected.firstOrNull() }?.let(::JsonPrimitive)
+        Kind.CHOICES -> (value as? Picked)?.let { p ->
+            p.other.trim().takeIf { it.isNotEmpty() }?.let { JsonArray(listOf(JsonPrimitive(it))) }
+                ?: p.selected.takeIf { it.isNotEmpty() }?.let { set -> JsonArray(options.map { it.value }.filter { it in set }.map(::JsonPrimitive)) }
+        }
         Kind.NUMBER -> (value as? String)?.trim()?.toDoubleOrNull()?.let { if (integer) JsonPrimitive(it.toLong()) else JsonPrimitive(it) }
         Kind.TEXT -> (value as? String)?.takeIf { it.isNotBlank() }?.let(::JsonPrimitive)
     }
@@ -263,15 +338,20 @@ internal data class SchemaField(
         private fun JsonObject.str(key: String) = (this[key] as? JsonPrimitive)?.contentOrNull
         private fun JsonObject.num(key: String) = (this[key] as? JsonPrimitive)?.doubleOrNull
 
-        /** `enum` (+ `enumNames`) or `oneOf` / `anyOf` of `{const, title}`. */
-        private fun options(p: JsonObject): List<Pair<String, String>> {
+        /** `enum` (+ `enumNames`) or `oneOf` / `anyOf` of `{const, title, description}`. */
+        private fun options(p: JsonObject): List<Option> {
             (p["enum"] as? JsonArray)?.let { values ->
                 val names = (p["enumNames"] as? JsonArray)?.map { (it as? JsonPrimitive)?.contentOrNull }
-                return values.mapIndexedNotNull { i, v -> (v as? JsonPrimitive)?.contentOrNull?.let { it to (names?.getOrNull(i) ?: it) } }
+                return values.mapIndexedNotNull { i, v -> (v as? JsonPrimitive)?.contentOrNull?.let { Option(it, names?.getOrNull(i) ?: it) } }
             }
-            val alternatives = (p["oneOf"] ?: p["anyOf"]) as? JsonArray ?: return emptyList()
-            return alternatives.mapNotNull { (it as? JsonObject)?.let { o -> o.str("const")?.let { c -> c to (o.str("title") ?: c) } } }
+            return alternatives(p).mapNotNull { o -> o.str("const")?.let { c -> Option(c, o.str("title") ?: c, o.str("description")) } }
         }
+
+        private fun alternatives(p: JsonObject) = ((p["oneOf"] ?: p["anyOf"]) as? JsonArray).orEmpty().mapNotNull { it as? JsonObject }
+
+        /** An `anyOf` alternative that is any string (no `const` / `enum`): the user's own answer. */
+        private fun allowsOther(p: JsonObject) = (p["anyOf"] as? JsonArray) != null &&
+            alternatives(p).any { it.str("type") == "string" && "const" !in it && "enum" !in it }
 
         fun of(name: String, p: JsonObject, required: Boolean): SchemaField {
             val type = p.str("type")
@@ -287,8 +367,11 @@ internal data class SchemaField(
             val items = p["items"] as? JsonObject
             return when {
                 type == "boolean" -> base.copy(kind = Kind.BOOLEAN)
-                type == "array" && items != null -> base.copy(kind = Kind.CHOICES, options = options(items))
-                single.isNotEmpty() -> base.copy(kind = Kind.CHOICE, options = single)
+                type == "array" && items != null -> base.copy(
+                    kind = Kind.CHOICES, options = options(items), allowsOther = allowsOther(items),
+                    minItems = p.num("minItems")?.toInt(), maxItems = p.num("maxItems")?.toInt(),
+                )
+                single.isNotEmpty() -> base.copy(kind = Kind.CHOICE, options = single, allowsOther = allowsOther(p))
                 type == "integer" || type == "number" -> base.copy(kind = Kind.NUMBER, integer = type == "integer", minimum = p.num("minimum"), maximum = p.num("maximum"))
                 else -> base.copy(format = p.str("format"), minLength = p.num("minLength")?.toInt(), maxLength = p.num("maxLength")?.toInt())
             }

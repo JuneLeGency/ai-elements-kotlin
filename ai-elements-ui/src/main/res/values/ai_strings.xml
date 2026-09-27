@@ -172,6 +172,7 @@
     <string name="ai_skill">Skill</string>
     <string name="ai_tool_via">via %1$s</string>
     <string name="ai_skills_count">Skills (%1$d)</string>
+    <string name="ai_input_other">Other…</string>
     <string name="ai_input_decline">Decline</string>
     <string name="ai_input_open_link">Open link</string>
     <string name="ai_input_done">Done</string>

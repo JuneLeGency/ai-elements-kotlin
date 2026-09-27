@@ -166,6 +166,7 @@
     <string name="ai_skill">技能</string>
     <string name="ai_tool_via">來自 %1$s</string>
     <string name="ai_skills_count">技能（%1$d）</string>
+    <string name="ai_input_other">其他…</string>
     <string name="ai_input_decline">拒絕</string>
     <string name="ai_input_open_link">開啟連結</string>
     <string name="ai_input_done">完成</string>

@@ -1,5 +1,7 @@
 package dev.ai.elements.core.protocol
 
+import kotlinx.serialization.json.JsonPrimitive
+import dev.ai.elements.core.agent.AskUser
 import com.sun.net.httpserver.HttpServer
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatEvent
@@ -144,6 +146,46 @@ class RecordedProtocolTest {
         val toolMessage = requests[1]["messages"]!!.jsonArray.map { it.jsonObject }.single { it["role"]!!.jsonPrimitive.content == "tool" }
         assertEquals("Pixel 10, Android 17", toolMessage["content"]!!.jsonPrimitive.content)
         assertTrue(reply.text.contains("Pixel 10"))
+    }
+
+    // --- Pydantic AI Harness `ask_user_question`, answered on the device ------------------
+
+    /** Answers every question with the second option (the multi-select one with its first two). */
+    private val answering = object : ToolApprover {
+        override suspend fun approve(toolCallId: String) = true
+        override suspend fun input(request: InputRequest): InputResponse {
+            val properties = request.schema!!["properties"]!!.jsonObject
+            return InputResponse.Accept(buildJsonObject {
+                put("Database", "Postgres")
+                put("Features", kotlinx.serialization.json.JsonArray(listOf(JsonPrimitive("Sign-in"), JsonPrimitive("Search"))))
+            }).also { assertEquals(setOf("Database", "Features"), properties.keys) }
+        }
+    }
+
+    @Test
+    fun agUi_askUser_frontendTool_answeredOnTheDevice() {
+        replay("agui/ask.sse", "agui/ask-continued.sse")
+        val (_, reply) = run(agUi(tools = listOf(AskUser.tool), approver = answering))
+        val call = reply.tool("ask_user_question")
+        assertEquals(ToolState.OUTPUT_AVAILABLE, call.state)
+        assertEquals("""{"Database":["Postgres"],"Features":["Sign-in","Search"]}""", call.output)
+        // Advertised with Harness's schema; the answer went back as the tool message.
+        assertTrue(requests[0]["tools"]!!.jsonArray.any { it.jsonObject["name"]!!.jsonPrimitive.content == "ask_user_question" })
+        val toolMessage = requests[1]["messages"]!!.jsonArray.map { it.jsonObject }.single { it["role"]!!.jsonPrimitive.content == "tool" }
+        assertEquals(call.output, toolMessage["content"]!!.jsonPrimitive.content)
+    }
+
+    @Test
+    fun aiSdk_askUser_clientSideTool_answeredOnTheDevice() {
+        replay("aisdk/ask.sse", "aisdk/ask-answered.sse")
+        val (_, reply) = run(UiMessageStreamBackend("$base/api/chat", tools = listOf(AskUser.tool), approver = answering))
+        val call = reply.tool("ask_user_question")
+        assertEquals("""{"Database":["Postgres"],"Features":["Sign-in","Search"]}""", call.output)
+        // The output went back as the tool part's `output-available`, as useChat's addToolResult does.
+        val part = requests[1]["messages"]!!.jsonArray.flatMap { m -> m.jsonObject["parts"]?.jsonArray.orEmpty() }
+            .map { it.jsonObject }.single { it["type"]!!.jsonPrimitive.content == "tool-ask_user_question" }
+        assertEquals("output-available", part["state"]!!.jsonPrimitive.content)
+        assertTrue(reply.text.isNotBlank())
     }
 
     // --- A2UI (generative UI) on each transport's binding -------------------------------

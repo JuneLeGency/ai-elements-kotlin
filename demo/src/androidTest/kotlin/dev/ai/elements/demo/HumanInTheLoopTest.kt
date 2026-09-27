@@ -1,5 +1,6 @@
 package dev.ai.elements.demo
 
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -91,5 +92,27 @@ class HumanInTheLoopTest {
 
         scrollToText("Booked a table for 4 at Hoshi, 19:30, outdoor.")
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("input-request").fetchSemanticsNodes().isEmpty() }
+    }
+
+    /**
+     * Pydantic AI Harness `ask_user_question` from the agent server: the app advertises it as an
+     * AG-UI frontend tool, shows the questions, and the run continues with the answers.
+     */
+    @Test
+    fun agUi_agentAsksAQuestion_answeredInTheApp() {
+        resetDemoApp(ProviderProfile("e2e-agui", "E2E AG-UI", ProviderKind.AG_UI, server, ""))
+        scenario = ActivityScenario.launch(MainActivity::class.java)
+        compose.onNodeWithTag("prompt-input").performClick().performTextInput("please ask me")
+        compose.onNodeWithTag("send-button").performClick()
+        scenario!!.hideKeyboard()
+        waitForTag("input-request")
+        compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("input-option-Database-Postgres"))
+        compose.onNodeWithTag("input-option-Database-Postgres").performClick()
+        compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("input-option-Features-Search"))
+        compose.onNodeWithTag("input-option-Features-Search").performClick()
+        compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("input-submit"))
+        compose.onNodeWithTag("input-submit").performClick()
+        compose.waitUntil(60_000) { compose.onAllNodesWithTag("input-request").fetchSemanticsNodes().isEmpty() }
+        scrollToText("Agent run complete")
     }
 }

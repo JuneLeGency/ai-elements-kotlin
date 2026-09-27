@@ -166,6 +166,7 @@
     <string name="ai_skill">スキル</string>
     <string name="ai_tool_via">%1$s 経由</string>
     <string name="ai_skills_count">スキル（%1$d）</string>
+    <string name="ai_input_other">その他…</string>
     <string name="ai_input_decline">断る</string>
     <string name="ai_input_open_link">リンクを開く</string>
     <string name="ai_input_done">完了</string>

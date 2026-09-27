@@ -1,0 +1,160 @@
+data: {"type":"start"}
+
+data: {"type":"start-step"}
+
+data: {"type":"text-start","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"## Agent run","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":" complete\n\nT","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"he request w","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"ent **app → ","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"agent server","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":" → PydanticA","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"I agent → to","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"ol → model**","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":" and\nback as","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":" a UI Messag","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"e Stream. Th","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"e tool repor","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"ted: `{\"Data","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"base\":[\"Post","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"gres\"],\"Feat","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"ures\":[\"Sign","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"-in\",\"Search","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"\"]}`.\n\n| Sta","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"ge | Protoco","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"l |\n|---|---","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"|\n| App → se","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"rver | `POST","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":" /api/chat` ","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"(AI SDK `UIM","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"essage[]`) |","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"\n| Server → ","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"app | SSE UI","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":" Message Str","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"eam v1 |\n| A","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"gent → tools","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":" | PydanticA","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"I function t","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"ools |\n\n```m","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"ermaid\nseque","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"nceDiagram\n ","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"   participa","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"nt App as An","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"droid app\n  ","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"  participan","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"t S as Agent","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":" server\n    ","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"participant ","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"A as Pydanti","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"cAI agent\n  ","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"  participan","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"t T as get_c","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"urrent_time\n","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"    App->>S:","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":" POST /api/c","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"hat\n    S->>","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"A: run(messa","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"ges)\n    A->","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":">T: call()\n ","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"   T-->>A: {","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"\"Database\":[","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"\"Postgres\"],","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"\"Features\":[","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"\"Sign-in\",\"S","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"earch\"]}\n   ","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":" A-->>S: tex","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"t deltas\n   ","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":" S-->>App: S","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"SE text-delt","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"a\n```\n\n```ko","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"tlin\nval con","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"troller = Ch","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"atController","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"(backend)\nco","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"ntroller.sen","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"d(\"Hello\")\n`","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-delta","delta":"``\n","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"text-end","id":"114e286b-5ae9-4550-b447-cc43bf3b59c5"}
+
+data: {"type":"message-metadata","messageMetadata":{"usage":{"inputTokens":50,"outputTokens":181}}}
+
+data: {"type":"message-metadata","messageMetadata":{"pydantic_ai":{"timestamp":"2026-09-27T23:06:01.831396Z"}}}
+
+data: {"type":"finish-step"}
+
+data: {"type":"finish"}
+
+data: [DONE]
+

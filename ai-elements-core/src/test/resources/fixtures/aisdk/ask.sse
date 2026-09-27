@@ -1,0 +1,20 @@
+data: {"type":"start"}
+
+data: {"type":"start-step"}
+
+data: {"type":"tool-input-start","toolCallId":"pyd_ai_f338dba47eaf4dfea0c5d1d2c68b7d97","toolName":"ask_user_question"}
+
+data: {"type":"tool-input-delta","toolCallId":"pyd_ai_f338dba47eaf4dfea0c5d1d2c68b7d97","inputTextDelta":"{\"questions\":[{\"header\":\"Database\",\"question\":\"Which database should the app use?\",\"options\":[{\"label\":\"SQLite\",\"description\":\"Local file, no server\"},{\"label\":\"Postgres\",\"description\":\"A managed server\"}]},{\"header\":\"Features\",\"question\":\"What should the first release include?\",\"multi_select\":true,\"options\":[{\"label\":\"Sign-in\"},{\"label\":\"Payments\"},{\"label\":\"Search\"}]}]}"}
+
+data: {"type":"tool-input-available","toolCallId":"pyd_ai_f338dba47eaf4dfea0c5d1d2c68b7d97","toolName":"ask_user_question","input":{"questions":[{"header":"Database","question":"Which database should the app use?","options":[{"label":"SQLite","description":"Local file, no server"},{"label":"Postgres","description":"A managed server"}]},{"header":"Features","question":"What should the first release include?","multi_select":true,"options":[{"label":"Sign-in"},{"label":"Payments"},{"label":"Search"}]}]}}
+
+data: {"type":"message-metadata","messageMetadata":{"usage":{"inputTokens":50,"outputTokens":55}}}
+
+data: {"type":"message-metadata","messageMetadata":{"pydantic_ai":{"timestamp":"2026-09-27T23:06:01.784611Z"}}}
+
+data: {"type":"finish-step"}
+
+data: {"type":"finish"}
+
+data: [DONE]
+

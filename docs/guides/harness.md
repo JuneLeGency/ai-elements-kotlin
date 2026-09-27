@@ -22,6 +22,7 @@ arguments and behaviour, so on-device and server agents render identically.
 | `Speech` | `harness-speech` | `speak`, `stop_speaking` |
 | `Scheduler` | `harness-scheduler` | `schedule_task`, `list_scheduled_tasks`, `cancel_scheduled_task` |
 | `Skills` | `ai-elements-core` | `load_capability` |
+| `AskUser` | `ai-elements-core` | `ask_user_question` |
 | `McpToolset` | `ai-elements-core` | the tools of the user's MCP servers |
 
 A `Capability` is instructions plus tools; write your own by implementing it, or pass plain

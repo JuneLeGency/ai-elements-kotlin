@@ -1,0 +1,150 @@
+data: {"type":"RUN_STARTED","timestamp":1790550360156,"threadId":"t","runId":"r2"}
+
+data: {"type":"TEXT_MESSAGE_START","timestamp":1790550360187,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360187,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"## Agent run"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360209,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":" complete\n\nT"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360231,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"he request w"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360253,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ent **app → "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360276,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"agent server"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360298,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":" → PydanticA"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360319,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"I agent → to"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360341,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ol → model**"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360363,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":" and\nback as"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360386,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":" a UI Messag"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360408,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"e Stream. Th"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360430,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"e tool repor"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360453,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ted: `{'Data"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360476,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"base': ['Pos"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360499,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"tgres'], 'Fe"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360520,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"atures': ['S"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360542,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ign-in', 'Se"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360564,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"arch']}`.\n\n|"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360587,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":" Stage | Pro"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360609,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"tocol |\n|---"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360631,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"|---|\n| App "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360654,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"→ server | `"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360676,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"POST /api/ch"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360698,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"at` (AI SDK "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360720,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"`UIMessage[]"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360743,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"`) |\n| Serve"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360764,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"r → app | SS"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360787,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"E UI Message"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360808,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":" Stream v1 |"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360830,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"\n| Agent → t"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360851,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ools | Pydan"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360873,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ticAI functi"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360896,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"on tools |\n\n"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360918,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"```mermaid\ns"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360941,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"equenceDiagr"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360963,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"am\n    parti"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550360986,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"cipant App a"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361008,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"s Android ap"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361029,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"p\n    partic"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361051,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ipant S as A"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361074,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"gent server\n"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361096,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"    particip"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361119,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ant A as Pyd"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361141,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"anticAI agen"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361162,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"t\n    partic"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361184,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ipant T as g"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361206,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"et_current_t"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361229,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ime\n    App-"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361251,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":">>S: POST /a"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361273,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"pi/chat\n    "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361297,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"S->>A: run(m"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361320,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"essages)\n   "}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361341,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":" A->>T: call"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361364,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"()\n    T-->>"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361386,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"A: {'Databas"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361408,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"e': ['Postgr"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361431,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"es'], 'Featu"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361454,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"res': ['Sign"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361477,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"-in', 'Searc"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361500,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"h']}\n    A--"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361523,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":">>S: text de"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361546,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ltas\n    S--"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361569,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":">>App: SSE t"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361592,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ext-delta\n``"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361614,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"`\n\n```kotlin"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361636,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"\nval control"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361658,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ler = ChatCo"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361681,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ntroller(bac"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361703,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"kend)\ncontro"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361726,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ller.send(\"H"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","timestamp":1790550361748,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc","delta":"ello\")\n```\n"}
+
+data: {"type":"TEXT_MESSAGE_END","timestamp":1790550361748,"messageId":"aec21324-7215-4e02-ba87-c5e1d210bebc"}
+
+data: {"type":"RUN_FINISHED","timestamp":1790550361752,"threadId":"t","runId":"r2","outcome":{"type":"success"}}
+

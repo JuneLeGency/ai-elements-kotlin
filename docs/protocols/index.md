@@ -25,7 +25,7 @@ interactive views through [MCP Apps](mcp-apps.md).
 | Tool calls | ✓ | ✓ | — | ✓ (with diffs) | ✓ |
 | Tools on the device | client-side tools | frontend tools | — | client file system | all tools |
 | Approvals | yes / no + reason | yes / no + reason + edited arguments | — | yes / no | yes / no + reason + edited arguments |
-| Forms for the user | — | interrupts with a `responseSchema` | `input-required` | — | through MCP elicitation |
+| Questions and forms for the user | `ask_user_question` (client-side tool) | `ask_user_question` (frontend tool), interrupts with a `responseSchema` | `input-required` | — | `AskUser`, MCP elicitation |
 | Sub-agents | `UIMessage` tool output | `SUBAGENT_*` | as sub-agents | — | `delegate_task` |
 | Plans and state | `data-*` parts | `STATE_*`, `ACTIVITY_*` | progress | `plan` | `Planning` |
 | Generative UI | `data-a2ui` | `a2ui-surface` activity | A2UI parts | — | — |
