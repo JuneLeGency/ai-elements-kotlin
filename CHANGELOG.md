@@ -20,6 +20,8 @@
   `Agent` descriptions and skill lists (A2A cards).
 - `ai-elements-koog`: a JetBrains Koog agent as a `ChatBackend` (and as an `AgentHarness` model
   binding), with AI Elements tools as Koog tools; approvals and progress work as with the built-in loop.
+- MCP authorization verified live end to end against the official `mcp` SDK OAuth server
+  (`server/mcp_auth_server.py`, `LiveMcpOAuthTest`).
 - New artifact `ai-elements-chat` (models, `ChatEvent`, `ChatBackend`, `ChatController`; same packages):
   `ai-elements-ui` now depends on it alone (no OkHttp / protocol libraries); `ai-elements-core` builds
   on it. Apps that used backends through `ai-elements-ui` add `ai-elements-core` explicitly.

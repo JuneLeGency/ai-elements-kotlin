@@ -23,7 +23,7 @@ android {
         listOf(
             "liveOllama" to "live.ollama", "liveModel" to "live.model", "liveAgentServer" to "live.agentServer",
             "liveCodexAuth" to "live.codexAuth", "liveCodexModel" to "live.codexModel",
-            "liveOAuth" to "live.oauth", "liveMcp" to "live.mcp", "liveMcpLegacy" to "live.mcpLegacy", "liveProxy" to "live.proxy", "liveProxyGemini" to "live.proxyGemini", "liveProxyModel" to "live.proxyModel",
+            "liveOAuth" to "live.oauth", "liveMcp" to "live.mcp", "liveMcpOAuth" to "live.mcpOAuth", "liveMcpLegacy" to "live.mcpLegacy", "liveProxy" to "live.proxy", "liveProxyGemini" to "live.proxyGemini", "liveProxyModel" to "live.proxyModel",
         )
             .forEach { (property, key) -> (findProperty(property) as String?)?.let { test.systemProperty(key, it) } }
         test.testLogging { showStandardStreams = true }

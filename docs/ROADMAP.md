@@ -39,7 +39,7 @@ UI = this library.
 | AI SDK 6 UI Message Stream: full `UIMessage` history, tool approval (`tool-approval-request` → `approval-responded`), client-side tools, preliminary output, `UIMessage` sub-agent output, metadata | AI SDK 6 | ✅ live (LiveHarnessServerTest) + recorded fixtures (RecordedProtocolTest) |
 | AG-UI 1.0: frontend tools, interrupts + `resume`, `SUBAGENT_*`, state / activity (JSON Patch), steps, `RUN_FINISHED.usage` | AG-UI 1.0, official `kotlin-core` types, `kotlin-json-patch` | ✅ live 5/5 + recorded fixtures incl. official-encoder SUBAGENT/STATE_DELTA/ACTIVITY/usage |
 | ✅ decoding on the official `com.ag-ui.community:kotlin-core` types. ⬜ upstream PR for `SUBAGENT_*` / `ACTIVITY_*` and the kotlinx-datetime 0.7 fix (#2772) | ag-ui Kotlin SDK | ⬜ |
-| MCP 2026-07-28 stateless + legacy session fallback, `Mcp-Method` / `Mcp-Name` / `x-mcp-header`, progress, OAuth discovery (RFC 9728 / 8414 / 7591 / 8707) | hand-written (official Kotlin SDK stops at 2025-11-25); switch when it ships 2026-07-28 | ✅ live vs official `mcp` 2.2 (stateless) and `mcp` 1.x (legacy fallback) + unit tests; OAuth discovery untested live |
+| MCP 2026-07-28 stateless + legacy session fallback, `Mcp-Method` / `Mcp-Name` / `x-mcp-header`, progress, OAuth discovery (RFC 9728 / 8414 / 7591 / 8707) | hand-written (official Kotlin SDK stops at 2025-11-25); switch when it ships 2026-07-28 | ✅ live vs official `mcp` 2.2 (stateless) and `mcp` 1.x (legacy fallback) + unit tests; OAuth ✅ live against the official `mcp` SDK OAuth server (`server/mcp_auth_server.py`: 401 → RFC 9728 → RFC 8414 → RFC 7591 → code + PKCE S256 + RFC 8707 → token → call → refresh) |
 | A2A 1.0 (0.3 compatible) as provider and as sub-agent | official `a2a-java-sdk` + its Android HTTP client | ✅ live 3/3 against the official Python `a2a-sdk` |
 
 ### W2 · Agent capabilities (Harness parity)
@@ -112,7 +112,7 @@ The demo is a showcase of both modes, switchable per conversation:
 | Item | Status |
 |---|---|
 | Backend picker: in-app harness · AI SDK server · AG-UI server · A2A agent · direct model API | ✅ provider kinds incl. A2A; remote servers get device-only tools, the in-app harness gets skills + sub-agents |
-| Settings: MCP servers (add, test, tools, approval policy, OAuth sign-in), Skills (bundled + zip import), Agents (sub-agents, remote A2A agents) | ✅ verified on emulator (MCP 2026-07-28 connect, 5 tools; live A2A card); MCP OAuth sign-in untested against a real OAuth server |
+| Settings: MCP servers (add, test, tools, approval policy, OAuth sign-in), Skills (bundled + zip import), Agents (sub-agents, remote A2A agents) | ✅ verified on emulator (MCP 2026-07-28 connect, 5 tools; live A2A card); MCP OAuth flow verified live against the official SDK's authorization server (library level; the in-app browser step is the same `OAuthClient` flow) |
 | Composer sheet to toggle MCP servers / skills / agents per chat | ✅ `CapabilitiesSheet` (composer button, badge count) |
 | Bundled skills from `/skills` (shared with the server) | ✅ `bundleSkills` Gradle task |
 | E2E on emulator and Xiaomi Pad: every capability over each protocol | 🟡 emulator: CapabilitiesFlowTest 4/4 (AG-UI delegation + interrupt approval, AI SDK skill + plan, A2A), AgentFlowTest, SandboxTest, BrowserTest, DeviceToolsTest, SpeechSchedulerTest 3/3, SharedFoldersTest (system picker); Xiaomi Pad and in-app harness with a real model pending (local Ollama too slow; Codex needs the authorized account) |

@@ -261,6 +261,7 @@ agents, the in-app agent's workspace / Linux sandbox / memory / planning, themes
 # Live, opt-in (with the reference server running):
 ./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveHarnessServerTest*' -PliveAgentServer=http://localhost:8788
 ./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveMcpTest*' -PliveMcp=http://localhost:8788/mcp -PliveMcpLegacy=http://localhost:8790/mcp
+./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveMcpOAuthTest*' -PliveMcpOAuth=http://127.0.0.1:8791/mcp   # after: cd server && uv run python mcp_auth_server.py
 ./gradlew :ai-elements-a2a:testDebugUnitTest -PliveA2a=http://localhost:8788
 ./gradlew :dokkaGenerate                                   # API reference → build/dokka/html
 ./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveCodexTest*' -PliveCodexAuth=$HOME/.codex/auth.json
