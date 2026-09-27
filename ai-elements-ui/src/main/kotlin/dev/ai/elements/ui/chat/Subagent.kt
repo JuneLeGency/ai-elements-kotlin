@@ -30,6 +30,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import dev.ai.elements.ui.theme.AiType
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -92,37 +95,28 @@ fun Subagent(
     Surface(
         onClick = { open = !open },
         color = scheme.surfaceContainerLow,
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.medium,
         modifier = modifier.fillMaxWidth().testTag("subagent-$agentName"),
     ) {
-        Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(AiSize.avatar)
-                        .clip(MaterialShapes.Sunny.toShape())
-                        .background(scheme.secondaryContainer),
-                ) {
-                    Icon(Icons.Outlined.SmartToy, null, Modifier.size(AiSize.compactIcon), scheme.onSecondaryContainer)
-                }
-                Column(Modifier.weight(1f)) {
-                    Text(agentName, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(
-                        text = activity(part, run, task),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = scheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.testTag("subagent-activity"),
-                    )
-                }
+        // One line like a tool call — agent, what it is doing, status — opening to its run.
+        Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.heightIn(min = 24.dp)) {
+                Icon(Icons.Outlined.SmartToy, null, Modifier.size(16.dp), scheme.onSurfaceVariant)
+                Text(agentName, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 160.dp))
+                Text(
+                    text = activity(part, run, task),
+                    style = AiType.small,
+                    color = scheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f).testTag("subagent-activity"),
+                )
                 StatusPill(part.state)
                 Icon(
                     Icons.Outlined.ExpandMore,
                     contentDescription = stringResource(if (open) R.string.ai_collapse else R.string.ai_expand),
                     tint = scheme.onSurfaceVariant,
-                    modifier = Modifier.rotate(if (open) 180f else 0f),
+                    modifier = Modifier.size(18.dp).rotate(if (open) 180f else 0f),
                 )
             }
             AnimatedVisibility(

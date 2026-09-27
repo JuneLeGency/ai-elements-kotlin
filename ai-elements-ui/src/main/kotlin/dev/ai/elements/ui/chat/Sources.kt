@@ -14,6 +14,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.pluralStringResource
@@ -41,14 +47,21 @@ fun Sources(sources: List<SourcePart>, modifier: Modifier = Modifier) {
             modifier = Modifier.horizontalFadingEdges({ row.canScrollBackward }, { row.canScrollForward }),
         ) {
             items(sources, key = { it.id }) { source ->
-                AssistChip(
+                // Small source pills (title only), like citations in the assistant apps.
+                Surface(
                     onClick = { runCatching { uriHandler.openUri(source.url) } },
-                    label = {
-                        Text(source.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    },
-                    leadingIcon = { Icon(Icons.Outlined.Link, null, Modifier.size(AssistChipDefaults.IconSize)) },
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     shape = MaterialTheme.shapes.extraLarge,
-                )
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.heightIn(min = 28.dp).padding(horizontal = 10.dp),
+                    ) {
+                        Icon(Icons.Outlined.Link, null, Modifier.size(14.dp), MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(source.title, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 160.dp))
+                    }
+                }
             }
         }
     }

@@ -36,6 +36,8 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -78,6 +80,8 @@ internal fun HistoryPane(
     onOpen: (String) -> Unit,
     onDelete: (String) -> Unit,
     modifier: Modifier = Modifier,
+    /** Pinned under the list (e.g. Components and Settings on phones, as chat apps put them in the drawer). */
+    footer: (@Composable () -> Unit)? = null,
 ) {
     val query = rememberTextFieldState()
     var searching by rememberSaveable { mutableStateOf(false) }
@@ -133,7 +137,7 @@ internal fun HistoryPane(
                 modifier = Modifier.padding(16.dp),
             )
         }
-        LazyColumn(Modifier.fillMaxWidth().testTag("history-list")) {
+        LazyColumn(Modifier.fillMaxWidth().weight(1f).testTag("history-list")) {
             filtered.groupBy { dateGroup(it.updatedAt, now) }.forEach { (group, rows) ->
                 item(key = "header-$group", contentType = "header") {
                     Text(
@@ -153,6 +157,11 @@ internal fun HistoryPane(
                     )
                 }
             }
+        }
+        footer?.let {
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+            it()
+            Spacer(Modifier.height(8.dp))
         }
     }
 }

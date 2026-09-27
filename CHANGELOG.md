@@ -37,8 +37,15 @@
 - `A2aAgent.cardOrNull(timeoutMs)`: listing remote agents no longer blocks a turn on an
   unreachable one (the blocking HTTP connect ignored the coroutine timeout; a physical device
   waited ~16 s per turn on the emulator-only default agent); failures are not retried for a minute.
-- `PromptInput`'s toolbar keeps its size when the screen is very short (a phone in landscape with
-  the keyboard up): the card clips it instead of squashing the buttons.
+- Denser, calmer conversation (as the mainstream assistant apps lay it out): replies use the full
+  width (no avatar column); reasoning is one quiet line ("Thought for 2s ›") that opens under a
+  hairline rule; tool calls, sub-agents, plans and tasks are one-line cards (name, argument or
+  activity preview, a quiet status that is coloured only for approval / error / denial);
+  smaller source pills and table cells.
+- `PromptInput` switches to one row (field + send) when there is too little height for two
+  (a phone in landscape with the keyboard up) instead of squashing its toolbar.
+- Demo: phones have no bottom navigation bar — Components and Settings open from the chat's
+  drawer (Back returns); the top bar is a single-line "Provider ▾" title at 56dp.
 - A2UI forms keep what the user entered while they scroll out of sight (sessions live in the
   renderer, not in the lazy list item).
 - New artifact `ai-elements-mcp-apps`: an MCP Apps host (2026-01-26). `ui://` views run in a

@@ -115,7 +115,7 @@ import kotlinx.coroutines.launch
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun SettingsScreen(viewModel: ChatViewModel, twoPane: Boolean) {
+fun SettingsScreen(viewModel: ChatViewModel, twoPane: Boolean, onBack: (() -> Unit)? = null) {
     val profiles by viewModel.providers.profiles.collectAsStateWithLifecycle()
     val selectedId by viewModel.providers.selectedId.collectAsStateWithLifecycle()
     val navigator = rememberListDetailNavigator<String>(twoPane, listWidth = 400.dp)
@@ -132,6 +132,7 @@ fun SettingsScreen(viewModel: ChatViewModel, twoPane: Boolean) {
                     selectedId = selectedId,
                     highlightedId = if (navigator.isDetailVisible) navigator.currentDestination?.contentKey else null,
                     onEdit = { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } },
+                    onBack = onBack,
                 )
             }
         },
@@ -177,6 +178,7 @@ private fun SettingsList(
     selectedId: String,
     highlightedId: String?,
     onEdit: (String) -> Unit,
+    onBack: (() -> Unit)? = null,
 ) {
     val appearance by viewModel.settings.appearance.collectAsStateWithLifecycle()
     var addMenu by remember { mutableStateOf(false) }
@@ -203,7 +205,13 @@ private fun SettingsList(
             dismissButton = { TextButton(onClick = { confirmSubscription = false }) { Text(stringResource(R.string.cancel)) } },
         )
     }
-    Scaffold(containerColor = Color.Transparent, topBar = { TopAppBar(title = { Text(stringResource(R.string.settings)) }, colors = transparentAppBarColors()) }) { padding ->
+    Scaffold(containerColor = Color.Transparent, topBar = {
+        TopAppBar(
+            title = { Text(stringResource(R.string.settings)) },
+            navigationIcon = { onBack?.let { BackArrow(it) } },
+            colors = transparentAppBarColors(),
+        )
+    }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding).testTag("settings-list")) {
             item { SectionHeader(stringResource(R.string.appearance)) }
             item {

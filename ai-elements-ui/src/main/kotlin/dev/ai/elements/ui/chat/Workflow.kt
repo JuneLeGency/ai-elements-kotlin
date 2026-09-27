@@ -33,6 +33,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import dev.ai.elements.ui.theme.AiType
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -178,29 +180,35 @@ private fun Collapsible(
     Surface(
         onClick = { open = !open },
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.medium,
         modifier = modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
-                ) { Icon(icon, null, Modifier.size(16.dp), MaterialTheme.colorScheme.onPrimaryContainer) }
-                Column(Modifier.weight(1f)) {
-                    ShimmerText(title, active = streaming, style = MaterialTheme.typography.titleSmall)
-                    subtitle?.let {
-                        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-                Icon(Icons.Outlined.ExpandMore, if (open) stringResource(R.string.ai_collapse) else stringResource(R.string.ai_expand), Modifier.rotate(rotation))
+        // Same shape and rhythm as a tool call: one header line, then the items.
+        Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AiSpacing.s), modifier = Modifier.heightIn(min = 24.dp)) {
+                Icon(icon, null, Modifier.size(16.dp), MaterialTheme.colorScheme.onSurfaceVariant)
+                ShimmerText(title, active = streaming, style = MaterialTheme.typography.labelLarge)
+                Text(
+                    subtitle.orEmpty(),
+                    style = AiType.small,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(
+                    Icons.Outlined.ExpandMore,
+                    if (open) stringResource(R.string.ai_collapse) else stringResource(R.string.ai_expand),
+                    Modifier.size(18.dp).rotate(rotation),
+                    MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             AnimatedVisibility(
                 visible = open,
                 enter = expandVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) + fadeIn(),
                 exit = shrinkVertically(MaterialTheme.motionScheme.fastSpatialSpec()) + fadeOut(),
             ) {
-                Column(Modifier.padding(top = AiSpacing.m).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
+                Column(Modifier.padding(top = AiSpacing.s, bottom = 2.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     content()
                 }
             }

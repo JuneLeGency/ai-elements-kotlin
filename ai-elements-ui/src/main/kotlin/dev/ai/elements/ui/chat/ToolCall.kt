@@ -30,6 +30,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import dev.ai.elements.ui.theme.AiType
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.ai.elements.core.model.ToolKind
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
@@ -68,39 +72,32 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
     var open by rememberSaveable(part.id) { mutableStateOf(false) }
     val scheme = MaterialTheme.colorScheme
 
+    // One line — icon, name, a preview of the arguments (or live progress), status — that opens
+    // to the input and output, the way assistant apps list tool calls without taking the screen.
     Surface(
         onClick = { open = !open },
         color = scheme.surfaceContainerLow,
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.medium,
         modifier = modifier.fillMaxWidth().testTag("tool-${part.name}"),
     ) {
-        Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(AiSize.avatar)
-                        .clip(MaterialShapes.Cookie6Sided.toShape())
-                        .background(scheme.tertiaryContainer),
-                ) {
-                    Icon(Icons.Outlined.Build, null, Modifier.size(AiSize.compactIcon), scheme.onTertiaryContainer)
-                }
-                Column(Modifier.weight(1f)) {
-                    ToolTitle(part)
-                    Text(
-                        text = subtitle(part),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = scheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+        Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.heightIn(min = 24.dp)) {
+                Icon(Icons.Outlined.Build, null, Modifier.size(16.dp), scheme.onSurfaceVariant)
+                ToolTitle(part)
+                Text(
+                    text = subtitle(part),
+                    style = AiType.small.copy(fontFamily = LocalCodeFontFamily.current),
+                    color = scheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
                 StatusPill(part.state)
                 Icon(
                     Icons.Outlined.ExpandMore,
                     contentDescription = if (open) stringResource(R.string.ai_collapse) else stringResource(R.string.ai_expand),
                     tint = scheme.onSurfaceVariant,
-                    modifier = Modifier.rotate(if (open) 180f else 0f),
+                    modifier = Modifier.size(18.dp).rotate(if (open) 180f else 0f),
                 )
             }
             if (part.state == ToolState.APPROVAL_REQUESTED) {
@@ -146,10 +143,10 @@ private fun ToolTitle(part: ToolPart) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             title,
-            style = if (part.title == null && kind is ToolKind.Function) MaterialTheme.typography.titleSmall.copy(fontFamily = LocalCodeFontFamily.current) else MaterialTheme.typography.titleSmall,
+            style = if (part.title == null && kind is ToolKind.Function) MaterialTheme.typography.labelLarge.copy(fontFamily = LocalCodeFontFamily.current, fontSize = 13.sp) else MaterialTheme.typography.labelLarge,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false),
+            modifier = Modifier.widthIn(max = 180.dp),
         )
         badge?.let {
             Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = MaterialTheme.shapes.extraSmall) {
@@ -169,18 +166,18 @@ private fun subtitle(part: ToolPart): String =
 @Composable
 internal fun StatusPill(state: ToolState) {
     val scheme = MaterialTheme.colorScheme
-    val (label, container, content) = when (state) {
-        ToolState.INPUT_STREAMING, ToolState.INPUT_AVAILABLE -> Triple(stringResource(R.string.ai_tool_running), scheme.secondaryContainer, scheme.onSecondaryContainer)
-        ToolState.OUTPUT_AVAILABLE -> Triple(stringResource(R.string.ai_tool_done), scheme.primaryContainer, scheme.onPrimaryContainer)
-        ToolState.APPROVAL_REQUESTED -> Triple(stringResource(R.string.ai_tool_approval), scheme.tertiaryContainer, scheme.onTertiaryContainer)
-        ToolState.OUTPUT_ERROR -> Triple(stringResource(R.string.ai_tool_error), scheme.errorContainer, scheme.onErrorContainer)
-        ToolState.OUTPUT_DENIED -> Triple(stringResource(R.string.ai_tool_denied), scheme.errorContainer, scheme.onErrorContainer)
+    // Quiet when all is well; colour only where the user should look (approval, error, denial).
+    val (label, content) = when (state) {
+        ToolState.INPUT_STREAMING, ToolState.INPUT_AVAILABLE -> stringResource(R.string.ai_tool_running) to scheme.onSurfaceVariant
+        ToolState.OUTPUT_AVAILABLE -> stringResource(R.string.ai_tool_done) to scheme.onSurfaceVariant
+        ToolState.APPROVAL_REQUESTED -> stringResource(R.string.ai_tool_approval) to scheme.tertiary
+        ToolState.OUTPUT_ERROR -> stringResource(R.string.ai_tool_error) to scheme.error
+        ToolState.OUTPUT_DENIED -> stringResource(R.string.ai_tool_denied) to scheme.error
     }
-    Surface(color = container, contentColor = content, shape = MaterialTheme.shapes.extraLarge) {
+    androidx.compose.runtime.CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides content) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.padding(horizontal = AiSpacing.m, vertical = AiSpacing.xs),
         ) {
             when (state) {
                 ToolState.OUTPUT_AVAILABLE -> Icon(Icons.Outlined.CheckCircle, null, Modifier.size(AiSize.badgeIcon))
@@ -189,7 +186,7 @@ internal fun StatusPill(state: ToolState) {
                 ToolState.APPROVAL_REQUESTED -> Icon(Icons.Outlined.PanTool, null, Modifier.size(AiSize.badgeIcon))
                 else -> LoadingIndicator(Modifier.size(16.dp), color = content)
             }
-            Text(label, style = MaterialTheme.typography.labelMedium)
+            Text(label, style = MaterialTheme.typography.labelMedium, color = content)
         }
     }
 }

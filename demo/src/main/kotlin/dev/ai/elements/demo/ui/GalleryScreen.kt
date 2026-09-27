@@ -88,8 +88,14 @@ import kotlinx.serialization.json.Json
 /** Every AI Elements component with sample data; a 1–3 column staggered grid by width. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GalleryScreen() {
-    Scaffold(containerColor = Color.Transparent, topBar = { TopAppBar(title = { Text(stringResource(R.string.nav_components)) }, colors = transparentAppBarColors()) }) { padding ->
+fun GalleryScreen(onBack: (() -> Unit)? = null) {
+    Scaffold(containerColor = Color.Transparent, topBar = {
+        TopAppBar(
+            title = { Text(stringResource(R.string.nav_components)) },
+            navigationIcon = { onBack?.let { BackArrow(it) } },
+            colors = transparentAppBarColors(),
+        )
+    }) { padding ->
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Adaptive(360.dp),
             contentPadding = PaddingValues(16.dp),

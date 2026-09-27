@@ -49,6 +49,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Widgets
+import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
@@ -56,6 +59,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
@@ -131,6 +137,7 @@ fun ChatScreen(
     twoPane: Boolean,
     compactHeight: Boolean,
     onOpenSettings: () -> Unit,
+    onOpenComponents: () -> Unit = {},
 ) {
     val conversations by viewModel.conversations.collectAsStateWithLifecycle()
     val currentId by viewModel.conversationId.collectAsStateWithLifecycle()
@@ -196,6 +203,23 @@ fun ChatScreen(
                         onNew = { viewModel.newChat(); scope.launch { drawer.close() } },
                         onOpen = { viewModel.open(it); scope.launch { drawer.close() } },
                         onDelete = viewModel::delete,
+                        // Phones have no navigation bar: the rest of the app lives in the drawer.
+                        footer = {
+                            NavigationDrawerItem(
+                                label = { Text(stringResource(R.string.nav_components)) },
+                                icon = { Icon(Icons.Outlined.Widgets, null) },
+                                selected = false,
+                                onClick = { scope.launch { drawer.close() }; onOpenComponents() },
+                                modifier = Modifier.testTag("drawer-components"),
+                            )
+                            NavigationDrawerItem(
+                                label = { Text(stringResource(R.string.settings)) },
+                                icon = { Icon(Icons.Outlined.Settings, null) },
+                                selected = false,
+                                onClick = { scope.launch { drawer.close() }; onOpenSettings() },
+                                modifier = Modifier.testTag("drawer-settings"),
+                            )
+                        },
                     )
                 }
             },
@@ -263,6 +287,7 @@ private fun ChatPane(
                     }
                 },
                 colors = transparentAppBarColors(),
+                expandedHeight = 56.dp,
             )
         },
     ) { padding ->
@@ -349,30 +374,20 @@ private fun ChatPane(
     }
 }
 
+/** The provider as the chat's title, "Name ▾" (the model is on the composer's chip). */
 @Composable
 private fun ProviderButton(provider: ProviderProfile, onClick: () -> Unit) {
-    Surface(
-        onClick = onClick,
-        shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        modifier = Modifier.testTag("provider-button"),
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .heightIn(min = 40.dp)
+            .padding(start = 8.dp, end = 4.dp)
+            .testTag("provider-button"),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
-        ) {
-            Column(Modifier.weight(1f, fill = false)) {
-                Text(provider.name, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(
-                    provider.model.ifBlank { stringResource(R.string.server_default_model) },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            Icon(Icons.Outlined.ArrowDropDown, null)
-        }
+        Text(provider.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+        Icon(Icons.Outlined.ArrowDropDown, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

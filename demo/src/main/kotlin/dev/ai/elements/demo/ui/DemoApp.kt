@@ -25,6 +25,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material3.IconButton
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,8 +55,9 @@ enum class Destination(@StringRes val label: Int, val icon: ImageVector, val sel
 enum class WidthClass { COMPACT, MEDIUM, EXPANDED }
 
 /**
- * Top level: an adaptive navigation suite — a short navigation bar on phones,
- * a navigation rail on tablets / unfolded foldables.
+ * Top level: a navigation rail on tablets / unfolded foldables. Phones have no
+ * navigation bar — like the mainstream chat apps, the chat gets the whole screen and
+ * Components / Settings open from its drawer, with Back returning to the chat.
  */
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
 @Composable
@@ -75,14 +79,11 @@ fun DemoApp(viewModel: ChatViewModel) {
         // List + detail side by side only when Expanded (M3 canonical list-detail): at Medium
         // (e.g. a tablet in portrait, ~800dp) a 360dp list would leave the chat ~350dp wide.
         val twoPane = widthClass == WidthClass.EXPANDED
-        // Phones: a bottom bar, hidden while typing so the composer sits right on the IME.
-        val bottomBar = widthClass == WidthClass.COMPACT && !WindowInsets.isImeVisible
+        val phone = widthClass == WidthClass.COMPACT
+        BackHandler(enabled = phone && destination != Destination.CHAT) { destination = Destination.CHAT }
+        val back = if (phone) ({ destination = Destination.CHAT }) else null
         NavigationSuiteScaffold(
-            layoutType = when {
-                bottomBar -> NavigationSuiteType.ShortNavigationBarCompact
-                widthClass == WidthClass.COMPACT -> NavigationSuiteType.None
-                else -> NavigationSuiteType.WideNavigationRailCollapsed
-            },
+            layoutType = if (phone) NavigationSuiteType.None else NavigationSuiteType.WideNavigationRailCollapsed,
             navigationSuiteItems = {
                 Destination.entries.forEach { dest ->
                     item(
@@ -95,13 +96,15 @@ fun DemoApp(viewModel: ChatViewModel) {
                 }
             },
         ) {
-            // The bottom bar already pads for the system navigation bar; stop screens adding it again.
-            val handled = if (bottomBar) WindowInsets.navigationBars.only(WindowInsetsSides.Bottom) else WindowInsets(0)
-            Box(Modifier.consumeWindowInsets(handled)) {
+            Box {
                 when (destination) {
-                    Destination.CHAT -> ChatScreen(viewModel, widthClass, twoPane, compactHeight, onOpenSettings = { destination = Destination.SETTINGS })
-                    Destination.COMPONENTS -> GalleryScreen()
-                    Destination.SETTINGS -> SettingsScreen(viewModel, twoPane)
+                    Destination.CHAT -> ChatScreen(
+                        viewModel, widthClass, twoPane, compactHeight,
+                        onOpenSettings = { destination = Destination.SETTINGS },
+                        onOpenComponents = { destination = Destination.COMPONENTS },
+                    )
+                    Destination.COMPONENTS -> GalleryScreen(onBack = back)
+                    Destination.SETTINGS -> SettingsScreen(viewModel, twoPane, onBack = back)
                 }
             }
         }
@@ -119,3 +122,11 @@ fun transparentAppBarColors() = TopAppBarDefaults.topAppBarColors(
     containerColor = Color.Transparent,
     scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
 )
+
+/** The top app bar's back arrow (phones, where Components and Settings are reached from the chat). */
+@Composable
+internal fun BackArrow(onBack: () -> Unit) {
+    IconButton(onClick = onBack, modifier = Modifier.testTag("back")) {
+        Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.back))
+    }
+}

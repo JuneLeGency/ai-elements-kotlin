@@ -19,8 +19,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -97,75 +97,96 @@ fun PromptInput(
         busy -> SubmitMode.STOP
         else -> SubmitMode.SEND
     }
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shape = RoundedCornerShape(28.dp),
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        Column(Modifier.padding(start = 20.dp, end = 8.dp, top = 16.dp, bottom = 8.dp)) {
-            AttachmentStrip(attachments, onRemoveAttachment, Modifier.padding(end = 12.dp, bottom = 12.dp))
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                maxLines = 6,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 12.dp)
-                    .heightIn(min = 24.dp)
-                    // Hardware keyboards (tablets, ChromeOS, DeX): Enter sends, Shift+Enter is a newline.
-                    // Soft keyboards commit "\n" as text and keep inserting newlines.
-                    .onPreviewKeyEvent { event ->
-                        val physical = event.nativeKeyEvent.device?.isVirtual == false
-                        val enter = event.key == Key.Enter || event.key == Key.NumPadEnter
-                        if (!physical || !enter || event.isShiftPressed) return@onPreviewKeyEvent false
-                        if (event.type == KeyEventType.KeyDown && mode != SubmitMode.STOP && hasInput) onSubmit()
-                        true
-                    }
-                    .testTag("prompt-input"),
-                decorationBox = { inner ->
-                    Box {
-                        if (value.isEmpty()) {
-                            Text(placeholder, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    // Too little height for two rows (a phone in landscape with the keyboard up): one row, field +
+    // send; the toolbar comes back with the room. Buttons keep their size either way.
+    BoxWithConstraints(modifier.fillMaxWidth()) {
+        val oneRow = maxHeight < TWO_ROW_HEIGHT
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shape = RoundedCornerShape(28.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            val field = @Composable { fieldModifier: Modifier ->
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    maxLines = if (oneRow) 2 else 6,
+                    modifier = fieldModifier
+                        .heightIn(min = 24.dp)
+                        // Hardware keyboards (tablets, ChromeOS, DeX): Enter sends, Shift+Enter is a newline.
+                        // Soft keyboards commit "\n" as text and keep inserting newlines.
+                        .onPreviewKeyEvent { event ->
+                            val physical = event.nativeKeyEvent.device?.isVirtual == false
+                            val enter = event.key == Key.Enter || event.key == Key.NumPadEnter
+                            if (!physical || !enter || event.isShiftPressed) return@onPreviewKeyEvent false
+                            if (event.type == KeyEventType.KeyDown && mode != SubmitMode.STOP && hasInput) onSubmit()
+                            true
                         }
-                        inner()
-                    }
-                },
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                // Its own height even when the screen is shorter (landscape with the keyboard up):
-                // the card clips it instead of squashing the buttons.
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp).wrapContentHeight(unbounded = true),
-            ) {
-                // Toolbar takes the remaining width and scrolls, so large font scales
-                // can never push the submit button off screen.
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.weight(1f).fadingHorizontalScroll(),
-                ) {
-                    if (onAddAttachment != null) {
-                        IconButton(
-                            onClick = onAddAttachment,
-                            shapes = IconButtonDefaults.shapes(),
-                            modifier = Modifier.compactIconButton().testTag("add-attachment"),
-                        ) { Icon(Icons.Outlined.AddPhotoAlternate, stringResource(R.string.ai_attach_image)) }
-                    }
-                    toolbar()
-                }
+                        .testTag("prompt-input"),
+                    decorationBox = { inner ->
+                        Box {
+                            if (value.isEmpty()) {
+                                Text(placeholder, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                            }
+                            inner()
+                        }
+                    },
+                )
+            }
+            val submit = @Composable {
                 SubmitButton(
                     mode = mode,
                     enabled = mode == SubmitMode.STOP || hasInput,
                     onClick = if (mode == SubmitMode.STOP) onStop else onSubmit,
                 )
             }
+            if (oneRow) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(start = 20.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
+                ) {
+                    field(Modifier.weight(1f))
+                    submit()
+                }
+            } else {
+                Column(Modifier.padding(start = 20.dp, end = 8.dp, top = 14.dp, bottom = 6.dp)) {
+                    AttachmentStrip(attachments, onRemoveAttachment, Modifier.padding(end = 12.dp, bottom = 12.dp))
+                    field(Modifier.fillMaxWidth().padding(end = 12.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    ) {
+                        // Toolbar takes the remaining width and scrolls, so large font scales
+                        // can never push the submit button off screen.
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.weight(1f).fadingHorizontalScroll(),
+                        ) {
+                            if (onAddAttachment != null) {
+                                IconButton(
+                                    onClick = onAddAttachment,
+                                    shapes = IconButtonDefaults.shapes(),
+                                    modifier = Modifier.compactIconButton().testTag("add-attachment"),
+                                ) { Icon(Icons.Outlined.AddPhotoAlternate, stringResource(R.string.ai_attach_image)) }
+                            }
+                            toolbar()
+                        }
+                        submit()
+                    }
+                }
+            }
         }
     }
 }
+
+/** Below this the composer drops its toolbar row rather than squash it. */
+private val TWO_ROW_HEIGHT = 96.dp
 
 private enum class SubmitMode { SEND, QUEUE, STOP }
 

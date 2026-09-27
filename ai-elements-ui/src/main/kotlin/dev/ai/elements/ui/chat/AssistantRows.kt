@@ -107,8 +107,8 @@ internal fun assistantRows(message: Message): List<AssistantRow> {
 }
 
 /**
- * Renders one [AssistantRow], aligned under the avatar column so the rows of
- * a reply read as a single message.
+ * Renders one [AssistantRow] at the full width of the conversation — like the
+ * mainstream assistant apps, replies have no avatar column taking width from them.
  */
 @Composable
 internal fun AssistantRowItem(
@@ -119,8 +119,7 @@ internal fun AssistantRowItem(
     onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)? = null,
     onSelectVersion: ((index: Int) -> Unit)? = null,
 ) {
-    Row(modifier.fillMaxWidth().testTag("assistant-row"), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        if (row.first) AssistantAvatar(active = row.streaming) else Spacer(Modifier.width(AiSize.avatar))
+    Row(modifier.fillMaxWidth().testTag("assistant-row")) {
         Box(Modifier.weight(1f)) {
             when (row) {
                 is AssistantRow.BlockRow -> CitationLinks(row.citations) { MarkdownBlock(row.text) }

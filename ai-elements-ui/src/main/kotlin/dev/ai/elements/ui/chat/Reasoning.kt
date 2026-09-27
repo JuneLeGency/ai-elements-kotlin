@@ -25,6 +25,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import dev.ai.elements.ui.theme.AiType
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.clickable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,53 +53,57 @@ import dev.ai.elements.ui.theme.AiSpacing
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun Reasoning(part: ReasoningPart, modifier: Modifier = Modifier) {
-    var open by rememberSaveable(part.id) { mutableStateOf(part.isStreaming) }
-    LaunchedEffect(part.isStreaming) { open = part.isStreaming }
+    var open by rememberSaveable(part.id) { mutableStateOf(false) }
     val rotation by animateFloatAsState(if (open) 180f else 0f, MaterialTheme.motionScheme.fastSpatialSpec(), label = "chevron")
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
 
-    Surface(
-        onClick = { open = !open },
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = MaterialTheme.shapes.large,
-        modifier = modifier.fillMaxWidth().testTag("reasoning"),
-    ) {
-        Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AiSpacing.s)) {
-                if (part.isStreaming) {
-                    LoadingIndicator(Modifier.size(20.dp))
-                } else {
-                    Icon(Icons.Outlined.Psychology, null, Modifier.size(AiSize.compactIcon), MaterialTheme.colorScheme.primary)
-                }
-                ShimmerText(
-                    text = if (part.isStreaming) stringResource(R.string.ai_thinking) else thoughtLabel(part.durationMs),
-                    active = part.isStreaming,
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.weight(1f),
-                )
+    // A quiet line, not a card: "Thinking…" while it streams, "Thought for 3s ›" after;
+    // the thoughts open under a hairline rule (as the mainstream assistant apps show them).
+    Column(modifier.fillMaxWidth().testTag("reasoning")) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier
+                .clip(MaterialTheme.shapes.small)
+                .clickable(enabled = part.text.isNotBlank()) { open = !open }
+                .heightIn(min = 32.dp)
+                .padding(end = 4.dp),
+        ) {
+            if (part.isStreaming) LoadingIndicator(Modifier.size(18.dp))
+            else Icon(Icons.Outlined.Psychology, null, Modifier.size(18.dp), muted)
+            ShimmerText(
+                text = if (part.isStreaming) stringResource(R.string.ai_thinking) else thoughtLabel(part.durationMs),
+                active = part.isStreaming,
+                style = MaterialTheme.typography.labelLarge.copy(color = muted),
+            )
+            if (part.text.isNotBlank()) {
                 Icon(
                     Icons.Outlined.ExpandMore,
                     contentDescription = if (open) stringResource(R.string.ai_collapse) else stringResource(R.string.ai_expand),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.rotate(rotation),
+                    tint = muted,
+                    modifier = Modifier.size(18.dp).rotate(rotation),
                 )
             }
-            AnimatedVisibility(
-                visible = open && part.text.isNotBlank(),
-                enter = expandVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) + fadeIn(),
-                exit = shrinkVertically(MaterialTheme.motionScheme.fastSpatialSpec()) + fadeOut(),
-            ) {
-                val scroll = rememberScrollState()
-                if (part.isStreaming) LaunchedEffect(part.text.length) { scroll.scrollTo(scroll.maxValue) }
-                Text(
-                    text = part.text.trim(),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .padding(top = AiSpacing.m)
-                        .heightIn(max = 280.dp)
-                        .verticalScroll(scroll),
-                )
-            }
+        }
+        AnimatedVisibility(
+            visible = open && part.text.isNotBlank(),
+            enter = expandVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) + fadeIn(),
+            exit = shrinkVertically(MaterialTheme.motionScheme.fastSpatialSpec()) + fadeOut(),
+        ) {
+            val scroll = rememberScrollState()
+            if (part.isStreaming) LaunchedEffect(part.text.length) { scroll.scrollTo(scroll.maxValue) }
+            val rule = MaterialTheme.colorScheme.outlineVariant
+            Text(
+                text = part.text.trim(),
+                style = AiType.small,
+                color = muted,
+                modifier = Modifier
+                    .padding(top = 4.dp, start = 8.dp)
+                    .drawBehind { drawRect(rule, size = androidx.compose.ui.geometry.Size(1.dp.toPx(), size.height)) }
+                    .padding(start = 12.dp)
+                    .heightIn(max = 280.dp)
+                    .verticalScroll(scroll),
+            )
         }
     }
 }

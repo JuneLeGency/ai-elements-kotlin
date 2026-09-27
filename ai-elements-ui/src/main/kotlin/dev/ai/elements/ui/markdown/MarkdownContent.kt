@@ -156,7 +156,7 @@ internal fun MarkdownBlock(content: String) {
             ),
         ),
         padding = markdownPadding(block = 0.dp, listIndent = 8.dp, listItemTop = 2.dp, listItemBottom = 2.dp),
-        dimens = markdownDimens(codeBackgroundCornerSize = 12.dp, tableCornerSize = 12.dp, tableCellWidth = 160.dp, tableCellPadding = 10.dp),
+        dimens = markdownDimens(codeBackgroundCornerSize = 12.dp, tableCornerSize = 12.dp, tableCellWidth = 160.dp, tableCellPadding = 8.dp),
         components = components,
         retainState = true,
         modifier = Modifier.fillMaxWidth(),
