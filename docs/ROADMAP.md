@@ -124,6 +124,7 @@ The demo is a showcase of both modes, switchable per conversation:
 | Review module and package layering: core packages by concern (`chat`, `protocol.aisdk`, `protocol.agui`, `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config`) | ✅ 98 unit tests + 11 live tests green after the move |
 | README, CHANGELOG, NOTICE (a2a-java-sdk, kotlin-json-patch, proot) | ✅ |
 | API reference and CI | ✅ Dokka 2.2 over every published module (`./gradlew :dokkaGenerate`); CI: unit tests, lint, publish, Dokka, emulator E2E (x86_64, now with a bundled x86_64 PRoot) |
+| Public API tracking (API review, GOAL W6) | ⬜ blocked by tooling: Kotlin 2.4 `abiValidation()` finds no compiled classes under AGP 9 built-in Kotlin ("provider has no value"), and binary-compatibility-validator 0.18.2 needs the `kotlin-android` plugin AGP 9 no longer uses. Adopt the official one once it supports AGP 9 built-in Kotlin; no hand-rolled checker |
 | One-line integration and samples | ✅ `Chat(controller)` / `rememberChat(backend)` (component test); `samples/pure-client` (verified on emulator against the AG-UI server) and `samples/in-app-agent` |
 | Protocol-independent UI layer and extension points | ✅ `ToolKind` / `source` in the model, conventions mapped in `core`; UI imports only `core.model` / `core.chat` (enforced by `LayeringTest`); `LocalAiElementsRenderers` + `LocalFileLoader` (component test); core 1 new test class, ElementsTest 13/13, demo E2E 20/20 on emulator |
 
