@@ -4,11 +4,16 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+
+/** A data model write that cannot apply (e.g. through a primitive value). */
+class A2uiDataError(message: String) : RuntimeException(message)
 
 /** RFC 6901 JSON Pointers over immutable JSON, with A2UI's upsert semantics for writes. */
 internal object JsonPointer {
     fun tokens(pointer: String): List<String> =
-        pointer.trim().removePrefix("/").let { if (it.isEmpty()) emptyList() else it.split('/') }
+        // A trailing slash names the same location (`/foo/` is `/foo`).
+        pointer.trim().removePrefix("/").removeSuffix("/").let { if (it.isEmpty()) emptyList() else it.split('/') }
             .map { it.replace("~1", "/").replace("~0", "~") }
 
     fun get(root: JsonElement?, pointer: String): JsonElement? =
@@ -21,8 +26,8 @@ internal object JsonPointer {
         }
 
     /**
-     * [root] with [value] at [pointer]: missing containers are created (arrays when the next token
-     * is an index into an existing array, objects otherwise); a null [value] removes the key.
+     * [root] with [value] at [pointer]: missing containers are created (a list when the token that
+     * indexes into it is a number, an object otherwise); a null [value] removes the key or item.
      */
     fun set(root: JsonElement?, pointer: String, value: JsonElement?): JsonElement {
         val path = tokens(pointer)
@@ -30,13 +35,15 @@ internal object JsonPointer {
         return setAt(root, path, value)
     }
 
+    private fun String.isIndex() = isNotEmpty() && all { it.isDigit() }
+
     private fun setAt(node: JsonElement?, path: List<String>, value: JsonElement?): JsonElement {
         val token = path.first()
         val rest = path.drop(1)
         val remove = value == null || value is JsonNull
         return when (node) {
             is JsonArray -> {
-                val index = token.toIntOrNull() ?: return node
+                val index = token.toIntOrNull() ?: throw A2uiDataError("'$token' is not a list index")
                 val items = node.toMutableList()
                 if (rest.isEmpty()) {
                     when {
@@ -54,12 +61,14 @@ internal object JsonPointer {
                 }
                 JsonArray(items)
             }
+            null, JsonNull -> if (token.isIndex()) setAt(JsonArray(emptyList()), path, value) else setAt(JsonObject(emptyMap()), path, value)
+            is JsonPrimitive -> throw A2uiDataError("Cannot write through the value at '$token': it is not an object or a list")
             else -> {
                 val map = (node as? JsonObject)?.toMutableMap() ?: mutableMapOf()
                 if (rest.isEmpty()) {
                     if (remove) map.remove(token) else map[token] = value!!
                 } else {
-                    map[token] = setAt(map[token]?.takeUnless { it is JsonNull }, rest, value)
+                    map[token] = setAt(map[token], rest, value)
                 }
                 JsonObject(map)
             }

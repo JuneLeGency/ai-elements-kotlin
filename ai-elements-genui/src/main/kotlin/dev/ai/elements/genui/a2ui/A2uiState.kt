@@ -88,7 +88,12 @@ data class A2uiAction(
  * from [process] as renderer-to-agent messages for the transport to send.
  */
 @Stable
-class A2uiState(val catalog: A2uiCatalog = A2uiCatalog.Basic) {
+class A2uiState(
+    val catalog: A2uiCatalog = A2uiCatalog.Basic,
+    /** More catalogs surfaces and components may name (A2UI mixable catalogs). */
+    catalogs: List<A2uiCatalog> = emptyList(),
+) {
+    private val registry: Map<String, A2uiCatalog> = (catalogs + catalog).associateBy { it.id }
     private val byId = mutableStateMapOf<String, A2uiSurface>()
     private val order = mutableStateListOf<String>()
 
@@ -106,19 +111,27 @@ class A2uiState(val catalog: A2uiCatalog = A2uiCatalog.Basic) {
     /** Apply one agent-to-renderer message; returns renderer-to-agent replies (usually none). */
     fun process(message: JsonElement): List<JsonObject> {
         val envelope = message as? JsonObject ?: return listOf(error("VALIDATION_FAILED", null, "Message is not a JSON object"))
+        // The list wrapper form (`agent_to_renderer_list_wrapper.json`): {"messages": [...]}.
+        if (envelope.keys == setOf("messages") && envelope["messages"] is JsonArray) return (envelope["messages"] as JsonArray).flatMap { process(it) }
+        // v1.0, and v0.9.x whose envelopes it shares (e.g. the AG-UI A2UI middleware's).
+        val version = envelope.str("version") ?: return listOf(error("VALIDATION_FAILED", null, "Message has no 'version'"))
+        if (version.removePrefix("v") !in SupportedVersions) return listOf(error("VALIDATION_FAILED", null, "Unsupported protocol version '$version'"))
+        if (depth(envelope) > MAX_DEPTH) return listOf(error("VALIDATION_FAILED", null, "Message nests deeper than $MAX_DEPTH levels"))
+        // An envelope carries exactly one message (A2UI §"Envelope message structure").
+        val kinds = envelope.keys.filter { it in MessageKinds }
+        if (kinds.size > 1) return listOf(error("VALIDATION_FAILED", null, "One message per envelope, got ${kinds.joinToString()}"))
         (envelope["createSurface"] as? JsonObject)?.let { return create(it) }
         (envelope["updateComponents"] as? JsonObject)?.let { body ->
-            val surface = body.str("surfaceId")?.let(byId::get) ?: return listOf(error("VALIDATION_FAILED", body.str("surfaceId"), "Unknown surface"))
-            (body["components"] as? JsonArray).orEmpty().forEach { addComponent(surface, it) }
-            return emptyList()
+            val surface = body.surfaceId()?.let(byId::get) ?: return listOf(error("VALIDATION_FAILED", body.surfaceId(), "Unknown surface"))
+            return addComponents(surface, (body["components"] as? JsonArray).orEmpty())
         }
         (envelope["updateDataModel"] as? JsonObject)?.let { body ->
-            val surface = body.str("surfaceId")?.let(byId::get) ?: return listOf(error("VALIDATION_FAILED", body.str("surfaceId"), "Unknown surface"))
-            surface.write(body.str("path") ?: "/", body["value"])
-            return emptyList()
+            val surface = body.surfaceId()?.let(byId::get) ?: return listOf(error("VALIDATION_FAILED", body.surfaceId(), "Unknown surface"))
+            return runCatching { surface.write(body.str("path") ?: "/", body["value"]) }
+                .fold({ emptyList() }, { listOf(error("VALIDATION_FAILED", surface.id, it.message ?: "Invalid data model update")) })
         }
         (envelope["deleteSurface"] as? JsonObject)?.let { body ->
-            body.str("surfaceId")?.let { id -> byId.remove(id); order.remove(id) }
+            body.surfaceId()?.let { id -> byId.remove(id); order.remove(id) }
             return emptyList()
         }
         (envelope["callRendererFunction"] as? JsonObject)?.let { return listOf(callFromAgent(it)) }
@@ -127,20 +140,32 @@ class A2uiState(val catalog: A2uiCatalog = A2uiCatalog.Basic) {
     }
 
     private fun create(body: JsonObject): List<JsonObject> {
-        val id = body.str("surfaceId") ?: return listOf(error("VALIDATION_FAILED", null, "createSurface needs a surfaceId"))
+        val id = body.surfaceId() ?: return listOf(error("VALIDATION_FAILED", null, "createSurface needs a surfaceId"))
         if (id in byId) return listOf(error("VALIDATION_FAILED", id, "Surface $id already exists"))
         val surface = A2uiSurface(id, body.str("catalogId"), (body["sendDataModel"] as? JsonPrimitive)?.contentOrNull == "true")
         (body["dataModel"] as? JsonObject)?.let { surface.dataModel = it }
-        (body["components"] as? JsonArray).orEmpty().forEach { addComponent(surface, it) }
+        val errors = addComponents(surface, (body["components"] as? JsonArray).orEmpty())
+        if (errors.isNotEmpty()) return errors
         byId[id] = surface
         order += id
         return emptyList()
     }
 
-    private fun addComponent(surface: A2uiSurface, element: JsonElement) {
-        val component = element as? JsonObject ?: return
-        val id = component.str("id") ?: return
-        if (component.str("component") != null) surface.components[id] = component
+    /**
+     * Apply one message's components atomically: if the updated tree would contain a cycle (a
+     * component reaching itself through child references), nothing changes and an error is returned.
+     */
+    private fun addComponents(surface: A2uiSurface, components: List<JsonElement>): List<JsonObject> {
+        val incoming = components.mapNotNull { it as? JsonObject }.filter { it.str("id") != null && it.str("component") != null }
+        // Mixed catalogs must follow the surface's protocol version.
+        val surfaceVersion = surface.catalogId?.let(registry::get)?.protocolVersion ?: A2ui.VERSION
+        incoming.firstOrNull { c -> c.str("catalogId")?.let(registry::get)?.let { it.protocolVersion != surfaceVersion } == true }?.let {
+            return listOf(error("VALIDATION_FAILED", surface.id, "Component '${it.str("id")}' uses catalog '${it.str("catalogId")}' of another protocol version"))
+        }
+        val candidate = surface.components.toMutableMap().apply { incoming.forEach { put(it.str("id")!!, it) } }
+        cycle(candidate)?.let { return listOf(error("VALIDATION_FAILED", surface.id, "Component cycle through '$it'")) }
+        incoming.forEach { surface.components[it.str("id")!!] = it }
+        return emptyList()
     }
 
     /** The agent calls a renderer function: only functions the catalog exposes to agents run. */
@@ -209,6 +234,48 @@ internal fun messagesIn(text: String): List<JsonElement> {
     }
     return out
 }
+
+private const val MAX_DEPTH = 64
+
+private fun depth(e: JsonElement): Int = when (e) {
+    is JsonObject -> 1 + (e.values.maxOfOrNull(::depth) ?: 0)
+    is JsonArray -> 1 + (e.maxOfOrNull(::depth) ?: 0)
+    else -> 0
+}
+
+/** Component ids a component references as children (`child`, `children`, templates, tabs, modal parts). */
+internal fun childIds(component: JsonObject): List<String> = buildList {
+    component.forEach { (key, value) ->
+        when {
+            key == "children" && value is JsonArray -> value.forEach { (it as? JsonPrimitive)?.contentOrNull?.let(::add) }
+            key == "children" && value is JsonObject -> value.str("componentId")?.let(::add)
+            key in setOf("child", "trigger", "content") && value is JsonPrimitive && value.isString -> add(value.content)
+            key == "tabs" && value is JsonArray -> value.forEach { (it as? JsonObject)?.str("child")?.let(::add) }
+        }
+    }
+}
+
+/** The id of a component on a cycle, if the adjacency list has one. */
+private fun cycle(components: Map<String, JsonObject>): String? {
+    val done = mutableSetOf<String>()
+    val path = mutableSetOf<String>()
+    fun visit(id: String): String? {
+        if (id in path) return id
+        if (!done.add(id)) return null
+        path += id
+        val found = components[id]?.let(::childIds)?.firstNotNullOfOrNull(::visit)
+        path -= id
+        return found
+    }
+    return components.keys.firstNotNullOfOrNull(::visit)
+}
+
+private val SupportedVersions = setOf("1.0", "0.9", "0.9.1")
+
+private val MessageKinds = setOf("createSurface", "updateComponents", "updateDataModel", "deleteSurface", "callRendererFunction", "agentFunctionResponse")
+
+/** The message's `surfaceId`, which must be a JSON string. */
+private fun JsonObject.surfaceId(): String? = (this["surfaceId"] as? JsonPrimitive)?.takeIf { it.isString }?.content
 
 internal fun JsonObject.str(key: String) = (this[key] as? JsonPrimitive)?.contentOrNull
 internal fun JsonObject?.orEmpty(): JsonObject = this ?: JsonObject(emptyMap())

@@ -32,6 +32,7 @@ junit = "4.13.2"
 junitExt = "1.2.1"
 androidxTest = "1.7.0"
 uiautomator = "2.4.0"
+snakeyaml = "2.7"
 
 [libraries]
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
@@ -89,6 +90,7 @@ highlights = { group = "dev.snipme", name = "highlights", version.ref = "highlig
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 junit-ext = { group = "androidx.test.ext", name = "junit", version.ref = "junitExt" }
 androidx-test-core = { group = "androidx.test", name = "core-ktx", version.ref = "androidxTest" }
+snakeyaml = { group = "org.yaml", name = "snakeyaml", version.ref = "snakeyaml" }
 androidx-test-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTest" }
 compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "compose" }

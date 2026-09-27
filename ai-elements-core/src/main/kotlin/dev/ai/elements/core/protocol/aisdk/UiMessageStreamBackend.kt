@@ -5,6 +5,7 @@ import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Part
@@ -286,6 +287,8 @@ private fun Part.toUiPart(role: Role, approvals: Map<String, Any>): JsonObject? 
         put("type", "source-url"); put("sourceId", id); put("url", url); put("title", title)
     }
     is ToolPart -> if (role == Role.USER) null else toUiToolPart(approvals[id])
+    // AI SDK `data-*` parts on user turns, e.g. `data-a2ui` with a user's A2UI action.
+    is DataPart -> if (role != Role.USER) null else buildJsonObject { put("type", "data-$name"); put("id", id); put("data", data) }
     else -> null
 }
 

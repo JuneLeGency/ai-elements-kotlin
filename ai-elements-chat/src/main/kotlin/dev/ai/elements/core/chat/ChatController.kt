@@ -1,6 +1,7 @@
 package dev.ai.elements.core.chat
 
 import dev.ai.elements.core.model.ChatStatus
+import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
@@ -19,7 +20,7 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /** A prompt sent while the agent was busy, waiting its turn (AI Elements `<Queue>`). */
-data class QueuedMessage(val id: String, val text: String, val attachments: List<FilePart> = emptyList())
+data class QueuedMessage(val id: String, val text: String, val attachments: List<FilePart> = emptyList(), val data: List<DataPart> = emptyList())
 
 /** Immutable snapshot rendered by the UI. */
 data class ChatState(
@@ -83,18 +84,18 @@ class ChatController(
     }
 
     /**
-     * Send a user message (text and/or [attachments]). While a reply is
-     * streaming the message is queued and sent when the turn finishes.
-     * Returns false only when there is nothing to send.
+     * Send a user message (text and/or [attachments], and [data] parts such as an A2UI action —
+     * [DataPart.A2UI]). While a reply is streaming the message is queued and sent when the turn
+     * finishes. Returns false only when there is nothing to send.
      */
-    fun send(text: String, attachments: List<FilePart> = emptyList()): Boolean {
+    fun send(text: String, attachments: List<FilePart> = emptyList(), data: List<DataPart> = emptyList()): Boolean {
         val prompt = text.trim()
-        if (prompt.isEmpty() && attachments.isEmpty()) return false
+        if (prompt.isEmpty() && attachments.isEmpty() && data.isEmpty()) return false
         if (_state.value.isBusy) {
-            _state.update { it.copy(queue = it.queue + QueuedMessage(newId(), prompt, attachments)) }
+            _state.update { it.copy(queue = it.queue + QueuedMessage(newId(), prompt, attachments, data)) }
             return true
         }
-        run(_state.value.messages + userMessage(prompt, attachments))
+        run(_state.value.messages + userMessage(prompt, attachments, data))
         return true
     }
 
@@ -107,7 +108,7 @@ class ChatController(
         val item = _state.value.queue.firstOrNull { it.id == id } ?: return
         if (_state.value.isBusy) return
         _state.update { it.copy(queue = it.queue - item, queuePaused = false, error = null) }
-        run(_state.value.messages + userMessage(item.text, item.attachments))
+        run(_state.value.messages + userMessage(item.text, item.attachments, item.data))
     }
 
     /** Answer a tool approval request (AI Elements `<Confirmation>`). */
@@ -181,8 +182,8 @@ class ChatController(
         _state.update { if (it.status == ChatStatus.ERROR) it.copy(status = ChatStatus.READY, error = null) else it }
     }
 
-    private fun userMessage(text: String, attachments: List<FilePart>): Message {
-        val parts = attachments + listOfNotNull(text.takeIf { it.isNotEmpty() }?.let { TextPart(newId(), it) })
+    private fun userMessage(text: String, attachments: List<FilePart>, data: List<DataPart> = emptyList()): Message {
+        val parts = attachments + listOfNotNull(text.takeIf { it.isNotEmpty() }?.let { TextPart(newId(), it) }) + data
         return Message(newId(), Role.USER, parts, clock())
     }
 
@@ -253,7 +254,7 @@ class ChatController(
         val next = _state.value.queue.firstOrNull()
         if (failure == null && next != null) {
             _state.update { it.copy(queue = it.queue.drop(1)) }
-            run(_state.value.messages + userMessage(next.text, next.attachments))
+            run(_state.value.messages + userMessage(next.text, next.attachments, next.data))
         }
     }
 

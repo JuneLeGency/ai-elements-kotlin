@@ -17,4 +17,14 @@ fun testScope(
 
 /** The scope a child renders in (template items keep their own data scope). */
 fun testScope(child: ChildRef, catalog: A2uiCatalog = A2uiCatalog.Basic): ComponentScope =
-    ComponentScope(child.component, child.context, SurfaceHost(catalog) {})
+    ComponentScope(child.component, child.context, SurfaceHost(catalog, {}))
+
+/** A surface data model with get / set / delete, for the conformance suite's `data_model` cases. */
+class TestDataModel internal constructor(private val surface: A2uiSurface) {
+    fun get(path: String) = surface.read(path)
+    fun set(path: String, value: kotlinx.serialization.json.JsonElement) = surface.write(path, value)
+    fun delete(path: String) = surface.write(path, null)
+}
+
+fun testDataModel(initial: kotlinx.serialization.json.JsonObject): TestDataModel =
+    TestDataModel(A2uiSurface("conformance", null, false).also { it.dataModel = initial })

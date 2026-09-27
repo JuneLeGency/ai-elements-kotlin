@@ -216,6 +216,19 @@ data class DataPart(
          * e.g. AG-UI `STATE_SNAPSHOT` / `STATE_DELTA`). Its `plan` / `task` keys use the data shapes above.
          */
         const val STATE = "state"
+
+        /**
+         * A2UI (open generative-UI protocol) messages as a JSON array: agent-to-renderer messages on
+         * assistant turns, renderer-to-agent messages (a user `action`) on user turns. Transports map
+         * their A2UI binding onto it (AG-UI `a2ui-surface` activities, A2A `application/a2ui+json` parts).
+         */
+        const val A2UI = "a2ui"
+
+        /** The renderer's data models (A2UI `renderer_data_model.json`) sent along with an [A2UI] action. */
+        const val A2UI_DATA_MODEL = "a2ui-data-model"
+
+        /** The A2UI media type in transports. */
+        const val A2UI_MEDIA_TYPE = "application/a2ui+json"
     }
 }
 

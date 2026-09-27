@@ -75,7 +75,7 @@ class A2uiTest {
         state.processText("""{"version":"v1.0","updateDataModel":{"surfaceId":"s","path":"/user/last","value":"B"}}""")
         state.processText("""{"version":"v1.0","updateDataModel":{"surfaceId":"s","path":"/user/tmp","value":null}}""")
         state.processText("""{"version":"v1.0","updateDataModel":{"surfaceId":"s","path":"/list/0","value":"x"}}""")
-        assertEquals(Json.parseToJsonElement("""{"user":{"first":"A","last":"B"},"list":{"0":"x"}}"""), s.dataModel)
+        assertEquals(Json.parseToJsonElement("""{"user":{"first":"A","last":"B"},"list":["x"]}"""), s.dataModel) // numeric token → list
         state.processText("""{"version":"v1.0","updateDataModel":{"surfaceId":"s","value":{"only":true}}}""")
         assertEquals(Json.parseToJsonElement("""{"only":true}"""), s.dataModel)
     }

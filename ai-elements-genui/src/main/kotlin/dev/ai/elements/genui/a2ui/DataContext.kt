@@ -73,8 +73,17 @@ class DataContext internal constructor(
         return function.invoke(resolved, this)
     }
 
-    /** `formatString`: `${…}` blocks with paths, literals and nested calls; `\${` is a literal `${`. */
-    fun interpolate(template: String): String = Interpolator(template, this).run()
+    /**
+     * `formatString`: the template's parts ([ExpressionParser]) evaluated in this scope. A part that
+     * cannot be evaluated renders empty; a template that does not parse shows as written.
+     */
+    fun interpolate(template: String): String {
+        val parts = runCatching { ExpressionParser.parse(template) }.getOrElse { return template }
+        return parts.joinToString("") { part ->
+            if (part is JsonPrimitive && part.isString) part.content
+            else runCatching { resolve(part) }.getOrNull()?.let(::stringify).orEmpty()
+        }
+    }
 
     internal companion object {
         const val INDEX = "@index"
@@ -103,101 +112,3 @@ class DataContext internal constructor(
 
 /** An expression that cannot be evaluated (unknown function, disallowed URL…). */
 class A2uiExpressionError(message: String) : RuntimeException(message)
-
-/** Parses and evaluates one `formatString` template. */
-private class Interpolator(private val text: String, private val context: DataContext) {
-    private var i = 0
-
-    fun run(): String = buildString {
-        while (i < text.length) {
-            when {
-                text.startsWith("\\\${", i) -> { append("\${"); i += 3 }
-                text.startsWith("\${", i) -> {
-                    i += 2
-                    // A block that cannot be evaluated renders empty; the rest of the string still shows.
-                    val value = runCatching { expression() }.getOrNull()
-                    skipSpaces()
-                    if (i < text.length && text[i] == '}') i++
-                    append(value?.let(DataContext::stringify).orEmpty())
-                }
-                else -> append(text[i++])
-            }
-        }
-    }
-
-    private fun expression(): JsonElement? {
-        skipSpaces()
-        if (i >= text.length) return null
-        val c = text[i]
-        return when {
-            // A nested block used as a value, e.g. `formatDate(value: ${/now}, …)`.
-            text.startsWith("\${", i) -> {
-                i += 2
-                val inner = expression()
-                skipSpaces()
-                if (i < text.length && text[i] == '}') i++
-                inner
-            }
-            c == '\'' || c == '"' -> JsonPrimitive(quoted(c))
-            c == '-' || c.isDigit() -> JsonPrimitive(number())
-            else -> {
-                val token = identifier()
-                if (token.isEmpty()) { i++; return null } // unrecognised character: skip it, always make progress
-                skipSpaces()
-                when {
-                    token == "true" -> JsonPrimitive(true)
-                    token == "false" -> JsonPrimitive(false)
-                    token == "null" -> JsonNull
-                    i < text.length && text[i] == '(' -> { i++; context.call(callOf(token, arguments())) }
-                    else -> context.resolve(JsonObject(mapOf("path" to JsonPrimitive(token))))
-                }
-            }
-        }
-    }
-
-    /** `name: value, …)` → args object (values already evaluated). */
-    private fun arguments(): JsonObject {
-        val args = linkedMapOf<String, JsonElement>()
-        while (true) {
-            skipSpaces()
-            if (i >= text.length) break
-            if (text[i] == ')') { i++; break }
-            if (text[i] == '}') break // unterminated call: let the block end
-            val start = i
-            val name = identifier()
-            skipSpaces()
-            if (i < text.length && text[i] == ':') i++
-            args[name] = expression() ?: JsonNull
-            skipSpaces()
-            if (i < text.length && text[i] == ',') i++
-            if (i == start) i++ // never loop in place on malformed input
-        }
-        return JsonObject(args)
-    }
-
-    private fun callOf(name: String, args: JsonObject) = JsonObject(mapOf("call" to JsonPrimitive(name), "args" to args))
-
-    private fun identifier(): String {
-        val start = i
-        while (i < text.length && (text[i].isLetterOrDigit() || text[i] in "/_@.~-")) i++
-        return text.substring(start, i)
-    }
-
-    private fun number(): Double {
-        val start = i
-        i++
-        while (i < text.length && (text[i].isDigit() || text[i] == '.')) i++
-        return text.substring(start, i).toDouble()
-    }
-
-    private fun quoted(quote: Char): String = buildString {
-        i++
-        while (i < text.length && text[i] != quote) {
-            if (text[i] == '\\' && i + 1 < text.length) i++
-            append(text[i++])
-        }
-        i++
-    }
-
-    private fun skipSpaces() { while (i < text.length && text[i].isWhitespace()) i++ }
-}

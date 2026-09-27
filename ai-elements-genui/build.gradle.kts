@@ -30,6 +30,7 @@ dependencies {
     api(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
+    testImplementation(libs.snakeyaml) // the A2UI conformance suites are YAML
 
     androidTestImplementation(libs.junit.ext)
     androidTestImplementation(libs.androidx.test.runner)

@@ -32,6 +32,17 @@ http-server = [
 ]
 
 [[package]]
+name = "a2ui-core"
+version = "0.1.2.dev386"
+source = { git = "https://github.com/google/A2UI?subdirectory=python%2Fa2ui_core#ec12ba915ab21725929430bd14bcef04e5ee7f12" }
+dependencies = [
+    { name = "babel" },
+    { name = "jsonschema" },
+    { name = "pydantic" },
+    { name = "referencing" },
+]
+
+[[package]]
 name = "ag-ui-protocol"
 version = "1.0.0"
 source = { registry = "https://mirror.lzu.edu.cn/pypi/web/simple" }
@@ -147,6 +158,15 @@ dependencies = [
 sdist = { url = "https://mirrors.ustc.edu.cn/pypi/packages/f1/51/bc1729d3cfdc214b4935f4e886e4dd443c3065fd8e1e66423fe84b490f81/authlib-1.8.0.tar.gz", hash = "sha256:f3ecd5f1da737262fb53bf1a4d95c4ea1ad9dd509316587a255c99ab1838a4f0", size = 177759, upload-time = "2026-08-30T12:12:34.833Z" }
 wheels = [
     { url = "https://mirrors.ustc.edu.cn/pypi/packages/b8/c6/6f124bcfbbfb20fba22c939b4e43a06dccfc0e1ca20e5634ca573cb1e271/authlib-1.8.0-py2.py3-none-any.whl", hash = "sha256:88aebbd9af6757e14e912d5dc007ae1dc1f3e27e3b2152ce7c552ee2c3b3c121", size = 260804, upload-time = "2026-08-30T12:12:33.162Z" },
+]
+
+[[package]]
+name = "babel"
+version = "2.18.0"
+source = { registry = "https://mirror.lzu.edu.cn/pypi/web/simple" }
+sdist = { url = "https://mirrors.ustc.edu.cn/pypi/packages/7d/b2/51899539b6ceeeb420d40ed3cd4b7a40519404f9baf3d4ac99dc413a834b/babel-2.18.0.tar.gz", hash = "sha256:b80b99a14bd085fcacfa15c9165f651fbb3406e66cc603abf11c5750937c992d", size = 9959554, upload-time = "2026-02-01T12:30:56.078Z" }
+wheels = [
+    { url = "https://mirrors.ustc.edu.cn/pypi/packages/77/f5/21d2de20e8b8b0408f0681956ca2c69f1320a3848ac50e6e7f39c6159675/babel-2.18.0-py3-none-any.whl", hash = "sha256:e2b422b277c2b9a9630c1d7903c2a00d0830c409c59ac8cae9081c92f1aeba35", size = 10196845, upload-time = "2026-02-01T12:30:53.445Z" },
 ]
 
 [[package]]
@@ -1964,6 +1984,11 @@ dependencies = [
     { name = "uvicorn", extra = ["standard"] },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "a2ui-core" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "a2a-sdk", extras = ["http-server"], specifier = ">=1.1.5" },
@@ -1975,6 +2000,9 @@ requires-dist = [
     { name = "pydantic-ai-harness", extras = ["skills"], specifier = ">=0.36.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.52.4" },
 ]
+
+[package.metadata.requires-dev]
+dev = [{ name = "a2ui-core", git = "https://github.com/google/A2UI?subdirectory=python%2Fa2ui_core" }]
 
 [[package]]
 name = "sniffio"

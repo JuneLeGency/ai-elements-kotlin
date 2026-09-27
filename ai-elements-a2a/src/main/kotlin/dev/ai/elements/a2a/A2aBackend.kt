@@ -1,5 +1,6 @@
 package dev.ai.elements.a2a
 
+import dev.ai.elements.core.model.DataPart as ChatDataPart
 import com.google.gson.Gson
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatEvent
@@ -57,21 +58,14 @@ class A2aBackend(private val agent: A2aAgent) : ChatBackend {
         val user = history.lastOrNull { it.role == Role.USER } ?: return@flow
         val previous = history.lastOrNull { it.role == Role.ASSISTANT }?.metadata?.get(METADATA_KEY) as? JsonObject
         val state = previous?.string("state")?.let { runCatching { TaskState.valueOf(it) }.getOrNull() }
-        val parts = buildList<Part<*>> {
-            user.parts.filterIsInstance<FilePart>().forEach { file ->
-                val data = file.base64Data
-                add(org.a2aproject.sdk.spec.FilePart(
-                    if (data != null) FileWithBytes(file.mediaType, file.filename ?: "attachment", data)
-                    else FileWithUri(file.mediaType, file.filename ?: "attachment", file.url),
-                ))
-            }
-            if (user.text.isNotBlank()) add(TextPart(user.text))
-        }
+        val parts = outgoingParts(user)
+        val a2uiDataModel = user.parts.filterIsInstance<ChatDataPart>().firstOrNull { it.name == ChatDataPart.A2UI_DATA_MODEL }
         val message = Message.builder()
             .role(Message.Role.ROLE_USER)
             .messageId(UUID.randomUUID().toString())
             .parts(parts)
             .apply {
+                a2uiDataModel?.data?.toJava()?.let { metadata(mapOf<String, Any>("a2uiRendererDataModel" to it)) }
                 previous?.string("contextId")?.let(::contextId)
                 if (state?.isInterrupted() == true) previous.string("taskId")?.let(::taskId)
             }
@@ -157,7 +151,9 @@ class A2aBackend(private val agent: A2aAgent) : ChatBackend {
                 is FileWithBytes -> ChatEvent.File(id, file.mimeType() ?: DEFAULT_MIME, "data:${file.mimeType() ?: DEFAULT_MIME};base64,${file.bytes()}")
                 else -> null
             }
-            is DataPart -> ChatEvent.Data(id, name, part.data().toJson())
+            // A2UI messages (A2UI A2A extension) become the neutral A2UI data part.
+            is DataPart -> if (part.metadata()?.get("mimeType") == ChatDataPart.A2UI_MEDIA_TYPE) ChatEvent.Data(id, ChatDataPart.A2UI, part.data().toJson())
+            else ChatEvent.Data(id, name, part.data().toJson())
             else -> null
         }
 
@@ -198,6 +194,24 @@ class A2aBackend(private val agent: A2aAgent) : ChatBackend {
         private fun Message.text() = parts().filterIsInstance<TextPart>().joinToString("\n") { it.text() }
         private fun TaskState.label() = name.removePrefix("TASK_STATE_").lowercase()
         private fun Any?.toJson(): JsonElement = if (this == null) JsonNull else Json.parseToJsonElement(gson.toJson(this))
+
+        /** The A2A parts of a user turn: files, text, and A2UI actions (A2UI A2A extension data parts). */
+        internal fun outgoingParts(user: ChatMessage): List<Part<*>> = buildList {
+            user.parts.filterIsInstance<FilePart>().forEach { file ->
+                val data = file.base64Data
+                add(org.a2aproject.sdk.spec.FilePart(
+                    if (data != null) FileWithBytes(file.mediaType, file.filename ?: "attachment", data)
+                    else FileWithUri(file.mediaType, file.filename ?: "attachment", file.url),
+                ))
+            }
+            if (user.text.isNotBlank()) add(TextPart(user.text))
+            user.parts.filterIsInstance<ChatDataPart>().filter { it.name == ChatDataPart.A2UI }.forEach { data ->
+                add(DataPart(data.data.toJava() ?: emptyList<Any>(), mapOf<String, Any>("mimeType" to ChatDataPart.A2UI_MEDIA_TYPE)))
+            }
+        }
+
+        /** JSON as the plain Java values (maps, lists, numbers…) the A2A SDK serializes. */
+        internal fun JsonElement.toJava(): Any? = gson.fromJson(toString(), Any::class.java)
     }
 }
 

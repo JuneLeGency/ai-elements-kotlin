@@ -30,12 +30,14 @@ class A2uiCatalog(
     val id: String,
     val components: Map<String, A2uiComponent>,
     val functions: Map<String, A2uiFunction>,
+    /** The A2UI version its definitions follow; catalogs mixed on one surface must share it. */
+    val protocolVersion: String = A2ui.VERSION,
 ) {
     fun extend(
         id: String = this.id,
         components: Map<String, A2uiComponent> = emptyMap(),
         functions: Map<String, A2uiFunction> = emptyMap(),
-    ) = A2uiCatalog(id, this.components + components, this.functions + functions)
+    ) = A2uiCatalog(id, this.components + components, this.functions + functions, protocolVersion)
 
     companion object {
         val Basic: A2uiCatalog by lazy { A2uiCatalog(A2ui.BASIC_CATALOG_ID, BasicComponents.all, BasicFunctions.all) }
@@ -134,12 +136,23 @@ class ComponentScope internal constructor(
     private inline fun <T> safely(block: () -> T): T? = runCatching(block).getOrNull()
 }
 
-internal class SurfaceHost(val catalog: A2uiCatalog, val onAction: (A2uiAction) -> Unit)
+internal class SurfaceHost(
+    val catalog: A2uiCatalog,
+    val onAction: (A2uiAction) -> Unit,
+    /** Other catalogs by id (A2UI mixable catalogs): components naming one render from it. */
+    val catalogs: Map<String, A2uiCatalog> = emptyMap(),
+) {
+    /** A component's renderer: its own `catalogId`'s, else the surface's catalog, else the main one. */
+    fun renderer(component: JsonObject, surfaceCatalog: String?): A2uiComponent? {
+        val type = component.str("component") ?: return null
+        val catalogId = component.str("catalogId") ?: surfaceCatalog
+        return catalogId?.let { catalogs[it]?.components?.get(type) } ?: catalog.components[type]
+    }
+}
 
 @Composable
 internal fun RenderComponent(component: JsonObject, context: DataContext, host: SurfaceHost, modifier: Modifier = Modifier) {
-    val type = component.str("component") ?: return
-    val renderer = host.catalog.components[type] ?: return // unknown types are skipped (progressive rendering)
+    val renderer = host.renderer(component, context.surface.catalogId) ?: return // unknown types are skipped (progressive rendering)
     val scope = ComponentScope(component, context, host)
     val accessibility = component["accessibility"] as? JsonObject
     if (accessibility != null && context.boolean(accessibility["hidden"]) == true) return
@@ -161,10 +174,12 @@ fun A2uiSurfaceView(
     modifier: Modifier = Modifier,
     catalog: A2uiCatalog = A2uiCatalog.Basic,
     onAction: (A2uiAction) -> Unit = {},
+    /** More catalogs components may name with `catalogId` (mixable catalogs). */
+    catalogs: List<A2uiCatalog> = emptyList(),
 ) {
     val uri = LocalUriHandler.current
     val root = surface.component("root") ?: return
-    val host = SurfaceHost(catalog, onAction)
+    val host = SurfaceHost(catalog, onAction, catalogs.associateBy { it.id })
     val context = DataContext(surface, catalog.functions, effects = A2uiEffects { uri.openUri(it) })
     RenderComponent(root, context, host, modifier.testTag("a2ui-surface-${surface.id}"))
 }

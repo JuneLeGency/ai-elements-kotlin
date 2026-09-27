@@ -137,7 +137,10 @@ class AgUiBackend(
                 putJsonArray("context") {
                     context.forEach { (description, value) -> addJsonObject { put("description", description); put("value", value) } }
                 }
-                putJsonObject("forwardedProps") {}
+                putJsonObject("forwardedProps") {
+                    // A2UI user action (AG-UI A2UI binding, @ag-ui/a2ui-middleware): only on the run it starts.
+                    if (it == 0) history.lastOrNull()?.a2uiAction()?.let { action -> putJsonObject("a2uiAction") { put("userAction", action) } }
+                }
                 resume?.let { put("resume", JsonArray(it)) }
             }
             client.sse(jsonPost(endpoint, body, headers)).collect { sse ->
@@ -206,6 +209,24 @@ private fun List<Message>.lastState(): JsonElement? =
     asReversed().firstNotNullOfOrNull { m -> m.parts.lastOrNull { it is DataPart && it.name == AgUiBackend.STATE_PART }?.let { (it as DataPart).data } }
 
 /** One chat message as AG-UI messages: user content, assistant text + tool calls, then tool results. */
+/** The AG-UI activity type the A2UI binding uses for surfaces. */
+internal const val A2UI_ACTIVITY = "a2ui-surface"
+
+/**
+ * An activity as a chat data part; `a2ui-surface` activities become the neutral [DataPart.A2UI]
+ * part (their `a2ui_operations`, or the pre-paint `status` object while the UI is being built).
+ */
+internal fun activityData(id: String, type: String, content: JsonElement): ChatEvent.Data =
+    if (type == A2UI_ACTIVITY) ChatEvent.Data(id, DataPart.A2UI, ((content as? JsonObject)?.get("a2ui_operations") as? JsonArray) ?: content)
+    else ChatEvent.Data(id, type, content)
+
+/** The A2UI `action` a user message carries, if any (see [DataPart.A2UI]). */
+internal fun Message.a2uiAction(): JsonObject? =
+    if (role != Role.USER) null
+    else parts.filterIsInstance<DataPart>().filter { it.name == DataPart.A2UI }
+        .flatMap { (it.data as? JsonArray).orEmpty() }
+        .firstNotNullOfOrNull { (it as? JsonObject)?.get("action") as? JsonObject }
+
 internal fun Message.toAgUi(): List<JsonObject> = when (role) {
     Role.USER -> if (!hasContent) emptyList() else listOf(buildJsonObject {
         put("id", id)
@@ -381,12 +402,12 @@ internal class AgUiParser(private val nested: Boolean = false) {
             }
             is ActivitySnapshotEvent -> {
                 activities[typed.messageId] = typed.content
-                listOf(ChatEvent.Data(typed.messageId, typed.activityType, typed.content))
+                listOf(activityData(typed.messageId, typed.activityType, typed.content))
             }
             is ActivityDeltaEvent -> {
                 val content = runCatching { JsonPatch.apply(typed.patch, activities[typed.messageId] ?: JsonObject(emptyMap())) }.getOrElse { return emptyList() }
                 activities[typed.messageId] = content
-                listOf(ChatEvent.Data(typed.messageId, typed.activityType, content))
+                listOf(activityData(typed.messageId, typed.activityType, content))
             }
             is StepStartedEvent -> { steps += (typed.stepName to false); listOf(stepsEvent()) }
             is StepFinishedEvent -> {

@@ -14,3 +14,11 @@ dependencies = [
     "pydantic-ai-harness[skills]>=0.36.0",
     "uvicorn[standard]>=0.52.4",
 ]
+
+[dependency-groups]
+dev = [
+    "a2ui-core",
+]
+
+[tool.uv.sources]
+a2ui-core = { git = "https://github.com/google/A2UI", subdirectory = "python/a2ui_core" }
