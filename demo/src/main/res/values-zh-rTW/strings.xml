@@ -185,4 +185,5 @@
     <string name="agent_unreachable">無法連線：%1$s</string>
     <string name="agent_name_hint">小寫字母、數字、- 和 _</string>
     <string name="off">已關閉</string>
+    <string name="manage">管理</string>
 </resources>

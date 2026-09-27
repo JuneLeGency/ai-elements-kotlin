@@ -185,4 +185,5 @@
     <string name="agent_unreachable">接続できません：%1$s</string>
     <string name="agent_name_hint">小文字・数字・- と _</string>
     <string name="off">オフ</string>
+    <string name="manage">管理</string>
 </resources>

@@ -325,6 +325,7 @@ private fun ChatPane(
                         if (isFinal) dictationBase = null
                     })
                     ModelChip(viewModel, provider)
+                    CapabilitiesButton(viewModel, provider, onManage = onOpenSettings)
                     // Phones already show usage under each reply; the composer has no room for it.
                     if (!compactWidth) lastUsage?.let { ContextUsage(it) }
                 },
