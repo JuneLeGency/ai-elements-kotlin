@@ -8,6 +8,8 @@ MCP toolset — and exposing it over open protocols only:
     POST /api/agui                      AG-UI 1.0 (AGUIAdapter)
     POST /mcp                           MCP server, Streamable HTTP (official `mcp` SDK)
     GET  /.well-known/agent-card.json   A2A agent card; JSON-RPC at POST /a2a (official `a2a-sdk`)
+    WS   /acp                           Agent Client Protocol (Pydantic AI Harness ACP adapter);
+                                        stdio: `uv run python acp_agent.py`
 
 Upstream model (any OpenAI-compatible endpoint, e.g. CLIProxyAPI):
 
@@ -37,7 +39,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from ag_ui.core import ActivitySnapshotEvent, StateSnapshotEvent
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import HTMLResponse, Response
 from mcp.server.transport_security import TransportSecuritySettings
 from pydantic_ai import Agent, CustomEvent, DeferredToolRequests, RunContext
@@ -103,6 +105,8 @@ class RunState:
     sources: int = 0
     # The A2UI user action that started this run, if any (see a2ui_demo.py).
     a2ui_action: dict | None = None
+    # ACP: the session's client connection and id, for `session/update`s (see acp_agent.py).
+    acp: tuple | None = None
 
 
 def _model_visible(ctx, tool) -> bool:
@@ -212,7 +216,15 @@ class PlanSnapshot(CustomEvent, name="plan"):
 
 @agent.on_event(PlanCreatedEvent, PlanUpdatedEvent, PlanStatusChangedEvent, PlanCompletedEvent, PlanDeletedEvent)
 async def mirror_plan(ctx: RunContext[RunState], event) -> None:
-    await ctx.emit(PlanSnapshot(protocol=ctx.deps.protocol, items=await ctx.deps.plan.get_items()))
+    items = await ctx.deps.plan.get_items()
+    if ctx.deps.acp:
+        # ACP has a plan update of its own (`sessionUpdate: "plan"`), sent on the session.
+        import acp
+        client, session_id = ctx.deps.acp
+        entries = [acp.plan_entry(i.content, status="completed" if i.status in ("completed", "cancelled") else i.status if i.status == "in_progress" else "pending") for i in items]
+        await client.session_update(session_id=session_id, update=acp.update_plan(entries))
+        return
+    await ctx.emit(PlanSnapshot(protocol=ctx.deps.protocol, items=items))
 
 
 # --- Generative UI (A2UI) -----------------------------------------------------
@@ -368,12 +380,21 @@ _DEMO_SCRIPTS = [
 ]
 
 
+def _prompt_text(part) -> str | None:
+    """A user prompt's text, or None for other parts and for prompts the harness injects."""
+    if type(part).__name__ != "UserPromptPart":
+        return None
+    # A string, or a list of content (ACP sends content blocks).
+    content = part.content if isinstance(part.content, str) else " ".join(c for c in part.content if isinstance(c, str))
+    return None if content.lstrip().startswith("<plan-reminder>") else content
+
+
 def _user_prompt(messages: list[ModelMessage]) -> str:
     """The latest user prompt (earlier turns must not re-trigger their capability)."""
     for message in reversed(messages):
         for part in reversed(getattr(message, "parts", [])):
-            if type(part).__name__ == "UserPromptPart" and isinstance(part.content, str):
-                return part.content.lower()
+            if (text := _prompt_text(part)) is not None:
+                return text.lower()
     return ""
 
 
@@ -383,7 +404,7 @@ def _demo_call(messages: list[ModelMessage], info: AgentInfo) -> ToolCallPart | 
     # AG-UI history can put the previous turn's tool result before the new prompt in one request),
     # or once this run has called a tool (capabilities such as Planning add prompts after results).
     parts = [p for m in messages for p in getattr(m, "parts", [])]
-    last_prompt = max((i for i, p in enumerate(parts) if type(p).__name__ == "UserPromptPart"), default=0)
+    last_prompt = max((i for i, p in enumerate(parts) if _prompt_text(p) is not None), default=0)
     if any(isinstance(p, (ToolReturnPart, RetryPromptPart)) for p in parts[last_prompt:]):
         return None
     run_id = getattr(messages[-1], "run_id", None) if messages else None
@@ -507,6 +528,13 @@ async def chat(request: Request) -> Response:
         allow_uploaded_files=True,  # image attachments arrive as data: URLs
         on_complete=on_complete,
     )
+
+
+@app.websocket("/acp")
+async def acp_websocket(websocket: WebSocket) -> None:
+    # Agent Client Protocol over the ACP Kotlin SDK's WebSocket transport (see acp_agent.py).
+    import acp_agent
+    await acp_agent.serve_websocket(websocket)
 
 
 @app.post("/api/agui")

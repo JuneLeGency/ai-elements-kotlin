@@ -12,6 +12,10 @@
 - `agui/subagent-state-activity.sse`: AG-UI 1.0 events the server does not emit yet
   (SUBAGENT_*, STATE_DELTA, ACTIVITY_*, usage), encoded by the official `ag_ui` Python SDK.
 
+- `../ai-elements-acp/src/test/resources/acp/*.jsonl`: Agent Client Protocol sessions with the
+  agent served by the Pydantic AI Harness ACP adapter (`acp_agent.py`, stdio), driven by the
+  official ACP Python SDK client: every JSON-RPC message the agent sent, one per line.
+
 Run with the server up:  uv run python record_fixtures.py [http://localhost:8788]
 """
 
@@ -239,7 +243,52 @@ def agui_spec_events() -> None:
     save("agui/subagent-state-activity.sse", "".join(encoder.encode(e) for e in run))
 
 
+ACP_OUT = Path(__file__).resolve().parent.parent / "ai-elements-acp/src/test/resources/acp"
+
+
+def acp_session(keyword: str, approve: bool = True) -> None:
+    """One ACP prompt turn over stdio; records the agent's messages (the wire lines it wrote)."""
+    import asyncio
+    import acp
+    from acp import schema
+    from acp.connection import StreamDirection
+
+    received: list[dict] = []
+
+    class Recorder:
+        async def session_update(self, session_id, update, **kwargs):
+            pass
+
+        async def request_permission(self, session_id, tool_call, options, **kwargs):
+            kind = "allow_once" if approve else "reject_once"
+            option = next(o for o in options if o.kind == kind)
+            return schema.RequestPermissionResponse(outcome=schema.AllowedOutcome(outcome="selected", option_id=option.option_id))
+
+    async def run() -> None:
+        def observe(event) -> None:
+            if event.direction == StreamDirection.INCOMING:
+                received.append(event.message)
+
+        async with acp.spawn_agent_process(lambda _agent: Recorder(), sys.executable, "acp_agent.py",
+                                           cwd=Path(__file__).resolve().parent, observers=[observe]) as (conn, _process):
+            await conn.initialize(protocol_version=acp.PROTOCOL_VERSION, client_capabilities=schema.ClientCapabilities())
+            session = await conn.new_session(cwd="/tmp", mcp_servers=[])
+            await conn.prompt(session_id=session.session_id, prompt=[acp.text_block(f"please {keyword}")])
+
+    asyncio.run(run())
+    path = ACP_OUT / f"{keyword}{'' if approve else '-denied'}.jsonl"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("".join(json.dumps(m, ensure_ascii=False) + "\n" for m in received))
+    print("wrote", path)
+
+
 if __name__ == "__main__":
+    if sys.argv[2:] == ["acp"]:
+        for keyword in ["plan", "time"]:
+            acp_session(keyword)
+        acp_session("note")
+        acp_session("note", approve=False)
+        sys.exit()
     for keyword in ["delegate", "plan", "skill", "note", "device"]:
         agui(keyword)
     for keyword in ["delegate", "plan", "skill", "note"]:

@@ -83,6 +83,7 @@
     <string name="kind_agent_server">伺服器端代理程式（如基於 PydanticAI 的 server/main.py），位址 {base}/api/chat，以 Vercel AI SDK UI Message Stream（v5）或 Data Stream（v4）串流輸出。工具在伺服器上執行。</string>
     <string name="kind_ag_ui">AG-UI 代理程式，位址 {base}/api/agui（PydanticAI、LangGraph、CrewAI、Mastra…）。工具在伺服器上執行。</string>
     <string name="kind_a2a">A2A 代理程式：從 {base}/.well-known/agent-card.json 讀取 Agent Card，代理程式在遠端執行，透過 A2A 任務回覆。</string>
+    <string name="kind_acp">Agent Client Protocol 代理程式（如 Claude Code、Codex、Gemini CLI 等程式碼代理程式），網址為 ws:// 或 wss://：每個對話是一個 ACP 工作階段，由本應用程式回應它的權限請求。</string>
     <string name="kind_openai">任何相容 OpenAI 的 /chat/completions 端點。代理程式迴圈和工具在本機執行。</string>
     <string name="kind_openai_responses">OpenAI Responses API（/responses），無狀態並攜帶加密推理。代理程式迴圈和工具在本機執行。</string>
     <string name="kind_anthropic">Anthropic Messages API（/v1/messages）。代理程式迴圈和工具在本機執行。</string>

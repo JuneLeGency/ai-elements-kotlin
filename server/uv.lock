@@ -55,6 +55,18 @@ wheels = [
 ]
 
 [[package]]
+name = "agent-client-protocol"
+version = "0.11.1"
+source = { registry = "https://mirror.lzu.edu.cn/pypi/web/simple" }
+dependencies = [
+    { name = "pydantic" },
+]
+sdist = { url = "https://mirrors.ustc.edu.cn/pypi/packages/ae/a3/0af4ac4cdb943d0daffd214c02dc5f79596d71d1db40248ee4d54ac596b2/agent_client_protocol-0.11.1.tar.gz", hash = "sha256:96b02a94de53e05ec20f64cedd1b83744b64f3f94dd2b82ae5d0af88388239ea", size = 100326, upload-time = "2026-07-27T18:47:29.298Z" }
+wheels = [
+    { url = "https://mirrors.ustc.edu.cn/pypi/packages/18/28/cc93079c418b03de7a778cabbf66ceac5add98592f5daf30cf6f4b8f9096/agent_client_protocol-0.11.1-py3-none-any.whl", hash = "sha256:42790f0a25b8fd24f5c9b27b7e0c34123fc1a980024ad8ef965d1d169a5e42d4", size = 68122, upload-time = "2026-07-27T18:47:28.27Z" },
+]
+
+[[package]]
 name = "aiofile"
 version = "3.12.3"
 source = { registry = "https://mirror.lzu.edu.cn/pypi/web/simple" }
@@ -1413,6 +1425,9 @@ wheels = [
 ]
 
 [package.optional-dependencies]
+acp = [
+    { name = "agent-client-protocol" },
+]
 skills = [
     { name = "pyyaml" },
 ]
@@ -1980,7 +1995,7 @@ dependencies = [
     { name = "httpx" },
     { name = "openai" },
     { name = "pydantic-ai" },
-    { name = "pydantic-ai-harness", extra = ["skills"] },
+    { name = "pydantic-ai-harness", extra = ["acp", "skills"] },
     { name = "uvicorn", extra = ["standard"] },
 ]
 
@@ -1997,7 +2012,7 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "openai", specifier = ">=3.13.0" },
     { name = "pydantic-ai", specifier = ">=2.51.0" },
-    { name = "pydantic-ai-harness", extras = ["skills"], specifier = ">=0.36.0" },
+    { name = "pydantic-ai-harness", extras = ["acp", "skills"], specifier = ">=0.36.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.52.4" },
 ]
 

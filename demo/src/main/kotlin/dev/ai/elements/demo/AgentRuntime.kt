@@ -2,6 +2,8 @@ package dev.ai.elements.demo
 
 import dev.ai.elements.a2a.A2aAgent
 import dev.ai.elements.a2a.A2aBackend
+import dev.ai.elements.acp.AcpAgent
+import dev.ai.elements.acp.AcpBackend
 import dev.ai.elements.a2a.asSubAgent
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ToolApprover
@@ -50,6 +52,7 @@ class AgentRuntime(
     private val appTools: List<AgentTool>,
 ) {
     private val a2aAgents = mutableMapOf<String, A2aAgent>()
+    private val acpAgents = mutableMapOf<String, AcpAgent>()
 
     /** The agent's workspace: shared by the file tools and the Linux sandbox (mounted at /workspace). */
     val workspace = java.io.File(context.filesDir, "workspace").apply { mkdirs() }
@@ -71,6 +74,9 @@ class AgentRuntime(
     fun newSession() { planning = Planning() }
 
     fun a2aAgent(url: String): A2aAgent = synchronized(a2aAgents) { a2aAgents.getOrPut(url.trimEnd('/')) { A2aAgent(url.trimEnd('/')) } }
+
+    /** One connection per ACP agent URL, shared by its conversations (each is an ACP session). */
+    fun acpAgent(url: String): AcpAgent = synchronized(acpAgents) { acpAgents.getOrPut(url.trim()) { AcpAgent.webSocket(url.trim()) } }
 
     /**
      * For agent servers (AI SDK / AG-UI): only device-side capabilities travel, as client /
@@ -99,6 +105,8 @@ class AgentRuntime(
         val profile = providers.selected
         return when {
             profile.kind == ProviderKind.A2A -> A2aBackend(a2aAgent(profile.baseUrl))
+            // The ACP agent brings its own tools; the app answers its permission requests.
+            profile.kind == ProviderKind.ACP -> AcpBackend(acpAgent(profile.baseUrl), approver)
             profile.kind.serverSideAgent -> deviceToolsOnly.backend(approver)
             else -> harness.backend(approver)
         }
@@ -106,6 +114,7 @@ class AgentRuntime(
 
     private fun modelOf(profile: ProviderProfile): ModelBinding = when {
         profile.kind == ProviderKind.A2A -> ModelBinding { _, _, _ -> A2aBackend(a2aAgent(profile.baseUrl)) }
+        profile.kind == ProviderKind.ACP -> ModelBinding { _, _, approver -> AcpBackend(acpAgent(profile.baseUrl), approver) }
         profile.usesTokens -> profile.model(tokens = providers.tokenSource(profile))
         agents.settings.value.koogRuntime -> profile.koogModel(providers.apiKey(profile.id)) ?: profile.model(apiKey = providers.apiKey(profile.id))
         else -> profile.model(apiKey = providers.apiKey(profile.id))

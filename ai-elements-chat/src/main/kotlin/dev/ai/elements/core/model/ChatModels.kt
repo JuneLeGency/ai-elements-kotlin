@@ -137,6 +137,8 @@ data class ToolPart(
     val kind: ToolKind = ToolKind.Function,
     /** Who provides the tool when it is not the agent itself, e.g. an MCP server's name. */
     val source: String? = null,
+    /** While [ToolState.APPROVAL_REQUESTED]: what the approval can answer besides yes / no. */
+    val approvalAnswers: ApprovalAnswers = ApprovalAnswers.All,
 ) : Part {
     override val isStreaming: Boolean
         get() = state == ToolState.INPUT_STREAMING || state == ToolState.INPUT_AVAILABLE ||
@@ -144,6 +146,19 @@ data class ToolPart(
 
     /** [title] or, failing that, the tool [name]. */
     val displayName: String get() = title ?: name
+}
+
+/**
+ * What a backend's approval can carry back besides approve / deny: a [reason] (AI SDK
+ * `approval.reason`, AG-UI resume `reason`) and [editInput], arguments the user changed
+ * (AG-UI `editedArgs`, the on-device loop). The UI offers only these.
+ */
+@Serializable
+data class ApprovalAnswers(val reason: Boolean = true, val editInput: Boolean = true) {
+    companion object {
+        val All = ApprovalAnswers()
+        val YesNo = ApprovalAnswers(reason = false, editInput = false)
+    }
 }
 
 /**

@@ -110,6 +110,7 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
 
     suspend fun listModels(profile: ProviderProfile): List<String> = when {
         profile.kind == dev.ai.elements.core.config.ProviderKind.A2A -> listOf(runtime.a2aAgent(profile.baseUrl).card().name())
+        profile.kind == dev.ai.elements.core.config.ProviderKind.ACP -> listOf(runtime.acpAgent(profile.baseUrl).displayName())
         // The ChatGPT backend has no public model list; offer the plan's current models.
         profile.oauth == OAuthProvider.CHATGPT -> { providers.tokenSource(profile).fresh(); ChatGptModels }
         profile.usesTokens -> profile.listModels(providers.tokenSource(profile).fresh().accessToken)

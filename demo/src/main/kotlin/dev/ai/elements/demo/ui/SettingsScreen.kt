@@ -364,6 +364,7 @@ private fun SettingsList(
                                             kind = kind,
                                             baseUrl = when (kind) {
                                                 ProviderKind.AGENT_SERVER, ProviderKind.AG_UI, ProviderKind.A2A -> "http://10.0.2.2:8788"
+                                                ProviderKind.ACP -> "ws://10.0.2.2:8788/acp"
                                                 ProviderKind.ANTHROPIC -> "https://api.anthropic.com"
                                                 ProviderKind.GEMINI -> "https://generativelanguage.googleapis.com"
                                                 ProviderKind.OLLAMA -> "http://10.0.2.2:11434"
@@ -670,6 +671,7 @@ private val ProviderKind.icon: ImageVector
         ProviderKind.GEMINI -> DemoIcons.AutoAwesome
         ProviderKind.OLLAMA -> DemoIcons.Computer
         ProviderKind.A2A -> DemoIcons.Hub
+        ProviderKind.ACP -> DemoIcons.Terminal
     }
 
 @get:StringRes
@@ -684,6 +686,7 @@ private val ProviderKind.description: Int
         ProviderKind.GEMINI -> R.string.kind_gemini
         ProviderKind.OLLAMA -> R.string.kind_ollama
         ProviderKind.A2A -> R.string.kind_a2a
+        ProviderKind.ACP -> R.string.kind_acp
     }
 
 /** Per-app language: follow the system or pick one of the shipped translations. */

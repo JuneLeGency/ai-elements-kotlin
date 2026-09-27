@@ -5,6 +5,7 @@ import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.model.ApprovalAnswers
 import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Message
@@ -197,7 +198,8 @@ class UiMessageStreamBackend(
                 )
                 "tool-output-available" -> toolOutput(toolCallId, chunk["output"], (chunk["preliminary"] as? JsonPrimitive)?.contentOrNull == "true")
                 "tool-output-error" -> listOf(ChatEvent.ToolError(toolCallId, str("errorText").orEmpty()))
-                "tool-approval-request" -> listOf(ChatEvent.ToolApprovalRequest(toolCallId))
+                // AI SDK 6 approvals answer `approved` and an optional `reason`; arguments cannot change.
+                "tool-approval-request" -> listOf(ChatEvent.ToolApprovalRequest(toolCallId, ApprovalAnswers(reason = true, editInput = false)))
                 "tool-output-denied" -> listOf(ChatEvent.ToolDenied(toolCallId))
                 "source-url" -> {
                     val url = str("url") ?: return emptyList()

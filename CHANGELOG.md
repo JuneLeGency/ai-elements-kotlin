@@ -85,6 +85,19 @@
   and `samples/in-app-agent` as minimal apps (built by CI).
 - `ai-elements-bom`; `server/` rebuilt on Pydantic AI 2.51 + Harness 0.36 with MCP and A2A endpoints.
 
+- `ai-elements-acp`: **Agent Client Protocol** on the official ACP Kotlin SDK — coding agents
+  (Claude Code, Codex, Gemini CLI, Pydantic AI Harness `run_acp_stdio`, …) as chat providers.
+  `AcpAgent.webSocket(url)` (the SDK's WebSocket transport) or `AcpAgent.process(command)` (stdio);
+  one ACP session per conversation (resumed with `session/load` when supported); text, reasoning,
+  tool calls (diffs as unified diffs), `plan` updates as the Plan element, usage;
+  `session/request_permission` through the app's approvals; `session/cancel` on stop; optional
+  client file system (`AcpFileSystem`). The reference server serves its agent over ACP with the
+  Harness ACP adapter (`acp_agent.py` on stdio, `ws://…/acp`); the demo has an "ACP agent" provider.
+- Approvals offer only what the protocol can carry back (`ApprovalAnswers` on
+  `ChatEvent.ToolApprovalRequest` / `ToolPart`): AG-UI and the on-device loop take a reason and
+  edited arguments, AI SDK a reason, ACP yes / no. Previously AI SDK approvals showed "Edit and
+  approve" and dropped the edits.
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

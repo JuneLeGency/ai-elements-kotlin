@@ -55,7 +55,9 @@ class CapabilitiesFlowTest {
     }
 
     private fun launchWith(kind: ProviderKind) {
-        resetDemoApp(ProviderProfile("e2e-${kind.name.lowercase()}", "E2E ${kind.label}", kind, server, ""))
+        // ACP agents are addressed by their WebSocket URL (the server's /acp).
+        val url = if (kind == ProviderKind.ACP) server.replaceFirst("http", "ws") + "/acp" else server
+        resetDemoApp(ProviderProfile("e2e-${kind.name.lowercase()}", "E2E ${kind.label}", kind, url, ""))
         scenario = ActivityScenario.launch(MainActivity::class.java)
     }
 
@@ -177,6 +179,27 @@ class CapabilitiesFlowTest {
         compose.awaitTurnEnd(60_000)
         compose.onNodeWithTag("conversation").performScrollToNode(hasText("Agent run complete", substring = true))
         scrollTo("data-task")
+    }
+
+    /**
+     * Agent Client Protocol (Pydantic AI Harness ACP adapter): a plan update renders as the Plan,
+     * and the next turn in the same session asks permission, which offers yes / no only.
+     */
+    @Test
+    fun acp_planThenPermission_inOneSession() {
+        launchWith(ProviderKind.ACP)
+        send("please plan")
+        compose.awaitTurnEnd(60_000)
+        scrollTo("data-plan")
+        send("please note")
+        scenario!!.hideKeyboard()
+        compose.waitUntil(60_000) { compose.onAllNodesWithTag("approve").fetchSemanticsNodes().isNotEmpty() }
+        assertTrue(compose.onAllNodesWithTag("edit-and-approve", useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
+        assertTrue(compose.onAllNodesWithTag("deny-with-reason", useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
+        compose.onNodeWithTag("approve").performClick()
+        compose.waitUntil(60_000) {
+            runCatching { compose.onNodeWithTag("conversation").performScrollToNode(hasText("Saved note", substring = true)) }.isSuccess
+        }
     }
 
     private fun reachable(url: String) = runCatching {

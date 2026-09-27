@@ -63,7 +63,7 @@ fun Message.reduce(event: ChatEvent, now: Long): Message = when (event) {
         it.copy(state = ToolState.OUTPUT_ERROR, errorText = event.error)
     }
 
-    is ChatEvent.ToolApprovalRequest -> updateExisting<ToolPart>(event.id) { it.copy(state = ToolState.APPROVAL_REQUESTED) }
+    is ChatEvent.ToolApprovalRequest -> updateExisting<ToolPart>(event.id) { it.copy(state = ToolState.APPROVAL_REQUESTED, approvalAnswers = event.answers) }
 
     // Approved: back to running until the output arrives.
     is ChatEvent.ToolApproved -> updateExisting<ToolPart>(event.id) {

@@ -48,7 +48,8 @@ internal val LocalToolDecision = staticCompositionLocalOf<((toolCallId: String, 
  * Human-in-the-loop approval (AI Elements `<Confirmation>`): what the agent
  * wants to do, with approve / deny actions. Null callbacks render read-only.
  * With [onDecide] the user can also deny with a reason or edit the call's
- * JSON [input] before approving (AG-UI approve-with-edits, AI SDK `reason`).
+ * JSON [input] before approving (AG-UI approve-with-edits, AI SDK `reason`); pass a null [input]
+ * or `withReason = false` where the backend cannot carry them.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -60,6 +61,7 @@ fun Confirmation(
     modifier: Modifier = Modifier,
     input: String? = null,
     onDecide: ((ToolDecision) -> Unit)? = null,
+    withReason: Boolean = true,
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
@@ -67,7 +69,7 @@ fun Confirmation(
         shape = MaterialTheme.shapes.large,
         modifier = modifier.fillMaxWidth(),
     ) {
-        ConfirmationContent(title, description, onApprove, onDeny, Modifier.padding(16.dp), input, onDecide)
+        ConfirmationContent(title, description, onApprove, onDeny, Modifier.padding(16.dp), input, onDecide, withReason)
     }
 }
 
@@ -82,6 +84,7 @@ internal fun ConfirmationContent(
     modifier: Modifier = Modifier,
     input: String? = null,
     onDecide: ((ToolDecision) -> Unit)? = null,
+    withReason: Boolean = true,
 ) {
     var mode by rememberSaveable { mutableStateOf(DecisionMode.NONE) }
     var reason by rememberSaveable { mutableStateOf("") }
@@ -140,7 +143,7 @@ internal fun ConfirmationContent(
             modifier = Modifier.fillMaxWidth(),
         ) {
             if (onDecide != null) {
-                TextButton(onClick = { mode = DecisionMode.REASON }, contentPadding = CompactPadding, modifier = Modifier.testTag("deny-with-reason")) { Text(stringResource(R.string.ai_deny_with_reason), maxLines = 1) }
+                if (withReason) TextButton(onClick = { mode = DecisionMode.REASON }, contentPadding = CompactPadding, modifier = Modifier.testTag("deny-with-reason")) { Text(stringResource(R.string.ai_deny_with_reason), maxLines = 1) }
                 if (input != null) TextButton(onClick = { mode = DecisionMode.EDIT }, contentPadding = CompactPadding, modifier = Modifier.testTag("edit-and-approve")) { Text(stringResource(R.string.ai_edit_and_approve), maxLines = 1) }
             }
             if (onApprove != null && onDeny != null) {

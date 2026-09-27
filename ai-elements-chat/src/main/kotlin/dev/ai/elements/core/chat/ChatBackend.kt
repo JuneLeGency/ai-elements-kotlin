@@ -48,8 +48,14 @@ sealed interface ChatEvent {
     /** Snapshot of a delegated agent's run inside tool call [id] (see [dev.ai.elements.core.agent.SubagentTool]). */
     data class SubagentUpdate(val id: String, val message: Message) : ChatEvent
 
-    /** The backend is waiting for [ToolApprover] to approve this tool call. */
-    data class ToolApprovalRequest(val id: String) : ChatEvent
+    /**
+     * The backend is waiting for [ToolApprover] to approve this tool call; [answers] says what
+     * its protocol can carry back beyond yes / no.
+     */
+    data class ToolApprovalRequest(
+        val id: String,
+        val answers: dev.ai.elements.core.model.ApprovalAnswers = dev.ai.elements.core.model.ApprovalAnswers.All,
+    ) : ChatEvent
 
     /** The user denied the call, optionally saying why. */
     data class ToolDenied(val id: String, val reason: String? = null) : ChatEvent

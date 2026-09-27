@@ -83,6 +83,7 @@
     <string name="kind_agent_server">服务端智能体（如基于 PydanticAI 的 server/main.py），地址 {base}/api/chat，以 Vercel AI SDK UI Message Stream（v5）或 Data Stream（v4）流式输出。工具在服务器上运行。</string>
     <string name="kind_ag_ui">AG-UI 智能体，地址 {base}/api/agui（PydanticAI、LangGraph、CrewAI、Mastra…）。工具在服务器上运行。</string>
     <string name="kind_a2a">A2A 智能体：从 {base}/.well-known/agent-card.json 读取 Agent Card，智能体在远端运行，通过 A2A 任务回复。</string>
+    <string name="kind_acp">Agent Client Protocol 智能体（如 Claude Code、Codex、Gemini CLI 等编码智能体），地址为 ws:// 或 wss://：每个对话是一个 ACP 会话，由本应用回应它的权限请求。</string>
     <string name="kind_openai">任意兼容 OpenAI 的 /chat/completions 接口。智能体循环和工具在本机运行。</string>
     <string name="kind_openai_responses">OpenAI Responses API（/responses），无状态并携带加密推理。智能体循环和工具在本机运行。</string>
     <string name="kind_anthropic">Anthropic Messages API（/v1/messages）。智能体循环和工具在本机运行。</string>

@@ -105,7 +105,8 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
                     onApprove = onApproval?.let { { it(true) } },
                     onDeny = onApproval?.let { { it(false) } },
                     modifier = Modifier.padding(top = 8.dp),
-                    input = part.input,
+                    input = part.input.takeIf { part.approvalAnswers.editInput },
+                    withReason = part.approvalAnswers.reason,
                     onDecide = onApproval?.let { LocalToolDecision.current }?.let { cb -> { decision -> cb(part.id, decision) } },
                 )
             }

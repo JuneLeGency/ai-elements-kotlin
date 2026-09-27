@@ -84,6 +84,7 @@
     <string name="kind_agent_server">A server-side agent (e.g. server/main.py with PydanticAI) at {base}/api/chat, streaming the Vercel AI SDK UI Message Stream (v5) or Data Stream (v4). Tools run on the server.</string>
     <string name="kind_ag_ui">An AG-UI agent at {base}/api/agui (PydanticAI, LangGraph, CrewAI, Mastra…). Tools run on the server.</string>
     <string name="kind_a2a">An A2A agent: its card is read from {base}/.well-known/agent-card.json; the agent runs remotely and replies through A2A tasks.</string>
+    <string name="kind_acp">An Agent Client Protocol agent (a coding agent such as Claude Code, Codex or Gemini CLI) at a ws:// or wss:// URL: each conversation is an ACP session, and the app answers its permission requests.</string>
     <string name="kind_openai">Any OpenAI-compatible /chat/completions endpoint. The agent loop and tools run on this device.</string>
     <string name="kind_openai_responses">OpenAI Responses API (/responses), stateless with encrypted reasoning. The agent loop and tools run on this device.</string>
     <string name="kind_anthropic">Anthropic Messages API (/v1/messages). The agent loop and tools run on this device.</string>

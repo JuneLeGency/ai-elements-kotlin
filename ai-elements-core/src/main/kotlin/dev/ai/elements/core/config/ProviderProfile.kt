@@ -38,6 +38,12 @@ enum class ProviderKind(val label: String, val needsKey: Boolean, val serverSide
 
     /** A remote A2A agent; built by `ai-elements-a2a` (`A2aBackend`), not by [ProviderProfile.createBackend]. */
     A2A("A2A agent", needsKey = false, serverSideAgent = true),
+
+    /**
+     * An Agent Client Protocol agent (a coding agent) at a `ws://` / `wss://` URL; built by
+     * `ai-elements-acp` (`AcpBackend`), not by [ProviderProfile.createBackend].
+     */
+    ACP("ACP agent", needsKey = false, serverSideAgent = true),
 }
 
 /**
@@ -110,6 +116,7 @@ data class ProviderProfile(
             ProviderKind.GEMINI -> GeminiBackend(base, model, apiKey, system, agentTools, approver)
             ProviderKind.OLLAMA -> OllamaBackend(base, model, system, agentTools, approver)
             ProviderKind.A2A -> throw UnsupportedOperationException("A2A agents need the ai-elements-a2a module: A2aBackend(A2aAgent(\"$baseUrl\"))")
+            ProviderKind.ACP -> throw UnsupportedOperationException("ACP agents need the ai-elements-acp module: AcpBackend(AcpAgent.webSocket(\"$baseUrl\"))")
         }
     }
 
@@ -135,6 +142,8 @@ data class ProviderProfile(
                 client.getJson("$base/v1/models", mapOf("x-api-key" to apiKey, "anthropic-version" to "2023-06-01")),
             )
             ProviderKind.A2A -> listOfNotNull(client.getJson("$base/.well-known/agent-card.json")["name"]?.jsonPrimitive?.contentOrNull)
+            // The agent names itself in ACP `initialize`, which needs ai-elements-acp.
+            ProviderKind.ACP -> emptyList()
         }.sorted()
     }
 
@@ -162,6 +171,7 @@ data class ProviderProfile(
             ProviderProfile("gemini", "Google Gemini", ProviderKind.GEMINI, "https://generativelanguage.googleapis.com", "gemini-2.5-flash", builtIn = true),
             ProviderProfile("openrouter", "OpenRouter", ProviderKind.OPENAI, "https://openrouter.ai/api/v1", "openai/gpt-5", builtIn = true),
             ProviderProfile("a2a-research", "Research agent · A2A", ProviderKind.A2A, "http://10.0.2.2:8788", "", builtIn = true),
+            ProviderProfile("acp-agent", "PydanticAI · ACP", ProviderKind.ACP, "ws://10.0.2.2:8788/acp", "", builtIn = true),
         )
     }
 }

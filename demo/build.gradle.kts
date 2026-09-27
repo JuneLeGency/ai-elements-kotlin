@@ -80,6 +80,7 @@ dependencies {
     implementation(project(":ai-elements-mcp-apps"))
     implementation(project(":ai-elements-mermaid-native"))
     implementation(project(":ai-elements-a2a"))
+    implementation(project(":ai-elements-acp"))
     implementation(project(":harness:harness-core"))
     implementation(project(":harness:harness-filesystem"))
     implementation(project(":harness:harness-memory"))
