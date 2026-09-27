@@ -48,6 +48,14 @@ Rules:
    implementation (official SDK or reference server), plus a live test when a public
    endpoint or the local server can exercise it.
 
+### Artifact layering
+
+`ai-elements-chat` (packages `model`, `chat`: models, `ChatEvent`, `ChatBackend`, `ChatController`; no
+networking, no Compose) ← `ai-elements-core` (protocols, providers, agent, MCP, skills, auth) and
+`ai-elements-ui` (Compose elements; depends on `ai-elements-chat` **only**) ← optional artifacts
+(`ai-elements-a2a`, `ai-elements-koog`, `harness/*`). A new protocol is a `ChatBackend` in core or in
+its own artifact; it never needs a UI change.
+
 ### Package layering (ai-elements-core)
 
 `chat` (controller, events, reducer) · `model` · `protocol.aisdk` / `protocol.agui` · `provider.*`

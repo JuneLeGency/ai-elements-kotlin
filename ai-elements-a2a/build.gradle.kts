@@ -20,6 +20,11 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
+    // The A2A Java SDK's jars each carry these; only matters for this module's own test APK.
+    packaging {
+        resources.excludes += listOf("META-INF/NOTICE.md", "META-INF/LICENSE.md", "META-INF/INDEX.LIST", "META-INF/DEPENDENCIES", "META-INF/beans.xml")
+    }
+
     testOptions.unitTests.all { test ->
         (findProperty("liveA2a") as String?)?.let { test.systemProperty("live.a2a", it) }
         test.testLogging { showStandardStreams = true }

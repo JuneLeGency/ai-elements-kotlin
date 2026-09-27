@@ -41,7 +41,8 @@ flowchart TD
 ```kotlin
 dependencies {
     implementation(platform("io.github.junelegency:ai-elements-bom:0.3.0-SNAPSHOT"))
-    implementation("io.github.junelegency:ai-elements-ui")          // elements + ai-elements-core
+    implementation("io.github.junelegency:ai-elements-ui")          // elements (protocol-independent)
+    implementation("io.github.junelegency:ai-elements-core")        // AI SDK / AG-UI / model-API backends, agent loop, MCP
     // Optional, as needed:
     implementation("io.github.junelegency:ai-elements-a2a")         // A2A agents (official a2a-java-sdk)
     implementation("io.github.junelegency:ai-elements-koog")        // JetBrains Koog as the agent runtime
@@ -55,8 +56,9 @@ dependencies {
 
 | Artifact | What it is | minSdk |
 |---|---|---|
-| `ai-elements-core` | Chat model (≈ AI SDK `UIMessage`), `ChatController` (≈ `useChat`), protocol clients, model APIs, agent loop, `SubAgents`, `Skills`, MCP, OAuth. No Compose. | 24 |
-| `ai-elements-ui` | The Compose elements and `AiElementsTheme`. | 24 |
+| `ai-elements-chat` | The protocol-independent layer: chat model (≈ AI SDK `UIMessage`), `ChatEvent`, `ChatBackend`, `ChatController` (≈ `useChat`). No networking, no Compose. | 24 |
+| `ai-elements-core` | Protocol clients (AI SDK, AG-UI), model APIs, agent loop, `SubAgents`, `Skills`, MCP, OAuth — each a `ChatBackend` or capability on top of `ai-elements-chat`. No Compose. | 24 |
+| `ai-elements-ui` | The Compose elements and `AiElementsTheme`; depends on `ai-elements-chat` only, so it renders any backend — including your own `ChatBackend`. | 24 |
 | `ai-elements-a2a` | A2A 1.0 on the official Java SDK: remote agents as providers or sub-agents. Needs core library desugaring. | 26 |
 | `ai-elements-koog` | A JetBrains Koog agent as a `ChatBackend` or harness model binding (`KoogBackend`); AI Elements tools as Koog tools. | 26 |
 | `ai-elements-mermaid-native` | Mermaid drawn with Compose Canvas instead of a WebView (experimental). | 24 |

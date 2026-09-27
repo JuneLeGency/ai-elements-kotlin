@@ -22,6 +22,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "ai-elements-kotlin"
 
+include(":ai-elements-chat")
 include(":ai-elements-core")
 include(":ai-elements-ui")
 include(":ai-elements-mermaid-native")

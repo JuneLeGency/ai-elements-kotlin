@@ -31,6 +31,7 @@ android {
 }
 
 dependencies {
+    api(project(":ai-elements-chat"))
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.serialization.json)
     api(libs.okhttp)

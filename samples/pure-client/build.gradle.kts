@@ -27,8 +27,9 @@ android {
 }
 
 dependencies {
-    // In your app: implementation(platform("io.github.junelegency:ai-elements-bom:<version>")) + implementation("io.github.junelegency:ai-elements-ui")
+    // In your app: the BOM plus ai-elements-ui (the elements) and ai-elements-core (the AG-UI / AI SDK backends).
     implementation(project(":ai-elements-ui"))
+    implementation(project(":ai-elements-core"))
     implementation(libs.activity.compose)
     implementation(libs.lifecycle.viewmodel.compose)
 }

@@ -29,7 +29,8 @@ composeCompiler {
 }
 
 dependencies {
-    api(project(":ai-elements-core"))
+    // Protocol-independent: the models and ChatController only, not the protocols or transports.
+    api(project(":ai-elements-chat"))
 
     api(libs.compose.ui)
     api(libs.compose.foundation)
@@ -46,6 +47,7 @@ dependencies {
 
     testImplementation(libs.junit)
 
+    androidTestImplementation(project(":ai-elements-core")) // offline MockAgentBackend in component tests
     androidTestImplementation(libs.junit.ext)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.compose.ui.test.junit4)
