@@ -147,6 +147,7 @@ private fun InAppAgentItems(viewModel: ChatViewModel, settings: dev.ai.elements.
     val sandbox by viewModel.runtime.sandbox.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     SectionHeader(stringResource(R.string.cap_in_app))
+    CapabilitySwitch(Icons.Outlined.Hub, R.string.cap_koog, stringResource(R.string.cap_koog_desc), settings.koogRuntime, "cap-koog") { on -> viewModel.agents.update { it.copy(koogRuntime = on) } }
     CapabilitySwitch(Icons.Outlined.FolderOpen, R.string.cap_workspace, stringResource(R.string.cap_workspace_desc), settings.workspaceFiles, "cap-workspace") { on -> viewModel.agents.update { it.copy(workspaceFiles = on) } }
     if (settings.workspaceFiles) SharedFolderItems(viewModel.runtime.sharedFolders)
     CapabilitySwitch(

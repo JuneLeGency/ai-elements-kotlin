@@ -36,6 +36,8 @@ data class RemoteAgentDef(
 @Serializable
 data class CapabilitySettings(
     val builtinTools: Boolean = true,
+    /** Run the in-app agent on JetBrains Koog (ai-elements-koog) instead of the built-in loop. */
+    val koogRuntime: Boolean = false,
     /** In-app harness: workspace files, a Linux sandbox shell, persistent memory and task planning. */
     val workspaceFiles: Boolean = true,
     val sandboxShell: Boolean = true,

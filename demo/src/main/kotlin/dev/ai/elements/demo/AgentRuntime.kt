@@ -104,10 +104,12 @@ class AgentRuntime(
         }
     }
 
-    private fun modelOf(profile: ProviderProfile): ModelBinding =
-        if (profile.kind == ProviderKind.A2A) ModelBinding { _, _, _ -> A2aBackend(a2aAgent(profile.baseUrl)) }
-        else if (profile.usesTokens) profile.model(tokens = providers.tokenSource(profile))
-        else profile.model(apiKey = providers.apiKey(profile.id))
+    private fun modelOf(profile: ProviderProfile): ModelBinding = when {
+        profile.kind == ProviderKind.A2A -> ModelBinding { _, _, _ -> A2aBackend(a2aAgent(profile.baseUrl)) }
+        profile.usesTokens -> profile.model(tokens = providers.tokenSource(profile))
+        agents.settings.value.koogRuntime -> profile.koogModel(providers.apiKey(profile.id)) ?: profile.model(apiKey = providers.apiKey(profile.id))
+        else -> profile.model(apiKey = providers.apiKey(profile.id))
+    }
 
     /** [serverSide]: only what the device alone can do (app tools, MCP); servers have their own clock, calculator and skills. */
     private fun capabilities(serverSide: Boolean): List<Capability> {

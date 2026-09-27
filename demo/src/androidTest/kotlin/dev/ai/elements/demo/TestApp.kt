@@ -22,3 +22,13 @@ fun resetDemoApp(profile: ProviderProfile? = null): DemoApplication {
     }
     return app
 }
+
+/** Only the built-in tools (no harness capabilities, skills, MCP or agents): small prompts for small local models. */
+fun DemoApplication.leanAgent(koog: Boolean = false) = agents.update {
+    CapabilitySettings(
+        koogRuntime = koog,
+        workspaceFiles = false, sandboxShell = false, memory = false, planning = false, webBrowser = false,
+        deviceTools = false, speech = false, scheduledTasks = false, skillsEnabled = false, mcpEnabled = false,
+        subAgents = emptyList(), remoteAgents = emptyList(),
+    )
+}

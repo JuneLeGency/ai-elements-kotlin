@@ -211,4 +211,6 @@
     <string name="schedule_every">每 %1$d 分钟</string>
     <string name="schedule_cancel">取消</string>
     <string name="folders_add">添加文件夹</string>
+    <string name="cap_koog">使用 JetBrains Koog 运行</string>
+    <string name="cap_koog_desc">由 Koog 驱动智能体循环（OpenAI、Anthropic、Ollama 提供方）；关闭则使用内置循环</string>
 </resources>

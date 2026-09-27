@@ -53,7 +53,7 @@ UI = this library.
 | FileSystem | `read_file`, `write_file`, `edit_file`, `list_directory`, `search_files`, `find_files`, `create_directory`, `file_info` | ⬜ harness module |
 | Shell | `run_command`, `start_command`, `check_command`, `stop_command` | ⬜ harness + sandbox |
 | Memory | `write_memory`, `read_memory`, `delete_memory`, `search_memory` | ⬜ harness module |
-| Koog adapter | Koog agent → `ChatBackend`; capabilities → Koog tools | ✅ `ai-elements-koog` (`KoogBackend`, `KoogTool`, JSON Schema → Koog descriptors) on Koog 1.3.0; tests on Koog's mock executor (tool events, approval); demo runtime switch ⬜ |
+| Koog adapter | Koog agent → `ChatBackend`; capabilities → Koog tools | ✅ `ai-elements-koog` (`KoogBackend`, `KoogTool`, JSON Schema → Koog descriptors) on Koog 1.3.0; tests on Koog's mock executor (tool events, approval); demo "Run on JetBrains Koog" switch (Koog OpenAI / Anthropic / Ollama clients on Ktor OkHttp) ✅; real-model E2E written (opt-in `-e ollama`), not yet green: local Ollama is CPU-only (~0.3 tok/s) |
 | (Planning, FileSystem, Shell, Memory move to the harness group, W2b) | | |
 
 ### W2b · In-app harness (group `io.github.junelegency.harness`)
@@ -134,6 +134,7 @@ The demo is a showcase of both modes, switchable per conversation:
 | 2026-09-27 | A2A: official `a2a-java-sdk` in an optional module | Official A2A 1.0 SDK; heavy dependencies stay optional |
 | 2026-09-27 | AG-UI: official `kotlin-core` types + upstream contribution | Official SDK, fill the gaps upstream |
 | 2026-09-27 | Koog via an adapter module | Koog is the Kotlin agent runtime; we are the UI layer |
+| 2026-09-27 | Koog runs as a harness model binding (`KoogBackend`) | Koog drives the same capabilities; tool calls reuse core's `runTool`, so approvals and progress look identical. Next candidate: Koog's LiteRT client for on-device models |
 | 2026-09-27 | OpenMinis (GPL-3.0): ideas only, no code; sandbox uses upstream proot as a separate process | Licence compatibility with Apache-2.0 |
 | 2026-09-27 | In-app harness is its own Maven group `io.github.junelegency.harness`, one artifact per capability, covering OpenMinis' capability set | User requirement; apps pick only what they need |
 | 2026-09-27 | AG-UI: official `kotlin-core` 0.4.1 typed events; 1.0 gaps (SUBAGENT_*, subagentRunId, RUN_FINISHED.usage / pendingToolCallIds, array tool results) read from raw JSON until upstream | Official SDK first |

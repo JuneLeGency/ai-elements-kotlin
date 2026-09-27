@@ -211,4 +211,6 @@
     <string name="schedule_every">%1$d 分ごと</string>
     <string name="schedule_cancel">キャンセル</string>
     <string name="folders_add">フォルダを追加</string>
+    <string name="cap_koog">JetBrains Koog で実行</string>
+    <string name="cap_koog_desc">Koog がエージェントループを実行（OpenAI・Anthropic・Ollama）。オフでは内蔵ループ</string>
 </resources>

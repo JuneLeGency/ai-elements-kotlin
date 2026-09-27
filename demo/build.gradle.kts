@@ -87,6 +87,12 @@ dependencies {
     implementation(project(":harness:harness-device"))
     implementation(project(":harness:harness-speech"))
     implementation(project(":harness:harness-scheduler"))
+    implementation(project(":ai-elements-koog"))
+    implementation(libs.koog.client.openai)
+    implementation(libs.koog.client.anthropic)
+    implementation(libs.koog.client.ollama)
+    implementation(libs.koog.http.ktor)
+    implementation(libs.ktor.client.okhttp)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(libs.activity.compose)

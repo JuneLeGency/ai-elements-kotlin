@@ -32,8 +32,8 @@ import java.net.URL
  * provider, launches the app, sends a prompt and waits for the agent run.
  *
  * Live tests use the host through the emulator alias and skip when it is not
- * reachable. Override with instrumentation args, e.g.
- * `-Pandroid.testInstrumentationRunnerArguments.ollama=http://10.0.2.2:11435`.
+ * reachable. Real-model Ollama tests (built-in loop and Koog) are opt-in:
+ * `-Pandroid.testInstrumentationRunnerArguments.ollama=http://10.0.2.2:11434`.
  */
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -44,7 +44,8 @@ class AgentFlowTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val args = InstrumentationRegistry.getArguments()
-    private val ollama = args.getString("ollama") ?: "http://10.0.2.2:11434"
+    /** Opt-in: pass `ollama` (e.g. http://10.0.2.2:11434) to run the real-model tests; small local models can be very slow. */
+    private val ollama = args.getString("ollama").orEmpty()
     private val agentServer = args.getString("agentServer") ?: "http://10.0.2.2:8788"
     private var scenario: ActivityScenario<MainActivity>? = null
 
@@ -103,13 +104,34 @@ class AgentFlowTest {
 
     @Test
     fun realModel_ollamaNative_runsOnDeviceAgentLoop() {
+        assumeTrue("Pass -e ollama <url> to run real-model tests", ollama.isNotEmpty())
         assumeTrue("Ollama not reachable at $ollama", reachable("$ollama/api/tags"))
         assumeTrue("qwen3:4b is not pulled on $ollama", fetch("$ollama/api/tags").contains("\"qwen3:4b\""))
-        launchWith(ProviderProfile("live-ollama", "Live Ollama", ProviderKind.OLLAMA, ollama, "qwen3:4b"))
+        resetDemoApp(ProviderProfile("live-ollama", "Live Ollama", ProviderKind.OLLAMA, ollama, "qwen3:4b")).leanAgent()
+        scenario = ActivityScenario.launch(MainActivity::class.java)
         send("Use the calculate tool to compute 1234 * 5678.")
         awaitTurnEnd(240_000)
         scrollTo(hasTestTag("tool-calculate"))
         scrollTo(hasText("7,006,652", substring = true) or hasText("7006652", substring = true))
+    }
+
+    /** The same turn with JetBrains Koog driving the in-app agent (ai-elements-koog). */
+    @Test
+    fun realModel_ollama_onKoogRuntime() {
+        assumeTrue("Pass -e ollama <url> to run real-model tests", ollama.isNotEmpty())
+        assumeTrue("Ollama not reachable at $ollama", reachable("$ollama/api/tags"))
+        assumeTrue("qwen3:4b is not pulled on $ollama", fetch("$ollama/api/tags").contains("\"qwen3:4b\""))
+        resetDemoApp(ProviderProfile("live-ollama-koog", "Live Ollama (Koog)", ProviderKind.OLLAMA, ollama, "qwen3:4b"))
+            .leanAgent(koog = true)
+        try {
+            scenario = ActivityScenario.launch(MainActivity::class.java)
+            send("Use the calculate tool to compute 1234 * 5678.")
+            awaitTurnEnd(240_000)
+            scrollTo(hasTestTag("tool-calculate"))
+            scrollTo(hasText("7,006,652", substring = true) or hasText("7006652", substring = true))
+        } finally {
+            resetDemoApp()
+        }
     }
 
     @Test

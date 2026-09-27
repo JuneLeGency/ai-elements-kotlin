@@ -213,4 +213,6 @@
     <string name="schedule_every">every %1$d min</string>
     <string name="schedule_cancel">Cancel</string>
     <string name="folders_add">Add folder</string>
+    <string name="cap_koog">Run on JetBrains Koog</string>
+    <string name="cap_koog_desc">Koog drives the agent loop (OpenAI, Anthropic and Ollama providers); off: the built-in loop</string>
 </resources>
