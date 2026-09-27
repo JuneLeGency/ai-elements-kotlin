@@ -29,9 +29,12 @@ internal const val DENIED_RESULT = "The user denied this tool call. Do not retry
  * run) is streamed as [ChatEvent.ToolOutput] (preliminary) and
  * [ChatEvent.SubagentUpdate].
  *
+ * Public for agent runtimes that run their own loop and plug into AI Elements
+ * (e.g. `ai-elements-koog`), so tool calls look and behave the same everywhere.
+ *
  * @return the text fed back to the model.
  */
-internal suspend fun FlowCollector<ChatEvent>.runTool(
+suspend fun FlowCollector<ChatEvent>.runTool(
     tools: List<AgentTool>,
     approver: ToolApprover,
     id: String,

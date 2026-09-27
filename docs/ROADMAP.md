@@ -53,7 +53,7 @@ UI = this library.
 | FileSystem | `read_file`, `write_file`, `edit_file`, `list_directory`, `search_files`, `find_files`, `create_directory`, `file_info` | ⬜ harness module |
 | Shell | `run_command`, `start_command`, `check_command`, `stop_command` | ⬜ harness + sandbox |
 | Memory | `write_memory`, `read_memory`, `delete_memory`, `search_memory` | ⬜ harness module |
-| Koog adapter | Koog agent → `ChatBackend`; capabilities → Koog tools | ⬜ |
+| Koog adapter | Koog agent → `ChatBackend`; capabilities → Koog tools | ✅ `ai-elements-koog` (`KoogBackend`, `KoogTool`, JSON Schema → Koog descriptors) on Koog 1.3.0; tests on Koog's mock executor (tool events, approval); demo runtime switch ⬜ |
 | (Planning, FileSystem, Shell, Memory move to the harness group, W2b) | | |
 
 ### W2b · In-app harness (group `io.github.junelegency.harness`)

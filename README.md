@@ -44,6 +44,7 @@ dependencies {
     implementation("io.github.junelegency:ai-elements-ui")          // elements + ai-elements-core
     // Optional, as needed:
     implementation("io.github.junelegency:ai-elements-a2a")         // A2A agents (official a2a-java-sdk)
+    implementation("io.github.junelegency:ai-elements-koog")        // JetBrains Koog as the agent runtime
     implementation("io.github.junelegency.harness:harness-core")    // in-app agent
     implementation("io.github.junelegency.harness:harness-filesystem")
     implementation("io.github.junelegency.harness:harness-memory")
@@ -57,6 +58,7 @@ dependencies {
 | `ai-elements-core` | Chat model (≈ AI SDK `UIMessage`), `ChatController` (≈ `useChat`), protocol clients, model APIs, agent loop, `SubAgents`, `Skills`, MCP, OAuth. No Compose. | 24 |
 | `ai-elements-ui` | The Compose elements and `AiElementsTheme`. | 24 |
 | `ai-elements-a2a` | A2A 1.0 on the official Java SDK: remote agents as providers or sub-agents. Needs core library desugaring. | 26 |
+| `ai-elements-koog` | A JetBrains Koog agent as a `ChatBackend` or harness model binding (`KoogBackend`); AI Elements tools as Koog tools. | 26 |
 | `ai-elements-mermaid-native` | Mermaid drawn with Compose Canvas instead of a WebView (experimental). | 24 |
 | `ai-elements-bom` | Aligns the versions of everything here. | — |
 | `harness-core` | `AgentHarness`: a model + capabilities → a `ChatBackend`; local and remote sub-agents. | 24 |
