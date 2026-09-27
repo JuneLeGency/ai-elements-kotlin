@@ -166,4 +166,18 @@
     <string name="ai_skill">スキル</string>
     <string name="ai_tool_via">%1$s 経由</string>
     <string name="ai_skills_count">スキル（%1$d）</string>
+    <string name="ai_input_decline">断る</string>
+    <string name="ai_input_open_link">リンクを開く</string>
+    <string name="ai_input_done">完了</string>
+    <string name="ai_input_required">必須</string>
+    <string name="ai_input_invalid_number">数値を入力してください</string>
+    <string name="ai_input_min">%1$s 以上</string>
+    <string name="ai_input_max">%1$s 以下</string>
+    <string name="ai_input_from">%1$s からの質問</string>
+    <string name="ai_input_invalid_email">メールアドレスを入力してください</string>
+    <string name="ai_deny_with_reason">理由を添えて拒否</string>
+    <string name="ai_deny_reason">理由（エージェントに伝わります）</string>
+    <string name="ai_edit_and_approve">編集して許可</string>
+    <string name="ai_edit_arguments">引数（JSON）</string>
+    <string name="ai_invalid_json">JSON オブジェクトではありません</string>
 </resources>

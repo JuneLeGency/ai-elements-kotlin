@@ -11,6 +11,7 @@ import asyncio
 from mcp.server.fastmcp import Context, FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import ToolAnnotations
+from pydantic import BaseModel, Field
 
 mcp = FastMCP(
     "legacy-notes",
@@ -34,6 +35,20 @@ async def count_slowly(to: int, ctx: Context) -> str:
         await ctx.report_progress(i, to, f"Counted {i}")
         await asyncio.sleep(0.2)
     return f"Counted to {to}."
+
+
+class Confirmation(BaseModel):
+    confirm: bool = Field(description="Go ahead?")
+    note: str = Field(default="", description="Anything to add")
+
+
+@mcp.tool()
+async def confirm_action(action: str, ctx: Context) -> str:
+    """Ask the user to confirm an action (elicitation/create mid-call, 2025-xx sessions)."""
+    result = await ctx.elicit(f"Confirm: {action}?", Confirmation)
+    if result.action == "accept":
+        return f"{action}: {'confirmed' if result.data.confirm else 'not confirmed'}{(' — ' + result.data.note) if result.data.note else ''}"
+    return f"{action}: {result.action}"
 
 
 @mcp.tool()

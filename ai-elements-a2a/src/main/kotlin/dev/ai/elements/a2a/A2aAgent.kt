@@ -1,6 +1,11 @@
 package dev.ai.elements.a2a
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.async
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -43,6 +48,30 @@ class A2aAgent(
 
     /** The agent card (fetched once). */
     suspend fun card(): AgentCard = lock.withLock { card ?: fetchCard().also { card = it } }
+
+    // Card fetches that may outlive their caller: a blocking connect cannot be cancelled.
+    private val background = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    @Volatile private var pending: Deferred<AgentCard>? = null
+    @Volatile private var failedAt = Long.MIN_VALUE
+
+    /**
+     * The card if it arrives within [timeoutMs], else null — for listing agents at the start of a
+     * turn without waiting on one that is unreachable. The fetch keeps going in the background, so
+     * a slow agent's card is ready next time; an agent that failed is not asked again for
+     * [retryAfterMs]. Unlike wrapping [card] in a timeout, this returns on time even while the
+     * HTTP client is stuck in a blocking connect.
+     */
+    suspend fun cardOrNull(timeoutMs: Long = 5_000, retryAfterMs: Long = 60_000): AgentCard? {
+        card?.let { return it }
+        if (System.currentTimeMillis() - failedAt < retryAfterMs) return null
+        val fetch = synchronized(this) {
+            pending?.takeIf { it.isActive } ?: background.async { card() }.also { started ->
+                pending = started
+                started.invokeOnCompletion { error -> if (error != null) failedAt = System.currentTimeMillis() }
+            }
+        }
+        return withTimeoutOrNull(timeoutMs) { runCatching { fetch.await() }.getOrNull() }
+    }
 
     private suspend fun fetchCard(): AgentCard = withContext(Dispatchers.IO) {
         val builder = A2ACardResolver.builder().httpClient(httpClient)

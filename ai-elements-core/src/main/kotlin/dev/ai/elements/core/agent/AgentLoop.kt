@@ -24,7 +24,9 @@ internal const val DENIED_RESULT = "The user denied this tool call. Do not retry
 
 /**
  * Execute one tool call of an agent loop, emitting the tool events. Tools with
- * [AgentTool.requiresApproval] wait for [approver] first. While the tool runs,
+ * [AgentTool.requiresApproval] wait for [approver] first: a denial (with the
+ * user's reason) goes back to the model, edited arguments replace the proposed
+ * ones. While the tool runs,
  * what it reports through [ToolCallContext] (interim output, a nested agent
  * run) is streamed as [ChatEvent.ToolOutput] (preliminary) and
  * [ChatEvent.SubagentUpdate].
@@ -56,12 +58,17 @@ suspend fun FlowCollector<ChatEvent>.runTool(
     )
     return try {
         requireNotNull(tool) { "Unknown tool: $name" }
-        val arguments = args.getOrElse { throw IllegalArgumentException("Invalid JSON arguments: ${it.message}") }
+        var arguments = args.getOrElse { throw IllegalArgumentException("Invalid JSON arguments: ${it.message}") }
         if (tool.requiresApproval) {
             emit(ChatEvent.ToolApprovalRequest(id))
-            if (!approver.approve(id)) {
-                emit(ChatEvent.ToolDenied(id))
-                return DENIED_RESULT
+            val decision = approver.decide(id)
+            if (!decision.approved) {
+                emit(ChatEvent.ToolDenied(id, decision.reason))
+                return decision.reason?.let { "$DENIED_RESULT Reason: $it" } ?: DENIED_RESULT
+            }
+            decision.editedInput?.let { edited ->
+                arguments = edited
+                emit(ChatEvent.ToolInputAvailable(id, name, edited.toString(), title = tool.titleFor(edited), kind = tool.kindFor(edited), source = tool.source))
             }
             emit(ChatEvent.ToolApproved(id))
         }

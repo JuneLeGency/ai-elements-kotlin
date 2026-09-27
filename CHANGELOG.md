@@ -20,6 +20,25 @@
   `Agent` descriptions and skill lists (A2A cards).
 - `ai-elements-koog`: a JetBrains Koog agent as a `ChatBackend` (and as an `AgentHarness` model
   binding), with AI Elements tools as Koog tools; approvals and progress work as with the built-in loop.
+- Human in the loop beyond yes / no: `ToolApprover.decide` (`ToolDecision`: reason, edited
+  arguments) and `ToolApprover.input` (`InputRequest` → `InputResponse`), `ChatState.inputRequests`,
+  `ChatController.respondToInput`. AG-UI resumes with `{approved, reason, editedArgs}` and answers
+  interrupts that carry a `responseSchema`; AI SDK approvals carry `reason`; the on-device loop runs
+  edited arguments and tells the model why a call was denied. MCP elicitation on both eras
+  (`InputRequiredResult` retries with `inputResponses` / `requestState`; `elicitation/create` on
+  legacy streams), form and URL modes; `McpClient.callTool(onInput = …)`, and MCP tools ask through
+  the chat. UI: `InputRequestCard` / `SchemaForm` (text, formats, numbers with bounds, booleans,
+  single and multiple choice, required) and `Confirmation` with deny-with-reason and
+  edit-then-approve.
+- `McpClient.serverInfo` on 2026-07-28 servers (from the results' `_meta`).
+- `StickToBottom` follows with `requestScrollToItem` (applied by the next measure) instead of
+  `scrollToItem`, whose forced remeasure re-entered layout when pinning ran inside a layout pass
+  (seen on a tablet).
+- `A2aAgent.cardOrNull(timeoutMs)`: listing remote agents no longer blocks a turn on an
+  unreachable one (the blocking HTTP connect ignored the coroutine timeout; a physical device
+  waited ~16 s per turn on the emulator-only default agent); failures are not retried for a minute.
+- A2UI forms keep what the user entered while they scroll out of sight (sessions live in the
+  renderer, not in the lazy list item).
 - New artifact `ai-elements-mcp-apps`: an MCP Apps host (2026-01-26). `ui://` views run in a
   sandboxed WebView (per-server origin, CSP from `_meta.ui.csp` as a response header, message-port
   bridge, no file or permission access). The host answers `ui/initialize`, `tools/call` (app-visible

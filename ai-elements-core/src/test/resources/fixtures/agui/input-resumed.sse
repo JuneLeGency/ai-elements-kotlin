@@ -1,0 +1,10 @@
+data: {"type":"RUN_STARTED","threadId":"t","runId":"r2"}
+
+data: {"type":"TEXT_MESSAGE_START","messageId":"m2","role":"assistant"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","messageId":"m2","delta":"Planning 5 nights in Kyoto on a mid budget."}
+
+data: {"type":"TEXT_MESSAGE_END","messageId":"m2"}
+
+data: {"type":"RUN_FINISHED","threadId":"t","runId":"r2","outcome":{"type":"success"}}
+

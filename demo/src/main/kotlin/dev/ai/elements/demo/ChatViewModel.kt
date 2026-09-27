@@ -6,6 +6,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.ai.elements.core.chat.ChatController
 import dev.ai.elements.core.chat.ChatState
+import dev.ai.elements.core.chat.InputResponse
+import dev.ai.elements.core.chat.ToolDecision
 import dev.ai.elements.core.mcp.McpAuthRequiredException
 import dev.ai.elements.core.mcp.McpServerConfig
 import dev.ai.elements.core.mcp.McpServerStatus
@@ -73,6 +75,8 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun takeAppContext(): List<DataPart> = synchronized(appContext) { appContext.values.toList().also { appContext.clear() } }
     fun respondToApproval(toolCallId: String, approved: Boolean) = chat.respondToApproval(toolCallId, approved)
+    fun respondToDecision(toolCallId: String, decision: ToolDecision) = chat.respondToApproval(toolCallId, decision)
+    fun respondToInput(requestId: String, response: InputResponse) = chat.respondToInput(requestId, response)
 
     /** A user's action on an agent-sent A2UI surface, back to the agent over the provider's protocol. */
     fun sendA2uiAction(action: dev.ai.elements.genui.a2ui.A2uiAction): Boolean = chat.send(action)

@@ -42,6 +42,19 @@ UI = this library.
 | MCP 2026-07-28 stateless + legacy session fallback, `Mcp-Method` / `Mcp-Name` / `x-mcp-header`, progress, OAuth discovery (RFC 9728 / 8414 / 7591 / 8707) | hand-written (official Kotlin SDK stops at 2025-11-25); switch when it ships 2026-07-28 | ✅ live vs official `mcp` 2.2 (stateless) and `mcp` 1.x (legacy fallback) + unit tests; OAuth ✅ live against the official `mcp` SDK OAuth server (`server/mcp_auth_server.py`: 401 → RFC 9728 → RFC 8414 → RFC 7591 → code + PKCE S256 + RFC 8707 → token → call → refresh) |
 | A2A 1.0 (0.3 compatible) as provider and as sub-agent | official `a2a-java-sdk` + its Android HTTP client | ✅ live 3/3 against the official Python `a2a-sdk` |
 
+### W1b · Human in the loop
+
+One neutral model (`ToolApprover.decide` / `input`, `ToolDecision`, `InputRequest` / `InputResponse`,
+`ChatState.inputRequests`) behind every protocol's approval and "ask the user" mechanism; the UI
+(`Confirmation`, `InputRequestCard` / `SchemaForm`) never knows which protocol asked.
+
+| Item | Spec | Status |
+|---|---|---|
+| Approve / deny tool calls | AI SDK 6 tool approval, AG-UI interrupts, on-device `requiresApproval`, MCP apps | ✅ (since W1) |
+| Deny with a reason, edit arguments before approving | AG-UI approve-with-edits resume payload `{approved, editedArgs, reason}` (as Pydantic AI advertises it); AI SDK 6 `approval.reason`; on-device loop | ✅ fixtures (`RecordedProtocolTest`), unit (`HumanInTheLoopTest`), UI (`ElementsTest`), E2E on the reference server (`agUi_interrupt_editArgumentsBeforeApproving`, `aiSdk_approval_denyWithAReason`) |
+| Agent asks the user (form from a JSON Schema, URL, confirmation) | AG-UI interrupts with `responseSchema` (resume `resolved` + payload / `cancelled`, `expiresAt`) | ✅ fixtures from the official `ag_ui` encoder |
+| MCP elicitation (form and URL modes) | 2026-07-28 `InputRequiredResult` (SEP-2322: `inputResponses` + `requestState`, up to 10 rounds); 2025-xx `elicitation/create` on the session stream | ✅ fixtures + live on both eras (official `mcp` 2.x and 1.x SDKs); E2E: on-device agent → MCP `book_table`, edited approval, then the elicitation form |
+
 ### W2 · Agent capabilities (Harness parity)
 
 | Capability | Contract (same as Pydantic AI Harness) | Status |

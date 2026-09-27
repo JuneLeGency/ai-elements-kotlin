@@ -28,6 +28,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import dev.ai.elements.core.chat.InputResponse
+import dev.ai.elements.core.chat.ToolDecision
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -72,7 +75,11 @@ fun Conversation(
     onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)? = null,
     onSelectVersion: ((messageId: String, index: Int) -> Unit)? = null,
     onRestoreCheckpoint: ((messageId: String) -> Unit)? = null,
-) {
+    /** Richer answers to approvals — a reason, edited arguments; shown when set. */
+    onToolDecision: ((toolCallId: String, decision: ToolDecision) -> Unit)? = null,
+    /** Answers [ChatState.inputRequests], shown as [InputRequestCard]s after the last message. */
+    onInputResponse: ((requestId: String, response: InputResponse) -> Unit)? = null,
+) = CompositionLocalProvider(LocalToolDecision provides onToolDecision) {
     val scope = rememberCoroutineScope()
     val stick = rememberStickToBottomState(listState)
     // The prompt each reply answers, for "Open in…".
@@ -146,6 +153,17 @@ fun Conversation(
                     ) {
                         AssistantAvatar(active = true)
                         LoadingIndicator(Modifier.size(36.dp))
+                    }
+                }
+            }
+            if (onInputResponse != null) {
+                state.inputRequests.forEach { request ->
+                    item(key = "input-${request.id}", contentType = "input-request") {
+                        InputRequestCard(
+                            request,
+                            onRespond = { onInputResponse(request.id, it) },
+                            modifier = Modifier.padding(top = AiSpacing.l).widthIn(max = maxContentWidth),
+                        )
                     }
                 }
             }

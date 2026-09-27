@@ -32,3 +32,13 @@ fun DemoApplication.leanAgent(koog: Boolean = false) = agents.update {
         subAgents = emptyList(), remoteAgents = emptyList(),
     )
 }
+
+/**
+ * Close the soft keyboard and clear focus. On tablets a (floating, split) keyboard re-lays out the
+ * screen, so a button found before it opened may have moved by the time it is tapped.
+ */
+fun androidx.test.core.app.ActivityScenario<MainActivity>.hideKeyboard() = onActivity { activity ->
+    activity.currentFocus?.clearFocus()
+    activity.getSystemService(android.view.inputmethod.InputMethodManager::class.java)
+        .hideSoftInputFromWindow(activity.window.decorView.windowToken, 0)
+}

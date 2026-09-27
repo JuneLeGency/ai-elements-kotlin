@@ -10,6 +10,9 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
+/** Answers a server's question to the user (MCP elicitation) with the user's response. */
+typealias McpInputHandler = suspend (dev.ai.elements.core.chat.InputRequest) -> dev.ai.elements.core.chat.InputResponse
+
 /** Name and version of an MCP client or server (`Implementation`). */
 data class McpImplementation(val name: String, val version: String, val title: String? = null)
 

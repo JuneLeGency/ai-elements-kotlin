@@ -1,0 +1,61 @@
+{
+ "jsonrpc": "2.0",
+ "id": 1,
+ "result": {
+  "inputRequests": {
+   "mcp_server:_ask_table": {
+    "method": "elicitation/create",
+    "params": {
+     "message": "Booking a table at Sora: how many people, and when?",
+     "mode": "form",
+     "requestedSchema": {
+      "properties": {
+       "party_size": {
+        "description": "How many people",
+        "maximum": 12,
+        "minimum": 1,
+        "title": "Party Size",
+        "type": "integer"
+       },
+       "time": {
+        "description": "Arrival time, e.g. 19:30",
+        "title": "Time",
+        "type": "string"
+       },
+       "seating": {
+        "default": "indoor",
+        "description": "Where to sit",
+        "enum": [
+         "indoor",
+         "outdoor"
+        ],
+        "title": "Seating",
+        "type": "string"
+       },
+       "remind_me": {
+        "default": true,
+        "description": "Send a reminder an hour before",
+        "title": "Remind Me",
+        "type": "boolean"
+       }
+      },
+      "required": [
+       "party_size",
+       "time"
+      ],
+      "type": "object"
+     }
+    }
+   }
+  },
+  "requestState": "v1.mLjcvXnb79SDaDj3o98ofnLQifbv9NrSd1O5Az2QT7s3TqdVhulN48AlcprAIVQl_aGFC_aI4fPVWyzkALFfIfWDPXPhlQLtoGKGrAGQ_ZygMoI72tGwvRosc6VMulr5s4MyM8iUT6AQlUrrBe1rVrK9SATHwVgiuwW9Gn4ZGb6HsHGja_qR3cPTOvrFkNND07cJnihPlUTkjHxiEiEtqOP1QTcQGhdez5HHJqqH0xqF63iW9WeIU_dHXRyErTQWLwSuQwcj5Fw519IuGPcWeczsGjyHwxrD81g8jqnlTeCo1-qOUjEFVfWZW-qNcXcA64XIXeekneqZaczzD-xm5OMN7CPkQkiN6bSvAnwwtaWpzu8",
+  "resultType": "input_required",
+  "_meta": {
+   "io.modelcontextprotocol/serverInfo": {
+    "name": "ai-elements-notes",
+    "title": "AI Elements notes",
+    "version": "0.3.0"
+   }
+  }
+ }
+}

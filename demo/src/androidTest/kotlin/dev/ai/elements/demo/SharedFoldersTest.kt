@@ -23,6 +23,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
@@ -55,6 +56,13 @@ class SharedFoldersTest {
 
     @Test
     fun pickedFolder_isMountedForTheFileTools() = runBlocking<Unit> {
+        // It drives the system folder picker over shared storage: on a personal device only when asked
+        // (`-e deviceData true`); pickers also differ between vendors.
+        assumeTrue(
+            "shared-storage test: pass -e deviceData true to run it on a physical device",
+            android.os.Build.FINGERPRINT.contains("generic") || android.os.Build.HARDWARE.contains("ranchu") ||
+                InstrumentationRegistry.getArguments().getString("deviceData") == "true",
+        )
         shell("mkdir -p /sdcard/Documents/agent-share/notes")
         shell("echo buy milk > /sdcard/Documents/agent-share/notes/todo.txt")
 

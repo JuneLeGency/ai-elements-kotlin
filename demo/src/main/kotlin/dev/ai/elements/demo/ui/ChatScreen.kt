@@ -290,6 +290,8 @@ private fun ChatPane(
                         onRegenerate = viewModel::regenerate,
                         onDismissError = viewModel::dismissError,
                         onToolApproval = viewModel::respondToApproval,
+                        onToolDecision = viewModel::respondToDecision,
+                        onInputResponse = viewModel::respondToInput,
                         onSelectVersion = viewModel::selectVersion,
                         onRestoreCheckpoint = viewModel::restoreCheckpoint,
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),

@@ -137,7 +137,8 @@ class AgentRuntime(
     /** Enabled remote A2A agents, described by their cards; unreachable ones are skipped. */
     private suspend fun remoteAgents() = coroutineScope {
         agents.settings.value.remoteAgents.filter { it.enabled }.map { def ->
-            async { withTimeoutOrNull(5_000) { runCatching { a2aAgent(def.url).let { it.asSubAgent(it.card()) } }.getOrNull() } }
+            // At most 5 s per agent, even when one is unreachable (its fetch goes on in the background).
+            async { a2aAgent(def.url).let { agent -> agent.cardOrNull(timeoutMs = 5_000)?.let { agent.asSubAgent(it) } } }
         }.awaitAll().filterNotNull()
     }
 }

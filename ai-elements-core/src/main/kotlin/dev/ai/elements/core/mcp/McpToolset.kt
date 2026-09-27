@@ -50,7 +50,8 @@ data class McpServerConfig(
  * One MCP tool as an [AgentTool]. The model sees `<server>__<tool>` (unique
  * across servers, within the 64-character limit), the UI the tool's title and
  * server name. Progress notifications stream as preliminary output; results
- * the server flags `isError` become tool errors.
+ * the server flags `isError` become tool errors; questions the server asks the
+ * user (elicitation) go to the chat's [dev.ai.elements.core.chat.ToolApprover.input].
  */
 class McpAgentTool(
     private val client: McpClient,
@@ -75,10 +76,15 @@ class McpAgentTool(
         // MCP Apps: the view shows with the input while the tool runs, then gets its result.
         val app = tool.uiResourceUri?.let { uri -> context?.let { McpAppPart(it, uri, arguments) } }
         app?.publish(null)
-        val result = client.callTool(tool, arguments) { p ->
-            val percent = p.fraction?.let { " ${(it * 100).toInt()}%" }.orEmpty()
-            context?.progress(listOfNotNull(p.message, percent.trim().ifEmpty { null }).joinToString(" ").ifEmpty { "…" })
-        }
+        val result = client.callTool(
+            tool, arguments,
+            onProgress = { p ->
+                val percent = p.fraction?.let { " ${(it * 100).toInt()}%" }.orEmpty()
+                context?.progress(listOfNotNull(p.message, percent.trim().ifEmpty { null }).joinToString(" ").ifEmpty { "…" })
+            },
+            // Elicitation: the server's questions go to the chat's human in the loop.
+            onInput = context?.approver?.let { human -> { request -> human.input(request.copy(id = "${context.toolCallId}:${request.id}", source = server.name)) } },
+        )
         app?.publish(result)
         val text = result.toText()
         if (result.isError) throw McpException(text.ifBlank { "${tool.name} failed" })

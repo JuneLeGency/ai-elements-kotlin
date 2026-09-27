@@ -21,7 +21,8 @@ import dev.ai.elements.core.agent.runTool
  * An offline agent that exercises every part type — reasoning, a real tool call
  * (executed through [tools]), sources, and a Markdown answer with a table, code
  * and a Mermaid diagram — so the full UI can be demoed without a network.
- * Naming a tool in the prompt (e.g. `notes__show_notes_board`) calls it with no arguments.
+ * Naming a tool in the prompt (e.g. `notes__show_notes_board`) calls it; a JSON object after the
+ * name is its arguments (`notes__book_table {"restaurant": "Sora"}`).
  *
  * @param chunkDelayMs pause between streamed chunks; 0 in tests.
  */
@@ -77,7 +78,11 @@ class MockAgentBackend(
 
         val callId = "call_${UUID.randomUUID()}"
         val (toolName, args) = when {
-            named != null -> named.name to "{}"
+            named != null -> named.name to prompt.substringAfter(named.name).let { rest ->
+                val start = rest.indexOf('{')
+                val end = rest.lastIndexOf('}')
+                if (start >= 0 && end > start) rest.substring(start, end + 1) else "{}"
+            }
             wantsCopy -> "copy_to_clipboard" to """{"text": "Hello from the AI Elements agent"}"""
             math != null -> "calculate" to """{"expression": "${math.replace("\"", "")}"}"""
             else -> "get_current_time" to """{"timezone": "Asia/Shanghai"}"""

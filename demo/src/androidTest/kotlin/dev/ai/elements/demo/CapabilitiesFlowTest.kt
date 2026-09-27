@@ -20,6 +20,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import dev.ai.elements.core.config.ProviderKind
 import dev.ai.elements.core.config.ProviderProfile
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
@@ -84,6 +85,39 @@ class CapabilitiesFlowTest {
         compose.onNodeWithTag("conversation").performScrollToNode(hasText("Saved note", substring = true))
     }
 
+    /** AG-UI approve-with-edits: the server (Pydantic AI) runs the call with the arguments the user edited. */
+    @Test
+    fun agUi_interrupt_editArgumentsBeforeApproving() {
+        launchWith(ProviderKind.AG_UI)
+        send("save a note")
+        compose.waitUntil(60_000) { compose.onAllNodesWithTag("edit-and-approve", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("edit-and-approve", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("edit-arguments").performTextReplacement("""{"title":"Edited in the app","content":"From the approval card"}""")
+        scenario!!.hideKeyboard()
+        compose.waitForIdle()
+        compose.onNodeWithTag("edit-and-approve-send", useUnmergedTree = true).performClick()
+        compose.waitUntil(60_000) {
+            runCatching { compose.onNodeWithTag("conversation").performScrollToNode(hasText("Saved note “Edited in the app”", substring = true)) }.isSuccess
+        }
+    }
+
+    /** AI SDK 6 approval with a reason: the call is denied and the reason is kept with it. */
+    @Test
+    fun aiSdk_approval_denyWithAReason() {
+        launchWith(ProviderKind.AGENT_SERVER)
+        send("save a note")
+        compose.waitUntil(60_000) { compose.onAllNodesWithTag("deny-with-reason", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("deny-with-reason", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("deny-reason").performTextInput("Not today")
+        scenario!!.hideKeyboard()
+        compose.waitForIdle()
+        compose.onNodeWithTag("deny-with-reason-send", useUnmergedTree = true).performClick()
+        compose.awaitTurnEnd(60_000)
+        val saved = java.io.File(context.filesDir, "conversations.json")
+        compose.waitUntil(10_000) { saved.exists() && saved.readText().contains("Not today") }
+        assertTrue(saved.readText().contains("OUTPUT_DENIED"))
+    }
+
     @Test
     fun aiSdk_skillLoad_andPlan() {
         launchWith(ProviderKind.AGENT_SERVER)
@@ -102,6 +136,10 @@ class CapabilitiesFlowTest {
         compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("a2ui-book"))
         compose.onNodeWithTag("a2ui-book").assertIsNotEnabled() // the guest name is required
         compose.onNodeWithTag("a2ui-guest").performTextReplacement("Jane")
+        // Close the keyboard first: on a tablet it re-lays out the screen and would move the button.
+        scenario!!.hideKeyboard()
+        compose.waitForIdle()
+        compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("a2ui-book"))
         compose.onNodeWithTag("a2ui-book").assertIsEnabled().performClick()
         // The action's userMessage becomes the user's turn; wait for the agent's tool call on it
         // (an earlier turn's actions row would satisfy awaitTurnEnd too early).

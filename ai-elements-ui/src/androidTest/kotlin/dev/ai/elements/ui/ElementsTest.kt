@@ -22,6 +22,17 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
+import dev.ai.elements.core.chat.ChatState
+import dev.ai.elements.core.chat.InputRequest
+import dev.ai.elements.core.chat.InputResponse
+import dev.ai.elements.core.chat.ToolDecision
+import dev.ai.elements.core.model.Message
+import dev.ai.elements.core.model.Role
+import dev.ai.elements.ui.chat.Conversation
+import dev.ai.elements.ui.chat.InputRequestCard
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.ai.elements.core.model.ToolKind
@@ -40,8 +51,6 @@ import dev.ai.elements.ui.chat.QuestionAnswer
 import dev.ai.elements.ui.chat.QuestionOption
 import dev.ai.elements.ui.chat.ToolCall
 import dev.ai.elements.ui.chat.ToolPartView
-import dev.ai.elements.core.model.Message
-import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.ui.code.EnvironmentVariable
 import dev.ai.elements.ui.code.EnvironmentVariables
@@ -202,6 +211,64 @@ class ElementsTest {
         compose.onNodeWithTag("approve", useUnmergedTree = true).performClick()
         compose.onNodeWithTag("deny", useUnmergedTree = true).performClick()
         assertEquals(listOf(true, false), decisions)
+    }
+
+    @Test fun inputRequest_schemaForm_validatesAndSubmitsTypedJson() {
+        val schema = Json.parseToJsonElement(
+            """{"type":"object","required":["party_size","time"],"properties":{
+            "party_size":{"type":"integer","minimum":1,"maximum":12,"title":"Party Size"},
+            "time":{"type":"string","title":"Time"},
+            "seating":{"type":"string","enum":["indoor","outdoor"],"default":"indoor","title":"Seating"},
+            "remind_me":{"type":"boolean","default":true,"title":"Remind Me"}}}""",
+        ).jsonObject
+        val answers = mutableListOf<InputResponse>()
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                InputRequestCard(InputRequest("q1", "Booking a table at Sora", schema, source = "Notes"), onRespond = { answers += it })
+            }
+        }
+        compose.onNodeWithText("Booking a table at Sora").assertExists()
+        compose.onNodeWithTag("input-submit").assertIsNotEnabled() // required fields are empty
+        compose.onNodeWithTag("input-field-party_size").performTextInput("20")
+        compose.onNodeWithTag("input-field-time").performTextInput("19:30")
+        compose.onNodeWithTag("input-submit").assertIsNotEnabled() // above the maximum
+        compose.onNodeWithTag("input-field-party_size").performTextReplacement("4")
+        compose.onNodeWithTag("input-option-seating-outdoor").performClick()
+        compose.onNodeWithTag("input-field-remind_me").performClick()
+        compose.onNodeWithTag("input-submit").assertIsEnabled().performClick()
+        compose.onNodeWithTag("input-decline").performClick()
+        val expected = Json.parseToJsonElement("""{"party_size":4,"time":"19:30","seating":"outdoor","remind_me":false}""").jsonObject
+        assertEquals(listOf(InputResponse.Accept(expected), InputResponse.Decline), answers)
+    }
+
+    @Test fun confirmation_deniesWithAReason_orApprovesEditedArguments() {
+        val decisions = mutableListOf<Pair<String, ToolDecision>>()
+        val part = ToolPart("t1", "save_note", ToolState.APPROVAL_REQUESTED, """{"title":"Milk"}""")
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                Conversation(
+                    ChatState(messages = listOf(Message("a1", Role.ASSISTANT, listOf(part)))),
+                    onToolApproval = { _, _ -> },
+                    onToolDecision = { id, decision -> decisions += id to decision },
+                )
+            }
+        }
+        compose.onNodeWithTag("deny-with-reason", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("deny-reason").performTextInput("Not that note")
+        compose.onNodeWithTag("deny-with-reason-send", useUnmergedTree = true).performClick()
+        compose.onNodeWithText(s(R.string.ai_cancel)).performClick()
+        compose.onNodeWithTag("edit-and-approve", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("edit-arguments").performTextReplacement("not json")
+        compose.onNodeWithTag("edit-and-approve-send", useUnmergedTree = true).assertIsNotEnabled()
+        compose.onNodeWithTag("edit-arguments").performTextReplacement("""{"title":"Groceries"}""")
+        compose.onNodeWithTag("edit-and-approve-send", useUnmergedTree = true).performClick()
+        assertEquals(
+            listOf(
+                "t1" to ToolDecision(false, reason = "Not that note"),
+                "t1" to ToolDecision(true, editedInput = Json.parseToJsonElement("""{"title":"Groceries"}""").jsonObject),
+            ),
+            decisions,
+        )
     }
 
     @Test fun checkpoint_restoresOnlyAfterConfirming() {

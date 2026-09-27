@@ -59,6 +59,8 @@ fun Chat(
             onToolApproval = controller::respondToApproval,
             onSelectVersion = controller::selectVersion,
             onRestoreCheckpoint = controller::restoreCheckpoint,
+            onToolDecision = controller::respondToApproval,
+            onInputResponse = controller::respondToInput,
         )
         val submit = { if (controller.send(input)) input = "" }
         val onChange = { text: String -> input = text }

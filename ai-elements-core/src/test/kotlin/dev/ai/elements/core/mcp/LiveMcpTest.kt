@@ -1,6 +1,8 @@
 package dev.ai.elements.core.mcp
 
 import dev.ai.elements.core.agent.ToolCallContext
+import dev.ai.elements.core.chat.InputRequest
+import dev.ai.elements.core.chat.InputResponse
 import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.model.DataPart
 import kotlinx.coroutines.withContext
@@ -79,7 +81,8 @@ class LiveMcpTest {
         assertTrue(tools.keys.toString(), "notes__convert_units" in tools && "legacy__echo" in tools && "legacy__fail" !in tools)
         assertEquals(false, tools.getValue("notes__convert_units").requiresApproval) // readOnlyHint
         assertEquals(true, tools.getValue("notes__save_note").requiresApproval)
-        assertEquals("Convert units · Notes", tools.getValue("notes__convert_units").title)
+        assertEquals("Convert units", tools.getValue("notes__convert_units").title)
+        assertEquals("Notes", tools.getValue("notes__convert_units").source)
         assertTrue(toolset.status["down"] is McpServerStatus.Failed)
         assertTrue(toolset.status["legacy"] is McpServerStatus.Connected)
         assertTrue(ToolCallContext.current() == null)
@@ -117,5 +120,42 @@ class LiveMcpTest {
         assertEquals("show_notes_board", done["tool"]!!.jsonObject["name"]!!.jsonPrimitive.content)
         assertTrue(parts.first().data.jsonObject["result"] == null)
         assertTrue(done["result"]!!.jsonObject["structuredContent"]!!.jsonObject.containsKey("notes"))
+    }
+
+    /** Elicitation on 2026-07-28 (SEP-2322): the official SDK's `InputRequiredResult`, answered and retried. */
+    @Test
+    fun modernServer_elicitation_acceptDeclineCancel() = runBlocking {
+        assumeTrue(modern != null)
+        val client = McpClient(modern!!)
+        val tool = client.listTools().single { it.name == "book_table" }
+        val asked = mutableListOf<InputRequest>()
+        val accepted = client.callTool(tool, buildJsonObject { put("restaurant", "Sora") }, onInput = { request ->
+            asked += request
+            InputResponse.Accept(buildJsonObject { put("party_size", 4); put("time", "19:30"); put("seating", "outdoor"); put("remind_me", false) })
+        })
+        assertEquals("Booked a table for 4 at Sora, 19:30, outdoor.", accepted.toText())
+        val question = asked.single()
+        assertEquals("Booking a table at Sora: how many people, and when?", question.message)
+        assertEquals(setOf("party_size", "time", "seating", "remind_me"), question.schema!!["properties"]!!.jsonObject.keys)
+        assertEquals("AI Elements notes", question.source)
+
+        assertEquals("The user declined to book a table at Sora.", client.callTool(tool, buildJsonObject { put("restaurant", "Sora") }, onInput = { InputResponse.Decline }).toText())
+        assertEquals("The booking was cancelled.", client.callTool(tool, buildJsonObject { put("restaurant", "Sora") }, onInput = { InputResponse.Cancel }).toText())
+        // Without anyone to ask, the client answers `cancel`.
+        assertEquals("The booking was cancelled.", client.callTool(tool, buildJsonObject { put("restaurant", "Sora") }).toText())
+    }
+
+    /** Elicitation on a legacy session: `elicitation/create` arrives on the call's stream and is answered. */
+    @Test
+    fun legacyServer_elicitationMidCall() = runBlocking {
+        assumeTrue(legacy != null)
+        val client = McpClient(legacy!!)
+        val tool = client.listTools().single { it.name == "confirm_action" }
+        val result = client.callTool(tool, buildJsonObject { put("action", "Archive notes") }, onInput = { request ->
+            assertEquals("Confirm: Archive notes?", request.message)
+            InputResponse.Accept(buildJsonObject { put("confirm", true); put("note", "all of them") })
+        })
+        assertEquals("Archive notes: confirmed — all of them", result.toText())
+        assertEquals("Archive notes: decline", client.callTool(tool, buildJsonObject { put("action", "Archive notes") }, onInput = { InputResponse.Decline }).toText())
     }
 }

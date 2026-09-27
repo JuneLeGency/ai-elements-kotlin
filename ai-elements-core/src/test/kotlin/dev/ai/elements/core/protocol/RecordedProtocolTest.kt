@@ -3,7 +3,10 @@ package dev.ai.elements.core.protocol
 import com.sun.net.httpserver.HttpServer
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.chat.InputRequest
+import dev.ai.elements.core.chat.InputResponse
 import dev.ai.elements.core.chat.ToolApprover
+import dev.ai.elements.core.chat.ToolDecision
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.Message
@@ -230,5 +233,73 @@ class RecordedProtocolTest {
         assertEquals("approval-responded", tool["state"]!!.jsonPrimitive.content)
         assertEquals(call.id, tool["approval"]!!.jsonObject["id"]!!.jsonPrimitive.content)
         assertEquals("true", tool["approval"]!!.jsonObject["approved"]!!.jsonPrimitive.content)
+    }
+
+    // --- Human in the loop beyond yes / no ---------------------------------------------------
+
+    /** A human in the loop that answers from fixed values. */
+    private class Human(
+        val decision: ToolDecision = ToolDecision(true),
+        val answer: InputResponse = InputResponse.Cancel,
+    ) : ToolApprover {
+        val asked = mutableListOf<InputRequest>()
+        override suspend fun approve(toolCallId: String) = decision.approved
+        override suspend fun decide(toolCallId: String) = decision
+        override suspend fun input(request: InputRequest) = answer.also { asked += request }
+    }
+
+    @Test
+    fun agUi_inputInterrupt_asksWithItsSchema_thenResumesWithThePayload() {
+        replay("agui/input-interrupt.sse", "agui/input-resumed.sse")
+        val trip = buildJsonObject { put("destination", "Kyoto"); put("nights", 5); put("budget", "mid") }
+        val human = Human(answer = InputResponse.Accept(trip))
+        val (_, reply) = run(agUi(approver = human))
+        val question = human.asked.single()
+        assertEquals("trip-details", question.id)
+        assertEquals("Where to, and for how long?", question.message)
+        assertEquals(listOf("destination", "nights"), question.schema!!["required"]!!.jsonArray.map { it.jsonPrimitive.content })
+        val resume = requests[1]["resume"]!!.jsonArray.single().jsonObject
+        assertEquals("resolved", resume["status"]!!.jsonPrimitive.content)
+        assertEquals(trip, resume["payload"])
+        assertTrue(reply.text, reply.text.contains("Planning 5 nights in Kyoto"))
+    }
+
+    @Test
+    fun agUi_inputInterrupt_declined_isCancelled() {
+        replay("agui/input-interrupt.sse", "agui/input-resumed.sse")
+        run(agUi(approver = Human(answer = InputResponse.Decline)))
+        val resume = requests[1]["resume"]!!.jsonArray.single().jsonObject
+        assertEquals("cancelled", resume["status"]!!.jsonPrimitive.content)
+        assertTrue(resume["payload"] == null)
+    }
+
+    /** Pydantic AI advertises `{approved, editedArgs, reason}` on the interrupt; edits and reasons go back in it. */
+    @Test
+    fun agUi_approval_withEditedArgsOrAReason() {
+        replay("agui/note.sse", "agui/note-resumed.sse")
+        val edited = buildJsonObject { put("title", "Groceries"); put("content", "Milk, eggs") }
+        run(agUi(approver = Human(ToolDecision(true, editedInput = edited))))
+        val payload = requests[1]["resume"]!!.jsonArray.single().jsonObject["payload"]!!.jsonObject
+        assertEquals("true", payload["approved"]!!.jsonPrimitive.content)
+        assertEquals(edited, payload["editedArgs"])
+
+        requests.clear()
+        replay("agui/note.sse", "agui/note-resumed.sse")
+        val (events, _) = run(agUi(approver = Human(ToolDecision(false, reason = "Not that note"))))
+        val denied = requests[1]["resume"]!!.jsonArray.single().jsonObject["payload"]!!.jsonObject
+        assertEquals("false", denied["approved"]!!.jsonPrimitive.content)
+        assertEquals("Not that note", denied["reason"]!!.jsonPrimitive.content)
+        assertTrue(denied["editedArgs"] == null)
+        assertEquals("Not that note", events.filterIsInstance<ChatEvent.ToolDenied>().single().reason)
+    }
+
+    @Test
+    fun aiSdk_denial_carriesTheReason() {
+        replay("aisdk/note.sse", "aisdk/note-approved.sse")
+        run(aiSdk(approver = Human(ToolDecision(false, reason = "Not now"))))
+        val parts = requests[1]["messages"]!!.jsonArray.last().jsonObject["parts"] as JsonArray
+        val approval = parts.map { it.jsonObject }.single { it["type"]!!.jsonPrimitive.content == "tool-save_note" }["approval"]!!.jsonObject
+        assertEquals("false", approval["approved"]!!.jsonPrimitive.content)
+        assertEquals("Not now", approval["reason"]!!.jsonPrimitive.content)
     }
 }

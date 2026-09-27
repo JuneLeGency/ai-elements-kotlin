@@ -199,6 +199,22 @@ Add your design system with `A2uiCatalog.Basic.extend(id = "https://example.com/
 `A2uiSurfaceView` / `A2uiState` render a surface outside the chat. `JsxPreview` compiles a JSX subset
 onto the same components (bindings only, no code execution) and keeps state while the JSX streams.
 
+## Human in the loop
+
+Every protocol's way of involving the user maps onto one neutral model, so the same elements
+answer them all:
+
+| The agent… | AI SDK 6 | AG-UI | MCP | On-device |
+|---|---|---|---|---|
+| asks to run a tool | `tool-approval-request` | interrupt with a `toolCallId` | — (the host's `McpApproval`) | `requiresApproval` |
+| gets a reason or edited arguments back | `approval.reason` | resume `{approved, reason, editedArgs}` | — | reason to the model, edited arguments run |
+| asks the user for input | — | interrupt with a `responseSchema` | elicitation (`InputRequiredResult` / `elicitation/create`, form or URL) | via MCP tools |
+
+`Chat` wires it all: `Confirmation` offers approve / deny, deny with a reason and edit-then-approve;
+questions show as an `InputRequestCard`, a form built from the request's JSON Schema. With your own
+screen, pass `onToolDecision` and `onInputResponse` to `Conversation`, or call
+`ChatController.respondToApproval(id, ToolDecision(...))` / `respondToInput(id, InputResponse...)`.
+
 ## MCP Apps
 
 MCP tools can ship an interactive view ([MCP Apps](https://github.com/modelcontextprotocol/ext-apps),

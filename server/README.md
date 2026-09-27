@@ -9,6 +9,10 @@ two protocols via PydanticAI's UI adapters:
 - `POST /concierge/a2a` — **A2A** hotel concierge that answers with **A2UI** v1.0 (A2UI A2A extension;
   card at `/concierge/.well-known/agent-card.json`)
 
+Elicitation: the MCP server's `book_table` asks the user for the party size, time and seating
+mid-call (official SDK `Resolve` + `Elicit`: an `InputRequiredResult` on 2026-07-28, `elicitation/create`
+on older sessions); `legacy_mcp_server.py`'s `confirm_action` does the same on a 2025-xx session.
+
 MCP Apps: the MCP server's `show_notes_board` tool has a view (`ui://notes/board`,
 `mcp_apps/notes_board.html`, built on the official `@modelcontextprotocol/ext-apps` SDK from its CDN);
 `board_notes` is only for that view (`visibility: ["app"]`), so the server's own agent never sees it.

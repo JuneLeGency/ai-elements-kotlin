@@ -50,7 +50,9 @@ sealed interface ChatEvent {
 
     /** The backend is waiting for [ToolApprover] to approve this tool call. */
     data class ToolApprovalRequest(val id: String) : ChatEvent
-    data class ToolDenied(val id: String) : ChatEvent
+
+    /** The user denied the call, optionally saying why. */
+    data class ToolDenied(val id: String, val reason: String? = null) : ChatEvent
 
     /** The user approved; the tool runs (or the server continues) next. */
     data class ToolApproved(val id: String) : ChatEvent
@@ -77,15 +79,65 @@ sealed interface ChatEvent {
 }
 
 /**
- * Gate for tools that need a human in the loop (`AgentTool.requiresApproval`).
- * [ChatController] implements it by surfacing a Confirmation in the UI.
+ * The human in the loop. Backends ask it to approve tool calls (`AgentTool.requiresApproval`,
+ * AI SDK tool approval, AG-UI interrupts) and for information only the user can give (AG-UI
+ * interrupts with a `responseSchema`, MCP elicitation). [ChatController] implements it by
+ * surfacing a Confirmation or an input form in the UI.
  */
 fun interface ToolApprover {
     suspend fun approve(toolCallId: String): Boolean
 
+    /** The user's full decision on a tool call: approval, a reason, edited arguments. */
+    suspend fun decide(toolCallId: String): ToolDecision = ToolDecision(approve(toolCallId))
+
+    /** Ask the user for [request]; hosts that cannot ask answer [InputResponse.Cancel]. */
+    suspend fun input(request: InputRequest): InputResponse = InputResponse.Cancel
+
     companion object {
         val AlwaysApprove = ToolApprover { true }
     }
+}
+
+/**
+ * A user's answer to a tool approval request.
+ *
+ * @property reason why they denied (or a note on approving); passed to the agent.
+ * @property editedInput arguments the user changed before approving; they replace the proposed ones.
+ */
+data class ToolDecision(
+    val approved: Boolean,
+    val reason: String? = null,
+    val editedInput: kotlinx.serialization.json.JsonObject? = null,
+)
+
+/**
+ * A request for information only the user can give — the neutral form of an AG-UI interrupt with
+ * a `responseSchema` and of MCP elicitation.
+ *
+ * @property message what is asked, for the user.
+ * @property schema a JSON Schema (`type: object`) of the answer; the UI renders it as a form.
+ *   Null asks for a plain confirmation.
+ * @property url for out-of-band input: the user completes it at this URL (MCP URL elicitation).
+ * @property source who asks, e.g. an MCP server's name.
+ */
+data class InputRequest(
+    val id: String,
+    val message: String,
+    val schema: kotlinx.serialization.json.JsonObject? = null,
+    val url: String? = null,
+    val source: String? = null,
+)
+
+/** The user's answer to an [InputRequest]. */
+sealed interface InputResponse {
+    /** Submitted: [content] matches the request's schema (null for a URL or a plain confirmation). */
+    data class Accept(val content: kotlinx.serialization.json.JsonObject? = null) : InputResponse
+
+    /** Explicitly declined. */
+    data object Decline : InputResponse
+
+    /** Dismissed without a choice (or the host cannot ask). */
+    data object Cancel : InputResponse
 }
 
 /** Thrown by backends for transport / HTTP failures. */

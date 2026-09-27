@@ -88,7 +88,12 @@ class StickToBottomState internal constructor(private val listState: LazyListSta
         when {
             following && listState.canScrollForward && !listState.isScrollInProgress -> {
                 val last = listState.layoutInfo.totalItemsCount - 1
-                if (last >= 0) scrollOwn { listState.scrollToItem(last, BOTTOM) }
+                if (last >= 0) {
+                    // A request, applied by the next measure pass: this may run inside a layout pass
+                    // (the change that triggered it), where `scrollToItem`'s forced remeasure re-enters.
+                    listState.requestScrollToItem(last, BOTTOM)
+                    ownPosition = null // the move is ours; re-read the position once it has landed
+                }
             }
             // The user scrolled (or flung) all the way down: follow again.
             !following && !listState.canScrollForward && !listState.isScrollInProgress -> {

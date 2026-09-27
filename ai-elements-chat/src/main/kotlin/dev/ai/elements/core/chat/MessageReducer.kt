@@ -70,7 +70,7 @@ fun Message.reduce(event: ChatEvent, now: Long): Message = when (event) {
         if (it.state == ToolState.APPROVAL_REQUESTED) it.copy(state = ToolState.INPUT_AVAILABLE) else it
     }
 
-    is ChatEvent.ToolDenied -> updateExisting<ToolPart>(event.id) { it.copy(state = ToolState.OUTPUT_DENIED) }
+    is ChatEvent.ToolDenied -> updateExisting<ToolPart>(event.id) { it.copy(state = ToolState.OUTPUT_DENIED, errorText = event.reason ?: it.errorText) }
 
     is ChatEvent.File -> upsert<FilePart>(event.id, { FilePart(event.id, event.mediaType, event.url) }) { it }
 

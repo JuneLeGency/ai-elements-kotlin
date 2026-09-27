@@ -4,6 +4,8 @@ import dev.ai.elements.core.model.ToolKind
 import dev.ai.elements.core.protocol.withConventions
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.chat.InputRequest
+import dev.ai.elements.core.chat.InputResponse
 import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.chat.finishStreaming
@@ -88,8 +90,11 @@ import dev.ai.elements.core.http.int
  *   here (after [approver] if it needs approval) and a follow-up run carries
  *   the `tool` message.
  * - **Interrupts** (human in the loop): a run finishing with
- *   `outcome: interrupt` for a tool call asks [approver], then resumes with
- *   `RunAgentInput.resume`.
+ *   `outcome: interrupt` asks [approver] — to decide on a tool call (the resume
+ *   payload is `{approved, reason?, editedArgs?}`, AG-UI's approve-with-edits
+ *   pattern), or, without a tool call, for input matching the interrupt's
+ *   `responseSchema` ([ToolApprover.input]) — then resumes with
+ *   `RunAgentInput.resume` (`resolved` with the payload, or `cancelled`).
  * - **Subagents**: `SUBAGENT_STARTED` and the events carrying its
  *   `subagentRunId` are folded into the delegating tool call's nested run.
  * - **Shared state**: `STATE_SNAPSHOT` / `STATE_DELTA` (JSON Patch) become a
@@ -179,25 +184,36 @@ class AgUiBackend(
         emit(ChatEvent.Error("Agent stopped after $maxRuns runs"))
     }
 
-    /** Answer one interrupt: tool-call approvals go to [approver]; others are cancelled (not supported). */
+    /** Answer one interrupt (AG-UI §Interrupts): tool calls are decided, anything else is asked. */
     private suspend fun FlowCollector<ChatEvent>.resolve(interrupt: AgUiParser.Interrupt): JsonObject {
+        fun entry(status: String, payload: JsonObject? = null) = buildJsonObject {
+            put("interruptId", interrupt.id)
+            put("status", status)
+            payload?.let { put("payload", it) }
+        }
+        // A resume MUST NOT be submitted after `expiresAt`.
+        if (android.os.Build.VERSION.SDK_INT >= 26 && interrupt.expiresAt != null && expired(interrupt.expiresAt)) return entry("cancelled")
         val toolCallId = interrupt.toolCallId
         if (toolCallId == null) {
-            emit(ChatEvent.Error(interrupt.message ?: "The agent asked for input this app cannot provide (${interrupt.reason})."))
-            return buildJsonObject { put("interruptId", interrupt.id); put("status", "cancelled") }
-        }
-        emit(ChatEvent.ToolApprovalRequest(toolCallId))
-        val approved = approver.approve(toolCallId)
-        emit(if (approved) ChatEvent.ToolApproved(toolCallId) else ChatEvent.ToolDenied(toolCallId))
-        return buildJsonObject {
-            put("interruptId", interrupt.id)
-            put("status", "resolved")
-            putJsonObject("payload") {
-                put("approved", approved)
-                if (!approved) put("reason", "The user denied this tool call.")
+            val answer = approver.input(InputRequest(interrupt.id, interrupt.message ?: interrupt.reason, interrupt.responseSchema as? JsonObject))
+            return when (answer) {
+                is InputResponse.Accept -> entry("resolved", answer.content ?: JsonObject(emptyMap()))
+                InputResponse.Decline, InputResponse.Cancel -> entry("cancelled")
             }
         }
+        emit(ChatEvent.ToolApprovalRequest(toolCallId))
+        val decision = approver.decide(toolCallId)
+        emit(if (decision.approved) ChatEvent.ToolApproved(toolCallId) else ChatEvent.ToolDenied(toolCallId, decision.reason))
+        return entry("resolved", buildJsonObject {
+            put("approved", decision.approved)
+            if (decision.approved) decision.editedInput?.let { put("editedArgs", it) }
+            (decision.reason ?: "The user denied this tool call.".takeIf { !decision.approved })?.let { put("reason", it) }
+        })
     }
+
+    @android.annotation.TargetApi(26)
+    private fun expired(timestamp: String): Boolean =
+        runCatching { java.time.Instant.parse(timestamp).isBefore(java.time.Instant.now()) }.getOrDefault(false)
 
     companion object {
         const val PROTOCOL_VERSION = "1.0.0"
@@ -294,7 +310,14 @@ internal fun Message.toAgUi(): List<JsonObject> = when (role) {
  * runs, steps and state carry over; [startRun] resets what is per run.
  */
 internal class AgUiParser(private val nested: Boolean = false) {
-    data class Interrupt(val id: String, val reason: String, val toolCallId: String?, val message: String?)
+    data class Interrupt(
+        val id: String,
+        val reason: String,
+        val toolCallId: String?,
+        val message: String?,
+        val responseSchema: JsonElement? = null,
+        val expiresAt: String? = null,
+    )
     data class Call(val id: String, var name: String, val args: StringBuilder = StringBuilder(), var parentMessageId: String? = null)
 
     private val calls = linkedMapOf<String, Call>()
@@ -421,7 +444,7 @@ internal class AgUiParser(private val nested: Boolean = false) {
             is RunErrorEvent -> { failed = true; usage(event) + ChatEvent.Error(typed.message) }
             is RunFinishedEvent -> {
                 when (val outcome = typed.outcome) {
-                    is RunFinishedInterruptOutcome -> interrupts = outcome.interrupts.map { Interrupt(it.id, it.reason, it.toolCallId, it.message) }
+                    is RunFinishedInterruptOutcome -> interrupts = outcome.interrupts.map { Interrupt(it.id, it.reason, it.toolCallId, it.message, it.responseSchema, it.expiresAt) }
                     else -> Unit
                 }
                 // Not yet in kotlin-core: RUN_FINISHED.outcome.pendingToolCallIds and RUN_FINISHED.usage.

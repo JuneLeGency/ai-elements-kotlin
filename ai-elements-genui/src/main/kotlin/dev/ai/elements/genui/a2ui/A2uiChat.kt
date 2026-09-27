@@ -33,18 +33,33 @@ import java.util.UUID
  *
  * One A2UI session per part: when a part grows (the agent streams more messages) only the new ones
  * are applied, so what the user typed stays; a part that is replaced by a different list starts over.
+ * Sessions live in the renderer, not in the composition, so a form keeps its input while it
+ * scrolls out of sight (the most recent [capacity] parts are kept).
  * A part holding `{"status": "building" | "retrying" | "failed"}` (the AG-UI middleware's pre-paint
  * lifecycle) shows as a placeholder.
  */
 fun a2uiRenderer(
     catalog: A2uiCatalog = A2uiCatalog.Basic,
     catalogs: List<A2uiCatalog> = emptyList(),
+    capacity: Int = 32,
     onAction: (A2uiAction) -> Unit,
-): DataRenderer = DataRenderer { part -> A2uiPart(part, catalog, catalogs, onAction) }
+): DataRenderer {
+    val sessions = object : LinkedHashMap<String, A2uiSession>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, A2uiSession>?) = size > capacity
+    }
+    val sessionFor = { id: String -> synchronized(sessions) { sessions.getOrPut(id) { A2uiSession(catalog, catalogs) } } }
+    return DataRenderer { part -> A2uiPart(part, catalog, catalogs, sessionFor, onAction) }
+}
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun A2uiPart(part: DataPart, catalog: A2uiCatalog, catalogs: List<A2uiCatalog>, onAction: (A2uiAction) -> Unit) {
+private fun A2uiPart(
+    part: DataPart,
+    catalog: A2uiCatalog,
+    catalogs: List<A2uiCatalog>,
+    sessionFor: (String) -> A2uiSession,
+    onAction: (A2uiAction) -> Unit,
+) {
     val status = ((part.data as? JsonObject)?.get("status") as? JsonPrimitive)?.content
     if (status != null) {
         Row(Modifier.padding(vertical = 8.dp).testTag("a2ui-status"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -58,7 +73,7 @@ private fun A2uiPart(part: DataPart, catalog: A2uiCatalog, catalogs: List<A2uiCa
         return
     }
     val messages = (part.data as? JsonArray).orEmpty()
-    val session = remember(part.id, catalog) { A2uiSession(catalog, catalogs) }
+    val session = remember(part.id) { sessionFor(part.id) }
     session.apply(messages)
     Column(Modifier.fillMaxWidth().testTag("a2ui-part-${part.id}"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         session.state.surfaces.forEach { A2uiSurfaceView(it, catalog = catalog, catalogs = catalogs, onAction = onAction) }

@@ -30,6 +30,9 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import dev.ai.elements.core.chat.InputRequest
+import dev.ai.elements.core.chat.InputResponse
+import kotlinx.coroutines.delay
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.io.encoding.Base64
@@ -50,8 +53,12 @@ import kotlin.io.encoding.Base64
  * carrying `notifications/progress` before the response. Cancelling the
  * calling coroutine closes the stream, which is the cancellation signal.
  *
- * The client declares no optional client capabilities (sampling, elicitation,
- * roots), so conforming servers never ask for them; [capabilities] can add
+ * It declares **elicitation** (form and URL modes): a server that needs the
+ * user's input mid-call — `InputRequiredResult` on 2026-07-28 (SEP-2322: the
+ * client asks, then retries with `inputResponses` and the echoed
+ * `requestState`), `elicitation/create` on a legacy session stream — is
+ * answered through [callTool]'s `onInput`; without one the answer is
+ * `cancel`. Sampling and roots are not declared. [capabilities] can add
  * extensions, e.g. [McpApps.CLIENT_CAPABILITIES] for MCP Apps.
  *
  * @param headers sent with every request, e.g. a static API key header.
@@ -63,9 +70,13 @@ class McpClient(
     private val auth: McpAuth? = null,
     private val http: OkHttpClient = DefaultHttpClient,
     private val clientInfo: McpImplementation = McpImplementation("ai-elements-kotlin", "0.3.0"),
-    /** The `ClientCapabilities` to declare (legacy `initialize` and per-request `_meta`). */
-    private val capabilities: JsonObject = JsonObject(emptyMap()),
+    /** More `ClientCapabilities` to declare (legacy `initialize` and per-request `_meta`). */
+    capabilities: JsonObject = JsonObject(emptyMap()),
 ) {
+    private val capabilities: JsonObject = JsonObject(
+        mapOf("elicitation" to buildJsonObject { putJsonObject("form") {}; putJsonObject("url") {} }) + capabilities,
+    )
+
     private sealed interface Era {
         data object Modern : Era
         data class Legacy(val version: String, val sessionId: String?) : Era
@@ -98,7 +109,13 @@ class McpClient(
      * Call [tool] with [arguments]. [onProgress] receives the server's
      * progress notifications while it runs.
      */
-    suspend fun callTool(tool: McpTool, arguments: JsonObject, onProgress: (suspend (McpProgress) -> Unit)? = null): McpToolResult {
+    suspend fun callTool(
+        tool: McpTool,
+        arguments: JsonObject,
+        /** Answers the server's questions to the user (elicitation); null answers `cancel`. */
+        onInput: McpInputHandler? = null,
+        onProgress: (suspend (McpProgress) -> Unit)? = null,
+    ): McpToolResult {
         val paramHeaders = mcpHeaderParams(tool.inputSchema).orEmpty().mapNotNull { (path, header) ->
             valueAt(arguments, path)?.let { "Mcp-Param-$header" to encodeHeaderValue(it) }
         }.toMap()
@@ -106,16 +123,46 @@ class McpClient(
             put("name", tool.name)
             put("arguments", arguments)
         }
-        val result = request("tools/call", params, name = tool.name, extraHeaders = paramHeaders, onProgress = onProgress)
-        if (result["inputRequests"] != null) {
-            throw McpException("${tool.name} asked for user input, which this client does not support.")
+        var retry = JsonObject(emptyMap())
+        repeat(MAX_INPUT_ROUNDS) { round ->
+            val result = request("tools/call", JsonObject(params + retry), name = tool.name, extraHeaders = paramHeaders, onProgress = onProgress, onInput = onInput)
+            // SEP-2322: ask, then retry the same call with the answers and the opaque state.
+            if (result.str("resultType") != INPUT_REQUIRED) return result.toToolResult()
+            val requests = result.obj("inputRequests").orEmpty()
+            val answers = buildJsonObject { requests.forEach { (key, request) -> put(key, answer(key, request as? JsonObject, onInput)) } }
+            retry = buildJsonObject {
+                if (requests.isNotEmpty()) put("inputResponses", answers)
+                result.str("requestState")?.let { put("requestState", it) }
+            }
+            if (requests.isEmpty()) delay((50L shl round).coerceAtMost(250))
         }
-        return result.toToolResult()
+        throw McpException("${tool.name} kept asking for input after $MAX_INPUT_ROUNDS rounds")
+    }
+
+    /** One server request for user input (`elicitation/create`) answered as its `ElicitResult`. */
+    private suspend fun answer(key: String, request: JsonObject?, onInput: McpInputHandler?): JsonObject {
+        val method = request?.str("method")
+        if (method != "elicitation/create") throw McpException("The server asked for $method, which this client does not support.")
+        val p = request.obj("params") ?: JsonObject(emptyMap())
+        val url = p.str("url")?.takeIf { p.str("mode") == "url" }
+        val response = onInput?.invoke(
+            InputRequest(key, p.str("message").orEmpty(), schema = if (url == null) p.obj("requestedSchema") else null, url = url, source = serverInfo?.let { it.title ?: it.name }),
+        ) ?: InputResponse.Cancel
+        return buildJsonObject {
+            when (response) {
+                is InputResponse.Accept -> {
+                    put("action", "accept")
+                    if (url == null) put("content", response.content ?: JsonObject(emptyMap()))
+                }
+                InputResponse.Decline -> put("action", "decline")
+                InputResponse.Cancel -> put("action", "cancel")
+            }
+        }
     }
 
     /** Call a tool by name (no `x-mcp-header` mirroring; prefer the [McpTool] overload). */
-    suspend fun callTool(name: String, arguments: JsonObject, onProgress: (suspend (McpProgress) -> Unit)? = null): McpToolResult =
-        callTool(McpTool(name = name, inputSchema = JsonObject(emptyMap())), arguments, onProgress)
+    suspend fun callTool(name: String, arguments: JsonObject, onInput: McpInputHandler? = null, onProgress: (suspend (McpProgress) -> Unit)? = null): McpToolResult =
+        callTool(McpTool(name = name, inputSchema = JsonObject(emptyMap())), arguments, onInput, onProgress)
 
     suspend fun listResources(): List<McpResource> = paginate("resources/list", "resources") {
         val uri = it.str("uri") ?: return@paginate null
@@ -184,15 +231,20 @@ class McpClient(
         name: String? = null,
         extraHeaders: Map<String, String> = emptyMap(),
         onProgress: (suspend (McpProgress) -> Unit)? = null,
+        onInput: McpInputHandler? = null,
     ): JsonObject {
         var refreshed = false
         var reinitialized = false
         while (true) {
             val current = era ?: eraLock.withLock { era } ?: Era.Modern
-            val outcome = send(current, method, params, name, extraHeaders, onProgress)
+            val outcome = send(current, method, params, name, extraHeaders, onProgress, onInput)
             when (outcome) {
                 is Outcome.Result -> {
                     if (era == null) era = current
+                    // 2026-07-28 results name their server in `_meta` (there is no initialize).
+                    outcome.result.obj("_meta")?.obj("io.modelcontextprotocol/serverInfo")?.let {
+                        serverInfo = McpImplementation(it.str("name").orEmpty(), it.str("version").orEmpty(), it.str("title"))
+                    }
                     return outcome.result
                 }
                 is Outcome.Unauthorized -> {
@@ -287,6 +339,7 @@ class McpClient(
         name: String?,
         extraHeaders: Map<String, String>,
         onProgress: (suspend (McpProgress) -> Unit)?,
+        onInput: McpInputHandler? = null,
     ): Outcome {
         val id = ids.incrementAndGet()
         val progressToken = if (onProgress != null) "p$id" else null
@@ -318,7 +371,7 @@ class McpClient(
                 is Frame.Body -> outcome = if (head!!.status in 200..299) parseResponse(frame.text, id, head!!) else failure(head!!.status, frame.text)
                 is Frame.Event -> {
                     val message = runCatching { Json.parseToJsonElement(frame.data).jsonObject }.getOrNull()
-                    if (message != null) outcome = handleStreamed(message, id, head!!, era, progressToken, onProgress)
+                    if (message != null) outcome = handleStreamed(message, id, head!!, era, progressToken, onProgress, onInput)
                 }
                 Frame.End -> if (outcome == null) outcome = if (head!!.status in 200..299) {
                     Outcome.Failure(head!!.status, null, "the server closed the stream without a response")
@@ -336,6 +389,7 @@ class McpClient(
         era: Era,
         progressToken: String?,
         onProgress: (suspend (McpProgress) -> Unit)?,
+        onInput: McpInputHandler?,
     ): Outcome? {
         val method = message.str("method")
         return when {
@@ -350,9 +404,10 @@ class McpClient(
                 }
                 null
             }
-            // Legacy servers may send requests on the stream; decline them (we declared no capabilities).
+            // Legacy servers send requests on the stream: elicitation is answered, anything else declined.
             method != null && message["id"] != null && era is Era.Legacy -> {
-                replyLegacy(era, message["id"]!!, method)
+                val result = if (method == "elicitation/create") runCatching { answer(message["id"].toString(), message, onInput) }.getOrNull() else null
+                replyLegacy(era, message["id"]!!, method, result)
                 null
             }
             method != null -> null
@@ -361,11 +416,12 @@ class McpClient(
         }
     }
 
-    private suspend fun replyLegacy(era: Era.Legacy, requestId: JsonElement, method: String) {
+    private suspend fun replyLegacy(era: Era.Legacy, requestId: JsonElement, method: String, result: JsonObject? = null) {
         val body = buildJsonObject {
             put("jsonrpc", "2.0")
             put("id", requestId)
-            if (method == "ping") putJsonObject("result") {} else putJsonObject("error") {
+            if (result != null) put("result", result)
+            else if (method == "ping") putJsonObject("result") {} else putJsonObject("error") {
                 put("code", -32601)
                 put("message", "Method not supported by this client: $method")
             }
@@ -465,6 +521,12 @@ class McpClient(
     }.flowOn(Dispatchers.IO)
 
     companion object {
+        /** `resultType` of an `InputRequiredResult` (SEP-2322). */
+        private const val INPUT_REQUIRED = "input_required"
+
+        /** Retry rounds before giving up on a server that keeps asking (the official SDKs use 10). */
+        const val MAX_INPUT_ROUNDS = 10
+
         /** The stateless revision this client speaks first. */
         const val MODERN_VERSION = "2026-07-28"
 

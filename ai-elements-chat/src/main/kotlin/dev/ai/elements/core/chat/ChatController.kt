@@ -30,6 +30,8 @@ data class ChatState(
     val queue: List<QueuedMessage> = emptyList(),
     /** True after stop/error: queued prompts wait for the user instead of auto-sending. */
     val queuePaused: Boolean = false,
+    /** Questions the agent is waiting on (answer with [ChatController.respondToInput]). */
+    val inputRequests: List<InputRequest> = emptyList(),
 ) {
     val isBusy: Boolean get() = status == ChatStatus.SUBMITTED || status == ChatStatus.STREAMING
 }
@@ -73,13 +75,29 @@ class ChatController(
 
     /** The in-flight reply, including deltas not yet published (read by [stop]). */
     private var live: Pair<List<Message>, Message>? = null
-    private val pendingApprovals = ConcurrentHashMap<String, CompletableDeferred<Boolean>>()
-    private val approver = ToolApprover { id ->
-        val decision = pendingApprovals.getOrPut(id) { CompletableDeferred() }
-        try {
-            decision.await()
-        } finally {
-            pendingApprovals.remove(id)
+    private val pendingApprovals = ConcurrentHashMap<String, CompletableDeferred<ToolDecision>>()
+    private val pendingInputs = ConcurrentHashMap<String, CompletableDeferred<InputResponse>>()
+    private val approver = object : ToolApprover {
+        override suspend fun approve(toolCallId: String) = decide(toolCallId).approved
+
+        override suspend fun decide(toolCallId: String): ToolDecision {
+            val decision = pendingApprovals.getOrPut(toolCallId) { CompletableDeferred() }
+            try {
+                return decision.await()
+            } finally {
+                pendingApprovals.remove(toolCallId)
+            }
+        }
+
+        override suspend fun input(request: InputRequest): InputResponse {
+            val answer = pendingInputs.getOrPut(request.id) { CompletableDeferred() }
+            _state.update { it.copy(inputRequests = it.inputRequests.filterNot { r -> r.id == request.id } + request) }
+            try {
+                return answer.await()
+            } finally {
+                pendingInputs.remove(request.id)
+                _state.update { it.copy(inputRequests = it.inputRequests.filterNot { r -> r.id == request.id }) }
+            }
         }
     }
 
@@ -112,8 +130,16 @@ class ChatController(
     }
 
     /** Answer a tool approval request (AI Elements `<Confirmation>`). */
-    fun respondToApproval(toolCallId: String, approved: Boolean) {
-        pendingApprovals.getOrPut(toolCallId) { CompletableDeferred() }.complete(approved)
+    fun respondToApproval(toolCallId: String, approved: Boolean) = respondToApproval(toolCallId, ToolDecision(approved))
+
+    /** Answer a tool approval request with a reason or edited arguments. */
+    fun respondToApproval(toolCallId: String, decision: ToolDecision) {
+        pendingApprovals.getOrPut(toolCallId) { CompletableDeferred() }.complete(decision)
+    }
+
+    /** Answer one of [ChatState.inputRequests]. */
+    fun respondToInput(requestId: String, response: InputResponse) {
+        pendingInputs[requestId]?.complete(response)
     }
 
     /** Ask again; the previous reply is kept as another version of the answer. */
@@ -159,6 +185,9 @@ class ChatController(
         running.cancel()
         pendingApprovals.values.forEach { it.cancel() }
         pendingApprovals.clear()
+        pendingInputs.values.forEach { it.complete(InputResponse.Cancel) }
+        pendingInputs.clear()
+        _state.update { it.copy(inputRequests = emptyList()) }
         val inFlight = live
         live = null
         _state.update { st ->

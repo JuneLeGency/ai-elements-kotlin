@@ -5,6 +5,10 @@
   flows (tool approval, frontend tools).
 - `agui/hotel*.sse`, `aisdk/hotel*.sse`: an A2UI v1.0 form and the run its user action starts,
   each surface checked by the official `a2ui-core` message processor (strict validation).
+- `mcp/elicitation-*.json`: MCP 2026-07-28 elicitation (SEP-2322) from the official `mcp` SDK — the
+  `InputRequiredResult` of `book_table` and the result of the retry that answers it.
+- `agui/input-interrupt.sse`, `agui/input-resumed.sse`: an interrupt that asks the user for input
+  (no tool call, a `responseSchema`), encoded by the official `ag_ui` SDK.
 - `agui/subagent-state-activity.sse`: AG-UI 1.0 events the server does not emit yet
   (SUBAGENT_*, STATE_DELTA, ACTIVITY_*, usage), encoded by the official `ag_ui` Python SDK.
 
@@ -19,6 +23,9 @@ from pathlib import Path
 
 import httpx
 from ag_ui.core import (
+    Interrupt,
+    RunFinishedInterruptOutcome,
+    RunFinishedSuccessOutcome,
     ActivityDeltaEvent,
     ActivitySnapshotEvent,
     RunFinishedEvent,
@@ -151,6 +158,61 @@ def aisdk_a2ui() -> None:
     save("aisdk/hotel-action.sse", second)
 
 
+MCP_META = {
+    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+    "io.modelcontextprotocol/clientInfo": {"name": "record_fixtures", "version": "1"},
+    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}, "url": {}}},
+}
+
+
+def mcp_call(params: dict) -> dict:
+    headers = {"Accept": "application/json, text/event-stream", "MCP-Protocol-Version": "2026-07-28",
+               "Mcp-Method": "tools/call", "Mcp-Name": params["name"]}
+    body = {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {**params, "_meta": MCP_META}}
+    return httpx.post(f"{BASE}/mcp", json=body, headers=headers, timeout=30).json()
+
+
+def mcp_elicitation() -> None:
+    """`book_table` asks for the party (InputRequiredResult), then completes on the answered retry."""
+    call = {"name": "book_table", "arguments": {"restaurant": "Sora"}}
+    first = mcp_call(call)
+    assert first["result"]["resultType"] == "input_required", first
+    save("mcp/elicitation-input-required.json", json.dumps(first, ensure_ascii=False, indent=1) + "\n")
+    [key] = first["result"]["inputRequests"]
+    answer = {"action": "accept", "content": {"party_size": 4, "time": "19:30", "seating": "outdoor", "remind_me": False}}
+    done = mcp_call({**call, "inputResponses": {key: answer}, "requestState": first["result"]["requestState"]})
+    assert done["result"]["resultType"] == "complete", done
+    save("mcp/elicitation-complete.json", json.dumps(done, ensure_ascii=False, indent=1) + "\n")
+
+
+def agui_input_interrupt() -> None:
+    """A run that pauses to ask the user (no tool call: a `responseSchema`), and the resumed run."""
+    encoder = EventEncoder()
+    schema = {"type": "object", "properties": {
+        "destination": {"type": "string", "title": "Destination"},
+        "nights": {"type": "integer", "minimum": 1, "maximum": 14, "title": "Nights"},
+        "budget": {"type": "string", "enum": ["low", "mid", "high"], "title": "Budget"},
+    }, "required": ["destination", "nights"]}
+    asked = [
+        RunStartedEvent(thread_id="t", run_id="r1"),
+        TextMessageStartEvent(message_id="m1", role="assistant"),
+        TextMessageContentEvent(message_id="m1", delta="A few details first."),
+        TextMessageEndEvent(message_id="m1"),
+        RunFinishedEvent(thread_id="t", run_id="r1", outcome=RunFinishedInterruptOutcome(type="interrupt", interrupts=[
+            Interrupt(id="trip-details", reason="input_required", message="Where to, and for how long?", responseSchema=schema),
+        ])),
+    ]
+    save("agui/input-interrupt.sse", "".join(encoder.encode(e) for e in asked))
+    resumed = [
+        RunStartedEvent(thread_id="t", run_id="r2"),
+        TextMessageStartEvent(message_id="m2", role="assistant"),
+        TextMessageContentEvent(message_id="m2", delta="Planning 5 nights in Kyoto on a mid budget."),
+        TextMessageEndEvent(message_id="m2"),
+        RunFinishedEvent(thread_id="t", run_id="r2", outcome=RunFinishedSuccessOutcome(type="success")),
+    ]
+    save("agui/input-resumed.sse", "".join(encoder.encode(e) for e in resumed))
+
+
 def agui_spec_events() -> None:
     """AG-UI 1.0 events encoded by the official Python SDK (subagents, state/activity deltas, usage)."""
     encoder = EventEncoder()
@@ -184,4 +246,6 @@ if __name__ == "__main__":
         aisdk(keyword)
     agui_a2ui()
     aisdk_a2ui()
+    mcp_elicitation()
+    agui_input_interrupt()
     agui_spec_events()

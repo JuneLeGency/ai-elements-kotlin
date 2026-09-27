@@ -1,0 +1,10 @@
+data: {"type":"RUN_STARTED","threadId":"t","runId":"r1"}
+
+data: {"type":"TEXT_MESSAGE_START","messageId":"m1","role":"assistant"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","messageId":"m1","delta":"A few details first."}
+
+data: {"type":"TEXT_MESSAGE_END","messageId":"m1"}
+
+data: {"type":"RUN_FINISHED","threadId":"t","runId":"r1","outcome":{"type":"interrupt","interrupts":[{"id":"trip-details","reason":"input_required","message":"Where to, and for how long?","responseSchema":{"type":"object","properties":{"destination":{"type":"string","title":"Destination"},"nights":{"type":"integer","minimum":1,"maximum":14,"title":"Nights"},"budget":{"type":"string","enum":["low","mid","high"],"title":"Budget"}},"required":["destination","nights"]}}]}}
+

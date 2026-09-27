@@ -172,4 +172,18 @@
     <string name="ai_skill">Skill</string>
     <string name="ai_tool_via">via %1$s</string>
     <string name="ai_skills_count">Skills (%1$d)</string>
+    <string name="ai_input_decline">Decline</string>
+    <string name="ai_input_open_link">Open link</string>
+    <string name="ai_input_done">Done</string>
+    <string name="ai_input_required">Required</string>
+    <string name="ai_input_invalid_number">Enter a number</string>
+    <string name="ai_input_min">At least %1$s</string>
+    <string name="ai_input_max">At most %1$s</string>
+    <string name="ai_input_from">Asked by %1$s</string>
+    <string name="ai_input_invalid_email">Enter an email address</string>
+    <string name="ai_deny_with_reason">Deny with a reason</string>
+    <string name="ai_deny_reason">Why? (the agent sees this)</string>
+    <string name="ai_edit_and_approve">Edit and approve</string>
+    <string name="ai_edit_arguments">Arguments (JSON)</string>
+    <string name="ai_invalid_json">Not a JSON object</string>
 </resources>

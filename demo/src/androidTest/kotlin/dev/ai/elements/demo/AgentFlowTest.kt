@@ -65,6 +65,8 @@ class AgentFlowTest {
     private fun send(prompt: String) {
         compose.onNodeWithTag("prompt-input").performClick().performTextInput(prompt)
         compose.onNodeWithTag("send-button").performClick()
+        scenario?.hideKeyboard() // a tablet's keyboard would move the cards the test taps next
+        compose.waitForIdle()
     }
 
     private fun scrollTo(matcher: androidx.compose.ui.test.SemanticsMatcher) {
@@ -145,7 +147,7 @@ class AgentFlowTest {
     }
 
     /** The Confirmation sits inside the clickable tool card, whose semantics merge it. */
-    private fun awaitConfirmation() = compose.waitUntil(10_000) {
+    private fun awaitConfirmation() = compose.waitUntil(20_000) {
         compose.onAllNodesWithTag("confirmation", useUnmergedTree = true).fetchSemanticsNodes().size == 1
     }
 

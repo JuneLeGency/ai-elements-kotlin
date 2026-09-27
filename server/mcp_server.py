@@ -14,7 +14,12 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 from mcp.server.mcpserver import Context, MCPServer
+from typing import Annotated, Literal
+
+from mcp.server.elicitation import AcceptedElicitation, DeclinedElicitation, ElicitationResult
+from mcp.server.mcpserver.resolve import Elicit, Resolve
 from mcp.types import CallToolResult, TextContent, ToolAnnotations
+from pydantic import BaseModel, Field
 
 mcp = MCPServer(
     name="ai-elements-notes",
@@ -110,6 +115,34 @@ def show_notes_board() -> CallToolResult:
 def board_notes() -> CallToolResult:
     """The notes for the board view (called by the view, not the model)."""
     return _board()
+
+
+# --- Elicitation (asking the user mid-call) ------------------------------------------------
+# On 2026-07-28 the SDK answers with an `InputRequiredResult` and resumes on the client's retry;
+# on the 2025-xx session revisions it sends `elicitation/create` mid-call.
+
+
+class TableDetails(BaseModel):
+    party_size: int = Field(ge=1, le=12, description="How many people")
+    time: str = Field(description="Arrival time, e.g. 19:30")
+    seating: Literal["indoor", "outdoor"] = Field(default="indoor", description="Where to sit")
+    remind_me: bool = Field(default=True, description="Send a reminder an hour before")
+
+
+def _ask_table(restaurant: str) -> Elicit[TableDetails]:
+    return Elicit(f"Booking a table at {restaurant}: how many people, and when?", TableDetails)
+
+
+@mcp.tool(title="Book a table", annotations=ToolAnnotations(readOnlyHint=False, destructiveHint=False))
+def book_table(restaurant: str, details: Annotated[ElicitationResult[TableDetails], Resolve(_ask_table)]) -> str:
+    """Book a restaurant table; asks the user for the party size, time and seating."""
+    if isinstance(details, AcceptedElicitation):
+        d = details.data
+        reminder = " I'll remind you an hour before." if d.remind_me else ""
+        return f"Booked a table for {d.party_size} at {restaurant}, {d.time}, {d.seating}.{reminder}"
+    if isinstance(details, DeclinedElicitation):
+        return f"The user declined to book a table at {restaurant}."
+    return "The booking was cancelled."
 
 
 @mcp.resource("notes://all", name="all-notes", title="All notes", mime_type="text/markdown")

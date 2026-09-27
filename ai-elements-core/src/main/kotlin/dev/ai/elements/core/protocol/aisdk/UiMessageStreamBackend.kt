@@ -58,7 +58,8 @@ import dev.ai.elements.core.http.str
  * Like `useChat`, the turn continues automatically when the server hands work
  * back to the client:
  * - **tool approval** (AI SDK 6): a `tool-approval-request` asks [approver];
- *   the answer is sent back as an `approval-responded` tool part;
+ *   the answer is sent back as an `approval-responded` tool part (`approval.reason`
+ *   carries the user's reason; the protocol has no edited arguments);
  * - **client-side tools**: a `tool-input-available` for one of [tools] with no
  *   server output runs the tool here and sends its `output-available` part
  *   (`sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls`).
@@ -118,16 +119,15 @@ class UiMessageStreamBackend(
                 return@flow
             }
             asked.forEach { (toolCallId, approvalId) ->
-                val approved = approver.approve(toolCallId)
-                approvals[toolCallId] = Approval(approvalId, approved)
-                out.emit(if (approved) ChatEvent.ToolApproved(toolCallId) else ChatEvent.ToolDenied(toolCallId))
+                val decision = approver.decide(toolCallId)
+                approvals[toolCallId] = Approval(approvalId, decision.approved, decision.reason)
+                out.emit(if (decision.approved) ChatEvent.ToolApproved(toolCallId) else ChatEvent.ToolDenied(toolCallId, decision.reason))
             }
             calls.forEach { call -> out.runTool(tools, approver, call.id, call.name, call.input) }
         }
         emit(ChatEvent.Error("Agent stopped after $maxRounds rounds"))
     }
 
-    private data class Approval(val id: String, val approved: Boolean)
 
     private fun Message.tool(id: String) = parts.firstOrNull { it is ToolPart && it.id == id } as? ToolPart
 
@@ -273,8 +273,11 @@ class UiMessageStreamBackend(
     }
 }
 
+/** A user's answer to a `tool-approval-request` (AI SDK 6 `ToolApprovalResponse`). */
+internal data class Approval(val id: String, val approved: Boolean, val reason: String? = null)
+
 /** One chat part as a `UIMessage` part (tool parts carry their state, input, output and approval). */
-private fun Part.toUiPart(role: Role, approvals: Map<String, Any>): JsonObject? = when (this) {
+private fun Part.toUiPart(role: Role, approvals: Map<String, Approval>): JsonObject? = when (this) {
     is TextPart -> if (text.isBlank()) null else buildJsonObject { put("type", "text"); put("text", text) }
     is ReasoningPart -> if (role == Role.USER || text.isBlank()) null else buildJsonObject { put("type", "reasoning"); put("text", text) }
     is FilePart -> if (role == Role.USER && !isImage && base64Data == null && !url.startsWith("http")) null else buildJsonObject {
@@ -292,12 +295,14 @@ private fun Part.toUiPart(role: Role, approvals: Map<String, Any>): JsonObject? 
     else -> null
 }
 
-private fun ToolPart.toUiToolPart(approval: Any?): JsonObject? {
+private fun ToolPart.toUiToolPart(approval: Approval?): JsonObject? {
     val input = runCatching { BackendJson.parseToJsonElement(input.ifBlank { "{}" }) }.getOrElse { JsonPrimitive(input) }
-    val approvalFields = approval?.let {
-        val (id, approved) = it.toString().removePrefix("Approval(").removeSuffix(")").split(", ").associate { kv -> kv.substringBefore('=') to kv.substringAfter('=') }
-            .let { m -> m["id"].orEmpty() to (m["approved"] == "true") }
-        buildJsonObject { put("id", id); put("approved", approved) }
+    val approvalFields = approval?.let { a ->
+        buildJsonObject {
+            put("id", a.id)
+            put("approved", a.approved)
+            a.reason?.let { put("reason", it) }
+        }
     }
     val state = when {
         approvalFields != null && state != ToolState.OUTPUT_AVAILABLE && state != ToolState.OUTPUT_ERROR -> "approval-responded"
