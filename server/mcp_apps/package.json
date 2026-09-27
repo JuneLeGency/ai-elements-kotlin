@@ -1,0 +1,12 @@
+{
+  "name": "mcp-apps-fixtures",
+  "private": true,
+  "type": "module",
+  "description": "Records MCP Apps fixtures for ai-elements-mcp-apps from the official SDK (App ↔ AppBridge).",
+  "scripts": { "record": "node record_fixtures.mjs" },
+  "dependencies": {
+    "@modelcontextprotocol/client": "^2.0.0",
+    "@modelcontextprotocol/ext-apps": "2.0.3",
+    "zod": "^4.2.0"
+  }
+}

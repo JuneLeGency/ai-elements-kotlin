@@ -105,7 +105,14 @@ class RunState:
     a2ui_action: dict | None = None
 
 
-notes = MCPToolset(MCP_URL, id="notes").approval_required(lambda ctx, tool, args: tool.name in MCP_WRITE_TOOLS)
+def _model_visible(ctx, tool) -> bool:
+    """MCP Apps: tools with `_meta.ui.visibility` lacking "model" are only for the server's views."""
+    return "model" in (((tool.metadata or {}).get("meta") or {}).get("ui") or {}).get("visibility", ["model"])
+
+
+notes = (MCPToolset(MCP_URL, id="notes")
+         .filtered(_model_visible)
+         .approval_required(lambda ctx, tool, args: tool.name in MCP_WRITE_TOOLS))
 
 researcher = Agent(
     name="researcher",

@@ -102,8 +102,7 @@ reference only, never copied).
 ### W4b · Generative UI (open specs)
 
 Agents that return interface, not just text. Layering: `ai-elements-ui` knows no UI format;
-`ai-elements-genui` holds a neutral node tree (`UiNode`) + component registry (Compose) shared by the
-formats; transports map onto neutral data parts in `core` / `a2a`; MCP Apps (host side, needs the MCP
+`ai-elements-genui` holds the A2UI component model + catalog (Compose) that JSX compiles onto; transports map onto neutral data parts in `core` / `a2a`; MCP Apps (host side, needs the MCP
 client) is its own artifact.
 
 | Item | Spec / reference | Status |
@@ -112,7 +111,7 @@ client) is its own artifact.
 | `ai-elements-genui` base: component catalog (Material, app-extensible), data scopes, actions | A2UI v1.0 catalog model (the shared base; JSX compiles onto it) | ✅ `A2uiCatalog` (`Basic` + `extend`), `ComponentScope`, `DataContext` |
 | `JsxPreview`: streaming-tolerant JSX subset compiled onto A2UI components, bindings only (no code execution) | AI Elements `jsx-preview` (`react-jsx-parser`) | ✅ `JsxCompiler` (catalog + HTML tags, inline Markdown runs, handlers → actions, every-prefix streaming test), `JsxPreview` (state kept across stream updates), `jsxCodeBlocks()` for ```` ```jsx ```` fences via the new `AiElementsRenderers.codeBlocks` extension point; unit 5/5, emulator 2/2 |
 | A2UI surface: messages → surface model, data binding, user actions; transports (AG-UI, A2A) → `DataPart` | A2UI v1.0 (release candidate), the official cross-language conformance suite, the Basic Catalog's 43 examples, `@ag-ui/a2ui-middleware`, the A2UI A2A extension | ✅ renderer (conformance: expressions 39/39, data model 41/41, message processor 22/22; 2 strict-schema cases are the validator's; fixed 8 spec gaps incl. component cycles → atomic rollback); transports ✅ AG-UI `a2ui-surface` activities ⇄ `forwardedProps.a2uiAction`, A2A `application/a2ui+json` parts + `a2uiRendererDataModel`, AI SDK `data-a2ui`, all onto neutral `DataPart.A2UI`; `a2uiRenderer()` + `ChatController.send(action)`; live server (`server/a2ui_demo.py`) + demo E2E ✅ (`CapabilitiesFlowTest` AG-UI and AI SDK form round trips); A2A live ✅ (`/concierge` agent with the A2UI extension on its card, `LiveA2aTest.a2uiSurface_andActionRoundTrip`); recorded fixtures `agui|aisdk/hotel*.sse` validated by the official `a2ui-core` |
-| MCP Apps host (`ai-elements-mcp-apps`): `ui://` resources, sandboxed WebView, `ui/*` JSON-RPC bridge | MCP Apps extension + official `ext-apps` SDK fixtures | ⬜ |
+| MCP Apps host (`ai-elements-mcp-apps`): `ui://` resources, sandboxed WebView, `ui/*` JSON-RPC bridge | MCP Apps 2026-01-26 + official `ext-apps` 2.0.3 SDK | ✅ `McpAppBridge` (replays an official `App` ↔ `AppBridge` session, `server/mcp_apps/record_fixtures.mjs`; visibility, approval, link, CSP-injection and resource checks; unit 5/5), `McpAppSandbox` (origin per server, CSP header, message port), `McpAppView` / `McpAppsHost` (sessions survive scrolling, root-level dialogs, full screen); core: negotiation, `_meta.ui`, app-only tools hidden, `DataPart.MCP_APP` / `MODEL_CONTEXT`; live `LiveMcpTest.modernServer_mcpApps` (official Python SDK); emulator `McpAppsTest` (official-SDK view: render, approved write, app-only refresh, CSP block, `ui/message` + model context) |
 
 ### W5 · Demo app
 

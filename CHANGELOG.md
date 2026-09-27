@@ -20,6 +20,21 @@
   `Agent` descriptions and skill lists (A2A cards).
 - `ai-elements-koog`: a JetBrains Koog agent as a `ChatBackend` (and as an `AgentHarness` model
   binding), with AI Elements tools as Koog tools; approvals and progress work as with the built-in loop.
+- New artifact `ai-elements-mcp-apps`: an MCP Apps host (2026-01-26). `ui://` views run in a
+  sandboxed WebView (per-server origin, CSP from `_meta.ui.csp` as a response header, message-port
+  bridge, no file or permission access). The host answers `ui/initialize`, `tools/call` (app-visible
+  tools of the view's own server; writes need approval), `resources/read`, `ui/message`,
+  `ui/update-model-context`, `ui/open-link` (http/s only) and `ui/request-display-mode` (inline and
+  full screen), and sends tool input, result, host context (Material theme as the standard CSS
+  variables) and teardown. `McpAppsHost` shows approvals and full screen at the screen's root, and
+  views keep running while they scroll away. Checked against a session recorded between the official
+  `App` and `AppBridge` SDKs, and end to end on the emulator with a view built on the official SDK.
+- MCP: `McpClient(capabilities = …)` and `McpApps.CLIENT_CAPABILITIES`; `McpTool.meta`,
+  `uiResourceUri`, `visibility` (app-only tools are hidden from the model); resource and tool results
+  keep `_meta` / the raw result; tools with a view add a `DataPart.MCP_APP` part.
+- `DataPart.MODEL_CONTEXT`: context for the model on a user turn (inline text for model APIs,
+  `RunAgentInput.context` for AG-UI, a `data-model-context` part for the AI SDK).
+- The offline mock agent calls a tool the prompt names.
 - New artifact `ai-elements-genui`: A2UI v1.0 surfaces rendered natively (`a2uiRenderer`,
   `A2uiSurfaceView`, extensible `A2uiCatalog`; passes the official conformance suite) and
   `JsxPreview`. A2UI rides each transport's binding: AG-UI `a2ui-surface` activities and

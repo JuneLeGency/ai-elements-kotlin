@@ -26,6 +26,7 @@ import kotlinx.serialization.json.putJsonObject
 import okhttp3.OkHttpClient
 import java.util.UUID
 import dev.ai.elements.core.model.hasContent
+import dev.ai.elements.core.model.inlineModelContext
 import dev.ai.elements.core.http.str
 import dev.ai.elements.core.http.sse
 import dev.ai.elements.core.http.obj
@@ -56,7 +57,7 @@ class GeminiBackend(
 ) : ChatBackend {
 
     override fun stream(history: List<Message>): Flow<ChatEvent> = flow {
-        val contents = history.filter { it.hasContent }.map { it.toContent() }.toMutableList()
+        val contents = history.inlineModelContext().filter { it.hasContent }.map { it.toContent() }.toMutableList()
         repeat(maxSteps) { step ->
             val parts = streamStep(JsonArray(contents), step)
             val calls = parts.mapNotNull { it.obj("functionCall") }

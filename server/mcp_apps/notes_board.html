@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notes board</title>
+<!-- An MCP App view (MCP Apps 2026-01-26) built on the official SDK, @modelcontextprotocol/ext-apps. -->
+<style>
+  :root {
+    --color-background-primary: light-dark(#ffffff, #1b1b1f);
+    --color-background-secondary: light-dark(#f3f3f7, #2a2a30);
+    --color-text-primary: light-dark(#1b1b1f, #e4e1e6);
+    --color-text-secondary: light-dark(#5d5e66, #c6c5d0);
+    --color-border-primary: light-dark(#c6c5d0, #46464f);
+    --color-ring-primary: light-dark(#4355b9, #bac3ff);
+    --font-sans: system-ui, sans-serif;
+    --border-radius-md: 12px;
+    color-scheme: light dark;
+  }
+  body { margin: 0; font-family: var(--font-sans); color: var(--color-text-primary); background: var(--color-background-primary); }
+  main { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  h2 { margin: 0; font-size: 1.05rem; }
+  ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  li { padding: 8px 10px; border-radius: var(--border-radius-md); background: var(--color-background-secondary); }
+  li b { display: block; }
+  li span { color: var(--color-text-secondary); font-size: .9rem; }
+  form, .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  input { flex: 1 1 120px; min-width: 0; padding: 8px; border-radius: 8px; border: 1px solid var(--color-border-primary); background: transparent; color: inherit; }
+  button { padding: 8px 12px; border-radius: 999px; border: 1px solid var(--color-border-primary); background: transparent; color: var(--color-ring-primary); font: inherit; }
+  #status { color: var(--color-text-secondary); font-size: .85rem; min-height: 1em; }
+</style>
+</head>
+<body>
+<main>
+  <h2 id="title">Notes</h2>
+  <ul id="notes"></ul>
+  <form id="add">
+    <input id="note-title" placeholder="Title" required>
+    <input id="note-content" placeholder="Note" required>
+    <button id="save" type="submit">Save</button>
+  </form>
+  <div class="actions">
+    <button id="refresh" type="button">Refresh</button>
+    <button id="ask" type="button">Ask about notes</button>
+    <button id="docs" type="button">MCP Apps docs</button>
+    <button id="fullscreen" type="button">Full screen</button>
+  </div>
+  <div id="status" role="status"></div>
+</main>
+<script type="module">
+  import { App, applyDocumentTheme, applyHostFonts, applyHostStyleVariables } from "https://cdn.jsdelivr.net/npm/@modelcontextprotocol/ext-apps@2.0.3/dist/src/app-with-deps.js";
+
+  const $ = (id) => document.getElementById(id);
+  const status = (text) => { $("status").textContent = text; };
+
+  function render(notes) {
+    $("notes").replaceChildren(...notes.map((n) => {
+      const li = document.createElement("li");
+      const b = document.createElement("b"); b.textContent = n.title;
+      const span = document.createElement("span"); span.textContent = n.content;
+      li.append(b, span);
+      return li;
+    }));
+    $("title").textContent = `Notes (${notes.length})`;
+    // Keep the model aware of what the user sees (ui/update-model-context).
+    app.updateModelContext({ content: [{ type: "text", text: `The notes board shows ${notes.length} note(s): ${notes.map((n) => n.title).join(", ")}` }] });
+  }
+
+  const notesOf = (result) => result?.structuredContent?.notes ?? result?.structuredContent?.result ?? [];
+
+  function applyContext(ctx) {
+    if (ctx.theme) applyDocumentTheme(ctx.theme);
+    if (ctx.styles?.variables) applyHostStyleVariables(ctx.styles.variables);
+    if (ctx.styles?.css?.fonts) applyHostFonts(ctx.styles.css.fonts);
+  }
+
+  const app = new App({ name: "Notes board", version: "1.0.0" }, { availableDisplayModes: ["inline", "fullscreen"] });
+  app.ontoolinput = () => status("Loading notes…");
+  app.ontoolresult = (result) => { status(""); render(notesOf(result)); };
+  app.ontoolcancelled = ({ reason }) => status(`Cancelled: ${reason ?? ""}`);
+  app.onhostcontextchanged = applyContext;
+  app.onteardown = async () => ({});
+
+  async function refresh() {
+    // `board_notes` is an app-only tool (visibility ["app"]): the model never sees it.
+    const result = await app.callServerTool({ name: "board_notes", arguments: {} });
+    render(notesOf(result));
+  }
+
+  $("add").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    status("Saving…");
+    const result = await app.callServerTool({ name: "save_note", arguments: { title: $("note-title").value, content: $("note-content").value } });
+    status(result.isError ? `Not saved: ${result.content?.[0]?.text ?? ""}` : result.content?.[0]?.text ?? "Saved");
+    if (!result.isError) { $("add").reset(); await refresh(); }
+  });
+  $("refresh").addEventListener("click", () => refresh().catch((e) => status(String(e.message ?? e))));
+  $("ask").addEventListener("click", () => app.sendMessage({ role: "user", content: [{ type: "text", text: "Summarize the notes on my board" }] }));
+  $("docs").addEventListener("click", () => app.openLink({ url: "https://modelcontextprotocol.io/extensions/apps" }));
+  $("fullscreen").addEventListener("click", async () => {
+    const { mode } = await app.requestDisplayMode({ mode: "fullscreen" });
+    status(`Display mode: ${mode}`);
+  });
+
+  await app.connect();
+  applyContext(app.getHostContext() ?? {});
+</script>
+</body>
+</html>

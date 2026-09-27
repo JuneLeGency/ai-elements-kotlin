@@ -15,13 +15,21 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 
 /**
  * Saved remote MCP servers. Configs live in SharedPreferences; bearer tokens,
  * OAuth registrations and tokens are encrypted in [secrets]. Clients are
  * cached per server so the negotiated protocol era and session are reused.
+ *
+ * @param clientCapabilities declared by every client, e.g. [dev.ai.elements.core.mcp.McpApps.CLIENT_CAPABILITIES]
+ *   when the app renders MCP Apps (`ai-elements-mcp-apps`).
  */
-class McpServerStore(context: Context, private val secrets: SecretStore = SecretStore(context)) {
+class McpServerStore(
+    context: Context,
+    private val secrets: SecretStore = SecretStore(context),
+    private val clientCapabilities: JsonObject = JsonObject(emptyMap()),
+) {
     private val prefs = context.getSharedPreferences("ai_elements_mcp", Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val listSerializer = ListSerializer(McpServerConfig.serializer())
@@ -65,8 +73,11 @@ class McpServerStore(context: Context, private val secrets: SecretStore = Secret
 
     /** The client for [server], with its configured credentials. */
     fun client(server: McpServerConfig): McpClient = synchronized(clients) {
-        clients[server.id]?.takeIf { it.first == server }?.second ?: McpClient(server.url, auth = auth(server)).also { clients[server.id] = server to it }
+        clients[server.id]?.takeIf { it.first == server }?.second ?: McpClient(server.url, auth = auth(server), capabilities = clientCapabilities).also { clients[server.id] = server to it }
     }
+
+    /** The client of the saved server [id] (e.g. for an MCP App of one of its tools), or null. */
+    fun client(id: String): McpClient? = _servers.value.firstOrNull { it.id == id }?.let(::client)
 
     /** The enabled servers as a capability for a turn. */
     fun toolset(): McpToolset = McpToolset(_servers.value.filter { it.enabled }, ::client)

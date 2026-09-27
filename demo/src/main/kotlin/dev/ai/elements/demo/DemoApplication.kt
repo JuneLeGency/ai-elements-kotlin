@@ -1,5 +1,6 @@
 package dev.ai.elements.demo
 
+import dev.ai.elements.core.mcp.McpApps
 import android.app.Application
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ToolApprover
@@ -16,7 +17,7 @@ import dev.ai.elements.harness.scheduler.ScheduledAgentHost
  */
 class DemoApplication : Application(), ScheduledAgentHost {
     val providers by lazy { ProviderStore(this) }
-    val mcpServers by lazy { McpServerStore(this, providers.secrets) }
+    val mcpServers by lazy { McpServerStore(this, providers.secrets, clientCapabilities = McpApps.CLIENT_CAPABILITIES) }
     val agents by lazy { AgentsStore(this) }
     val skills by lazy { SkillsRepository(this) }
     val runtime by lazy { AgentRuntime(this, providers, mcpServers, agents, skills, appTools = listOf(ClipboardTool(this))) }

@@ -12,7 +12,9 @@ import dev.ai.elements.core.mcp.McpServerStatus
 import kotlinx.coroutines.flow.update
 import dev.ai.elements.core.auth.OAuthProvider
 import dev.ai.elements.core.config.ProviderProfile
+import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.FilePart
+import dev.ai.elements.mcpapps.McpAppModelContext
 import dev.ai.elements.demo.auth.SignInController
 import dev.ai.elements.demo.data.AppSettings
 import dev.ai.elements.demo.data.Conversation
@@ -62,7 +64,14 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun send(text: String, attachments: List<FilePart> = emptyList()): Boolean = chat.send(text, attachments)
+    fun send(text: String, attachments: List<FilePart> = emptyList()): Boolean = chat.send(text, attachments, data = takeAppContext())
+
+    // MCP Apps: each view's latest `ui/update-model-context`, sent with the next user turn.
+    private val appContext = mutableMapOf<String, DataPart>()
+
+    fun setMcpAppContext(context: McpAppModelContext) = synchronized(appContext) { appContext[context.toolCallId] = context.toDataPart() }
+
+    private fun takeAppContext(): List<DataPart> = synchronized(appContext) { appContext.values.toList().also { appContext.clear() } }
     fun respondToApproval(toolCallId: String, approved: Boolean) = chat.respondToApproval(toolCallId, approved)
 
     /** A user's action on an agent-sent A2UI surface, back to the agent over the provider's protocol. */

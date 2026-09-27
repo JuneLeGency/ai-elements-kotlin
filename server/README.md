@@ -9,6 +9,12 @@ two protocols via PydanticAI's UI adapters:
 - `POST /concierge/a2a` — **A2A** hotel concierge that answers with **A2UI** v1.0 (A2UI A2A extension;
   card at `/concierge/.well-known/agent-card.json`)
 
+MCP Apps: the MCP server's `show_notes_board` tool has a view (`ui://notes/board`,
+`mcp_apps/notes_board.html`, built on the official `@modelcontextprotocol/ext-apps` SDK from its CDN);
+`board_notes` is only for that view (`visibility: ["app"]`), so the server's own agent never sees it.
+`mcp_apps/record_fixtures.mjs` records the client's MCP Apps fixture from the official SDKs
+(`cd mcp_apps && npm install && npm run record`).
+
 Generative UI: say "hotel" and the agent sends an A2UI booking form (`a2ui_demo.py`) on the
 protocol's A2UI binding — an AG-UI `a2ui-surface` activity, an AI SDK `data-a2ui` part or an A2A
 `application/a2ui+json` DataPart. Its **Book** action comes back on the same binding and the agent

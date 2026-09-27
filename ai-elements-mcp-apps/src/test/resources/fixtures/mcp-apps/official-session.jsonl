@@ -1,0 +1,24 @@
+{"from":"view","message":{"method":"ui/initialize","params":{"appCapabilities":{"availableDisplayModes":["inline","fullscreen"]},"appInfo":{"name":"Notes board","version":"1.0.0"},"protocolVersion":"2026-01-26"},"jsonrpc":"2.0","id":0}}
+{"from":"host","message":{"result":{"protocolVersion":"2026-01-26","hostCapabilities":{"openLinks":{},"serverTools":{},"serverResources":{},"logging":{},"updateModelContext":{"text":{}},"message":{"text":{}}},"hostInfo":{"name":"reference-host","version":"1.0.0"},"hostContext":{"theme":"light","displayMode":"inline","availableDisplayModes":["inline","fullscreen"],"platform":"mobile","locale":"en-US","toolInfo":{"id":"call-1","tool":{"name":"show_notes_board","description":"Show the notes board","inputSchema":{"type":"object","properties":{}},"_meta":{"ui":{"resourceUri":"ui://notes/board"}}}}}},"jsonrpc":"2.0","id":0}}
+{"from":"view","message":{"jsonrpc":"2.0","method":"ui/notifications/initialized"}}
+{"from":"host","message":{"jsonrpc":"2.0","method":"ui/notifications/tool-input","params":{"arguments":{}}}}
+{"from":"host","message":{"jsonrpc":"2.0","method":"ui/notifications/tool-result","params":{"content":[{"type":"text","text":"No notes yet."}],"structuredContent":{"notes":[]}}}}
+{"from":"view","message":{"method":"tools/call","params":{"name":"save_note","arguments":{"title":"Milk","content":"2 litres"},"_meta":{"progressToken":1}},"jsonrpc":"2.0","id":1}}
+{"from":"host","message":{"result":{"content":[{"type":"text","text":"Saved note “Milk”."}]},"jsonrpc":"2.0","id":1}}
+{"from":"view","message":{"method":"tools/call","params":{"name":"board_notes","arguments":{},"_meta":{"progressToken":2}},"jsonrpc":"2.0","id":2}}
+{"from":"host","message":{"result":{"content":[{"type":"text","text":"1 note(s)"}],"structuredContent":{"notes":[{"title":"Milk","content":"2 litres"}]}},"jsonrpc":"2.0","id":2}}
+{"from":"view","message":{"method":"resources/read","params":{"uri":"notes://all"},"jsonrpc":"2.0","id":3}}
+{"from":"host","message":{"result":{"contents":[{"uri":"notes://all","mimeType":"text/markdown","text":"## Milk\n2 litres"}]},"jsonrpc":"2.0","id":3}}
+{"from":"view","message":{"method":"ui/message","params":{"role":"user","content":[{"type":"text","text":"Summarize the notes on my board"}]},"jsonrpc":"2.0","id":4}}
+{"from":"host","message":{"result":{},"jsonrpc":"2.0","id":4}}
+{"from":"view","message":{"method":"ui/update-model-context","params":{"content":[{"type":"text","text":"The notes board shows 1 note(s): Milk"}]},"jsonrpc":"2.0","id":5}}
+{"from":"host","message":{"result":{},"jsonrpc":"2.0","id":5}}
+{"from":"view","message":{"method":"ui/open-link","params":{"url":"https://modelcontextprotocol.io/extensions/apps"},"jsonrpc":"2.0","id":6}}
+{"from":"host","message":{"result":{},"jsonrpc":"2.0","id":6}}
+{"from":"view","message":{"method":"ui/request-display-mode","params":{"mode":"fullscreen"},"jsonrpc":"2.0","id":7}}
+{"from":"host","message":{"result":{"mode":"fullscreen"},"jsonrpc":"2.0","id":7}}
+{"from":"view","message":{"jsonrpc":"2.0","method":"ui/notifications/size-changed","params":{"width":360,"height":420}}}
+{"from":"view","message":{"jsonrpc":"2.0","method":"notifications/message","params":{"level":"info","data":"board rendered"}}}
+{"from":"host","message":{"jsonrpc":"2.0","method":"ui/notifications/host-context-changed","params":{"theme":"dark","displayMode":"fullscreen"}}}
+{"from":"host","message":{"method":"ui/resource-teardown","params":{},"jsonrpc":"2.0","id":0}}
+{"from":"view","message":{"result":{},"jsonrpc":"2.0","id":0}}

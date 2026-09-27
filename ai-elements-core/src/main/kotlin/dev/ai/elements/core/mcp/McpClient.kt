@@ -51,7 +51,8 @@ import kotlin.io.encoding.Base64
  * calling coroutine closes the stream, which is the cancellation signal.
  *
  * The client declares no optional client capabilities (sampling, elicitation,
- * roots), so conforming servers never ask for them.
+ * roots), so conforming servers never ask for them; [capabilities] can add
+ * extensions, e.g. [McpApps.CLIENT_CAPABILITIES] for MCP Apps.
  *
  * @param headers sent with every request, e.g. a static API key header.
  * @param auth supplies (and refreshes) bearer tokens; see [McpAuth].
@@ -62,6 +63,8 @@ class McpClient(
     private val auth: McpAuth? = null,
     private val http: OkHttpClient = DefaultHttpClient,
     private val clientInfo: McpImplementation = McpImplementation("ai-elements-kotlin", "0.3.0"),
+    /** The `ClientCapabilities` to declare (legacy `initialize` and per-request `_meta`). */
+    private val capabilities: JsonObject = JsonObject(emptyMap()),
 ) {
     private sealed interface Era {
         data object Modern : Era
@@ -122,7 +125,7 @@ class McpClient(
     /** The contents of the resource at [uri] (text and/or base64 blobs). */
     suspend fun readResource(uri: String): List<McpContent.Resource> =
         request("resources/read", buildJsonObject { put("uri", uri) }, name = uri)
-            .arr("contents")?.mapNotNull { (it as? JsonObject)?.let { c -> McpContent.Resource(c.str("uri") ?: uri, c.str("mimeType"), c.str("text"), c.str("blob")) } }
+            .arr("contents")?.mapNotNull { (it as? JsonObject)?.let { c -> McpContent.Resource(c.str("uri") ?: uri, c.str("mimeType"), c.str("text"), c.str("blob"), c.obj("_meta")) } }
             .orEmpty()
 
     suspend fun listPrompts(): List<McpPrompt> = paginate("prompts/list", "prompts") { p ->
@@ -223,7 +226,7 @@ class McpClient(
         if (era is Era.Legacy && era != seen) return@withLock
         val params = buildJsonObject {
             put("protocolVersion", LEGACY_VERSIONS.first())
-            putJsonObject("capabilities") {}
+            put("capabilities", capabilities)
             putJsonObject("clientInfo") {
                 put("name", clientInfo.name)
                 put("version", clientInfo.version)
@@ -407,7 +410,7 @@ class McpClient(
                     put("name", clientInfo.name)
                     put("version", clientInfo.version)
                 }
-                putJsonObject("io.modelcontextprotocol/clientCapabilities") {}
+                put("io.modelcontextprotocol/clientCapabilities", capabilities)
             }
         }
         if (meta.isEmpty()) return params

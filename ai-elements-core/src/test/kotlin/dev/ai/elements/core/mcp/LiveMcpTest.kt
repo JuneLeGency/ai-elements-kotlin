@@ -1,6 +1,11 @@
 package dev.ai.elements.core.mcp
 
 import dev.ai.elements.core.agent.ToolCallContext
+import dev.ai.elements.core.chat.ToolApprover
+import dev.ai.elements.core.model.DataPart
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -78,5 +83,39 @@ class LiveMcpTest {
         assertTrue(toolset.status["down"] is McpServerStatus.Failed)
         assertTrue(toolset.status["legacy"] is McpServerStatus.Connected)
         assertTrue(ToolCallContext.current() == null)
+    }
+
+    /** MCP Apps (2026-01-26) against the official SDK: UI tool metadata, app-only tools, the view resource, the chat part. */
+    @Test
+    fun modernServer_mcpApps() = runBlocking {
+        assumeTrue(modern != null)
+        val client = McpClient(modern!!, capabilities = McpApps.CLIENT_CAPABILITIES)
+        val tools = client.listTools().associateBy { it.name }
+        val board = tools.getValue("show_notes_board")
+        assertEquals("ui://notes/board", board.uiResourceUri)
+        assertEquals(setOf("model", "app"), board.visibility)
+        assertEquals(setOf("app"), tools.getValue("board_notes").visibility)
+
+        val view = client.readResource("ui://notes/board").single()
+        assertEquals(McpApps.MIME_TYPE, view.mimeType)
+        assertTrue(view.text!!.contains("@modelcontextprotocol/ext-apps"))
+        assertEquals("[\"https://cdn.jsdelivr.net\"]", view.meta!!.obj("ui")!!.obj("csp")!!["resourceDomains"].toString())
+
+        // The model never sees app-only tools; a UI tool's call publishes the MCP App part, then its result.
+        val server = McpServerConfig("notes", "Notes", modern)
+        val agentTools = McpToolset(listOf(server), { client }).tools().associateBy { it.name }
+        assertTrue(agentTools.keys.toString(), "notes__show_notes_board" in agentTools && "notes__board_notes" !in agentTools)
+        val updates = mutableListOf<ToolCallContext.Update>()
+        withContext(ToolCallContext("call-1", ToolApprover.AlwaysApprove) { updates += it }) {
+            agentTools.getValue("notes__show_notes_board").execute(buildJsonObject {})
+        }
+        val parts = updates.filterIsInstance<ToolCallContext.Update.Data>()
+        assertEquals(listOf(DataPart.MCP_APP, DataPart.MCP_APP), parts.map { it.name })
+        assertEquals(setOf("mcp-app-call-1"), parts.map { it.id }.toSet())
+        val done = parts.last().data.jsonObject
+        assertEquals("ui://notes/board", done["resourceUri"]!!.jsonPrimitive.content)
+        assertEquals("show_notes_board", done["tool"]!!.jsonObject["name"]!!.jsonPrimitive.content)
+        assertTrue(parts.first().data.jsonObject["result"] == null)
+        assertTrue(done["result"]!!.jsonObject["structuredContent"]!!.jsonObject.containsKey("notes"))
     }
 }

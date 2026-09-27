@@ -10,6 +10,9 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import dev.ai.elements.core.model.DataPart
 
 /** When an MCP tool asks the user before running. */
 @Serializable
@@ -69,13 +72,34 @@ class McpAgentTool(
 
     override suspend fun execute(arguments: JsonObject): String {
         val context = ToolCallContext.current()
+        // MCP Apps: the view shows with the input while the tool runs, then gets its result.
+        val app = tool.uiResourceUri?.let { uri -> context?.let { McpAppPart(it, uri, arguments) } }
+        app?.publish(null)
         val result = client.callTool(tool, arguments) { p ->
             val percent = p.fraction?.let { " ${(it * 100).toInt()}%" }.orEmpty()
             context?.progress(listOfNotNull(p.message, percent.trim().ifEmpty { null }).joinToString(" ").ifEmpty { "…" })
         }
+        app?.publish(result)
         val text = result.toText()
         if (result.isError) throw McpException(text.ifBlank { "${tool.name} failed" })
         return text
+    }
+
+    /** The [DataPart.MCP_APP] part of one call. */
+    private inner class McpAppPart(private val context: ToolCallContext, private val resourceUri: String, private val input: JsonObject) {
+        suspend fun publish(result: McpToolResult?) = context.data(
+            "mcp-app-${context.toolCallId}",
+            DataPart.MCP_APP,
+            buildJsonObject {
+                put("server", server.id)
+                put("serverName", server.name)
+                put("resourceUri", resourceUri)
+                put("tool", tool.toJson())
+                put("toolCallId", context.toolCallId)
+                put("input", input)
+                result?.raw?.let { put("result", it) }
+            },
+        )
     }
 
     companion object {
@@ -124,7 +148,9 @@ class McpToolset(
                 val tools = runCatching { listCached(server, client) }
                     .onFailure { e -> record(server, if (e is McpAuthRequiredException) McpServerStatus.NeedsSignIn(e) else McpServerStatus.Failed(e.message ?: e::class.simpleName.orEmpty())) }
                     .getOrNull().orEmpty()
-                tools.filter { it.name !in server.disabledTools }.map { McpAgentTool(client, it, server) }
+                // MCP Apps: tools only an app may call (`visibility: ["app"]`) are not the model's.
+                tools.filter { it.name !in server.disabledTools && McpTool.VISIBLE_TO_MODEL in it.visibility }
+                    .map { McpAgentTool(client, it, server) }
             }
         }.awaitAll().flatten()
     }

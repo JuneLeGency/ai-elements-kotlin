@@ -71,6 +71,7 @@ import dev.ai.elements.core.http.BackendJson
 import dev.ai.elements.core.agent.runTool
 import dev.ai.elements.core.agent.DENIED_RESULT
 import dev.ai.elements.core.model.hasContent
+import dev.ai.elements.core.model.modelContext
 import dev.ai.elements.core.model.images
 import dev.ai.elements.core.http.int
 
@@ -135,7 +136,9 @@ class AgUiBackend(
                     }
                 }
                 putJsonArray("context") {
-                    context.forEach { (description, value) -> addJsonObject { put("description", description); put("value", value) } }
+                    // Static context, then the turn's own (DataPart.MODEL_CONTEXT, e.g. an MCP App's).
+                    (context + history.lastOrNull { m -> m.role == Role.USER }?.modelContext.orEmpty())
+                        .forEach { (description, value) -> addJsonObject { put("description", description); put("value", value) } }
                 }
                 putJsonObject("forwardedProps") {
                     // A2UI user action (AG-UI A2UI binding, @ag-ui/a2ui-middleware): only on the run it starts.

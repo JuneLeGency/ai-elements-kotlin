@@ -5,6 +5,9 @@ import dev.ai.elements.ui.chat.AiElementsRenderers
 import dev.ai.elements.genui.jsx.jsxCodeBlocks
 import dev.ai.elements.genui.a2ui.a2uiRenderer
 import dev.ai.elements.genui.a2ui.A2uiAction
+import dev.ai.elements.mcpapps.McpAppActions
+import dev.ai.elements.mcpapps.McpAppModelContext
+import dev.ai.elements.mcpapps.McpAppsHost
 import dev.ai.elements.core.model.DataPart
 import android.content.Context
 import android.graphics.Color
@@ -79,21 +82,33 @@ class MainActivity : ComponentActivity() {
                 val scaled = remember(density, appearance.textSize) {
                     Density(density.density, density.fontScale * appearance.textSize.scale)
                 }
-                // Generative UI: A2UI surfaces from any transport, and ```jsx previews, rendered natively.
-                val renderers = remember(viewModel) {
-                    val send: (A2uiAction) -> Unit = { viewModel.sendA2uiAction(it) }
-                    AiElementsRenderers(
-                        data = mapOf(DataPart.A2UI to a2uiRenderer(onAction = send)),
-                        codeBlocks = mapOf("jsx" to jsxCodeBlocks(send), "tsx" to jsxCodeBlocks(send)),
-                    )
+                // Generative UI: A2UI surfaces from any transport, ```jsx previews rendered natively,
+                // and MCP Apps (interactive views of MCP tools) in a sandbox.
+                val appActions = remember(viewModel) {
+                    object : McpAppActions {
+                        override fun message(text: String) = viewModel.send(text)
+                        override fun modelContext(context: McpAppModelContext) = viewModel.setMcpAppContext(context)
+                    }
                 }
-                CompositionLocalProvider(
-                    LocalMermaidRenderer provides renderer,
-                    LocalMermaidSizing provides sizing,
-                    LocalDensity provides scaled,
-                    LocalAiElementsRenderers provides renderers,
-                ) {
-                    DemoApp(viewModel)
+                McpAppsHost({ id -> viewModel.mcpServers.client(id) }, appActions) { mcpApps ->
+                    val renderers = remember(viewModel, mcpApps) {
+                        val send: (A2uiAction) -> Unit = { viewModel.sendA2uiAction(it) }
+                        AiElementsRenderers(
+                            data = mapOf(
+                                DataPart.A2UI to a2uiRenderer(onAction = send),
+                                DataPart.MCP_APP to mcpApps,
+                            ),
+                            codeBlocks = mapOf("jsx" to jsxCodeBlocks(send), "tsx" to jsxCodeBlocks(send)),
+                        )
+                    }
+                    CompositionLocalProvider(
+                        LocalMermaidRenderer provides renderer,
+                        LocalMermaidSizing provides sizing,
+                        LocalDensity provides scaled,
+                        LocalAiElementsRenderers provides renderers,
+                    ) {
+                        DemoApp(viewModel)
+                    }
                 }
             }
             // The window background only covers startup; once Compose has drawn,

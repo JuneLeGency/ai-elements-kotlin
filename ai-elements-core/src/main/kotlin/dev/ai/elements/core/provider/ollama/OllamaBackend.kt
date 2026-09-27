@@ -25,6 +25,7 @@ import okhttp3.OkHttpClient
 import java.util.UUID
 import dev.ai.elements.core.provider.openai.toOpenAi
 import dev.ai.elements.core.model.hasContent
+import dev.ai.elements.core.model.inlineModelContext
 import dev.ai.elements.core.http.str
 import dev.ai.elements.core.http.obj
 import dev.ai.elements.core.http.ndjson
@@ -55,7 +56,7 @@ class OllamaBackend(
     override fun stream(history: List<Message>): Flow<ChatEvent> = flow {
         val messages = buildJsonArray {
             if (systemPrompt.isNotBlank()) addJsonObject { put("role", "system"); put("content", systemPrompt) }
-            history.filter { it.hasContent }.forEach { m ->
+            history.inlineModelContext().filter { it.hasContent }.forEach { m ->
                 addJsonObject {
                     put("role", if (m.role == Role.USER) "user" else "assistant")
                     put("content", m.text)

@@ -21,6 +21,7 @@ import dev.ai.elements.core.agent.runTool
  * An offline agent that exercises every part type — reasoning, a real tool call
  * (executed through [tools]), sources, and a Markdown answer with a table, code
  * and a Mermaid diagram — so the full UI can be demoed without a network.
+ * Naming a tool in the prompt (e.g. `notes__show_notes_board`) calls it with no arguments.
  *
  * @param chunkDelayMs pause between streamed chunks; 0 in tests.
  */
@@ -33,6 +34,7 @@ class MockAgentBackend(
     override fun stream(history: List<Message>): Flow<ChatEvent> = flow {
         val prompt = history.lastOrNull { it.role == Role.USER }?.text.orEmpty()
         val math = extractExpression(prompt)
+        val named = tools.filter { prompt.contains(it.name) }.maxByOrNull { it.name.length }
         val wantsCopy = tools.any { it.name == "copy_to_clipboard" } &&
             listOf("copy", "clipboard", "复制", "剪贴板", "複製", "剪貼簿", "コピー", "クリップボード").any { prompt.contains(it, ignoreCase = true) }
 
@@ -64,6 +66,7 @@ class MockAgentBackend(
         streamText(
             "The user asked: \"${prompt.take(80)}\". I should " +
                 (when {
+                    named != null -> "call the ${named.name} tool the user named"
                     wantsCopy -> "copy the text to the clipboard, which needs the user's approval"
                     math != null -> "evaluate the expression with the calculator tool"
                     else -> "check the current time with a tool"
@@ -74,6 +77,7 @@ class MockAgentBackend(
 
         val callId = "call_${UUID.randomUUID()}"
         val (toolName, args) = when {
+            named != null -> named.name to "{}"
             wantsCopy -> "copy_to_clipboard" to """{"text": "Hello from the AI Elements agent"}"""
             math != null -> "calculate" to """{"expression": "${math.replace("\"", "")}"}"""
             else -> "get_current_time" to """{"timezone": "Asia/Shanghai"}"""

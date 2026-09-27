@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.androidx.browser)
     implementation(project(":ai-elements-ui"))
     implementation(project(":ai-elements-genui"))
+    implementation(project(":ai-elements-mcp-apps"))
     implementation(project(":ai-elements-mermaid-native"))
     implementation(project(":ai-elements-a2a"))
     implementation(project(":harness:harness-core"))

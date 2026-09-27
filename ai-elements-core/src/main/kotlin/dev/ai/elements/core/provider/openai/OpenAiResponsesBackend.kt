@@ -24,6 +24,7 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import okhttp3.OkHttpClient
 import dev.ai.elements.core.model.hasContent
+import dev.ai.elements.core.model.inlineModelContext
 import dev.ai.elements.core.http.str
 import dev.ai.elements.core.http.DefaultHttpClient
 import dev.ai.elements.core.http.BackendJson
@@ -58,7 +59,7 @@ class OpenAiResponsesBackend(
 ) : ChatBackend {
 
     override fun stream(history: List<Message>): Flow<ChatEvent> = flow {
-        val input = history.filter { it.hasContent }.map { it.toInputItem() }.toMutableList()
+        val input = history.inlineModelContext().filter { it.hasContent }.map { it.toInputItem() }.toMutableList()
         repeat(maxSteps) {
             val output = streamStep(JsonArray(input))
             val calls = output.filter { it.str("type") == "function_call" }

@@ -229,6 +229,22 @@ data class DataPart(
 
         /** The A2UI media type in transports. */
         const val A2UI_MEDIA_TYPE = "application/a2ui+json"
+
+        /**
+         * An MCP App (MCP Apps extension `io.modelcontextprotocol/ui`) for a tool call, as a JSON
+         * object: `server` (id), `serverName`, `resourceUri` (`ui://…`), `tool` (the MCP tool),
+         * `toolCallId`, `input` and, once the call returns, `result` (the MCP `CallToolResult`).
+         * In-process only: the MCP client that ran the tool adds it.
+         */
+        const val MCP_APP = "mcp-app"
+
+        /**
+         * Context for the model on a user turn, as `{"description": …, "value": …}` (e.g. what an
+         * MCP App shows, from `ui/update-model-context`). Not shown as the user's words: on-device
+         * models get it as text before the turn, AG-UI as `RunAgentInput.context`, the AI SDK as a
+         * `data-model-context` part.
+         */
+        const val MODEL_CONTEXT = "model-context"
     }
 }
 

@@ -10,10 +10,11 @@ output, and error results.
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 from datetime import datetime, timezone
 
 from mcp.server.mcpserver import Context, MCPServer
-from mcp.types import ToolAnnotations
+from mcp.types import CallToolResult, TextContent, ToolAnnotations
 
 mcp = MCPServer(
     name="ai-elements-notes",
@@ -73,6 +74,42 @@ async def count_slowly(to: int, ctx: Context) -> str:
         await ctx.report_progress(i, to, f"Counted {i}")
         await asyncio.sleep(0.5)
     return f"Counted to {to}."
+
+
+# --- MCP Apps (io.modelcontextprotocol/ui, 2026-01-26) -------------------------------------
+# `show_notes_board` renders in an interactive view (a `ui://` HTML resource built on the official
+# `@modelcontextprotocol/ext-apps` SDK); `board_notes` is only for that view (visibility ["app"]).
+
+BOARD_URI = "ui://notes/board"
+MCP_APP_MIME = "text/html;profile=mcp-app"
+_BOARD_HTML = (Path(__file__).resolve().parent / "mcp_apps" / "notes_board.html").read_text()
+
+
+@mcp.resource(BOARD_URI, name="notes-board", title="Notes board", mime_type=MCP_APP_MIME,
+              meta={"ui": {"csp": {"resourceDomains": ["https://cdn.jsdelivr.net"]}, "prefersBorder": True}})
+def notes_board() -> str:
+    """The interactive notes board (MCP App view)."""
+    return _BOARD_HTML
+
+
+def _board() -> CallToolResult:
+    notes = list(_NOTES.values())
+    text = f"{len(notes)} note(s): " + ", ".join(n["title"] for n in notes) if notes else "No notes yet."
+    return CallToolResult(content=[TextContent(type="text", text=text)], structured_content={"notes": notes})
+
+
+@mcp.tool(title="Show notes board", annotations=ToolAnnotations(readOnlyHint=True),
+          meta={"ui": {"resourceUri": BOARD_URI}})
+def show_notes_board() -> CallToolResult:
+    """Show the user's notes on an interactive board where they can add notes and ask about them."""
+    return _board()
+
+
+@mcp.tool(title="Board notes", annotations=ToolAnnotations(readOnlyHint=True),
+          meta={"ui": {"resourceUri": BOARD_URI, "visibility": ["app"]}})
+def board_notes() -> CallToolResult:
+    """The notes for the board view (called by the view, not the model)."""
+    return _board()
 
 
 @mcp.resource("notes://all", name="all-notes", title="All notes", mime_type="text/markdown")

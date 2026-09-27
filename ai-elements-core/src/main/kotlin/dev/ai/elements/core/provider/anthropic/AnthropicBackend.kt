@@ -25,6 +25,7 @@ import kotlinx.serialization.json.putJsonObject
 import okhttp3.OkHttpClient
 import java.util.UUID
 import dev.ai.elements.core.model.hasContent
+import dev.ai.elements.core.model.inlineModelContext
 import dev.ai.elements.core.http.str
 import dev.ai.elements.core.http.sse
 import dev.ai.elements.core.http.obj
@@ -64,7 +65,7 @@ class AnthropicBackend(
     }
 
     override fun stream(history: List<Message>): Flow<ChatEvent> = flow {
-        val messages = history.filter { it.hasContent }.map { m ->
+        val messages = history.inlineModelContext().filter { it.hasContent }.map { m ->
             buildJsonObject {
                 put("role", if (m.role == Role.USER) "user" else "assistant")
                 put("content", m.anthropicContent())

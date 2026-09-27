@@ -14,6 +14,8 @@ crosses a process boundary must follow one of them, exactly as specified:
 | Agent ↔ UI streaming | Vercel **AI SDK** UI Message Stream (v5/v6), v4 Data Stream | `core/protocol/aisdk/` |
 | Agent ↔ UI streaming | **AG-UI** 1.x (events, subagents, interrupts/resume, state, activities) | `core/protocol/agui/` (official AG-UI `kotlin-core` types) |
 | Tools and context from servers | **MCP** 2026-07-28 Streamable HTTP, with fallback to the 2025-xx session revisions | `core/mcp/` |
+| Interactive tool views | **MCP Apps** 2026-01-26 (`io.modelcontextprotocol/ui`: `ui://` views, `ui/*` bridge, sandbox + CSP) | `core/mcp/McpApps.kt` (negotiation, `_meta.ui`), `ai-elements-mcp-apps` (host) |
+| Generative UI | **A2UI** v1.0 (Basic Catalog; AG-UI, A2A and AI SDK bindings) | `ai-elements-genui` (renderer), transports in `core` / `a2a` |
 | Agent ↔ agent | **A2A** 1.0 JSON-RPC binding, with 0.3 compatibility | `ai-elements-a2a` (official `a2a-java-sdk`) |
 | Skills | **Agent Skills** (`SKILL.md` + YAML frontmatter) | `core/skills/` |
 | Sign-in | OAuth 2.1 / RFC 6749, 7636, 8252, 8628, 8414, 9728, 7591, 8707 | `core/auth/`, `core/mcp/McpAuth.kt` |
@@ -54,7 +56,9 @@ Rules:
 networking, no Compose) ← `ai-elements-core` (protocols, providers, agent, MCP, skills, auth) and
 `ai-elements-ui` (Compose elements; depends on `ai-elements-chat` **only**) ← optional artifacts
 (`ai-elements-a2a`, `ai-elements-koog`, `harness/*`). A new protocol is a `ChatBackend` in core or in
-its own artifact; it never needs a UI change.
+its own artifact; it never needs a UI change. UI formats that need more than the chat model sit on
+top of `ai-elements-ui`: `ai-elements-genui` (A2UI, JSX; ui only) and `ai-elements-mcp-apps` (ui +
+core, since a view talks to its MCP server). They plug in through `AiElementsRenderers`.
 
 ### Package layering (ai-elements-core)
 

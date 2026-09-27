@@ -45,6 +45,7 @@ dependencies {
     implementation("io.github.junelegency:ai-elements-core")        // AI SDK / AG-UI / model-API backends, agent loop, MCP
     // Optional, as needed:
     implementation("io.github.junelegency:ai-elements-genui")       // generative UI: A2UI surfaces, JsxPreview
+    implementation("io.github.junelegency:ai-elements-mcp-apps")    // MCP Apps: interactive views of MCP tools
     implementation("io.github.junelegency:ai-elements-a2a")         // A2A agents (official a2a-java-sdk)
     implementation("io.github.junelegency:ai-elements-koog")        // JetBrains Koog as the agent runtime
     implementation("io.github.junelegency.harness:harness-core")    // in-app agent
@@ -61,6 +62,7 @@ dependencies {
 | `ai-elements-core` | Protocol clients (AI SDK, AG-UI), model APIs, agent loop, `SubAgents`, `Skills`, MCP, OAuth — each a `ChatBackend` or capability on top of `ai-elements-chat`. No Compose. | 24 |
 | `ai-elements-ui` | The Compose elements and `AiElementsTheme`; depends on `ai-elements-chat` only, so it renders any backend — including your own `ChatBackend`. | 24 |
 | `ai-elements-genui` | Generative UI on the elements: A2UI v1.0 surfaces rendered natively (Basic Catalog, extensible with your own components), `JsxPreview`. Depends on `ai-elements-ui` only; transports hand it A2UI messages. | 26 |
+| `ai-elements-mcp-apps` | An MCP Apps host (2026-01-26): `ui://` views of MCP tools in a sandboxed WebView (CSP from the view's metadata, no JavaScript interface), bridged to their server; tool approvals, full screen, model context. | 24 |
 | `ai-elements-a2a` | A2A 1.0 on the official Java SDK: remote agents as providers or sub-agents. Needs core library desugaring. | 26 |
 | `ai-elements-koog` | A JetBrains Koog agent as a `ChatBackend` or harness model binding (`KoogBackend`); AI Elements tools as Koog tools. | 26 |
 | `ai-elements-mermaid-native` | Mermaid drawn with Compose Canvas instead of a WebView (experimental). | 24 |
@@ -197,6 +199,27 @@ Add your design system with `A2uiCatalog.Basic.extend(id = "https://example.com/
 `A2uiSurfaceView` / `A2uiState` render a surface outside the chat. `JsxPreview` compiles a JSX subset
 onto the same components (bindings only, no code execution) and keeps state while the JSX streams.
 
+## MCP Apps
+
+MCP tools can ship an interactive view ([MCP Apps](https://github.com/modelcontextprotocol/ext-apps),
+`_meta.ui.resourceUri`). With `ai-elements-mcp-apps` the chat shows it under the tool call:
+
+```kotlin
+val servers = McpServerStore(context, clientCapabilities = McpApps.CLIENT_CAPABILITIES) // advertise MCP Apps
+McpAppsHost({ id -> servers.client(id) }, actions) { apps ->
+    CompositionLocalProvider(LocalAiElementsRenderers provides AiElementsRenderers(data = mapOf(DataPart.MCP_APP to apps))) {
+        Chat(controller)
+    }
+}
+```
+
+The view runs in a WebView served from its own origin with the Content-Security-Policy its resource
+declares, and talks JSON-RPC over a message port. It reaches only its own server's tools whose
+`visibility` includes `app`, and tools that are not read-only ask the user first. `ui/message`
+becomes a user turn (`McpAppActions.message`); `ui/update-model-context` becomes a
+`DataPart.MODEL_CONTEXT` for the next turn, which on-device models read as text and AG-UI sends as
+`RunAgentInput.context`. Tools with `visibility: ["app"]` are never given to the model.
+
 ## Quick start: in-app agent
 
 ```kotlin
@@ -256,7 +279,8 @@ in [AGENTS.md](AGENTS.md).
 `server/` is a Pydantic AI + Pydantic AI Harness agent (Planning, SubAgents, Skills, an MCP toolset
 with approval) served over AI SDK 6 (`/api/chat`) and AG-UI 1.0 (`/api/agui`), with an MCP server
 (`/mcp`, official `mcp` SDK) and A2A agents (official `a2a-sdk`: a researcher at `/a2a`, and a hotel
-concierge at `/concierge/a2a` that answers with A2UI).
+concierge at `/concierge/a2a` that answers with A2UI). Its MCP server has an MCP App: `show_notes_board`
+opens a notes board built on the official `@modelcontextprotocol/ext-apps` SDK.
 
 ```bash
 cd server && uv sync
