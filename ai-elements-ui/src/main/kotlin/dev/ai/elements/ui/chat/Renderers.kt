@@ -15,6 +15,13 @@ fun interface ToolRenderer {
     fun Render(part: ToolPart, onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)?)
 }
 
+/** Renders a fenced code block of one language (```` ```lang ````) in place of the code view. */
+fun interface CodeBlockRenderer {
+    /** [complete] is false while the fence is still streaming. */
+    @Composable
+    fun Render(source: String, complete: Boolean)
+}
+
 /** Renders one data part in place of the built-in [DataPartView] shapes. */
 fun interface DataRenderer {
     @Composable
@@ -37,12 +44,14 @@ fun interface DataRenderer {
  * @property data by data part name ([DataPart.name], without `data-`), including keys of the
  *   agent's shared state ([DataPart.STATE]).
  * @property tool a catch-all consulted after [tools]: return null to keep the built-in rendering.
+ * @property codeBlocks by fence language (lower case), e.g. a live preview for `jsx` fences.
  */
 @Immutable
 class AiElementsRenderers(
     val tools: Map<String, ToolRenderer> = emptyMap(),
     val data: Map<String, DataRenderer> = emptyMap(),
     val tool: ((ToolPart) -> ToolRenderer?)? = null,
+    val codeBlocks: Map<String, CodeBlockRenderer> = emptyMap(),
 ) {
     internal fun toolRenderer(part: ToolPart): ToolRenderer? = tools[part.name] ?: tool?.invoke(part)
 }

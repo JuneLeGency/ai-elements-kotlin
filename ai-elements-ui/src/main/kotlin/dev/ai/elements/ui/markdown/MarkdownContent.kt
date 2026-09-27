@@ -1,5 +1,6 @@
 package dev.ai.elements.ui.markdown
 
+import dev.ai.elements.ui.chat.LocalAiElementsRenderers
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -105,7 +106,9 @@ internal fun MarkdownBlock(content: String) {
             codeFence = { model ->
                 val closed = model.node.children.lastOrNull()?.type == MarkdownTokenTypes.CODE_FENCE_END
                 MarkdownCodeFence(model.content, model.node, model.typography.code) { source, language, _ ->
+                    val custom = language?.lowercase()?.let { LocalAiElementsRenderers.current.codeBlocks[it] }
                     when {
+                        custom != null -> custom.Render(source, closed)
                         language.equals("mermaid", ignoreCase = true) -> MermaidDiagram(source, complete = closed)
                         language.equals("math", ignoreCase = true) && closed -> MathBlock(source)
                         else -> CodeBlock(source, language)
