@@ -97,6 +97,7 @@ reference only, never copied).
 | Tool titles (`title`), preliminary output, skill and MCP badges in `ToolCall` | ✅ |
 | AG-UI state / activity rendering (`state.plan` → `Plan`) | ✅ `DataPartView` renders the `state` part's `plan` / `task` / `chain-of-thought` keys (rest as JSON), activity types case-insensitively; component test + AG-UI E2E (server STATE_SNAPSHOT → Plan) |
 | A2A agent card view (extend `Agent`) | ✅ `description` + `toolsTitle` (skills) |
+| UI review matrix (GOAL W4 DoD): light/dark × en/zh-CN/zh-TW/ja × phone/tablet | ✅ `ScreenshotMatrixTest` (opt-in `-e screenshots true`, `-e size tablet` after `wm size 2560x1600`); 16 shots reviewed: translations, dark Mermaid/code, list-detail tablet layout OK. Open: under instrumentation at tablet size the table + Mermaid block of the offline reply stays collapsed in the screenshot; the same flow by hand (incl. IME hide) renders correctly — investigate the WebView sizing under the test harness |
 
 ### W5 · Demo app
 
