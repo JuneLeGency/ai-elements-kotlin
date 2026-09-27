@@ -55,8 +55,11 @@ class ScreenshotMatrixTest {
                         compose.onNodeWithTag("send-button").performClick()
                         compose.awaitTurnEnd(60_000)
                         scenario.onActivity { WindowCompat.getInsetsController(it.window, it.window.decorView).hide(WindowInsetsCompat.Type.ime()) }
+                        // The test clock only moves when told: run the streaming fade-ins to the end, then give
+                        // WebView diagrams real time to draw.
+                        compose.mainClock.advanceTimeBy(5_000)
                         compose.waitForIdle()
-                        Thread.sleep(12_000) // let WebView diagrams finish drawing (seconds on a large emulator screen)
+                        Thread.sleep(4_000)
                         val shot = instrumentation.uiAutomation.takeScreenshot()
                         file.outputStream().use { shot.compress(Bitmap.CompressFormat.PNG, 90, it) }
                     }
