@@ -20,6 +20,7 @@ android {
 
 dependencies {
     api(project(":harness:harness-core"))
+    implementation(libs.androidx.documentfile)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

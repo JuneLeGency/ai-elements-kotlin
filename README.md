@@ -60,7 +60,7 @@ dependencies {
 | `ai-elements-mermaid-native` | Mermaid drawn with Compose Canvas instead of a WebView (experimental). | 24 |
 | `ai-elements-bom` | Aligns the versions of everything here. | — |
 | `harness-core` | `AgentHarness`: a model + capabilities → a `ChatBackend`; local and remote sub-agents. | 24 |
-| `harness-filesystem` | `read_file`, `write_file`, `edit_file`, `list_directory`, `search_files`, `find_files`, `create_directory`, `file_info`. | 26 |
+| `harness-filesystem` | `read_file`, `write_file`, `edit_file`, `list_directory`, `search_files`, `find_files`, `create_directory`, `file_info` — in the workspace and in folders the user shares (`SharedFolders`, mounted at `/mnt/<name>`). | 26 |
 | `harness-memory` | `write_memory`, `read_memory`, `delete_memory`, `search_memory`; `MEMORY.md` injected each turn. | 26 |
 | `harness-planning` | `write_plan`, `read_plan`, `add_task`, `update_task_status(es)`, `remove_task`; drives the `Plan` element. | 26 |
 | `harness-shell` | `run_command`, `start_command`, `check_command`, `stop_command` over a pluggable runtime. | 26 |

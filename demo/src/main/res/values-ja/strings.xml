@@ -188,7 +188,7 @@
     <string name="manage">管理</string>
     <string name="cap_in_app">アプリ内エージェント</string>
     <string name="cap_workspace">ワークスペースのファイル</string>
-    <string name="cap_workspace_desc">エージェントのワークスペースでファイルを読み書き・検索</string>
+    <string name="cap_workspace_desc">エージェントのワークスペースと共有したフォルダでファイルを読み書き・検索</string>
     <string name="cap_sandbox">Linux サンドボックス</string>
     <string name="sandbox_not_installed">Alpine Linux、初回使用時にインストール（約 4 MB）</string>
     <string name="sandbox_installing">インストール中… %1$s</string>
@@ -210,4 +210,5 @@
     <string name="cap_schedule_none">予定されたタスクはありません</string>
     <string name="schedule_every">%1$d 分ごと</string>
     <string name="schedule_cancel">キャンセル</string>
+    <string name="folders_add">フォルダを追加</string>
 </resources>

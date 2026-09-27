@@ -35,6 +35,10 @@ import java.security.MessageDigest
  * Tools that change the workspace ask the user first unless [approveChanges]
  * is off.
  *
+ * [mounts] adds folders outside the workspace — typically ones the user shared
+ * through the Storage Access Framework ([DocumentFolder]) — at `/mnt/<name>`,
+ * served by the same tools with the same rules. The shell cannot see them.
+ *
  * @param cwd where relative paths start; inside [root].
  */
 class FileSystem(
@@ -49,6 +53,7 @@ class FileSystem(
     val maxListResults: Int = 1000,
     val maxSearchResults: Int = 1000,
     val maxFindResults: Int = 1000,
+    private val mounts: suspend () -> List<Mount> = { emptyList() },
 ) : Capability {
     private val root: Path = root.apply { mkdirs() }.toPath().toRealPath()
     private val cwd: Path = cwd.apply { mkdirs() }.toPath().toRealPath().also {
@@ -56,6 +61,11 @@ class FileSystem(
     }
     private val denied = deniedPatterns.map(::matcher)
     private val protected = protectedPatterns.map { it to matcher(it) }
+
+    override suspend fun context(): String? = mounts().takeIf { it.isNotEmpty() }?.let { list ->
+        "Folders the user shared are mounted at: " + list.joinToString { "${Mount.ROOT}/${it.name}" + if (it.writable && !readOnly) "" else " (read-only)" } +
+            ". Use absolute paths for them; the shell cannot see them (copy files into the workspace first)."
+    }
 
     override suspend fun tools(): List<AgentTool> = buildList {
         add(tool("read_file", "Read a text file with line numbers.", "path" to str("File path relative to `cwd`."), "offset" to int("Zero-based line offset to start reading from."), "limit" to int("Maximum number of lines to return (default: $maxReadLines).")) { a ->
@@ -99,7 +109,7 @@ class FileSystem(
 
     // --- Operations (also callable directly, outside an agent run) ---------------------------
 
-    suspend fun readFile(path: String, offset: Int = 0, limit: Int = maxReadLines): String = io {
+    suspend fun readFile(path: String, offset: Int = 0, limit: Int = maxReadLines): String = onMount(path) { mountRead(it, offset, limit) } ?: io {
         val file = resolve(path)
         if (!Files.isRegularFile(file)) throw java.io.FileNotFoundException(if (Files.isDirectory(file)) "'$path' is a directory, not a file." else "File not found: $path")
         val raw = Files.readAllBytes(file)
@@ -108,7 +118,7 @@ class FileSystem(
         "[$path | ${lines.size} lines${if (contentHashes) " | hash:${hash(raw)}" else ""}]\n" + formatLines(lines, offset, limit)
     }
 
-    suspend fun writeFile(path: String, content: String, expectedHash: String? = null): String = io {
+    suspend fun writeFile(path: String, content: String, expectedHash: String? = null): String = onMount(path) { mountWrite(it, content, expectedHash) } ?: io {
         val file = resolve(path, write = true)
         if (Files.exists(file) && !Files.isRegularFile(file)) throw IllegalArgumentException("Path '$path' exists and is not a regular file.")
         val parent = file.parent
@@ -119,27 +129,15 @@ class FileSystem(
         "Wrote ${content.length} chars (${content.splitLinesKeepEnds().size} lines) to $path.${hashSuffix(bytes)}"
     }
 
-    suspend fun editFile(path: String, replacements: List<Pair<String, String>>, expectedHash: String? = null): String = io {
+    suspend fun editFile(path: String, replacements: List<Pair<String, String>>, expectedHash: String? = null): String = onMount(path) { mountEdit(it, replacements, expectedHash) } ?: io {
         val file = resolve(path, write = true)
         if (!Files.isRegularFile(file)) throw java.io.FileNotFoundException("File not found: $path")
-        val raw = Files.readAllBytes(file)
-        if (raw.isBinary()) throw IllegalArgumentException("$path is a binary file; edit_file only edits text files.")
-        if (expectedHash != null) checkHash(path, raw, expectedHash)
-        var text = String(raw, Charsets.UTF_8)
-        replacements.forEachIndexed { i, (old, new) ->
-            require(old.isNotEmpty()) { "old_text must not be empty." }
-            val count = text.windowedCount(old)
-            val which = if (replacements.size > 1) " (replacement ${i + 1})" else ""
-            require(count > 0) { "old_text$which not found in $path." }
-            require(count == 1) { "old_text$which appears $count times in $path; include more context to make it unique." }
-            text = text.replaceFirst(old, new)
-        }
-        val bytes = text.toByteArray(Charsets.UTF_8)
+        val bytes = applyEdits(path, Files.readAllBytes(file), replacements, expectedHash)
         Files.write(file, bytes)
         "Edited $path.${hashSuffix(bytes)}"
     }
 
-    suspend fun listDirectory(path: String = "."): String = io {
+    suspend fun listDirectory(path: String = "."): String = onMount(path) { mountList(it) } ?: io {
         val dir = resolve(path, checkAllowed = false)
         if (!Files.isDirectory(dir)) throw IllegalArgumentException("Not a directory: $path")
         val entries = mutableListOf<String>()
@@ -154,9 +152,13 @@ class FileSystem(
         entries.joinToString("\n").ifEmpty { "(empty directory)" }
     }
 
-    suspend fun searchFiles(pattern: String, path: String = ".", includeGlob: String? = null): String = io {
+    suspend fun searchFiles(pattern: String, path: String = ".", includeGlob: String? = null): String {
         val regex = runCatching { Regex(pattern) }.getOrElse { throw IllegalArgumentException("Invalid regex: ${it.message}") }
         val include = includeGlob?.let(::matcher)
+        return onMount(path) { mountSearch(it, regex, include) } ?: io { searchWorkspace(path, regex, include) }
+    }
+
+    private fun searchWorkspace(path: String, regex: Regex, include: PathMatcher?): String {
         val results = mutableListOf<String>()
         walk(resolve(path, checkAllowed = false)) { file ->
             if (include != null && !include.matches(root.relativize(file))) return@walk true
@@ -170,13 +172,17 @@ class FileSystem(
             }
             true
         }
-        results.joinToString("\n").ifEmpty { "No matches found." }
+        return results.joinToString("\n").ifEmpty { "No matches found." }
     }
 
-    suspend fun findFiles(pattern: String, path: String = "."): String = io {
+    suspend fun findFiles(pattern: String, path: String = "."): String {
         require(!pattern.startsWith("/")) { "Pattern '$pattern' must be relative to the search path, not absolute." }
-        val base = resolve(path, checkAllowed = false)
         val glob = matcher(pattern)
+        return onMount(path) { mountFind(it, pattern, glob) } ?: io { findInWorkspace(path, pattern, glob) }
+    }
+
+    private fun findInWorkspace(path: String, pattern: String, glob: PathMatcher): String {
+        val base = resolve(path, checkAllowed = false)
         val results = mutableListOf<String>()
         walk(base) { file ->
             val rel = base.relativize(file)
@@ -186,17 +192,17 @@ class FileSystem(
             }
             true
         }
-        results.joinToString("\n").ifEmpty { "No files found." }
+        return results.joinToString("\n").ifEmpty { "No files found." }
     }
 
-    suspend fun createDirectory(path: String): String = io {
+    suspend fun createDirectory(path: String): String = onMount(path) { mountMkdir(it) } ?: io {
         val dir = resolve(path, write = true)
         if (Files.exists(dir) && !Files.isDirectory(dir)) throw IllegalArgumentException("Path '$path' exists and is not a directory.")
         Files.createDirectories(dir)
         "Created directory: $path"
     }
 
-    suspend fun fileInfo(path: String): String = io {
+    suspend fun fileInfo(path: String): String = onMount(path) { mountInfo(it) } ?: io {
         val original = cwd.resolve(path).normalize()
         val file = resolve(path)
         if (!Files.exists(file)) throw java.io.FileNotFoundException("Path not found: $path")
@@ -211,6 +217,164 @@ class FileSystem(
         }
         if (Files.isSymbolicLink(original)) parts += "symlink_target: ${display(file)}"
         parts.joinToString("\n")
+    }
+
+    // --- Mounted folders ------------------------------------------------------------------------
+
+    /** A path under [Mount.ROOT]: [mount] null is `/mnt` itself. */
+    private class Target(val path: String, val mount: Mount?, val parts: List<String>) {
+        val rel get() = parts.joinToString("/")
+        val display get() = if (mount == null) Mount.ROOT else "${Mount.ROOT}/${mount.name}" + if (parts.isEmpty()) "" else "/$rel"
+        fun display(sub: List<String>) = (listOf("${Mount.ROOT}/${mount!!.name}") + parts + sub).joinToString("/")
+    }
+
+    /** Runs [op] on IO when [path] is under [Mount.ROOT]; null for workspace paths. */
+    private suspend fun onMount(path: String, op: (Target) -> String): String? {
+        require(!path.contains('\u0000')) { "Invalid path" }
+        if (path != Mount.ROOT && !path.startsWith(Mount.ROOT + "/")) return null
+        val parts = path.removePrefix(Mount.ROOT).split('/').filter { it.isNotEmpty() && it != "." }
+        if (".." in parts) throw SecurityException("Path '$path' uses '..'; use absolute paths under ${Mount.ROOT}.")
+        val available = mounts()
+        val target = if (parts.isEmpty()) Target(path, null, parts)
+        else Target(path, available.firstOrNull { it.name == parts[0] } ?: throw java.io.FileNotFoundException("No folder is mounted at ${Mount.ROOT}/${parts[0]}."), parts.drop(1))
+        if (target.parts.isNotEmpty() && isDenied(target.rel)) throw SecurityException("Path '$path' is not accessible.")
+        return if (target.mount == null) io { available.joinToString("\n") { "${Mount.ROOT}/${it.name}/" + if (it.writable && !readOnly) "" else "  (read-only)" }.ifEmpty { "(no folders mounted)" } }
+        else io { op(target) }
+    }
+
+    private fun node(t: Target, parts: List<String> = t.parts): FolderNode? =
+        parts.fold(t.mount!!.root as FolderNode?) { node, name -> node?.takeIf { it.isDirectory }?.child(name) }
+
+    private fun checkWritable(t: Target) {
+        val mount = t.mount!!
+        if (readOnly || !mount.writable) throw SecurityException("${Mount.ROOT}/${mount.name} is read-only.")
+        val rel = java.nio.file.Paths.get(t.rel)
+        protected.firstOrNull { (_, m) -> m.matches(rel) || (rel.fileName != null && m.matches(rel.fileName)) }?.let { (p, _) ->
+            throw SecurityException("Path '${t.path}' is protected (matches '$p').")
+        }
+    }
+
+    private fun isDenied(rel: String): Boolean {
+        val p = java.nio.file.Paths.get(rel)
+        return denied.any { it.matches(p) || (p.fileName != null && it.matches(p.fileName)) }
+    }
+
+    private fun mountFile(t: Target): FolderNode {
+        val node = node(t) ?: throw java.io.FileNotFoundException("File not found: ${t.path}")
+        if (node.isDirectory) throw java.io.FileNotFoundException("'${t.path}' is a directory, not a file.")
+        return node
+    }
+
+    private fun mountRead(t: Target, offset: Int, limit: Int): String {
+        val raw = mountFile(t).read()
+        if (raw.isBinary()) return "[Binary file: ${raw.size} bytes. Use a binary-aware tool to inspect.]"
+        val lines = String(raw, Charsets.UTF_8).splitLinesKeepEnds()
+        return "[${t.path} | ${lines.size} lines${if (contentHashes) " | hash:${hash(raw)}" else ""}]\n" + formatLines(lines, offset, limit)
+    }
+
+    private fun mountWrite(t: Target, content: String, expectedHash: String?): String {
+        require(t.parts.isNotEmpty()) { "Path '${t.path}' is a folder." }
+        checkWritable(t)
+        val parent = node(t, t.parts.dropLast(1))?.takeIf { it.isDirectory }
+            ?: throw java.io.FileNotFoundException("Parent directory '${t.display.substringBeforeLast('/')}' does not exist. Use create_directory first.")
+        val existing = parent.child(t.parts.last())
+        if (existing != null && existing.isDirectory) throw IllegalArgumentException("Path '${t.path}' exists and is not a regular file.")
+        if (expectedHash != null && existing != null) checkHash(t.path, existing.read(), expectedHash)
+        val bytes = content.toByteArray(Charsets.UTF_8)
+        (existing ?: parent.createFile(t.parts.last())).write(bytes)
+        return "Wrote ${content.length} chars (${content.splitLinesKeepEnds().size} lines) to ${t.path}.${hashSuffix(bytes)}"
+    }
+
+    private fun mountEdit(t: Target, replacements: List<Pair<String, String>>, expectedHash: String?): String {
+        checkWritable(t)
+        val file = mountFile(t)
+        val bytes = applyEdits(t.path, file.read(), replacements, expectedHash)
+        file.write(bytes)
+        return "Edited ${t.path}.${hashSuffix(bytes)}"
+    }
+
+    private fun mountList(t: Target): String {
+        val dir = node(t)?.takeIf { it.isDirectory } ?: throw IllegalArgumentException("Not a directory: ${t.path}")
+        val entries = mutableListOf<String>()
+        for (child in dir.children().sortedBy { it.name }) {
+            if (child.name.startsWith(".") || isDenied((t.parts + child.name).joinToString("/"))) continue
+            if (entries.size >= maxListResults) { entries += "[... truncated at $maxListResults entries]"; break }
+            entries += if (child.isDirectory) "${t.display(listOf(child.name))}/" else "${t.display(listOf(child.name))}  (${child.size} bytes)"
+        }
+        return entries.joinToString("\n").ifEmpty { "(empty directory)" }
+    }
+
+    /** Depth-first walk of files under [t] (sorted, dotfiles and denied paths skipped), with paths relative to [t]; [visit] returns false to stop. */
+    private fun mountWalk(t: Target, visit: (List<String>, FolderNode) -> Boolean) {
+        val base = node(t)?.takeIf { it.isDirectory } ?: throw IllegalArgumentException("Not a directory: ${t.path}")
+        fun go(dir: FolderNode, prefix: List<String>): Boolean {
+            for (child in dir.children().sortedBy { it.name }) {
+                val rel = prefix + child.name
+                if (child.name.startsWith(".") || isDenied((t.parts + rel).joinToString("/"))) continue
+                if (child.isDirectory) { if (!go(child, rel)) return false } else if (!visit(rel, child)) return false
+            }
+            return true
+        }
+        go(base, emptyList())
+    }
+
+    private fun mountSearch(t: Target, regex: Regex, include: PathMatcher?): String {
+        val results = mutableListOf<String>()
+        mountWalk(t) { rel, file ->
+            if (include != null && !include.matches(java.nio.file.Paths.get((t.parts + rel).joinToString("/")))) return@mountWalk true
+            val raw = runCatching { file.read() }.getOrNull() ?: return@mountWalk true
+            if (raw.isBinary()) return@mountWalk true
+            String(raw, Charsets.UTF_8).lineSequence().forEachIndexed { i, line ->
+                if (regex.containsMatchIn(line)) {
+                    if (results.size >= maxSearchResults) { results += "[... truncated at $maxSearchResults matches]"; return@mountWalk false }
+                    results += "${t.display(rel)}:${i + 1}:$line"
+                }
+            }
+            true
+        }
+        return results.joinToString("\n").ifEmpty { "No matches found." }
+    }
+
+    private fun mountFind(t: Target, pattern: String, glob: PathMatcher): String {
+        val results = mutableListOf<String>()
+        mountWalk(t) { rel, _ ->
+            val path = java.nio.file.Paths.get(rel.joinToString("/"))
+            if (glob.matches(path) || (!pattern.contains('/') && glob.matches(path.fileName))) {
+                if (results.size >= maxFindResults) { results += "[... truncated at $maxFindResults files]"; return@mountWalk false }
+                results += t.display(rel)
+            }
+            true
+        }
+        return results.joinToString("\n").ifEmpty { "No files found." }
+    }
+
+    private fun mountMkdir(t: Target): String {
+        require(t.parts.isNotEmpty()) { "${t.path} already exists." }
+        checkWritable(t)
+        t.parts.fold(t.mount!!.root) { dir, name ->
+            val existing = dir.child(name)
+            when {
+                existing == null -> dir.createDirectory(name)
+                existing.isDirectory -> existing
+                else -> throw IllegalArgumentException("Path '${t.path}' exists and is not a directory.")
+            }
+        }
+        return "Created directory: ${t.path}"
+    }
+
+    private fun mountInfo(t: Target): String {
+        val node = node(t) ?: throw java.io.FileNotFoundException("Path not found: ${t.path}")
+        val parts = mutableListOf("path: ${t.path}", "type: ${if (node.isDirectory) "directory" else "file"}", "size: ${node.size} bytes")
+        if (!node.isDirectory) {
+            val raw = node.read()
+            parts += "binary: ${if (raw.isBinary()) "True" else "False"}"
+            if (!raw.isBinary()) {
+                parts += "lines: ${String(raw, Charsets.UTF_8).lines().let { if (it.lastOrNull() == "") it.size - 1 else it.size }}"
+                parts += "hash: ${hash(raw)}"
+            }
+        }
+        if (t.mount?.writable == false || readOnly) parts += "read_only: True"
+        return parts.joinToString("\n")
     }
 
     // --- Sandbox --------------------------------------------------------------------------------
@@ -260,6 +424,22 @@ class FileSystem(
     private fun checkHash(path: String, raw: ByteArray, expected: String) {
         val actual = hash(raw)
         if (actual != expected) throw IllegalStateException("Conflict: $path changed since it was read (hash $actual, expected $expected). Read it again.")
+    }
+
+    /** [replacements] applied in order to text [raw]; each old text must match exactly once. */
+    private fun applyEdits(path: String, raw: ByteArray, replacements: List<Pair<String, String>>, expectedHash: String?): ByteArray {
+        if (raw.isBinary()) throw IllegalArgumentException("$path is a binary file; edit_file only edits text files.")
+        if (expectedHash != null) checkHash(path, raw, expectedHash)
+        var text = String(raw, Charsets.UTF_8)
+        replacements.forEachIndexed { i, (old, new) ->
+            require(old.isNotEmpty()) { "old_text must not be empty." }
+            val count = text.windowedCount(old)
+            val which = if (replacements.size > 1) " (replacement ${i + 1})" else ""
+            require(count > 0) { "old_text$which not found in $path." }
+            require(count == 1) { "old_text$which appears $count times in $path; include more context to make it unique." }
+            text = text.replaceFirst(old, new)
+        }
+        return text.toByteArray(Charsets.UTF_8)
     }
 
     private fun hashSuffix(bytes: ByteArray) = if (contentHashes) " [hash:${hash(bytes)}]" else ""

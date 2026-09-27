@@ -103,7 +103,7 @@ private fun CapabilitiesSheet(viewModel: ChatViewModel, inApp: Boolean, onManage
                     }
                 }
             }
-            TextButton(onClick = onManage, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) { Text(stringResource(R.string.manage)) }
+            TextButton(onClick = onManage, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).testTag("capabilities-manage")) { Text(stringResource(R.string.manage)) }
         }
     }
 }

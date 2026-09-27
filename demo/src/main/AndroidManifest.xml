@@ -16,6 +16,8 @@
     <queries>
         <intent><action android:name="android.intent.action.SET_ALARM" /></intent>
         <intent><action android:name="android.intent.action.SET_TIMER" /></intent>
+        <!-- Shared folders for the agent (Storage Access Framework picker). -->
+        <intent><action android:name="android.intent.action.OPEN_DOCUMENT_TREE" /></intent>
     </queries>
 
     <application

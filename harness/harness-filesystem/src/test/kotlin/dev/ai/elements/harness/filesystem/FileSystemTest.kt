@@ -101,4 +101,46 @@ class FileSystemTest {
         val readOnly = FileSystem(root, readOnly = true).tools().map { it.name }
         assertFalse("write_file" in readOnly || "edit_file" in readOnly || "create_directory" in readOnly)
     }
+
+    /** An in-memory folder tree standing in for a SAF folder. */
+    private class MemNode(override val name: String, val dir: Boolean, var data: ByteArray = ByteArray(0)) : FolderNode {
+        val kids = mutableListOf<MemNode>()
+        override val isDirectory get() = dir
+        override val size get() = data.size.toLong()
+        override fun children(): List<FolderNode> = kids
+        override fun read() = data
+        override fun write(bytes: ByteArray) { data = bytes }
+        override fun createFile(name: String) = MemNode(name, false).also { kids += it }
+        override fun createDirectory(name: String) = MemNode(name, true).also { kids += it }
+    }
+
+    @Test
+    fun mounts_serveSharedFoldersWithTheSameTools() = runBlocking<Unit> {
+        val docs = MemNode("Documents", true).apply {
+            createFile("todo.md").write("buy milk\n".toByteArray())
+            (createDirectory("sub") as MemNode).createFile("deep.txt").write("milk shake\n".toByteArray())
+            createFile(".hidden").write("x".toByteArray())
+        }
+        val photos = MemNode("Photos", true)
+        val fs = FileSystem(tmp.newFolder("ws"), mounts = { listOf(Mount("Documents", docs), Mount("Photos", photos, writable = false)) })
+
+        assertEquals("/mnt/Documents/\n/mnt/Photos/  (read-only)", fs.listDirectory("/mnt"))
+        assertEquals("/mnt/Documents/sub/\n/mnt/Documents/todo.md  (9 bytes)", fs.listDirectory("/mnt/Documents"))
+        val hash = FileSystem.hash("buy milk\n".toByteArray())
+        assertEquals("[/mnt/Documents/todo.md | 1 lines | hash:$hash]\n     1\tbuy milk\n", fs.readFile("/mnt/Documents/todo.md"))
+        assertEquals("/mnt/Documents/sub/deep.txt:1:milk shake\n/mnt/Documents/todo.md:1:buy milk", fs.searchFiles("milk", "/mnt/Documents"))
+        assertEquals("/mnt/Documents/sub/deep.txt", fs.findFiles("**/*.txt", "/mnt/Documents"))
+
+        fs.editFile("/mnt/Documents/todo.md", listOf("milk" to "eggs"), expectedHash = hash)
+        assertEquals("buy eggs\n", String(docs.child("todo.md")!!.read()))
+        fs.createDirectory("/mnt/Documents/a/b")
+        assertTrue(fs.writeFile("/mnt/Documents/a/b/new.txt", "hi").startsWith("Wrote 2 chars (1 lines) to /mnt/Documents/a/b/new.txt."))
+        assertTrue(fs.fileInfo("/mnt/Documents/a/b/new.txt").contains("type: file"))
+
+        assertThrows(SecurityException::class.java) { runBlocking { fs.writeFile("/mnt/Photos/x.txt", "x") } }
+        assertThrows(SecurityException::class.java) { runBlocking { fs.readFile("/mnt/Documents/../../etc/passwd") } }
+        assertThrows(java.io.FileNotFoundException::class.java) { runBlocking { fs.readFile("/mnt/Music/a.mp3") } }
+        assertTrue(fs.context()!!.contains("/mnt/Photos (read-only)"))
+        assertEquals(null, FileSystem(tmp.newFolder("ws2")).context())
+    }
 }

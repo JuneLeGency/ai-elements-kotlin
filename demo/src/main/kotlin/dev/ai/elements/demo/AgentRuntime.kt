@@ -21,6 +21,7 @@ import dev.ai.elements.harness.LocalSubAgent
 import dev.ai.elements.harness.ModelBinding
 import dev.ai.elements.harness.model
 import dev.ai.elements.harness.filesystem.FileSystem
+import dev.ai.elements.harness.filesystem.SharedFolders
 import dev.ai.elements.harness.memory.FileMemoryStore
 import dev.ai.elements.harness.memory.Memory
 import dev.ai.elements.harness.planning.Planning
@@ -54,7 +55,9 @@ class AgentRuntime(
     val workspace = java.io.File(context.filesDir, "workspace").apply { mkdirs() }
     val sandbox = AlpineSandbox(context, workspace)
     private val shell = Shell(sandbox, defaultTimeoutSeconds = 120.0)
-    private val fileSystem = FileSystem(workspace)
+    /** Folders the user shared (Storage Access Framework), mounted at /mnt/<name> for the file tools. */
+    val sharedFolders = SharedFolders(context)
+    private val fileSystem = FileSystem(workspace, mounts = { sharedFolders.mounts() })
     private val browser = WebBrowser(context)
     private val device = DeviceTools(context, PermissionBroker)
     private val speech = Speech(context)

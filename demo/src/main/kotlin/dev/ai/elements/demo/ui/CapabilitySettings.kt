@@ -29,6 +29,8 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Extension
+import androidx.compose.material.icons.outlined.CreateNewFolder
+import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.PhoneAndroid
@@ -146,6 +148,7 @@ private fun InAppAgentItems(viewModel: ChatViewModel, settings: dev.ai.elements.
     val scope = rememberCoroutineScope()
     SectionHeader(stringResource(R.string.cap_in_app))
     CapabilitySwitch(Icons.Outlined.FolderOpen, R.string.cap_workspace, stringResource(R.string.cap_workspace_desc), settings.workspaceFiles, "cap-workspace") { on -> viewModel.agents.update { it.copy(workspaceFiles = on) } }
+    if (settings.workspaceFiles) SharedFolderItems(viewModel.runtime.sharedFolders)
     CapabilitySwitch(
         Icons.Outlined.Terminal, R.string.cap_sandbox,
         when (val s = sandbox) {
@@ -167,6 +170,26 @@ private fun InAppAgentItems(viewModel: ChatViewModel, settings: dev.ai.elements.
     CapabilitySwitch(Icons.Outlined.RecordVoiceOver, R.string.cap_speech, stringResource(R.string.cap_speech_desc), settings.speech, "cap-speech") { on -> viewModel.agents.update { it.copy(speech = on) } }
     CapabilitySwitch(Icons.Outlined.Schedule, R.string.cap_schedule, stringResource(R.string.cap_schedule_desc), settings.scheduledTasks, "cap-schedule") { on -> viewModel.agents.update { it.copy(scheduledTasks = on) } }
     if (settings.scheduledTasks) ScheduledTaskItems(viewModel.runtime.scheduler)
+}
+
+/** Folders shared through the system picker, mounted at /mnt/<name>; each can be removed. */
+@Composable
+private fun SharedFolderItems(folders: dev.ai.elements.harness.filesystem.SharedFolders) {
+    val shared by folders.folders.collectAsStateWithLifecycle()
+    val pick = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri -> uri?.let { folders.add(it) } }
+    shared.forEach { folder ->
+        ListItem(
+            onClick = {},
+            leadingContent = { Icon(Icons.Outlined.Folder, null) },
+            supportingContent = { Text("${dev.ai.elements.harness.filesystem.Mount.ROOT}/${folder.name}") },
+            trailingContent = { TextButton(onClick = { folders.remove(folder.name) }) { Text(stringResource(R.string.remove)) } },
+            modifier = Modifier.padding(start = 56.dp, end = 12.dp).testTag("folder-${folder.name}"),
+        ) { Text(folder.name) }
+    }
+    TextButton(onClick = { pick.launch(null) }, modifier = Modifier.padding(start = 64.dp).testTag("folder-add")) {
+        Icon(Icons.Outlined.CreateNewFolder, null, Modifier.size(18.dp))
+        Text(stringResource(R.string.folders_add), Modifier.padding(start = 8.dp))
+    }
 }
 
 /** Tasks the agent scheduled, with their last result; each can be cancelled. */

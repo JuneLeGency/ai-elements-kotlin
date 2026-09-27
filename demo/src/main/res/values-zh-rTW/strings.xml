@@ -188,7 +188,7 @@
     <string name="manage">管理</string>
     <string name="cap_in_app">內建代理程式</string>
     <string name="cap_workspace">工作區檔案</string>
-    <string name="cap_workspace_desc">在代理程式工作區中讀寫和搜尋檔案</string>
+    <string name="cap_workspace_desc">在代理程式工作區和你共享的資料夾中讀寫和搜尋檔案</string>
     <string name="cap_sandbox">Linux 沙箱</string>
     <string name="sandbox_not_installed">Alpine Linux，首次使用時安裝（約 4 MB）</string>
     <string name="sandbox_installing">安裝中… %1$s</string>
@@ -210,4 +210,5 @@
     <string name="cap_schedule_none">尚無排程任務</string>
     <string name="schedule_every">每 %1$d 分鐘</string>
     <string name="schedule_cancel">取消</string>
+    <string name="folders_add">新增資料夾</string>
 </resources>

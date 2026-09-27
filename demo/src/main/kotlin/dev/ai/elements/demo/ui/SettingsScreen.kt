@@ -204,7 +204,7 @@ private fun SettingsList(
         )
     }
     Scaffold(containerColor = Color.Transparent, topBar = { TopAppBar(title = { Text(stringResource(R.string.settings)) }, colors = transparentAppBarColors()) }) { padding ->
-        LazyColumn(Modifier.fillMaxSize().padding(padding)) {
+        LazyColumn(Modifier.fillMaxSize().padding(padding).testTag("settings-list")) {
             item { SectionHeader(stringResource(R.string.appearance)) }
             item {
                 Row(

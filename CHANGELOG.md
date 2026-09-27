@@ -11,7 +11,7 @@
 - **Capabilities** mirroring Pydantic AI Harness: `Capability`, `SubAgents` (`delegate_task`),
   `Skills` (Agent Skills, `load_capability`), `ToolCallContext` (progress, nested runs, data parts).
 - **In-app harness** (group `io.github.junelegency.harness`): `harness-core` (`AgentHarness`),
-  `harness-filesystem`, `harness-memory`, `harness-planning`, `harness-shell`,
+  `harness-filesystem` (workspace plus user-shared SAF folders at `/mnt/<name>`), `harness-memory`, `harness-planning`, `harness-shell`,
   `harness-sandbox-proot` (Alpine Linux on PRoot), `harness-browser` (off-screen WebView),
   `harness-device` (calendar, contacts, location, clipboard, alarms, notifications),
   `harness-speech` (text to speech) and `harness-scheduler` (scheduled background runs on
