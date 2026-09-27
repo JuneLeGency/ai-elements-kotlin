@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
@@ -27,6 +28,8 @@ import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
 import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.ui.chat.BranchSelector
+import dev.ai.elements.ui.chat.Chat
+import dev.ai.elements.ui.chat.rememberChat
 import dev.ai.elements.ui.chat.DataPartView
 import dev.ai.elements.ui.chat.Checkpoint
 import dev.ai.elements.ui.chat.ModelOption
@@ -47,6 +50,7 @@ import dev.ai.elements.ui.voice.Transcription
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Rule
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -57,6 +61,27 @@ class ElementsTest {
     val compose = createComposeRule()
 
     private fun s(id: Int, vararg args: Any) = InstrumentationRegistry.getInstrumentation().targetContext.getString(id, *args)
+
+    @OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
+    @Test fun chat_oneLine_sendsAndStreamsAReply() {
+        lateinit var chat: dev.ai.elements.core.chat.ChatController
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                chat = rememberChat { approver -> dev.ai.elements.core.provider.mock.MockAgentBackend(approver = approver, chunkDelayMs = 1) }
+                Chat(chat)
+            }
+        }
+        compose.onNodeWithTag("prompt-input").performClick().performTextInput("hello")
+        compose.onNodeWithTag("send-button").performClick()
+        compose.waitUntilExactlyOneExists(androidx.compose.ui.test.hasTestTag("regenerate"), 20_000)
+        val messages = chat.state.value.messages
+        assertEquals(listOf(Role.USER, Role.ASSISTANT), messages.map { it.role })
+        assertEquals("hello", (messages.first().parts.single() as TextPart).text)
+        assertTrue(messages.last().parts.isNotEmpty())
+        compose.onNodeWithTag("prompt-input").assert(
+            androidx.compose.ui.test.SemanticsMatcher.expectValue(androidx.compose.ui.semantics.SemanticsProperties.EditableText, androidx.compose.ui.text.AnnotatedString("")),
+        )
+    }
 
     @Test fun dataPart_agUiState_rendersPlanAndKeepsOtherKeysAsJson() {
         val state = kotlinx.serialization.json.Json.parseToJsonElement(

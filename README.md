@@ -76,6 +76,18 @@ R8 rules ship with the libraries.
 
 ## Quick start: pure client
 
+The shortest version — one composable wires the conversation, tools, approvals, sub-agents,
+plans and the prompt input to a controller (`samples/` has both modes as complete apps):
+
+```kotlin
+AiElementsTheme {
+    Chat(rememberChat { approver -> AgUiBackend("https://agents.example.com/api/agui", approver = approver) })
+}
+```
+
+In an app, keep the controller in a `ViewModel` so the conversation survives rotation, and
+compose the pieces yourself when you need more control:
+
 ```kotlin
 class ChatViewModel : ViewModel() {
     // An AG-UI agent (Pydantic AI, LangGraph, CrewAI, Mastra…). Tools that need approval pause
