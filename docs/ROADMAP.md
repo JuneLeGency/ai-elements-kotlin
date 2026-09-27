@@ -68,10 +68,10 @@ reference only, never copied).
 |---|---|---|---|
 | `harness-core` | `AgentHarness`: model + capabilities → `ChatBackend`; local / remote sub-agents, `maxDepth`; `ModelBinding` for any provider | agent loop | ✅ unit tests; the demo runs on it |
 | `harness-filesystem` | Workspace + SAF-mounted folders: `read_file`, `write_file`, `edit_file`, `list_directory`, `search_files`, `find_files`, `create_directory`, `file_info` | file tools, mounted folders | ✅ workspace (5 tests: format, hashes, sandbox, protected, approvals); SAF mounts ⬜ |
-| `harness-shell` | `run_command`, `start_command`, `check_command`, `stop_command` over a pluggable `ShellRuntime` | `shell_execute` | ⬜ |
-| `harness-sandbox-proot` | Alpine Linux via upstream proot (separate process, GPL-2 binary + source offer), rootfs downloaded on first use | proot sandbox | ⬜ |
+| `harness-shell` | `run_command`, `start_command`, `check_command`, `stop_command` over a pluggable `ShellRuntime` | `shell_execute` | ✅ 4 tests (Harness output format, timeout, background, approval by isolation) |
+| `harness-sandbox-proot` | Alpine Linux via upstream proot (separate process, GPL-2 binary + source offer), rootfs downloaded on first use | proot sandbox | ✅ reproducible NDK build (`native/build-proot.sh`); in-app test on emulator (targetSdk 36): install + commands + shared /workspace; `apk add python3` verified |
 | `harness-memory` | `write_memory`, `read_memory`, `delete_memory`, `search_memory` (file store) | memory tools | ✅ 4 tests; `<memory>` injection via `Capability.context()` |
-| `harness-planning` | `write_plan`, `read_plan`, `add_task`, `update_task_status(es)`, `remove_task` | — | ⬜ |
+| `harness-planning` | `write_plan`, `read_plan`, `add_task`, `update_task_status(es)`, `remove_task` | — | ✅ 3 tests; live `data-plan` via `ToolCallContext.data` |
 | `harness-browser` | WebView browsing / page reading / actions | `browser_use` | ⬜ |
 | `harness-device` | Clipboard, calendar, contacts, notifications, location, alarms (runtime permissions) | device integrations | ⬜ |
 | `harness-speech` | Speech recognition and TTS for agents | speech | ⬜ |

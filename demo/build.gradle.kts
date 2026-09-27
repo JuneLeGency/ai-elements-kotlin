@@ -29,6 +29,8 @@ android {
 
     // The A2A Java SDK's jars each carry these; their notices are reproduced in the app's licences.
     packaging {
+        // The Linux sandbox executes PRoot from the native library directory, so libraries are extracted.
+        jniLibs.useLegacyPackaging = true
         resources.excludes += listOf("META-INF/NOTICE.md", "META-INF/LICENSE.md", "META-INF/INDEX.LIST", "META-INF/DEPENDENCIES", "META-INF/beans.xml")
     }
 
@@ -77,6 +79,10 @@ dependencies {
     implementation(project(":ai-elements-mermaid-native"))
     implementation(project(":ai-elements-a2a"))
     implementation(project(":harness:harness-core"))
+    implementation(project(":harness:harness-filesystem"))
+    implementation(project(":harness:harness-memory"))
+    implementation(project(":harness:harness-planning"))
+    implementation(project(":harness:harness-sandbox-proot"))
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(libs.activity.compose)

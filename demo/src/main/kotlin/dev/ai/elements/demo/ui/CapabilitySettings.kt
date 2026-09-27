@@ -27,7 +27,11 @@ import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Extension
+import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.Psychology
+import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material.icons.outlined.FileUpload
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Hub
@@ -118,6 +122,7 @@ internal fun LazyListScope.capabilityItems(viewModel: ChatViewModel, highlighted
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("settings-$key"),
                 ) { Text(stringResource(title)) }
             }
+            InAppAgentItems(viewModel, settings)
             ListItem(
                 checked = settings.builtinTools,
                 onCheckedChange = { on -> viewModel.agents.update { it.copy(builtinTools = on) } },
@@ -128,6 +133,44 @@ internal fun LazyListScope.capabilityItems(viewModel: ChatViewModel, highlighted
             ) { Text(stringResource(R.string.cap_builtin_tools)) }
         }
     }
+}
+
+/** Harness capabilities of the in-app agent, with the sandbox's install state. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun InAppAgentItems(viewModel: ChatViewModel, settings: dev.ai.elements.demo.data.CapabilitySettings) {
+    val sandbox by viewModel.runtime.sandbox.state.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+    SectionHeader(stringResource(R.string.cap_in_app))
+    CapabilitySwitch(Icons.Outlined.FolderOpen, R.string.cap_workspace, stringResource(R.string.cap_workspace_desc), settings.workspaceFiles, "cap-workspace") { on -> viewModel.agents.update { it.copy(workspaceFiles = on) } }
+    CapabilitySwitch(
+        Icons.Outlined.Terminal, R.string.cap_sandbox,
+        when (val s = sandbox) {
+            dev.ai.elements.harness.sandbox.AlpineSandbox.State.NotInstalled -> stringResource(R.string.sandbox_not_installed)
+            is dev.ai.elements.harness.sandbox.AlpineSandbox.State.Installing -> stringResource(R.string.sandbox_installing, s.progress?.let { "${(it * 100).toInt()}%" } ?: s.step)
+            dev.ai.elements.harness.sandbox.AlpineSandbox.State.Ready -> stringResource(R.string.sandbox_ready)
+            is dev.ai.elements.harness.sandbox.AlpineSandbox.State.Failed -> stringResource(R.string.sandbox_failed, s.message)
+        },
+        settings.sandboxShell, "cap-sandbox",
+        extra = {
+            if (sandbox is dev.ai.elements.harness.sandbox.AlpineSandbox.State.Installing) LoadingIndicator(Modifier.size(24.dp))
+            else if (sandbox == dev.ai.elements.harness.sandbox.AlpineSandbox.State.Ready) TextButton(onClick = { scope.launch { viewModel.runtime.sandbox.reset() } }) { Text(stringResource(R.string.sandbox_reset)) }
+        },
+    ) { on -> viewModel.agents.update { it.copy(sandboxShell = on) } }
+    CapabilitySwitch(Icons.Outlined.Psychology, R.string.cap_memory, stringResource(R.string.cap_memory_desc), settings.memory, "cap-memory") { on -> viewModel.agents.update { it.copy(memory = on) } }
+    CapabilitySwitch(Icons.Outlined.Checklist, R.string.cap_planning, stringResource(R.string.cap_planning_desc), settings.planning, "cap-planning") { on -> viewModel.agents.update { it.copy(planning = on) } }
+}
+
+@Composable
+private fun CapabilitySwitch(icon: androidx.compose.ui.graphics.vector.ImageVector, title: Int, description: String, checked: Boolean, tag: String, extra: @Composable () -> Unit = {}, onChange: (Boolean) -> Unit) {
+    ListItem(
+        checked = checked,
+        onCheckedChange = onChange,
+        leadingContent = { Icon(icon, null, tint = MaterialTheme.colorScheme.primary) },
+        supportingContent = { Text(description) },
+        trailingContent = { Row(verticalAlignment = Alignment.CenterVertically) { extra(); Switch(checked = checked, onCheckedChange = null) } },
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag(tag),
+    ) { Text(stringResource(title)) }
 }
 
 /** The detail page for [key] (one of [CapabilityPage]). */

@@ -20,6 +20,12 @@ import dev.ai.elements.harness.AgentHarness
 import dev.ai.elements.harness.LocalSubAgent
 import dev.ai.elements.harness.ModelBinding
 import dev.ai.elements.harness.model
+import dev.ai.elements.harness.filesystem.FileSystem
+import dev.ai.elements.harness.memory.FileMemoryStore
+import dev.ai.elements.harness.memory.Memory
+import dev.ai.elements.harness.planning.Planning
+import dev.ai.elements.harness.sandbox.AlpineSandbox
+import dev.ai.elements.harness.shell.Shell
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -31,6 +37,7 @@ import kotlinx.coroutines.withTimeoutOrNull
  * (`harness-core`); an A2A provider is talked to directly (`ai-elements-a2a`).
  */
 class AgentRuntime(
+    context: android.content.Context,
     private val providers: ProviderStore,
     private val mcp: McpServerStore,
     private val agents: AgentsStore,
@@ -38,6 +45,19 @@ class AgentRuntime(
     private val appTools: List<AgentTool>,
 ) {
     private val a2aAgents = mutableMapOf<String, A2aAgent>()
+
+    /** The agent's workspace: shared by the file tools and the Linux sandbox (mounted at /workspace). */
+    val workspace = java.io.File(context.filesDir, "workspace").apply { mkdirs() }
+    val sandbox = AlpineSandbox(context, workspace)
+    private val shell = Shell(sandbox, defaultTimeoutSeconds = 120.0)
+    private val fileSystem = FileSystem(workspace)
+    private val memory = Memory(FileMemoryStore(java.io.File(context.filesDir, "memory")))
+
+    /** One plan per conversation. */
+    @Volatile private var planning = Planning()
+
+    /** A new conversation starts with an empty plan. */
+    fun newSession() { planning = Planning() }
 
     fun a2aAgent(url: String): A2aAgent = synchronized(a2aAgents) { a2aAgents.getOrPut(url.trimEnd('/')) { A2aAgent(url.trimEnd('/')) } }
 
@@ -88,6 +108,12 @@ class AgentRuntime(
                 if (enabled.isNotEmpty()) add(Skills(enabled))
             }
             if (settings.mcpEnabled && mcp.servers.value.any { it.enabled }) add(mcp.toolset())
+            if (!serverSide) {
+                if (settings.workspaceFiles) add(fileSystem)
+                if (settings.sandboxShell) add(shell)
+                if (settings.memory) add(memory)
+                if (settings.planning) add(planning)
+            }
         }
     }
 

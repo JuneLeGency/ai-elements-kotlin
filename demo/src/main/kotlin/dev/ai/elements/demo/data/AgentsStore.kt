@@ -36,6 +36,11 @@ data class RemoteAgentDef(
 @Serializable
 data class CapabilitySettings(
     val builtinTools: Boolean = true,
+    /** In-app harness: workspace files, a Linux sandbox shell, persistent memory and task planning. */
+    val workspaceFiles: Boolean = true,
+    val sandboxShell: Boolean = true,
+    val memory: Boolean = true,
+    val planning: Boolean = true,
     val skillsEnabled: Boolean = true,
     val disabledSkills: Set<String> = emptySet(),
     val mcpEnabled: Boolean = true,

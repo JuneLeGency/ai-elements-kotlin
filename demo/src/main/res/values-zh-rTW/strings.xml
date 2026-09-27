@@ -186,4 +186,17 @@
     <string name="agent_name_hint">小寫字母、數字、- 和 _</string>
     <string name="off">已關閉</string>
     <string name="manage">管理</string>
+    <string name="cap_in_app">內建代理程式</string>
+    <string name="cap_workspace">工作區檔案</string>
+    <string name="cap_workspace_desc">在代理程式工作區中讀寫和搜尋檔案</string>
+    <string name="cap_sandbox">Linux 沙箱</string>
+    <string name="sandbox_not_installed">Alpine Linux，首次使用時安裝（約 4 MB）</string>
+    <string name="sandbox_installing">安裝中… %1$s</string>
+    <string name="sandbox_ready">Alpine Linux 已就緒 · 代理程式可用 apk 安裝套件</string>
+    <string name="sandbox_failed">安裝失敗：%1$s</string>
+    <string name="sandbox_reset">重設</string>
+    <string name="cap_memory">記憶</string>
+    <string name="cap_memory_desc">代理程式跨對話保留的筆記</string>
+    <string name="cap_planning">規劃</string>
+    <string name="cap_planning_desc">在對話中即時顯示任務計畫</string>
 </resources>

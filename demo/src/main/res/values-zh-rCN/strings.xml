@@ -186,4 +186,17 @@
     <string name="agent_name_hint">小写字母、数字、- 和 _</string>
     <string name="off">已关闭</string>
     <string name="manage">管理</string>
+    <string name="cap_in_app">内置智能体</string>
+    <string name="cap_workspace">工作区文件</string>
+    <string name="cap_workspace_desc">在智能体工作区中读写和搜索文件</string>
+    <string name="cap_sandbox">Linux 沙箱</string>
+    <string name="sandbox_not_installed">Alpine Linux，首次使用时安装（约 4 MB）</string>
+    <string name="sandbox_installing">安装中… %1$s</string>
+    <string name="sandbox_ready">Alpine Linux 已就绪 · 智能体可用 apk 安装软件包</string>
+    <string name="sandbox_failed">安装失败：%1$s</string>
+    <string name="sandbox_reset">重置</string>
+    <string name="cap_memory">记忆</string>
+    <string name="cap_memory_desc">智能体跨会话保留的笔记</string>
+    <string name="cap_planning">规划</string>
+    <string name="cap_planning_desc">在对话中实时显示任务计划</string>
 </resources>

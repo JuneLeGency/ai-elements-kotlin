@@ -46,7 +46,7 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
     val skills = SkillsRepository(app)
 
     /** Each turn: the selected provider with the enabled skills, MCP servers and sub-agents. */
-    val runtime = AgentRuntime(providers, mcpServers, agents, skills, appTools = listOf(ClipboardTool(app)))
+    val runtime = AgentRuntime(app, providers, mcpServers, agents, skills, appTools = listOf(ClipboardTool(app)))
 
     private val chat = ChatController(backend = runtime::backend, scope = viewModelScope)
     val chatState: StateFlow<ChatState> = chat.state
@@ -76,6 +76,7 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
     fun dismissError() = chat.dismissError()
 
     fun newChat() {
+        runtime.newSession()
         chat.load(emptyList())
         _conversationId.value = newId()
     }
@@ -83,6 +84,7 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
     fun open(id: String) {
         val conversation = repository.get(id) ?: return
         _conversationId.value = id
+        runtime.newSession()
         chat.load(conversation.messages)
     }
 

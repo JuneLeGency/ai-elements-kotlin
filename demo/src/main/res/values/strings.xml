@@ -188,4 +188,17 @@
     <string name="agent_name_hint">Lowercase letters, digits, - and _</string>
     <string name="off">Off</string>
     <string name="manage">Manage</string>
+    <string name="cap_in_app">In-app agent</string>
+    <string name="cap_workspace">Workspace files</string>
+    <string name="cap_workspace_desc">Read, write and search files in the agent\'s workspace</string>
+    <string name="cap_sandbox">Linux sandbox</string>
+    <string name="sandbox_not_installed">Alpine Linux, installed on first use (about 4 MB)</string>
+    <string name="sandbox_installing">Installing… %1$s</string>
+    <string name="sandbox_ready">Alpine Linux ready · the agent can apk add packages</string>
+    <string name="sandbox_failed">Setup failed: %1$s</string>
+    <string name="sandbox_reset">Reset</string>
+    <string name="cap_memory">Memory</string>
+    <string name="cap_memory_desc">A notebook the agent keeps across chats</string>
+    <string name="cap_planning">Planning</string>
+    <string name="cap_planning_desc">Task plans shown live in the chat</string>
 </resources>

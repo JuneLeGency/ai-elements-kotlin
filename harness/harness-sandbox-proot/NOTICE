@@ -1,0 +1,14 @@
+harness-sandbox-proot bundles third-party executables in src/main/jniLibs:
+
+* PRoot (libproot.so, libproot-loader.so, libproot-loader32.so)
+  Copyright (C) 2014 STMicroelectronics and contributors — GNU General Public License v2.0.
+  Built from https://github.com/termux/proot at commit d4d2a19081c3c07f75250e4ce2980b9fa2f5720f
+  by native/build-proot.sh (unmodified source). The corresponding source is available at that
+  URL and commit; on request we provide it for three years from distribution.
+  PRoot runs as a separate process; the Kotlin code of this artifact is Apache-2.0.
+
+* talloc 2.4.3 (statically linked into libproot.so) — GNU Lesser General Public License v3.0.
+  Termux package libtalloc-static 2.4.3 (sha256 a2f3bb40…); source: https://www.samba.org/ftp/talloc/
+
+At runtime the app downloads the Alpine Linux minirootfs (dl-cdn.alpinelinux.org); its packages
+carry their own licences (musl MIT, BusyBox GPL-2.0, …).
