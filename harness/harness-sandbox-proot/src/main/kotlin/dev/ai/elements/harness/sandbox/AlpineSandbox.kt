@@ -28,6 +28,20 @@ data class RootfsImage(val name: String, val url: String, val sha256: String) {
             "https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/aarch64/alpine-minirootfs-3.24.2-aarch64.tar.gz",
             "9bf70a7f18ea44094cbb5f70c58f9af129c8214745743db0e68e5502cc2ce773",
         )
+
+        /** Alpine Linux 3.24.2 minirootfs for x86_64 (emulators, Chromebooks). */
+        val ALPINE_X86_64 = RootfsImage(
+            "Alpine Linux 3.24.2 (x86_64)",
+            "https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/x86_64/alpine-minirootfs-3.24.2-x86_64.tar.gz",
+            "c5ca053cfe1d85c5b96dff8b9bc57045f7f184a30ffb6b65776409ca90388677",
+        )
+
+        /** The image for this device's primary ABI; null where PRoot is not bundled. */
+        fun forDevice(): RootfsImage? = when (android.os.Build.SUPPORTED_ABIS.firstOrNull()) {
+            "arm64-v8a" -> ALPINE_AARCH64
+            "x86_64" -> ALPINE_X86_64
+            else -> null
+        }
     }
 }
 
@@ -49,7 +63,7 @@ data class RootfsImage(val name: String, val url: String, val sha256: String) {
 class AlpineSandbox(
     private val context: Context,
     private val workspace: File,
-    private val image: RootfsImage = RootfsImage.ALPINE_AARCH64,
+    private val image: RootfsImage? = RootfsImage.forDevice(),
     private val home: File = File(context.filesDir, "sandbox/alpine"),
 ) : ShellRuntime {
 
@@ -68,16 +82,17 @@ class AlpineSandbox(
     private val nativeDir get() = File(context.applicationInfo.nativeLibraryDir)
     private val proot get() = File(nativeDir, "libproot.so")
 
-    override val description get() = "an ${image.name} sandbox (BusyBox, `apk add` to install packages; working directory /workspace)"
+    override val description get() = "an ${image?.name ?: "Alpine Linux"} sandbox (BusyBox, `apk add` to install packages; working directory /workspace)"
     override val isolated = true
 
     override suspend fun prepare() = lock.withLock {
         if (installedMarker().isFile) return@withLock
+        val image = checkNotNull(image) { "The Linux sandbox supports arm64-v8a and x86_64 devices, not ${android.os.Build.SUPPORTED_ABIS.firstOrNull()}." }
         check(proot.canExecute()) {
             "PRoot is not extracted from the APK: set packaging.jniLibs.useLegacyPackaging = true in the app module."
         }
         try {
-            install()
+            install(image)
             _state.value = State.Ready
         } catch (e: Exception) {
             _state.value = State.Failed(e.message ?: e.javaClass.simpleName)
@@ -115,12 +130,12 @@ class AlpineSandbox(
         _state.value = State.NotInstalled
     }
 
-    private suspend fun install() = withContext(Dispatchers.IO) {
+    private suspend fun install(image: RootfsImage) = withContext(Dispatchers.IO) {
         home.deleteRecursively()
         rootfs.mkdirs()
         _state.value = State.Installing(0f, "Downloading ${image.name}")
         val archive = File(home, "rootfs.tar.gz")
-        download(archive)
+        download(image, archive)
         _state.value = State.Installing(null, "Unpacking")
         extract(archive.inputStream(), rootfs)
         archive.delete()
@@ -129,7 +144,7 @@ class AlpineSandbox(
         installedMarker().writeText(image.sha256)
     }
 
-    private fun download(target: File) {
+    private fun download(image: RootfsImage, target: File) {
         val connection = URL(image.url).openConnection() as HttpURLConnection
         connection.connectTimeout = 15_000
         connection.readTimeout = 30_000

@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Builds PRoot (GPL-2.0, https://github.com/termux/proot) for Android arm64 with the NDK and
-# installs it as native libraries, so Android lets the app execute it (W^X):
-#   src/main/jniLibs/arm64-v8a/libproot.so           the proot executable
-#   src/main/jniLibs/arm64-v8a/libproot-loader.so    its ELF loader (PROOT_LOADER)
-#   src/main/jniLibs/arm64-v8a/libproot-loader32.so  loader for 32-bit ARM programs (PROOT_LOADER_32)
+# Builds PRoot (GPL-2.0, https://github.com/termux/proot) for Android with the NDK and installs
+# it as native libraries, so Android lets the app execute it (W^X):
+#   src/main/jniLibs/<abi>/libproot.so           the proot executable
+#   src/main/jniLibs/<abi>/libproot-loader.so    its ELF loader (PROOT_LOADER)
+#   src/main/jniLibs/<abi>/libproot-loader32.so  loader for 32-bit programs (PROOT_LOADER_32)
+# Usage: build-proot.sh [arm64-v8a|x86_64]   (default arm64-v8a; run once per ABI)
 # talloc (LGPL-3.0) is linked statically from Termux's prebuilt libtalloc-static package.
 # Inputs are pinned (commit, sha256) so the build is reproducible; see ../NOTICE for licences
 # and where to get the corresponding source.
@@ -11,14 +12,24 @@ set -euo pipefail
 
 PROOT_COMMIT=d4d2a19081c3c07f75250e4ce2980b9fa2f5720f
 TALLOC_VERSION=2.4.3
-TALLOC_STATIC_SHA256=a2f3bb400395520cc1380626907e61ec59bd072ec2209fbff9bf21e167c5be2e
-TALLOC_SHA256=ac81ad623d74c209718b9f3acb2dd702cc8a88c431e820d212229910b4db29da
+ABI="${1:-arm64-v8a}"
+case "$ABI" in
+  arm64-v8a)
+    ARCH=aarch64; TRIPLE=aarch64-linux-android
+    TALLOC_STATIC_SHA256=a2f3bb400395520cc1380626907e61ec59bd072ec2209fbff9bf21e167c5be2e
+    TALLOC_SHA256=ac81ad623d74c209718b9f3acb2dd702cc8a88c431e820d212229910b4db29da ;;
+  x86_64)
+    ARCH=x86_64; TRIPLE=x86_64-linux-android
+    TALLOC_STATIC_SHA256=4e8a8cb13a8b36eb95d0b8aca08c77a17e095d7b902a72b70327b29e097abdc9
+    TALLOC_SHA256=7ca2eaae2e53b28228a01301bc410b62845403d6317c25b8e0a7f40681de0628 ;;
+  *) echo "Unsupported ABI: $ABI" >&2; exit 1 ;;
+esac
 TERMUX=https://packages.termux.dev/apt/termux-main/pool/main
 API=26
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-OUT="$HERE/../src/main/jniLibs/arm64-v8a"
-WORK="${WORK:-$HERE/build}"
+OUT="$HERE/../src/main/jniLibs/$ABI"
+WORK="${WORK:-$HERE/build}/$ABI"
 NDK="${ANDROID_NDK_HOME:-$(ls -d "$HOME"/Library/Android/sdk/ndk/* | sort -V | tail -1)}"
 TOOLCHAIN="$(echo "$NDK"/toolchains/llvm/prebuilt/*)"
 mkdir -p "$WORK" "$OUT"
@@ -32,8 +43,8 @@ unpack_deb() { # deb dir
   mkdir -p "$2" && (cd "$2" && tar -xf "../$1" && tar -xf data.tar.xz)
 }
 
-fetch "$TERMUX/libt/libtalloc-static/libtalloc-static_${TALLOC_VERSION}_aarch64.deb" "$TALLOC_STATIC_SHA256" talloc-static.deb
-fetch "$TERMUX/libt/libtalloc/libtalloc_${TALLOC_VERSION}_aarch64.deb" "$TALLOC_SHA256" talloc.deb
+fetch "$TERMUX/libt/libtalloc-static/libtalloc-static_${TALLOC_VERSION}_${ARCH}.deb" "$TALLOC_STATIC_SHA256" talloc-static.deb
+fetch "$TERMUX/libt/libtalloc/libtalloc_${TALLOC_VERSION}_${ARCH}.deb" "$TALLOC_SHA256" talloc.deb
 unpack_deb talloc-static.deb talloc-static
 unpack_deb talloc.deb talloc
 TALLOC_PREFIX_LIB="$WORK/$(dirname "$(find talloc-static -name libtalloc.a | head -1)")"
@@ -44,7 +55,7 @@ if [ ! -d proot ]; then
 fi
 (cd proot && git fetch -q origin "$PROOT_COMMIT" 2>/dev/null || true; git checkout -q "$PROOT_COMMIT")
 
-export CC="$TOOLCHAIN/bin/aarch64-linux-android$API-clang"
+export CC="$TOOLCHAIN/bin/$TRIPLE$API-clang"
 export LD="$CC"
 export STRIP="$TOOLCHAIN/bin/llvm-strip"
 export OBJCOPY="$TOOLCHAIN/bin/llvm-objcopy"
