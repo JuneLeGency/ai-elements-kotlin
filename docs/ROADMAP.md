@@ -72,7 +72,7 @@ reference only, never copied).
 | `harness-sandbox-proot` | Alpine Linux via upstream proot (separate process, GPL-2 binary + source offer), rootfs downloaded on first use | proot sandbox | ✅ reproducible NDK build (`native/build-proot.sh`); in-app test on emulator (targetSdk 36): install + commands + shared /workspace; `apk add python3` verified |
 | `harness-memory` | `write_memory`, `read_memory`, `delete_memory`, `search_memory` (file store) | memory tools | ✅ 4 tests; `<memory>` injection via `Capability.context()` |
 | `harness-planning` | `write_plan`, `read_plan`, `add_task`, `update_task_status(es)`, `remove_task` | — | ✅ 3 tests; live `data-plan` via `ToolCallContext.data` |
-| `harness-browser` | WebView browsing / page reading / actions | `browser_use` | ⬜ |
+| `harness-browser` | Harness browser tools (`navigate`, `snapshot`, `click`, `type_text`, `press_key`, `select_option`, `hover`, `wait_for`, `get_text`, `scroll`, `go_back`, `go_forward`) on an off-screen WebView | `browser_use` | ✅ in-app E2E on emulator (form fill + submit + history) |
 | `harness-device` | Clipboard, calendar, contacts, notifications, location, alarms (runtime permissions) | device integrations | ⬜ |
 | `harness-speech` | Speech recognition and TTS for agents | speech | ⬜ |
 | `harness-scheduler` | Scheduled / background agent runs (WorkManager, foreground service) | scheduled agents | ⬜ |

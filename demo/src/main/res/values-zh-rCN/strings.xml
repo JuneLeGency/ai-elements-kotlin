@@ -199,4 +199,6 @@
     <string name="cap_memory_desc">智能体跨会话保留的笔记</string>
     <string name="cap_planning">规划</string>
     <string name="cap_planning_desc">在对话中实时显示任务计划</string>
+    <string name="cap_browser">网页浏览器</string>
+    <string name="cap_browser_desc">打开网页、阅读内容并填写表单</string>
 </resources>

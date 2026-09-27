@@ -26,6 +26,7 @@ import dev.ai.elements.harness.memory.Memory
 import dev.ai.elements.harness.planning.Planning
 import dev.ai.elements.harness.sandbox.AlpineSandbox
 import dev.ai.elements.harness.shell.Shell
+import dev.ai.elements.harness.browser.WebBrowser
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -51,6 +52,7 @@ class AgentRuntime(
     val sandbox = AlpineSandbox(context, workspace)
     private val shell = Shell(sandbox, defaultTimeoutSeconds = 120.0)
     private val fileSystem = FileSystem(workspace)
+    private val browser = WebBrowser(context)
     private val memory = Memory(FileMemoryStore(java.io.File(context.filesDir, "memory")))
 
     /** One plan per conversation. */
@@ -113,6 +115,7 @@ class AgentRuntime(
                 if (settings.sandboxShell) add(shell)
                 if (settings.memory) add(memory)
                 if (settings.planning) add(planning)
+                if (settings.webBrowser) add(browser)
             }
         }
     }

@@ -38,7 +38,7 @@ from pathlib import Path
 
 from ag_ui.core import StateSnapshotEvent
 from fastapi import FastAPI, Request
-from fastapi.responses import Response
+from fastapi.responses import HTMLResponse, Response
 from mcp.server.transport_security import TransportSecuritySettings
 from pydantic_ai import Agent, CustomEvent, DeferredToolRequests, RunContext
 from pydantic_ai.mcp import MCPToolset
@@ -426,6 +426,33 @@ async def chat(request: Request) -> Response:
 async def agui(request: Request) -> Response:
     model_name = request.query_params.get("model") or DEFAULT_MODEL
     return await AGUIAdapter.dispatch_request(request, agent=agent, deps=RunState(protocol="agui"), model=resolve_model(model_name))
+
+
+# A small page for the in-app browser's end-to-end test (harness-browser).
+_BROWSER_TEST_PAGE = """<!doctype html><html><head><title>Order form</title></head><body>
+<h1>Order a coffee</h1>
+<form action="/browser-test/done" method="get">
+  <label>Name <input name="name" placeholder="Your name"></label>
+  <label>Size <select name="size"><option value="s">Small</option><option value="l">Large</option></select></label>
+  <button type="submit">Order</button>
+</form>
+<a href="/browser-test/about">About this shop</a>
+</body></html>"""
+
+
+@app.get("/browser-test", response_class=HTMLResponse)
+async def browser_test() -> str:
+    return _BROWSER_TEST_PAGE
+
+
+@app.get("/browser-test/done", response_class=HTMLResponse)
+async def browser_test_done(name: str = "", size: str = "") -> str:
+    return f"<!doctype html><html><head><title>Thanks</title></head><body><h1>Thanks {name}!</h1><p>Your {'large' if size == 'l' else 'small'} coffee is on its way.</p></body></html>"
+
+
+@app.get("/browser-test/about", response_class=HTMLResponse)
+async def browser_test_about() -> str:
+    return "<!doctype html><html><head><title>About</title></head><body><h1>About</h1><p>Open since 2026.</p></body></html>"
 
 
 @app.get("/health")

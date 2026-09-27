@@ -201,4 +201,6 @@
     <string name="cap_memory_desc">A notebook the agent keeps across chats</string>
     <string name="cap_planning">Planning</string>
     <string name="cap_planning_desc">Task plans shown live in the chat</string>
+    <string name="cap_browser">Web browser</string>
+    <string name="cap_browser_desc">Open pages, read them and fill in forms</string>
 </resources>

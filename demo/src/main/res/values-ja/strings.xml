@@ -199,4 +199,6 @@
     <string name="cap_memory_desc">チャットをまたいで残るノート</string>
     <string name="cap_planning">計画</string>
     <string name="cap_planning_desc">タスク計画をチャットにライブ表示</string>
+    <string name="cap_browser">ウェブブラウザー</string>
+    <string name="cap_browser_desc">ページを開いて読み、フォームに入力</string>
 </resources>

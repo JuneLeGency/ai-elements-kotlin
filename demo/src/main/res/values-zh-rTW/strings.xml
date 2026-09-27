@@ -199,4 +199,6 @@
     <string name="cap_memory_desc">代理程式跨對話保留的筆記</string>
     <string name="cap_planning">規劃</string>
     <string name="cap_planning_desc">在對話中即時顯示任務計畫</string>
+    <string name="cap_browser">網頁瀏覽器</string>
+    <string name="cap_browser_desc">開啟網頁、閱讀內容並填寫表單</string>
 </resources>

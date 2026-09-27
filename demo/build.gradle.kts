@@ -83,6 +83,7 @@ dependencies {
     implementation(project(":harness:harness-memory"))
     implementation(project(":harness:harness-planning"))
     implementation(project(":harness:harness-sandbox-proot"))
+    implementation(project(":harness:harness-browser"))
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(libs.activity.compose)
