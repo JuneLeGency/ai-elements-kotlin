@@ -44,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.ai.elements.core.model.ToolKind
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
 import dev.ai.elements.ui.R
@@ -130,20 +131,20 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
 }
 
 /**
- * The tool's name line: its title when it has one (e.g. "Convert units" with an
- * MCP server chip), a Skill chip for skill loads, else the raw name in code type.
+ * The tool's name line: its title when it has one, else the raw name in code type, with a chip
+ * for what it is — a Skill for skill loads, the provider (e.g. an MCP server) for [ToolPart.source].
  */
 @Composable
 private fun ToolTitle(part: ToolPart) {
+    val kind = part.kind
     val (title, badge) = when {
-        part.name == LOAD_CAPABILITY -> (part.title ?: part.name) to stringResource(R.string.ai_skill)
-        part.title != null && " · " in part.title!! -> part.title!!.substringBefore(" · ") to part.title!!.substringAfter(" · ")
-        else -> part.displayName to null
+        kind is ToolKind.Skill -> (kind.skill ?: part.displayName) to stringResource(R.string.ai_skill)
+        else -> part.displayName to part.source
     }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             title,
-            style = if (part.title == null) MaterialTheme.typography.titleSmall.copy(fontFamily = LocalCodeFontFamily.current) else MaterialTheme.typography.titleSmall,
+            style = if (part.title == null && kind is ToolKind.Function) MaterialTheme.typography.titleSmall.copy(fontFamily = LocalCodeFontFamily.current) else MaterialTheme.typography.titleSmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f, fill = false),
@@ -161,8 +162,6 @@ private fun subtitle(part: ToolPart): String =
     if (part.preliminary && part.isStreaming && !part.output.isNullOrBlank()) part.output!!.lineSequence().last { it.isNotBlank() }
     else part.input.compactJson().ifBlank { "…" }
 
-/** Pydantic AI's deferred-capability loader (skills). */
-private const val LOAD_CAPABILITY = "load_capability"
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

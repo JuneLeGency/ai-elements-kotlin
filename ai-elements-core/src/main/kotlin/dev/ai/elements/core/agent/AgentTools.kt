@@ -1,5 +1,6 @@
 package dev.ai.elements.core.agent
 
+import dev.ai.elements.core.model.ToolKind
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -32,8 +33,14 @@ interface AgentTool {
     /** Ask the user before running (rendered as a Confirmation). */
     val requiresApproval: Boolean get() = false
 
-    /** Label for one call, e.g. "Skill · pdf" from its arguments; defaults to [title]. */
+    /** Label for one call from its arguments (e.g. the skill or agent it names); defaults to [title]. */
     fun titleFor(arguments: JsonObject): String? = title
+
+    /** Who provides the tool when it is not the agent itself (e.g. an MCP server), shown next to the title. */
+    val source: String? get() = null
+
+    /** What one call means for the UI (a delegation, a skill load…); an ordinary function by default. */
+    fun kindFor(arguments: JsonObject): ToolKind = ToolKind.Function
 
     /** Run the tool. Throwing reports a tool error back to the model. */
     suspend fun execute(arguments: JsonObject): String

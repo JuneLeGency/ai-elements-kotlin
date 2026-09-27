@@ -129,6 +129,27 @@ fun ChatScreen(vm: ChatViewModel) {
 Sub-agents, plans, shared state and activities from the server render on their own: a
 `delegate_task` call or an AG-UI `SUBAGENT_*` run becomes a `Subagent` card with the nested run.
 
+## Customising the elements
+
+Elements are protocol-independent: they render `ToolPart.kind` / `source`, data parts and
+messages, whichever backend produced them. Replace how any part renders app-wide — without
+forking `Conversation` — and plug in your own loading:
+
+```kotlin
+CompositionLocalProvider(
+    LocalAiElementsRenderers provides AiElementsRenderers(
+        tools = mapOf("get_weather" to ToolRenderer { part, _ -> WeatherCard(part.output) }),
+        data = mapOf("chart" to DataRenderer { part -> MyChart(part.data) }),   // `data-chart` parts
+    ),
+    LocalFileLoader provides FileLoader { url -> myHttp.bytes(url) },         // attachment previews
+) {
+    Chat(controller)
+}
+```
+
+On-device tools say what they are (`AgentTool.kindFor` → `ToolKind.Delegation` / `Skill`,
+`AgentTool.source` for a provider chip), so custom tools get the same rendering as built-in ones.
+
 ## Quick start: in-app agent
 
 ```kotlin

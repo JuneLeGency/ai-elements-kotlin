@@ -38,12 +38,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.ai.elements.core.http.DefaultHttpClient
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.ui.R
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
-import okhttp3.Request
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -62,8 +60,12 @@ fun FileImage(
     fitToImage: Boolean = false,
     maxDecodePx: Int = 1600,
 ) {
+    val loader = LocalFileLoader.current
     val bitmap by produceState<ImageBitmap?>(null, file.url) {
-        value = withContext(Dispatchers.IO) { runCatching { decode(file, maxDecodePx) }.getOrNull() }
+        value = runCatching {
+            val bytes = file.base64Data?.let { Base64.decode(it, Base64.DEFAULT) } ?: loader.load(file.url)
+            bytes?.let { withContext(Dispatchers.Default) { decode(it, maxDecodePx) } }
+        }.getOrNull()
     }
     val image = bitmap
     val sized = when {
@@ -141,10 +143,7 @@ fun AttachmentStrip(
     }
 }
 
-private fun decode(file: FilePart, maxPx: Int): ImageBitmap? {
-    val bytes = file.base64Data?.let { Base64.decode(it, Base64.DEFAULT) }
-        ?: DefaultHttpClient.newCall(Request.Builder().url(file.url).build()).execute().use { it.body?.bytes() }
-        ?: return null
+private fun decode(bytes: ByteArray, maxPx: Int): ImageBitmap? {
     val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
     BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
     var sample = 1

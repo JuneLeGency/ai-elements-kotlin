@@ -7,6 +7,7 @@ import dev.ai.elements.core.model.Part
 import dev.ai.elements.core.model.ReasoningPart
 import dev.ai.elements.core.model.SourcePart
 import dev.ai.elements.core.model.TextPart
+import dev.ai.elements.core.model.ToolKind
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
 import dev.ai.elements.core.model.Usage
@@ -41,11 +42,11 @@ fun Message.reduce(event: ChatEvent, now: Long): Message = when (event) {
 
     is ChatEvent.ToolInputAvailable -> upsert<ToolPart>(
         event.id,
-        { ToolPart(event.id, event.name, ToolState.INPUT_AVAILABLE, event.input, title = event.title) },
+        { ToolPart(event.id, event.name, ToolState.INPUT_AVAILABLE, event.input, title = event.title, kind = event.kind ?: ToolKind.Function, source = event.source) },
     ) {
         // A call that already has a (preliminary) result or awaits approval keeps its state.
         val state = if (it.state == ToolState.INPUT_STREAMING) ToolState.INPUT_AVAILABLE else it.state
-        it.copy(name = event.name, state = state, input = event.input, title = event.title ?: it.title)
+        it.copy(name = event.name, state = state, input = event.input, title = event.title ?: it.title, kind = event.kind ?: it.kind, source = event.source ?: it.source)
     }
 
     is ChatEvent.ToolOutput -> updateExisting<ToolPart>(event.id) {

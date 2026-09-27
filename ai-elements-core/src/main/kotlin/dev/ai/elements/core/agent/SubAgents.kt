@@ -1,5 +1,6 @@
 package dev.ai.elements.core.agent
 
+import dev.ai.elements.core.model.ToolKind
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.chat.ToolApprover
@@ -95,6 +96,8 @@ class SubAgents(
         }
 
         override fun titleFor(arguments: JsonObject): String? = arguments.string("agent_name")
+
+        override fun kindFor(arguments: JsonObject) = ToolKind.Delegation(arguments.string("agent_name"), arguments.string("task"))
 
         override suspend fun execute(arguments: JsonObject): String {
             val agentName = arguments.string("agent_name").orEmpty()

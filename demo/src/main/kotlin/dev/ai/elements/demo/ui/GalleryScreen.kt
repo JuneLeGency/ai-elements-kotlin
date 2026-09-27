@@ -49,6 +49,7 @@ import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.SourcePart
 import dev.ai.elements.core.model.Suggestion
 import dev.ai.elements.core.model.TextPart
+import dev.ai.elements.core.model.ToolKind
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
 import dev.ai.elements.core.model.Usage
@@ -195,7 +196,7 @@ private fun sampleDelegation(running: Boolean): ToolPart {
                 if (running) ToolState.APPROVAL_REQUESTED else ToolState.OUTPUT_AVAILABLE,
                 """{"title":"AG-UI","content":"Event-based agent ↔ UI protocol"}""",
                 output = if (running) null else "Saved note “AG-UI”.",
-                title = "Save note · Notes",
+                title = "Save note", source = "Notes",
             ),
         ) + if (running) emptyList() else listOf(TextPart("g-sub-x", "**AG-UI** is an open, event-based protocol that streams an agent's text, tool calls and state to any UI.")),
     )
@@ -204,8 +205,8 @@ private fun sampleDelegation(running: Boolean): ToolPart {
         if (running) ToolState.INPUT_AVAILABLE else ToolState.OUTPUT_AVAILABLE,
         """{"agent_name":"researcher","task":"Explain the AG-UI protocol in two sentences and save a note about it."}""",
         output = if (running) null else nested.text,
-        title = "researcher",
         subagent = nested,
+        kind = ToolKind.Delegation("researcher", "Explain the AG-UI protocol in two sentences and save a note about it."),
     )
 }
 
@@ -229,11 +230,11 @@ private val GallerySamples: List<Pair<String, @Composable () -> Unit>> = listOf<
             ToolCall(ToolPart("g-t2", "calculate", ToolState.OUTPUT_AVAILABLE, """{"expression":"6*7"}""", output = "42"))
             ToolCall(ToolPart("g-t3", "fetch_url", ToolState.OUTPUT_ERROR, """{"url":"https://x"}""", errorText = "Timed out"))
             // MCP tool with a title, reporting progress; a skill load.
-            ToolCall(ToolPart("g-t6", "notes__count_slowly", ToolState.INPUT_AVAILABLE, """{"to":5}""", output = "Counted 3 60%", title = "Count slowly · Notes", preliminary = true))
-            ToolCall(ToolPart("g-t7", "load_capability", ToolState.OUTPUT_AVAILABLE, """{"id":"mermaid-diagrams"}""", output = "# Skill: mermaid-diagrams", title = "mermaid-diagrams"))
+            ToolCall(ToolPart("g-t6", "notes__count_slowly", ToolState.INPUT_AVAILABLE, """{"to":5}""", output = "Counted 3 60%", title = "Count slowly", source = "Notes", preliminary = true))
+            ToolCall(ToolPart("g-t7", "load_capability", ToolState.OUTPUT_AVAILABLE, """{"id":"mermaid-diagrams"}""", output = "# Skill: mermaid-diagrams", kind = ToolKind.Skill("mermaid-diagrams")))
         }
     },
-    "Sub-agents (delegate_task)" to {
+    "Sub-agents" to {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             ToolPartView(sampleDelegation(running = true), onToolApproval = { _, _ -> })
             ToolPartView(sampleDelegation(running = false))

@@ -1,6 +1,7 @@
 package dev.ai.elements.core.chat
 
 import dev.ai.elements.core.model.Message
+import dev.ai.elements.core.model.ToolKind
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 
@@ -31,7 +32,14 @@ sealed interface ChatEvent {
 
     data class ToolInputStart(val id: String, val name: String, val title: String? = null) : ChatEvent
     data class ToolInputDelta(val id: String, val delta: String) : ChatEvent
-    data class ToolInputAvailable(val id: String, val name: String, val input: String, val title: String? = null) : ChatEvent
+    data class ToolInputAvailable(
+        val id: String,
+        val name: String,
+        val input: String,
+        val title: String? = null,
+        val kind: ToolKind? = null,
+        val source: String? = null,
+    ) : ChatEvent
 
     /** A tool result; [preliminary] results are replaced by later ones (AI SDK preliminary tool results). */
     data class ToolOutput(val id: String, val output: String, val preliminary: Boolean = false) : ChatEvent

@@ -1,5 +1,7 @@
 package dev.ai.elements.core.protocol.agui
 
+import dev.ai.elements.core.model.ToolKind
+import dev.ai.elements.core.protocol.withConventions
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.chat.ToolApprover
@@ -366,7 +368,7 @@ internal class AgUiParser(private val nested: Boolean = false) {
             }
             is ToolCallEndEvent -> {
                 val call = calls[typed.toolCallId]
-                listOf(ChatEvent.ToolInputAvailable(typed.toolCallId, call?.name.orEmpty(), call?.args?.toString().orEmpty().ifBlank { "{}" }))
+                listOf(ChatEvent.ToolInputAvailable(typed.toolCallId, call?.name.orEmpty(), call?.args?.toString().orEmpty().ifBlank { "{}" }).withConventions())
             }
             is ToolCallResultEvent -> toolResult(typed.toolCallId, typed.messageId, typed.content)
             is StateSnapshotEvent -> {
@@ -464,7 +466,7 @@ internal class AgUiParser(private val nested: Boolean = false) {
                 // No tool call delegated it: show the subagent as its own delegation.
                 val input = buildJsonObject { put("agent_name", name); event.str("description")?.let { put("task", it) } }.toString()
                 add(ChatEvent.ToolInputStart(toolCallId, DELEGATE_TOOL, name))
-                add(ChatEvent.ToolInputAvailable(toolCallId, DELEGATE_TOOL, input, name))
+                add(ChatEvent.ToolInputAvailable(toolCallId, DELEGATE_TOOL, input, name, kind = ToolKind.Delegation(name, event.str("description"))))
             }
             add(ChatEvent.SubagentUpdate(toolCallId, sub.message))
         }

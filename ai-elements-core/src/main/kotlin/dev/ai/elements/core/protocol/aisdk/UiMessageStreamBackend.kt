@@ -1,5 +1,6 @@
 package dev.ai.elements.core.protocol.aisdk
 
+import dev.ai.elements.core.protocol.withConventions
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.chat.ToolApprover
@@ -188,9 +189,9 @@ class UiMessageStreamBackend(
                 "tool-input-start" -> listOf(ChatEvent.ToolInputStart(toolCallId, str("toolName").orEmpty(), str("title")))
                 "tool-input-delta" -> listOf(ChatEvent.ToolInputDelta(toolCallId, str("inputTextDelta").orEmpty()))
                 "tool-input-available" ->
-                    listOf(ChatEvent.ToolInputAvailable(toolCallId, str("toolName").orEmpty(), chunk["input"].asText(), str("title")))
+                    listOf(ChatEvent.ToolInputAvailable(toolCallId, str("toolName").orEmpty(), chunk["input"].asText(), str("title")).withConventions())
                 "tool-input-error" -> listOf(
-                    ChatEvent.ToolInputAvailable(toolCallId, str("toolName").orEmpty(), chunk["input"].asText(), str("title")),
+                    ChatEvent.ToolInputAvailable(toolCallId, str("toolName").orEmpty(), chunk["input"].asText(), str("title")).withConventions(),
                     ChatEvent.ToolError(toolCallId, str("errorText").orEmpty()),
                 )
                 "tool-output-available" -> toolOutput(toolCallId, chunk["output"], (chunk["preliminary"] as? JsonPrimitive)?.contentOrNull == "true")
@@ -338,7 +339,7 @@ internal class DataStreamV4Parser {
             'b' -> listOfNotNull(obj?.let { ChatEvent.ToolInputStart(it.str("toolCallId").orEmpty(), it.str("toolName").orEmpty()) })
             'c' -> listOfNotNull(obj?.let { ChatEvent.ToolInputDelta(it.str("toolCallId").orEmpty(), it.str("argsTextDelta").orEmpty()) })
             '9' -> listOfNotNull(obj?.let {
-                ChatEvent.ToolInputAvailable(it.str("toolCallId").orEmpty(), it.str("toolName").orEmpty(), it["args"]?.toString() ?: "{}")
+                ChatEvent.ToolInputAvailable(it.str("toolCallId").orEmpty(), it.str("toolName").orEmpty(), it["args"]?.toString() ?: "{}").withConventions()
             })
             'a' -> listOfNotNull(obj?.let {
                 val result = it["result"]

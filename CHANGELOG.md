@@ -20,6 +20,11 @@
   `Agent` descriptions and skill lists (A2A cards).
 - `ai-elements-koog`: a JetBrains Koog agent as a `ChatBackend` (and as an `AgentHarness` model
   binding), with AI Elements tools as Koog tools; approvals and progress work as with the built-in loop.
+- Protocol-independent elements: `ToolPart.kind` (`ToolKind.Function` / `Delegation` / `Skill`) and
+  `ToolPart.source` replace tool-name checks and `"title · server"` labels in the UI; protocols map
+  onto them in `core` (`ToolConventions`, AG-UI `SUBAGENT_*`), on-device tools declare them
+  (`AgentTool.kindFor` / `source`). `DataPart.STATE` names shared agent state. Extension points:
+  `LocalAiElementsRenderers` (tool / data renderers) and `LocalFileLoader`. `LayeringTest` guards it.
 - `Chat(controller)` and `rememberChat(backend)`: a complete chat in one composable; `samples/pure-client`
   and `samples/in-app-agent` as minimal apps (built by CI).
 - `ai-elements-bom`; `server/` rebuilt on Pydantic AI 2.51 + Harness 0.36 with MCP and A2A endpoints.

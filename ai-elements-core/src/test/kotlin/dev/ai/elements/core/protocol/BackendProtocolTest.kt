@@ -1,5 +1,6 @@
 package dev.ai.elements.core.protocol
 
+import dev.ai.elements.core.model.ToolKind
 import com.sun.net.httpserver.HttpServer
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatBackendException
@@ -135,7 +136,7 @@ class BackendProtocolTest {
         )
         val events = OpenAiChatBackend(base, "m", apiKey = "k", tools = BuiltinTools).events()
 
-        assertTrue(events.contains(ChatEvent.ToolInputAvailable("call_1", "calculate", """{"expression":"6*7"}""")))
+        assertTrue(events.contains(ChatEvent.ToolInputAvailable("call_1", "calculate", """{"expression":"6*7"}""", kind = ToolKind.Function)))
         assertTrue(events.contains(ChatEvent.ToolOutput("call_1", "42")))
         val text = events.filterIsInstance<ChatEvent.TextDelta>().joinToString("") { it.delta }
         assertEquals("It is 42.", text)

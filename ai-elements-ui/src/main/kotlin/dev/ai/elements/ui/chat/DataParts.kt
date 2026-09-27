@@ -47,9 +47,10 @@ fun DataPartView(
     renderers: Map<String, @Composable (DataPart) -> Unit> = emptyMap(),
 ) {
     renderers[part.name]?.let { it(part); return }
+    LocalAiElementsRenderers.current.data[part.name]?.let { it.Render(part); return }
     val data = part.data as? JsonObject
     when (part.name.lowercase()) {
-        STATE -> if (data != null) Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        DataPart.STATE -> if (data != null) Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
             val known = data.filterKeys { it in BUILT_IN }
             known.forEach { (key, value) -> DataPartView(DataPart("${part.id}-$key", key, value), renderers = renderers) }
             val rest = data.filterKeys { it !in BUILT_IN }
@@ -93,7 +94,6 @@ private fun JsonCard(part: DataPart, modifier: Modifier) {
 
 private val prettyJson = Json { prettyPrint = true }
 
-private const val STATE = "state"
 private val BUILT_IN = setOf("plan", "task", "chain-of-thought")
 
 private fun JsonObject.string(key: String): String? = (this[key] as? JsonPrimitive)?.contentOrNull

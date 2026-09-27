@@ -32,7 +32,6 @@ import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -53,25 +52,23 @@ import dev.ai.elements.core.model.Part
 import dev.ai.elements.core.model.ReasoningPart
 import dev.ai.elements.core.model.SourcePart
 import dev.ai.elements.core.model.TextPart
+import dev.ai.elements.core.model.ToolKind
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
 import dev.ai.elements.ui.R
 import dev.ai.elements.ui.markdown.MarkdownContent
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.contentOrNull
 
 /**
  * A delegated agent run (the sub-agent pattern): who was asked, what they were
  * asked to do, and their live work — reasoning, tool calls (approvable in
  * place) and answer — nested under the delegating tool call.
  *
- * Renders the three open-protocol shapes the same way: Pydantic AI Harness /
- * on-device `delegate_task` calls, AG-UI `SUBAGENT_*` runs, and AI SDK tools
- * whose output is a `UIMessage`. While the run is live the header shows what
+ * Protocol-independent: it renders any [ToolPart] whose [ToolPart.kind] is a
+ * [ToolKind.Delegation] or that carries a nested run ([ToolPart.subagent]) — the
+ * backends map their protocol onto those (on-device sub-agents, AG-UI
+ * `SUBAGENT_*`, AI SDK tools whose output is a `UIMessage`…). While the run is live the header shows what
  * the agent is doing; it opens by itself when a nested tool needs approval.
  *
  * @param onToolApproval answers approval requests of the nested tools.
@@ -84,9 +81,9 @@ fun Subagent(
     onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)? = null,
 ) {
     val run = part.subagent
-    val args = remember(part.input) { part.input.asJsonObject() }
-    val agentName = part.title ?: args?.string("agent_name") ?: stringResource(R.string.ai_subagent)
-    val task = args?.string("task")
+    val delegation = part.kind as? ToolKind.Delegation
+    val agentName = delegation?.agent ?: part.title ?: stringResource(R.string.ai_subagent)
+    val task = delegation?.task
     val needsApproval = run?.parts.orEmpty().any { it is ToolPart && it.hasPendingApproval() }
     var open by rememberSaveable(part.id) { mutableStateOf(false) }
     LaunchedEffect(needsApproval) { if (needsApproval) open = true }
@@ -145,14 +142,14 @@ fun Subagent(
 }
 
 /** Whether a tool call is a delegation to a sub-agent (render it with [Subagent]). */
-val ToolPart.isDelegation: Boolean get() = subagent != null || name == DELEGATE_TASK
-
-private const val DELEGATE_TASK = "delegate_task"
+val ToolPart.isDelegation: Boolean get() = subagent != null || kind is ToolKind.Delegation
 
 /** A tool call rendered by the element that fits it: [Subagent] for delegations, [ToolCall] otherwise. */
 @Composable
 fun ToolPartView(part: ToolPart, modifier: Modifier = Modifier, onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)? = null) {
-    if (part.isDelegation) Subagent(part, modifier, onToolApproval)
+    val custom = LocalAiElementsRenderers.current.toolRenderer(part)
+    if (custom != null) custom.Render(part, onToolApproval)
+    else if (part.isDelegation) Subagent(part, modifier, onToolApproval)
     else ToolCall(part, modifier, onApproval = onToolApproval?.let { cb -> { approved -> cb(part.id, approved) } })
 }
 
@@ -217,5 +214,3 @@ private fun String.lastLine() = trimEnd().lineSequence().lastOrNull { it.isNotBl
 private fun String.firstLine() = trim().lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty().stripMarkdown()
 private fun String.stripMarkdown() = replace(Regex("[#*_`>]+"), "").trim()
 
-private fun String.asJsonObject(): JsonObject? = runCatching { Json.parseToJsonElement(this) as? JsonObject }.getOrNull()
-private fun JsonObject.string(key: String) = (this[key] as? JsonPrimitive)?.contentOrNull

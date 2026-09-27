@@ -56,6 +56,19 @@ sub-agents) · `mcp` · `skills` · `auth` · `config`. Dependencies point downw
 `provider` use `chat`, `agent`, `http`, `model`; never the reverse). Optional capabilities live in their
 own artifacts: `ai-elements-a2a`, `harness/*`.
 
+### UI elements are protocol-independent (ai-elements-ui)
+
+Elements render the in-process models only (`core.model`, `core.chat`); they never import
+`protocol`, `provider`, `agent`, `mcp`, `skills`, `http` or other artifacts, and never interpret
+tool names or protocol conventions. What a part *means* is a model field set upstream:
+`ToolPart.kind` (`Function` / `Delegation` / `Skill`) and `ToolPart.source` are declared by
+on-device tools (`AgentTool.kindFor` / `source`) or mapped from a protocol in `core`
+(`protocol.ToolConventions`, AG-UI `SUBAGENT_*`); shared agent state is `DataPart.STATE`.
+If an element needs more, extend the model — do not special-case a name in the UI.
+`LayeringTest` (ai-elements-ui unit tests) enforces this. Apps customise rendering through
+`LocalAiElementsRenderers` (tools by name or predicate, data parts by name) and loading through
+`LocalFileLoader`, without forking elements.
+
 ## 2. Best practices over bespoke code
 
 - Prefer the official SDK / reference implementation of a spec for the server side and

@@ -125,6 +125,7 @@ The demo is a showcase of both modes, switchable per conversation:
 | README, CHANGELOG, NOTICE (a2a-java-sdk, kotlin-json-patch, proot) | ✅ |
 | API reference and CI | ✅ Dokka 2.2 over every published module (`./gradlew :dokkaGenerate`); CI: unit tests, lint, publish, Dokka, emulator E2E (x86_64, now with a bundled x86_64 PRoot) |
 | One-line integration and samples | ✅ `Chat(controller)` / `rememberChat(backend)` (component test); `samples/pure-client` (verified on emulator against the AG-UI server) and `samples/in-app-agent` |
+| Protocol-independent UI layer and extension points | ✅ `ToolKind` / `source` in the model, conventions mapped in `core`; UI imports only `core.model` / `core.chat` (enforced by `LayeringTest`); `LocalAiElementsRenderers` + `LocalFileLoader` (component test); core 1 new test class, ElementsTest 13/13, demo E2E 20/20 on emulator |
 
 ## Decisions log
 

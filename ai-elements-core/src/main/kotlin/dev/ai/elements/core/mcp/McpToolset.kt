@@ -59,7 +59,8 @@ class McpAgentTool(
     override val parameters: JsonObject = tool.inputSchema.let {
         if (it["type"] == null) JsonObject(it + ("type" to JsonPrimitive("object"))) else it
     }
-    override val title: String = "${tool.displayName} · ${server.name}"
+    override val title: String = tool.displayName
+    override val source: String = server.name
     override val requiresApproval: Boolean = when (server.approval) {
         McpApproval.ALWAYS -> true
         McpApproval.NEVER -> false

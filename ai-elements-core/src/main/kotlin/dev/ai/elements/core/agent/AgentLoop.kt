@@ -45,7 +45,15 @@ suspend fun FlowCollector<ChatEvent>.runTool(
     val args = runCatching {
         if (rawArgs.isBlank()) JsonObject(emptyMap()) else BackendJson.parseToJsonElement(rawArgs).jsonObject
     }
-    emit(ChatEvent.ToolInputAvailable(id, name, rawArgs.ifBlank { "{}" }, args.getOrNull()?.let { tool?.titleFor(it) } ?: tool?.title))
+    val parsed = args.getOrNull()
+    emit(
+        ChatEvent.ToolInputAvailable(
+            id, name, rawArgs.ifBlank { "{}" },
+            title = parsed?.let { tool?.titleFor(it) } ?: tool?.title,
+            kind = parsed?.let { tool?.kindFor(it) },
+            source = tool?.source,
+        ),
+    )
     return try {
         requireNotNull(tool) { "Unknown tool: $name" }
         val arguments = args.getOrElse { throw IllegalArgumentException("Invalid JSON arguments: ${it.message}") }

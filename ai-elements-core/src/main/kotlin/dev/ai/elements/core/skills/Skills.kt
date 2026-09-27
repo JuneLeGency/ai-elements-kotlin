@@ -1,5 +1,6 @@
 package dev.ai.elements.core.skills
 
+import dev.ai.elements.core.model.ToolKind
 import android.content.res.AssetManager
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.Capability
@@ -104,6 +105,8 @@ class Skills(val skills: List<Skill>) : Capability {
         }
 
         override fun titleFor(arguments: JsonObject): String? = arguments.id()
+
+        override fun kindFor(arguments: JsonObject) = ToolKind.Skill(arguments.id())
 
         override suspend fun execute(arguments: JsonObject): String {
             val id = arguments.id()?.let(Skill::normalizeName).orEmpty()

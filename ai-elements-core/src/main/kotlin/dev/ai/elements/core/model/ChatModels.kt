@@ -133,6 +133,10 @@ data class ToolPart(
     val title: String? = null,
     val preliminary: Boolean = false,
     val subagent: Message? = null,
+    /** What the call is, for rendering; set by the protocol mapping or the tool, never guessed by the UI. */
+    val kind: ToolKind = ToolKind.Function,
+    /** Who provides the tool when it is not the agent itself, e.g. an MCP server's name. */
+    val source: String? = null,
 ) : Part {
     override val isStreaming: Boolean
         get() = state == ToolState.INPUT_STREAMING || state == ToolState.INPUT_AVAILABLE ||
@@ -140,6 +144,29 @@ data class ToolPart(
 
     /** [title] or, failing that, the tool [name]. */
     val displayName: String get() = title ?: name
+}
+
+/**
+ * The protocol-independent meaning of a tool call. Backends map their protocol onto it (an
+ * on-device tool declares it, AG-UI `SUBAGENT_*` runs and the Pydantic AI Harness tool
+ * conventions are translated in `core`), so UI elements only ever look at this.
+ */
+@Serializable
+sealed interface ToolKind {
+    /** An ordinary function call. */
+    @Serializable
+    @SerialName("function")
+    data object Function : ToolKind
+
+    /** Hands [task] to another agent ([agent]); its run arrives as [ToolPart.subagent]. */
+    @Serializable
+    @SerialName("delegation")
+    data class Delegation(val agent: String? = null, val task: String? = null) : ToolKind
+
+    /** Loads a skill's instructions ([skill] is its name). */
+    @Serializable
+    @SerialName("skill")
+    data class Skill(val skill: String? = null) : ToolKind
 }
 
 /** A cited source (URL and title), shown by [dev.ai.elements.ui.chat.Sources] and inline citations. */
@@ -182,7 +209,15 @@ data class DataPart(
     override val id: String,
     val name: String,
     val data: JsonElement,
-) : Part
+) : Part {
+    companion object {
+        /**
+         * The name of the agent's shared state (a JSON object the agent keeps in sync with the UI,
+         * e.g. AG-UI `STATE_SNAPSHOT` / `STATE_DELTA`). Its `plan` / `task` keys use the data shapes above.
+         */
+        const val STATE = "state"
+    }
+}
 
 /** A prompt suggestion chip. */
 data class Suggestion(val text: String, val label: String = text)

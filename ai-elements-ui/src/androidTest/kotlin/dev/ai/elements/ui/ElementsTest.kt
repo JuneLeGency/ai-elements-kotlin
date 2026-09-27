@@ -24,6 +24,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import dev.ai.elements.core.model.ToolKind
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
 import dev.ai.elements.core.model.DataPart
@@ -83,12 +84,34 @@ class ElementsTest {
         )
     }
 
+    @Test fun renderers_overrideToolsAndDataAppWide() {
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                androidx.compose.runtime.CompositionLocalProvider(
+                    dev.ai.elements.ui.chat.LocalAiElementsRenderers provides dev.ai.elements.ui.chat.AiElementsRenderers(
+                        tools = mapOf("get_weather" to dev.ai.elements.ui.chat.ToolRenderer { part, _ -> androidx.compose.material3.Text("Weather card: ${part.output}") }),
+                        data = mapOf("chart" to dev.ai.elements.ui.chat.DataRenderer { androidx.compose.material3.Text("Custom chart") }),
+                    ),
+                ) {
+                    androidx.compose.foundation.layout.Column {
+                        ToolPartView(ToolPart("w", "get_weather", ToolState.OUTPUT_AVAILABLE, "{}", output = "21°C"))
+                        DataPartView(DataPart("c", "chart", kotlinx.serialization.json.JsonObject(emptyMap())))
+                        ToolPartView(ToolPart("n", "notes__save", ToolState.OUTPUT_AVAILABLE, "{}", output = "ok", title = "Save note", source = "Notes"))
+                    }
+                }
+            }
+        }
+        compose.onNodeWithText("Weather card: 21°C").assertExists()
+        compose.onNodeWithText("Custom chart").assertExists()
+        compose.onNodeWithText("Notes", useUnmergedTree = true).assertExists()
+    }
+
     @Test fun dataPart_agUiState_rendersPlanAndKeepsOtherKeysAsJson() {
         val state = kotlinx.serialization.json.Json.parseToJsonElement(
             """{"plan":{"title":"Release","steps":[{"label":"Write notes","status":"complete"},{"label":"Tag","status":"active"}]},"cursor":3}""",
         )
         compose.setContent {
-            AiElementsTheme(dynamicColor = false) { DataPartView(DataPart("s", "state", state)) }
+            AiElementsTheme(dynamicColor = false) { DataPartView(DataPart("s", DataPart.STATE, state)) }
         }
         compose.onNodeWithTag("data-plan").assertExists()
         compose.onNodeWithText("Write notes").assertExists()
@@ -220,8 +243,8 @@ class ElementsTest {
 
     @Test fun subagent_opensForNestedApproval_andAnswersWithTheNestedCallId() {
         val approvals = mutableListOf<Pair<String, Boolean>>()
-        val nested = Message("sub", Role.ASSISTANT, listOf(ToolPart("inner-1", "notes__save_note", ToolState.APPROVAL_REQUESTED, "{}", title = "Save note · Notes")))
-        val call = ToolPart("call-1", "delegate_task", ToolState.INPUT_AVAILABLE, """{"agent_name":"researcher","task":"Save a note"}""", title = "researcher", subagent = nested)
+        val nested = Message("sub", Role.ASSISTANT, listOf(ToolPart("inner-1", "notes__save_note", ToolState.APPROVAL_REQUESTED, "{}", title = "Save note", source = "Notes")))
+        val call = ToolPart("call-1", "delegate_task", ToolState.INPUT_AVAILABLE, """{"agent_name":"researcher","task":"Save a note"}""", subagent = nested, kind = ToolKind.Delegation("researcher", "Save a note"))
         compose.setContent {
             AiElementsTheme(dynamicColor = false) { ToolPartView(call, onToolApproval = { id, ok -> approvals += id to ok }) }
         }
@@ -234,7 +257,7 @@ class ElementsTest {
 
     @Test fun subagent_collapsedSummaryShowsTheAnswer() {
         val nested = Message("sub", Role.ASSISTANT, listOf(TextPart("t", "**AG-UI** streams agent events.")))
-        val call = ToolPart("call-2", "delegate_task", ToolState.OUTPUT_AVAILABLE, """{"agent_name":"researcher","task":"Explain"}""", output = "AG-UI streams agent events.", title = "researcher", subagent = nested)
+        val call = ToolPart("call-2", "delegate_task", ToolState.OUTPUT_AVAILABLE, """{"agent_name":"researcher","task":"Explain"}""", output = "AG-UI streams agent events.", subagent = nested, kind = ToolKind.Delegation("researcher", "Explain"))
         compose.setContent { AiElementsTheme(dynamicColor = false) { ToolPartView(call) } }
         compose.onNodeWithTag("subagent-activity", useUnmergedTree = true).assertTextEquals("AG-UI streams agent events.")
     }
