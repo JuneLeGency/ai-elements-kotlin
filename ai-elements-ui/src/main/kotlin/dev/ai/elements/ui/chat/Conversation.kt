@@ -204,7 +204,7 @@ fun Conversation(
 /** [content] in an [AgentComputerScaffold] of [state], or as is when the caller already has one. */
 @Composable
 private fun MaybeComputerScaffold(state: AgentComputerState?, messages: List<Message>, modifier: Modifier, content: @Composable () -> Unit) {
-    if (state == null) Box(modifier) { content() } else AgentComputerScaffold(state, messages, modifier, content)
+    if (state == null) Box(modifier) { content() } else AgentComputerScaffold(state, messages, modifier, content = content)
 }
 
 @Composable

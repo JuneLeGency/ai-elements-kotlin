@@ -190,6 +190,12 @@
 - `WebBrowser(viewport = BrowserViewport.Desktop)` by default: 1280 × 720 CSS pixels (Playwright's
   default) with Chrome's "Desktop site" user agent; screenshots at CSS-pixel resolution, so image
   coordinates are click coordinates. The step view opens screenshots full screen.
+- `AgentComputerScaffold(layout = …)`: `Auto`, `SidePane`, `BottomSheet`, or `Hosted` for apps that
+  place `AgentComputerPanel` themselves. The demo hosts it in the extra pane of M3's
+  `ListDetailPaneScaffold`, so on tablets it opens on the right beside the chat. Browser actions
+  wait for the navigation they start, as Playwright's auto-waiting does; actions that may navigate
+  run after their script returns and every script call is time-limited (a page that unloads never
+  answers `evaluateJavascript`).
 
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,

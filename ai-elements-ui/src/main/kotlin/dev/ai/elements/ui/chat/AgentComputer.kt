@@ -197,11 +197,27 @@ fun rememberAgentComputerState(replay: RunReplay? = null): AgentComputerState =
 /** The agent's computer view of the enclosing [AgentComputerScaffold]. */
 val LocalAgentComputer = staticCompositionLocalOf<AgentComputerState?> { null }
 
+/** Where [AgentComputerScaffold] shows the agent's computer. */
+enum class AgentComputerLayout {
+    /** A side pane when the scaffold is at least 720dp wide, else a bottom sheet. */
+    Auto,
+    SidePane,
+    BottomSheet,
+
+    /**
+     * The app shows [AgentComputerPanel] itself, e.g. in the extra pane of Material 3's
+     * `ListDetailPaneScaffold`, which on expanded windows sets it beside the chat in place of the
+     * list. The scaffold only provides [state][LocalAgentComputer].
+     */
+    Hosted,
+}
+
 /**
- * Lays out [content] (a conversation) with the agent's computer view of [state]: a side pane
- * next to it when there is room (at least 720dp, as Material 3's supporting pane on expanded
- * widths), a bottom sheet otherwise. The width is the scaffold's own, so it adapts inside a
- * list–detail layout too.
+ * Lays out [content] (a conversation) with the agent's computer view of [state]: by default
+ * ([AgentComputerLayout.Auto]) a side pane next to it when there is room (at least 720dp, as
+ * Material 3's supporting pane on expanded widths), a bottom sheet otherwise. The width is the
+ * scaffold's own, so it adapts inside a list–detail layout too; an app that has an adaptive
+ * scaffold of its own hosts the panel there ([AgentComputerLayout.Hosted]).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -209,12 +225,17 @@ fun AgentComputerScaffold(
     state: AgentComputerState,
     messages: List<Message>,
     modifier: Modifier = Modifier,
+    layout: AgentComputerLayout = AgentComputerLayout.Auto,
     content: @Composable () -> Unit,
 ) {
-    val message = state.messageId?.let { id -> messages.firstOrNull { it.id == id } }
+    val message = state.messageId?.let { id -> messages.firstOrNull { it.id == id } }?.takeIf { layout != AgentComputerLayout.Hosted }
     CompositionLocalProvider(LocalAgentComputer provides state) {
         BoxWithConstraints(modifier) {
-            val wide = maxWidth >= 720.dp
+            val wide = when (layout) {
+                AgentComputerLayout.SidePane -> true
+                AgentComputerLayout.BottomSheet -> false
+                else -> maxWidth >= 720.dp
+            }
             val paneWidth = (maxWidth * 0.45f).coerceIn(340.dp, 560.dp)
             // The content keeps its place in the tree whatever the width, so it keeps its state.
             Row(Modifier.fillMaxSize()) {

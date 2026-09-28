@@ -23,6 +23,13 @@ import java.net.URL
 /** The in-app browser (off-screen WebView) filling and submitting a real form on the reference server. */
 @RunWith(AndroidJUnit4::class)
 class BrowserTest {
+    /**
+     * The app in front, as when a user watches the agent browse: MIUI freezes background processes
+     * (cgroup freezer), which would stop the off-screen WebView mid-test.
+     */
+    @get:org.junit.Rule
+    val app = androidx.test.ext.junit.rules.ActivityScenarioRule(MainActivity::class.java)
+
     private val server = InstrumentationRegistry.getArguments().getString("agentServer") ?: "http://10.0.2.2:8788"
 
     @Test
@@ -85,7 +92,9 @@ class BrowserTest {
         val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
         // The desktop viewport at CSS pixels (Playwright's default): image coordinates are page coordinates.
         assertTrue("${bitmap.width}x${bitmap.height}", bitmap.width == 1280 && bitmap.height == 720)
-        assertTrue("screenshot looks blank", (0 until bitmap.height step 32).flatMap { y -> (0 until bitmap.width step 32).map { x -> bitmap.getPixel(x, y) } }.toSet().size > 3)
+        // Every pixel: a desktop page is mostly margin, and a sparse grid can miss all of its text.
+        val pixels = IntArray(bitmap.width * bitmap.height).also { bitmap.getPixels(it, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height) }
+        assertTrue("screenshot looks blank", pixels.toSet().size > 3)
         // Shown with the call as well.
         assertTrue(events.any { it is dev.ai.elements.core.chat.ChatEvent.File && it.id.startsWith("c2-") })
         lateinit var full: dev.ai.elements.core.agent.ToolResult
@@ -93,6 +102,18 @@ class BrowserTest {
             full = runToolWithContent(tools, dev.ai.elements.core.chat.ToolApprover.AlwaysApprove, "c3", "screenshot", """{"full_page":true}""")
         }.toList()
         assertTrue(full.text, full.text.startsWith("Screenshot captured.") && full.content.size == 1)
+        browser.close()
+    }
+
+    /** A click that follows a link returns once the new page has loaded (as Playwright auto-waits). */
+    @Test
+    fun click_waitsForTheNavigationItStarts() = runBlocking<Unit> {
+        assumeTrue(runCatching { (URL("$server/health").openConnection() as HttpURLConnection).responseCode == 200 }.getOrDefault(false))
+        val browser = WebBrowser(ApplicationProvider.getApplicationContext())
+        val tools = browser.tools().associateBy { it.name }
+        tools.getValue("navigate").execute(buildJsonObject { put("url", "$server/browser-test") })
+        val clicked = tools.getValue("click").execute(buildJsonObject { put("selector", "a") })
+        assertTrue(clicked, clicked.contains("URL: $server/browser-test/about") && clicked.contains("Open since 2026"))
         browser.close()
     }
 

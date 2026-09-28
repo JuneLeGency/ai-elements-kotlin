@@ -75,7 +75,20 @@ the panel is a side pane next to the conversation, as in Material 3's supporting
 also works inside a list–detail layout, because the width checked is the chat's own, not the
 window's. When narrower, the panel is a `ModalBottomSheet`. `Chat` and `Conversation` set this up.
 To share one panel across your own layout, create a state with `rememberAgentComputerState` and
-wrap your layout in `AgentComputerScaffold`.
+wrap your layout in `AgentComputerScaffold` (`layout`: `Auto`, `SidePane`, `BottomSheet`).
+
+An app that already uses Material 3's adaptive `ListDetailPaneScaffold` for its conversation list
+should host the panel in the scaffold's **extra pane** (`layout = AgentComputerLayout.Hosted`, and
+`AgentComputerPanel` in `extraPane`). This is the canonical list–detail–extra layout, and the
+scaffold then decides:
+
+- On expanded windows (tablets, unfolded foldables), the computer opens on the right, beside the
+  chat, and the history list steps aside.
+- In a single pane, the computer opens over the chat.
+- Back returns to the list and the chat.
+
+The demo app does this: open the computer on navigation to the extra pane, and close it when the
+user navigates away.
 
 Stepping through works on any saved conversation, because it only reads the stored message.
 

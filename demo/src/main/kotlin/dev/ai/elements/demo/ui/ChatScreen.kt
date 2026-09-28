@@ -91,7 +91,10 @@ import dev.ai.elements.demo.ChatViewModel
 import dev.ai.elements.demo.R
 import dev.ai.elements.demo.data.Conversation
 import dev.ai.elements.demo.data.imageAttachment
+import dev.ai.elements.ui.chat.AgentComputerLayout
+import dev.ai.elements.ui.chat.AgentComputerPanel
 import dev.ai.elements.ui.chat.AgentComputerScaffold
+import dev.ai.elements.ui.chat.AgentComputerState
 import dev.ai.elements.ui.chat.ChatEmptyState
 import dev.ai.elements.ui.chat.ContextUsage
 import dev.ai.elements.ui.chat.Conversation
@@ -142,6 +145,9 @@ fun ChatScreen(
     val conversations by viewModel.conversations.collectAsStateWithLifecycle()
     val currentId by viewModel.conversationId.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    // The agent's computer; AG-UI runs replay from their event log.
+    val eventLog = viewModel.runtime.agUiEventLog
+    val computer = rememberAgentComputerState(remember(eventLog) { RunReplay { eventLog.replayOf(it) } })
 
     if (widthClass != WidthClass.COMPACT) {
         val navigator = rememberListDetailNavigator<Any>(twoPane)
@@ -154,6 +160,20 @@ fun ChatScreen(
         fun showChat() {
             if (!navigator.isDetailVisible) scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail) }
         }
+        // The agent's computer is the scaffold's extra pane (M3 canonical list-detail with an extra
+        // pane): on expanded windows it opens beside the chat in place of the history, elsewhere
+        // over the chat, and Back returns to the list and chat.
+        val onExtra = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Extra
+        LaunchedEffect(computer.messageId) {
+            if (computer.isOpen && !onExtra) navigator.navigateTo(ListDetailPaneScaffoldRole.Extra)
+            if (!computer.isOpen && onExtra) navigator.navigateBack()
+        }
+        var wasOnExtra by remember { mutableStateOf(false) }
+        LaunchedEffect(onExtra) {
+            if (wasOnExtra && !onExtra && computer.isOpen) computer.close() // left with Back
+            wasOnExtra = onExtra
+        }
+        val chat by viewModel.chatState.collectAsStateWithLifecycle()
         NavigableListDetailPaneScaffold(
             navigator = navigator,
             listPane = {
@@ -181,10 +201,27 @@ fun ChatScreen(
                         // Expanded layouts keep a 24dp window margin on the trailing edge (M3).
                         modifier = if (twoPane) Modifier.padding(end = 24.dp) else Modifier,
                         showMenu = !navigator.isListVisible,
+                        computer = computer,
+                        computerLayout = AgentComputerLayout.Hosted,
                         compactHeight = compactHeight,
                         onMenu = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.List) } },
                         onOpenSettings = onOpenSettings,
                     )
+                }
+            },
+            extraPane = {
+                AnimatedPane(Modifier.preferredWidth(480.dp)) {
+                    val message = computer.messageId?.let { id -> chat.messages.firstOrNull { it.id == id } }
+                    if (message != null) {
+                        AgentComputerPanel(
+                            computer,
+                            message,
+                            Modifier
+                                .fillMaxSize()
+                                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.End))
+                                .then(if (twoPane) Modifier.padding(vertical = 8.dp).clip(MaterialTheme.shapes.extraLarge) else Modifier),
+                        )
+                    }
                 }
             },
             paneExpansionDragHandle = if (twoPane) { state -> PaneDragHandle(state) } else null,
@@ -227,6 +264,7 @@ fun ChatScreen(
             ChatPane(
                 viewModel,
                 showMenu = true,
+                computer = computer,
                 compactHeight = compactHeight,
                 onMenu = { scope.launch { drawer.open() } },
                 onOpenSettings = onOpenSettings,
@@ -240,7 +278,9 @@ fun ChatScreen(
 private fun ChatPane(
     viewModel: ChatViewModel,
     showMenu: Boolean,
+    computer: AgentComputerState,
     modifier: Modifier = Modifier,
+    computerLayout: AgentComputerLayout = AgentComputerLayout.Auto,
     compactHeight: Boolean,
     onMenu: () -> Unit,
     onOpenSettings: () -> Unit,
@@ -299,9 +339,6 @@ private fun ChatPane(
             )
         },
     ) { padding ->
-        // The agent's computer: beside the chat on wide windows, a bottom sheet on phones; AG-UI runs replay from their event log.
-        val eventLog = viewModel.runtime.agUiEventLog
-        val computer = rememberAgentComputerState(remember(eventLog) { RunReplay { eventLog.replayOf(it) } })
         AgentComputerScaffold(
             computer,
             state.messages,
@@ -309,6 +346,7 @@ private fun ChatPane(
                 .fillMaxSize()
                 .padding(padding)
                 .consumeWindowInsets(padding),
+            layout = computerLayout,
         ) {
             Column(
                 Modifier

@@ -151,9 +151,15 @@ class WebBrowser(
     private suspend fun snapshot(): String = truncate(unquote(js(SNAPSHOT_JS)))
 
     private suspend fun act(action: String, selector: String, arg: String = "", result: suspend () -> String): String {
+        val before = pageLoad
         val error = unquote(js("return __aiAct(${q(action)}, ${q(selector)}, ${q(arg)})"))
         if (error.isNotEmpty()) throw IllegalArgumentException(error)
-        delay(300) // let the page react (navigation, rendering)
+        // As Playwright's auto-waiting: an action that starts a navigation waits for the new page.
+        val navigating = withTimeoutOrNull(NAVIGATION_START_MS) {
+            while (pageLoad === before) delay(50)
+            true
+        } == true
+        if (!navigating) delay(300) // let the page react (rendering)
         withTimeoutOrNull(navigationTimeoutMs) { awaitReady() }
         // The acted-on element's box, still set when the page stayed (a new page has a new window).
         target = runCatching {
@@ -270,12 +276,18 @@ class WebBrowser(
 
     private suspend fun url(): String = withContext(Dispatchers.Main) { view().url.orEmpty() }
 
-    /** Evaluate [body] (a function body using `return`) with the helper library loaded; returns the JSON result. */
-    private suspend fun js(body: String): String = withContext(Dispatchers.Main) {
-        suspendCancellableCoroutine { cont ->
-            view().evaluateJavascript("(function(){$HELPERS\n$body})()") { cont.resume(it ?: "null") }
+    /**
+     * Evaluate [body] (a function body using `return`) with the helper library loaded; returns the
+     * JSON result, or `null` if the page gave no answer within [actionTimeoutMs] (a script whose page
+     * unloads is never answered).
+     */
+    private suspend fun js(body: String): String = withTimeoutOrNull(actionTimeoutMs) {
+        withContext(Dispatchers.Main) {
+            suspendCancellableCoroutine { cont ->
+                view().evaluateJavascript("(function(){$HELPERS\n$body})()") { if (cont.isActive) cont.resume(it ?: "null") }
+            }
         }
-    }
+    } ?: "null"
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun view(): WebView = webView ?: WebView(context.applicationContext).apply {
@@ -386,11 +398,14 @@ class WebBrowser(
         const val TARGET_COLOR = 0xFFFF5722.toInt()
         const val VISUAL_STATE_TIMEOUT_MS = 2_000L
 
+        /** How long an action may take to start the navigation it causes (a link, a submit). */
+        const val NAVIGATION_START_MS = 1_000L
+
         /** Largest screenshot returned to the model: the strictest mainstream per-image limit (as the Harness). */
         const val MAX_SCREENSHOT_BYTES = 5_000_000
         const val MAX_FULL_PAGE_SCREENS = 10
         /** Calls that retrieve a page or its content (ACP `fetch`); the others act on the page. */
-        val FETCHING = setOf("navigate", "go_back", "go_forward", "snapshot", "get_text")
+        val FETCHING = setOf("navigate", "go_back", "go_forward", "snapshot", "get_text", "screenshot")
 
         val PAGE_CHANGING = setOf("navigate", "click", "type_text", "press_key", "select_option", "scroll", "go_back", "go_forward")
 
@@ -414,14 +429,16 @@ function __aiAct(action,sel,arg){
   if(!el) return "No element matches '"+sel+"'.";
   el.scrollIntoView({block:'center'});
   var r=el.getBoundingClientRect();window.__aiTarget=[r.left,r.top,r.width,r.height,devicePixelRatio];
-  if(action==='click'){el.click();return '';}
+  // Actions that may navigate run after this script returns: a page that unloads while a script runs
+  // never answers evaluateJavascript.
+  if(action==='click'){setTimeout(function(){el.click()},0);return '';}
   if(action==='hover'){['mouseover','mouseenter','mousemove'].forEach(function(t){el.dispatchEvent(new MouseEvent(t,{bubbles:true}))});return '';}
   if(action==='type'){el.focus();var d=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el),'value');if(d&&d.set)d.set.call(el,arg);else el.value=arg;
-    el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));return '';}
+    setTimeout(function(){el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))},0);return '';}
   if(action==='select'){var vals=JSON.parse(arg);var found=0;Array.prototype.forEach.call(el.options||[],function(o){o.selected=vals.indexOf(o.value)>=0||vals.indexOf(o.text)>=0;if(o.selected)found++;});
-    if(!found) return 'No option matches '+arg+'.';el.dispatchEvent(new Event('change',{bubbles:true}));return '';}
-  if(action==='key'){el.focus&&el.focus();var o={key:arg,bubbles:true};el.dispatchEvent(new KeyboardEvent('keydown',o));el.dispatchEvent(new KeyboardEvent('keyup',o));
-    if(arg==='Enter'){var f=el.form||(el.closest&&el.closest('form'));if(f){if(f.requestSubmit)f.requestSubmit();else f.submit();}}return '';}
+    if(!found) return 'No option matches '+arg+'.';setTimeout(function(){el.dispatchEvent(new Event('change',{bubbles:true}))},0);return '';}
+  if(action==='key'){el.focus&&el.focus();setTimeout(function(){var o={key:arg,bubbles:true};el.dispatchEvent(new KeyboardEvent('keydown',o));el.dispatchEvent(new KeyboardEvent('keyup',o));
+    if(arg==='Enter'){var f=el.form||(el.closest&&el.closest('form'));if(f){if(f.requestSubmit)f.requestSubmit();else f.submit();}}},0);return '';}
   return 'Unknown action '+action;
 }
 """

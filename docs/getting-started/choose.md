@@ -47,7 +47,10 @@ for a terminal: ECMA-48 / xterm escape codes, `\r` redraws and OSC 8 links.
 
 - **The computer panel fits the space the chat has.** It is a side pane when the chat is at least
   720 dp wide (tablets, unfolded foldables, phones in landscape) and a bottom sheet below that
-  width. It measures its own container, so it also works inside a list–detail layout.
+  width. It measures its own container, so it also works inside a list–detail layout. With Material
+  3's `ListDetailPaneScaffold`, host it in the extra pane instead: on tablets it then opens on the
+  right, beside the chat, in place of the history list
+  ([details](../guides/steps-and-replay.md#the-agents-computer)).
 - **Long content stays fast.**
   - A step view shows at most 100 000 characters.
   - Terminal output keeps a scrollback of 1 000 lines and says how many earlier lines it left out.

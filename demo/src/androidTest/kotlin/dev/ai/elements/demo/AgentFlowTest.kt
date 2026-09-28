@@ -96,6 +96,20 @@ class AgentFlowTest {
             ?.config?.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text)?.joinToString { it.text }
         val noLink = compose.onAllNodesWithText("I'll follow it", substring = true).fetchSemanticsNodes().isEmpty()
         assertTrue("steps: $counter; not opened: $notOpened; no link found: $noLink", counter.contains("4"))
+        // For review (opt-in): the agent's computer on the last step, and on the click.
+        if (args.getString("screenshots") == "true") {
+            val out = java.io.File(context.getExternalFilesDir(null), "screens").apply { mkdirs() }
+            fun shot(name: String) {
+                compose.waitForIdle()
+                Thread.sleep(1_500)
+                java.io.File(out, "browse-$name.png").outputStream().use {
+                    InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot().compress(android.graphics.Bitmap.CompressFormat.PNG, 90, it)
+                }
+            }
+            shot("screenshot")
+            compose.onNodeWithTag("run-previous").performClick()
+            shot("click")
+        }
         compose.onNodeWithTag("run-screen").assertExists()
     }
 
