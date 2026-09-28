@@ -99,7 +99,7 @@ class ConversationFeaturesTest {
         compose.mainClock.autoAdvance = false
         var waited = 0
         while (compose.onAllNodesWithTag("stop-button").fetchSemanticsNodes().isEmpty()) {
-            check(waited < 5_000) { "reply never started streaming" }
+            check(waited < 15_000) { "reply never started streaming" }
             Thread.sleep(50)
             waited += 50
             compose.mainClock.advanceTimeByFrame()

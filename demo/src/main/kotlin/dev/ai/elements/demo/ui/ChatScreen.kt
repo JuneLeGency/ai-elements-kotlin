@@ -43,6 +43,9 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -226,45 +229,61 @@ fun ChatScreen(
         val drawer = rememberDrawerState(DrawerValue.Closed)
         // Back closes the open drawer before it leaves the screen.
         BackHandler(enabled = drawer.isOpen || drawer.isAnimationRunning) { scope.launch { drawer.close() } }
-        ModalNavigationDrawer(
-            drawerState = drawer,
-            drawerContent = {
-                ModalDrawerSheet(Modifier.width(320.dp)) {
-                    HistoryPane(
-                        conversations = conversations,
-                        currentId = currentId,
-                        onNew = { viewModel.newChat(); scope.launch { drawer.close() } },
-                        onOpen = { viewModel.open(it); scope.launch { drawer.close() } },
-                        onDelete = viewModel::delete,
-                        // Phones have no navigation bar: the rest of the app lives in the drawer.
-                        footer = {
-                            NavigationDrawerItem(
-                                label = { Text(stringResource(R.string.nav_components)) },
-                                icon = { Icon(DemoIcons.Widgets, null) },
-                                selected = false,
-                                onClick = { scope.launch { drawer.close() }; onOpenComponents() },
-                                modifier = Modifier.testTag("drawer-components"),
-                            )
-                            NavigationDrawerItem(
-                                label = { Text(stringResource(R.string.settings)) },
-                                icon = { Icon(DemoIcons.Settings, null) },
-                                selected = false,
-                                onClick = { scope.launch { drawer.close() }; onOpenSettings() },
-                                modifier = Modifier.testTag("drawer-settings"),
-                            )
-                        },
-                    )
+        // The drawer itself slides with the standard motion: the expressive spring settles for ~0.8 s
+        // after it looks still, and a tap in that tail stops the drawer instead of reaching the row
+        // (a conversation needed two taps). What is inside keeps the app's expressive motion.
+        val appMotion = MaterialTheme.motionScheme
+        // Opening the history puts the keyboard away, as the chat behind it is not being typed in.
+        val keyboard = LocalSoftwareKeyboardController.current
+        val focus = LocalFocusManager.current
+        LaunchedEffect(drawer.targetValue) {
+            if (drawer.targetValue == DrawerValue.Open) { keyboard?.hide(); focus.clearFocus() }
+        }
+        MaterialTheme(motionScheme = MotionScheme.standard()) {
+            ModalNavigationDrawer(
+                drawerState = drawer,
+                drawerContent = {
+                    MaterialTheme(motionScheme = appMotion) {
+                    ModalDrawerSheet(Modifier.width(320.dp)) {
+                        HistoryPane(
+                            conversations = conversations,
+                            currentId = currentId,
+                            onNew = { viewModel.newChat(); scope.launch { drawer.close() } },
+                            onOpen = { viewModel.open(it); scope.launch { drawer.close() } },
+                            onDelete = viewModel::delete,
+                            // Phones have no navigation bar: the rest of the app lives in the drawer.
+                            footer = {
+                                NavigationDrawerItem(
+                                    label = { Text(stringResource(R.string.nav_components)) },
+                                    icon = { Icon(DemoIcons.Widgets, null) },
+                                    selected = false,
+                                    onClick = { scope.launch { drawer.close() }; onOpenComponents() },
+                                    modifier = Modifier.testTag("drawer-components"),
+                                )
+                                NavigationDrawerItem(
+                                    label = { Text(stringResource(R.string.settings)) },
+                                    icon = { Icon(DemoIcons.Settings, null) },
+                                    selected = false,
+                                    onClick = { scope.launch { drawer.close() }; onOpenSettings() },
+                                    modifier = Modifier.testTag("drawer-settings"),
+                                )
+                            },
+                        )
+                    }
+                    }
+                },
+            ) {
+                MaterialTheme(motionScheme = appMotion) {
+                ChatPane(
+                    viewModel,
+                    showMenu = true,
+                    computer = computer,
+                    compactHeight = compactHeight,
+                    onMenu = { scope.launch { drawer.open() } },
+                    onOpenSettings = onOpenSettings,
+                )
                 }
-            },
-        ) {
-            ChatPane(
-                viewModel,
-                showMenu = true,
-                computer = computer,
-                compactHeight = compactHeight,
-                onMenu = { scope.launch { drawer.open() } },
-                onOpenSettings = onOpenSettings,
-            )
+            }
         }
     }
 }

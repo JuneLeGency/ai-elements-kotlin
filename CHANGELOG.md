@@ -256,6 +256,10 @@
 - A reply's action row shows copy, read aloud, regenerate and the agent's computer; the run graph
   and "open in / share" are in its "⋯" menu (`message-more`).
 - `ChatEmptyState(subtitle)` is optional (`null` hides it).
+- Demo: one tap opens a conversation from the history drawer. The drawer slid with the expressive
+  spring, which settles for ~0.8 s after it looks still, and a tap in that tail stopped the drawer
+  instead of reaching the row; the drawer now uses the standard motion (its content keeps the
+  expressive one), and opening it puts the keyboard away. `HistoryTest` covers the flow.
 - Links in content (citations, sources, Markdown, A2UI, MCP Apps) open in a Custom Tab with the
   theme's colours (`CustomTabsUriHandler`, provided by `AiElementsTheme`; `openLinksInCustomTabs =
   false` keeps the default browser). `ai-elements-ui` depends on `androidx.browser`.
