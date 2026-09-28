@@ -86,6 +86,8 @@ class McpAgentTool(
             onInput = context?.approver?.let { human -> { request -> human.input(request.copy(id = "${context.toolCallId}:${request.id}", source = server.name)) } },
         )
         app?.publish(result)
+        // Images the tool returned (e.g. a screenshot) show with the call.
+        result.content.filterIsInstance<McpContent.Image>().forEach { context?.file(it.mimeType, "data:${it.mimeType};base64,${it.data}") }
         val text = result.toText()
         if (result.isError) throw McpException(text.ifBlank { "${tool.name} failed" })
         return text

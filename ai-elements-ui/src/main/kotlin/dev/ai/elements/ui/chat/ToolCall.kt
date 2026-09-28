@@ -228,4 +228,4 @@ private fun String.parseJsonOrNull(): JsonElement? =
 private fun String.prettyJson(): String =
     parseJsonOrNull()?.let { prettyJson.encodeToString(JsonElement.serializer(), it) } ?: this
 
-private fun String.compactJson(): String = parseJsonOrNull()?.toString() ?: this
+internal fun String.compactJson(): String = parseJsonOrNull()?.toString() ?: this

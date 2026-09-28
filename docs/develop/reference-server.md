@@ -43,6 +43,7 @@ prompt, so every flow can be exercised offline:
 | `note` | saves a note through MCP, which asks for approval |
 | `device` | calls a frontend tool on the device |
 | `ask` | asks the user two questions with `ask_user_question`, answered in the app |
+| `browse` | "opens" a page with the `browse` tool, which returns a screenshot |
 | `hotel` | shows an A2UI booking form; its **Book** action comes back as `book` |
 | anything else | asks the clock tool and answers with Markdown and a Mermaid diagram |
 

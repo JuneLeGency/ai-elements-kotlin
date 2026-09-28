@@ -37,7 +37,7 @@ Where the names differ:
 |---|---|
 | `TextPart` | `MarkdownContent`: GitHub-flavoured Markdown, code with highlighting, Mermaid, KaTeX |
 | `ReasoningPart` | `Reasoning`: one quiet line ("Thought for 2s") that expands |
-| `ToolPart` | `ToolCall`, `Subagent` for delegations, a skill badge for skill loads, `Confirmation` while it waits for approval |
+| `ToolPart` | `ToolCall`, `Subagent` for delegations, a skill badge for skill loads, `Confirmation` while it waits for approval; its screenshots as a strip that opens `AgentRunPlayback` ([Steps and replay](steps-and-replay.md)) |
 | `SourcePart` | `Sources`, and `InlineCitation` for `[n]` markers |
 | `FilePart` | images (upright by EXIF; tap for `ImageViewer`: zoom, pan, rotate), videos (`VideoAttachment`: first frame, duration, full-screen player), audio (`AudioPlayer`) and documents (`DocumentAttachment`: PDF preview and viewer; other formats open in an app) |
 | `DataPart` | `Plan`, `Task`, A2UI surfaces, MCP Apps views, or your own renderer |

@@ -188,6 +188,34 @@ class RecordedProtocolTest {
         assertTrue(reply.text.isNotBlank())
     }
 
+    // --- Screenshots of what a tool did (steps with media) ---------------------------------
+
+    @Test
+    fun agUi_toolResultMediaParts_becomeFilesAfterTheCall() {
+        replay("agui/tool-media.sse")
+        val (_, reply) = run(agUi())
+        val call = reply.tool("browse")
+        assertEquals("Opened https://example.com", call.output)
+        val files = reply.parts.filterIsInstance<dev.ai.elements.core.model.FilePart>()
+        assertEquals(listOf("image/png", "image/png"), files.map { it.mediaType })
+        assertTrue(files[0].url.startsWith("data:image/png;base64,iVBOR"))
+        assertEquals("https://example.com/full.png", files[1].url)
+        // In order: the call, then its screenshots, then the answer.
+        val order = reply.parts.map { it::class.simpleName }
+        assertTrue(order.indexOf("ToolPart") < order.indexOf("FilePart") && order.indexOf("FilePart") < order.lastIndexOf("TextPart"))
+    }
+
+    @Test
+    fun aiSdk_toolFileChunk_followsTheCall() {
+        replay("aisdk/browse.sse")
+        val (_, reply) = run(aiSdk())
+        val call = reply.tool("browse")
+        assertTrue(call.output!!.startsWith("Opened https://example.com/pricing"))
+        val file = reply.parts.filterIsInstance<dev.ai.elements.core.model.FilePart>().single()
+        assertEquals("image/png", file.mediaType)
+        assertTrue(reply.parts.indexOf(call) < reply.parts.indexOf(file))
+    }
+
     // --- A2UI (generative UI) on each transport's binding -------------------------------
 
     private val bookAction = Json.parseToJsonElement(

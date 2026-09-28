@@ -42,7 +42,7 @@ from ag_ui.core import ActivitySnapshotEvent, StateSnapshotEvent
 from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import HTMLResponse, Response
 from mcp.server.transport_security import TransportSecuritySettings
-from pydantic_ai import Agent, CustomEvent, DeferredToolRequests, RunContext
+from pydantic_ai import Agent, BinaryImage, CustomEvent, DeferredToolRequests, RunContext
 from pydantic_ai.mcp import MCPToolset
 from pydantic_ai_harness import Planning, Skills, SubAgent, SubAgents
 from pydantic_ai_harness import AskUser
@@ -65,7 +65,7 @@ from pydantic_ai.models.wrapper import WrapperModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.ui.ag_ui import AGUIAdapter
 from pydantic_ai.ui.vercel_ai import VercelAIAdapter
-from pydantic_ai.ui.vercel_ai.response_types import DataChunk, MessageMetadataChunk, SourceUrlChunk
+from pydantic_ai.ui.vercel_ai.response_types import DataChunk, FileChunk, MessageMetadataChunk, SourceUrlChunk
 
 import a2ui_demo
 from a2a.types import AgentExtension, AgentSkill
@@ -323,6 +323,47 @@ def search_docs(ctx: RunContext[RunState], query: str) -> ToolReturn:
 
 
 agent.tool(search_docs)
+
+
+def _page_png(url: str, step: int, width: int = 360, height: int = 240) -> bytes:
+    """A small PNG standing in for a browser screenshot: address bar, heading, text lines, a button."""
+    import struct, zlib
+    rows = []
+    for y in range(height):
+        row = bytearray()
+        for x in range(width):
+            if y < 28:                                           # browser chrome with an address field
+                c = (241, 243, 247) if not (60 < x < width - 20 and 7 < y < 21) else (255, 255, 255)
+            elif 44 < y < 64 and 20 < x < 20 + 160 + step * 12:  # heading
+                c = (40, 44, 60)
+            elif any(80 + i * 22 < y < 90 + i * 22 for i in range(4)) and 20 < x < width - 40 - (y % 3) * 30:
+                c = (170, 176, 190)                              # paragraph lines
+            elif 180 < y < 210 and 20 < x < 130:                 # a button
+                c = (98, 80, 180)
+            else:
+                c = (255, 255, 255)
+            row += bytes(c)
+        rows.append(b"\x00" + bytes(row))
+    def chunk(kind, data):
+        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)
+    return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)) + \
+        chunk(b"IDAT", zlib.compress(b"".join(rows), 9)) + chunk(b"IEND", b"")
+
+
+def browse(ctx: RunContext[RunState], url: str) -> ToolReturn:
+    """Open a web page and look at it. Returns what the page says and a screenshot of it."""
+    image = BinaryImage(data=_page_png(url, ctx.deps.sources), media_type="image/png")
+    ctx.deps.sources += 1
+    # The screenshot reaches the model as tool-result content (AG-UI: an ImagePart in TOOL_CALL_RESULT)
+    # and the AI SDK UI as a `file` part after the tool output.
+    return ToolReturn(
+        return_value=f"Opened {url}: an example page with a heading, four paragraphs and a sign-up button.",
+        content=[image],
+        metadata=[FileChunk(url=image.data_uri, media_type="image/png")],
+    )
+
+
+agent.tool(browse)
 researcher.tool(search_docs)
 
 
@@ -368,6 +409,7 @@ controller.send("Hello")
 # exercised end to end (and recorded as protocol fixtures) without an LLM.
 _DEMO_SCRIPTS = [
     # Pydantic AI Harness `ask_user_question`, answered by the user on the device (a client tool).
+    ("browse", "browse", {"url": "https://example.com/pricing"}),
     ("ask", "ask_user_question", {"questions": [
         {"header": "Database", "question": "Which database should the app use?", "options": [
             {"label": "SQLite", "description": "Local file, no server"},

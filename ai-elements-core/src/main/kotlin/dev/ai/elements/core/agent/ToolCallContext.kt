@@ -37,6 +37,9 @@ class ToolCallContext internal constructor(
 
         /** A data part of the reply (same [id] replaces), e.g. a live plan. */
         data class Data(val id: String, val name: String, val data: JsonElement) : Update
+
+        /** A file the call produced (a screenshot, an image), shown after the call. */
+        data class File(val id: String, val mediaType: String, val url: String) : Update
     }
 
     /** Show [output] as an interim result (AI SDK preliminary tool result). */
@@ -50,6 +53,15 @@ class ToolCallContext internal constructor(
      * `Plan` element. In-process only: servers use their protocol's own channel for this.
      */
     suspend fun data(id: String, name: String, data: JsonElement) = sink(Update.Data(id, name, data))
+
+    private var files = 0
+
+    /**
+     * Attach a file the call produced — a screenshot of what it did, a generated image — as a file
+     * part right after the call (AI SDK `file` part; the steps view shows it with this call).
+     * [url] is a `data:` or `http(s)` URL.
+     */
+    suspend fun file(mediaType: String, url: String) = sink(Update.File("$toolCallId-file-${files++}", mediaType, url))
 
     companion object Key : CoroutineContext.Key<ToolCallContext> {
         /** The call being executed, or null outside an agent loop (e.g. in a unit test). */

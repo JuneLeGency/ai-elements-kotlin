@@ -21,6 +21,7 @@ Run with the server up:  uv run python record_fixtures.py [http://localhost:8788
 
 from __future__ import annotations
 
+import base64
 import json
 import sys
 from pathlib import Path
@@ -297,7 +298,36 @@ def acp_session(keyword: str, approve: bool = True) -> None:
     print("wrote", path)
 
 
+def agui_tool_media() -> None:
+    """An AG-UI 1.x tool result with media content parts (a screenshot), encoded by the official
+    `ag_ui` SDK: Pydantic AI's AG-UI adapter sends tool results as text only for now."""
+    from ag_ui.core import DataSource, ImagePart, TextPart, UrlSource
+    import main as server
+    png = base64.b64encode(server._page_png("https://example.com", 0)).decode()
+    encoder = EventEncoder()
+    run = [
+        RunStartedEvent(thread_id="t", run_id="r"),
+        ToolCallStartEvent(tool_call_id="call-1", tool_call_name="browse", parent_message_id="m1"),
+        ToolCallArgsEvent(tool_call_id="call-1", delta='{"url":"https://example.com"}'),
+        ToolCallEndEvent(tool_call_id="call-1"),
+        ToolCallResultEvent(message_id="r1", tool_call_id="call-1", role="tool", content=[
+            TextPart(text="Opened https://example.com"),
+            ImagePart(source=DataSource(value=png, mime_type="image/png")),
+            ImagePart(source=UrlSource(value="https://example.com/full.png", mime_type="image/png")),
+        ]),
+        TextMessageStartEvent(message_id="m2", role="assistant"),
+        TextMessageContentEvent(message_id="m2", delta="The page has a sign-up button."),
+        TextMessageEndEvent(message_id="m2"),
+        RunFinishedEvent(thread_id="t", run_id="r", outcome={"type": "success"}),
+    ]
+    save("agui/tool-media.sse", "".join(encoder.encode(e) for e in run))
+
+
 if __name__ == "__main__":
+    if sys.argv[2:] == ["browse"]:
+        aisdk("browse")
+        agui_tool_media()
+        sys.exit()
     if sys.argv[2:] == ["acp"]:
         for keyword in ["plan", "time"]:
             acp_session(keyword)
@@ -310,10 +340,11 @@ if __name__ == "__main__":
         sys.exit()
     for keyword in ["delegate", "plan", "skill", "note", "device", "ask"]:
         agui(keyword)
-    for keyword in ["delegate", "plan", "skill", "note", "ask"]:
+    for keyword in ["delegate", "plan", "skill", "note", "ask", "browse"]:
         aisdk(keyword)
     agui_a2ui()
     aisdk_a2ui()
     mcp_elicitation()
     agui_input_interrupt()
     agui_spec_events()
+    agui_tool_media()

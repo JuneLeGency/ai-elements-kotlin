@@ -145,6 +145,13 @@
   PowerPoint and other files open in an app that can show them (`openExternally`, through the
   library's own `AiElementsFileProvider`, `${applicationId}.aielements.files`). No new dependencies.
 
+- Steps with screenshots and run playback (like Manus's computer view): a tool call's screenshots
+  (AI SDK `file` parts after the output, AG-UI 1.x media parts in `TOOL_CALL_RESULT`, MCP image
+  content, on-device `ToolCallContext.file`) show as a strip under the call; `AgentRunPlayback`
+  steps through a reply's run with its screenshots, a timeline and autoplay, live or from history.
+  `WebBrowser` attaches a viewport screenshot after each page-changing call. The reference server
+  has a `browse` tool that returns one.
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

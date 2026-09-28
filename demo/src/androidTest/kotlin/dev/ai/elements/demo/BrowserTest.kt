@@ -1,5 +1,7 @@
 package dev.ai.elements.demo
 
+import dev.ai.elements.core.agent.runTool
+import kotlinx.coroutines.flow.toList
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -47,5 +49,20 @@ class BrowserTest {
         assertTrue(about, about.contains("Open since 2026"))
         runCatching { call("navigate", buildJsonObject { put("url", "file:///etc/hosts") }) }.exceptionOrNull().let { assertTrue(it is IllegalArgumentException) }
         browser.close()
+    }
+
+    /** Page-changing calls attach a screenshot of the viewport, and it shows the page (not a blank frame). */
+    @Test
+    fun navigate_attachesAScreenshotOfThePage() = runBlocking<Unit> {
+        val browser = WebBrowser(ApplicationProvider.getApplicationContext())
+        val events = kotlinx.coroutines.flow.flow<dev.ai.elements.core.chat.ChatEvent> {
+            runTool(browser.tools(), dev.ai.elements.core.chat.ToolApprover.AlwaysApprove, "c1", "navigate", buildJsonObject { put("url", "$server/browser-test") }.toString())
+        }.toList()
+        val shot = events.filterIsInstance<dev.ai.elements.core.chat.ChatEvent.File>().single()
+        assertTrue(shot.mediaType == "image/jpeg" && shot.url.startsWith("data:image/jpeg;base64,"))
+        val bytes = android.util.Base64.decode(shot.url.substringAfter("base64,"), android.util.Base64.DEFAULT)
+        val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        val colors = (0 until bitmap.height step 16).flatMap { y -> (0 until bitmap.width step 16).map { x -> bitmap.getPixel(x, y) } }.toSet()
+        assertTrue("screenshot looks blank (${colors.size} colours)", colors.size > 3)
     }
 }

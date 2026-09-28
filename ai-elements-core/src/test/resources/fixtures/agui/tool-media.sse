@@ -1,0 +1,18 @@
+data: {"type":"RUN_STARTED","threadId":"t","runId":"r"}
+
+data: {"type":"TOOL_CALL_START","toolCallId":"call-1","toolCallName":"browse","parentMessageId":"m1"}
+
+data: {"type":"TOOL_CALL_ARGS","toolCallId":"call-1","delta":"{\"url\":\"https://example.com\"}"}
+
+data: {"type":"TOOL_CALL_END","toolCallId":"call-1"}
+
+data: {"type":"TOOL_CALL_RESULT","messageId":"r1","toolCallId":"call-1","content":[{"type":"text","text":"Opened https://example.com"},{"type":"image","source":{"type":"data","value":"iVBORw0KGgoAAAANSUhEUgAAAWgAAADwCAIAAACixWkYAAADP0lEQVR42u3csQ2lMBRFQZdDQAkUQQ2UR0RATE+IgBBCYutZsmxmdCtYrY9s7WfTed1mZllL/gjMTDjMTDjMTDjMTDjMTDjMzITDzITj2wPECAcgHMIBwiEcIBzCAcIhHCAcwgEIh3CAcAgHCIdwgHAIBwiHcADCIRwgHGbm61gzEw4zM+EwM+EwM+EwM+Ews37D4V+zgVzCAQgHIByAcADCAQgHgHAAwgEIByAcgHAACAcgHIBwAMIBCAdAuXAM42S9zvFAOEw4EA4TDoTDhAPhMOFAOIRDOEA4TDgQDhMOhMOEA+Ew4UA4hEM4EA7hMOFAOEw4EA4TDoTDhAPhcLqEA+EQDhMOhMOEA+Ew4aCHcADCASAcgHAAwgEIByAcAMIBCAcgHIBwAMIBIByAcADCAQgHIByAcASs22FmtSYcZo63G4eZ4+2pIhxmYiccZu4ywmHmeAuHmXmqmDnebhzCYY63pwqAcADCAQgHIByAcAAIByAcgHAAwgEIB4BwAMIBNBkOn1Sa+axeOMzxRjjMxE44zBxvNw4zx1s4zMxTRTjM3GWEw8xTRTjMxM4vR4G/3DgA4QAQDkA4AOEAhAMQDgDhAIQDEA5AOADhACgVDp8nmi9NhUM4zMROOMzcZYTDzPEWDjPzVDEzTxXhMMcb4TATO+Ewc7z9chQQDkA4AIQDEA5AOADhAIQDEA4A4QCEAxAOQDgA4cjjw0czn9ULh5nP6oXDzP8AJhxm5qli5ni7cZg53p4qwmEmdsJh5i4jHGaOt1+OAsIBCAeAcADCAQgHIByAcADCASAcgHAAwgEIByAcAMIBCAcgHIBwAMIBIByAcADCAQgHIBwAwgHUCccy7xafv4gIhwkHwiEcwgHCIRwgHMIBwiEcIBwmHAiHcAgHCIdwgHAIBwiHcIBwmHAgHMIhHAiHcAgHCIdwgHAIBwiHCQfCYcKBcAiHcIBwCAcIh3CAcAgHCIcJB8IhHMIBwiEcIBzCAcIhHCAcJhwIh3AIB8IBIByAcADCAQgHIBwAwgEIByAcgHAAwgEgHIBwAMIBCAcgHADCAQgHIByAcADCAQgHgHAAwgEIByAcgHAACAcgHIBwAO15Ab87UCASWT5xAAAAAElFTkSuQmCC","mimeType":"image/png"}},{"type":"image","source":{"type":"url","value":"https://example.com/full.png","mimeType":"image/png"}}],"role":"tool"}
+
+data: {"type":"TEXT_MESSAGE_START","messageId":"m2","role":"assistant"}
+
+data: {"type":"TEXT_MESSAGE_CONTENT","messageId":"m2","delta":"The page has a sign-up button."}
+
+data: {"type":"TEXT_MESSAGE_END","messageId":"m2"}
+
+data: {"type":"RUN_FINISHED","threadId":"t","runId":"r","outcome":{"type":"success"}}
+

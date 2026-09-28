@@ -199,4 +199,9 @@
     <string name="ai_play_video">動画を再生</string>
     <string name="ai_pages">%1$d ページ</string>
     <string name="ai_open_with">他のアプリで開く</string>
+    <string name="ai_run_playback">実行の再生</string>
+    <string name="ai_step_of">ステップ %1$d / %2$d</string>
+    <string name="ai_no_steps">この返信はツールを使っていません</string>
+    <string name="ai_previous_step">前のステップ</string>
+    <string name="ai_next_step">次のステップ</string>
 </resources>

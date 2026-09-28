@@ -199,4 +199,9 @@
     <string name="ai_play_video">播放视频</string>
     <string name="ai_pages">%1$d 页</string>
     <string name="ai_open_with">用其他应用打开</string>
+    <string name="ai_run_playback">运行回放</string>
+    <string name="ai_step_of">第 %1$d / %2$d 步</string>
+    <string name="ai_no_steps">这条回复没有调用工具</string>
+    <string name="ai_previous_step">上一步</string>
+    <string name="ai_next_step">下一步</string>
 </resources>

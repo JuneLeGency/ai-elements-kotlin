@@ -214,6 +214,13 @@ internal fun MessageActions(
                 modifier = Modifier.compactIconButton().testTag("regenerate"),
             ) { Icon(AiIcons.Refresh, stringResource(R.string.ai_regenerate), Modifier.size(AiSize.compactIcon)) }
         }
+        // Step through the run (tool calls and their screenshots), when it had any.
+        val openPlayback = LocalOpenRunPlayback.current
+        if (openPlayback != null && message.parts.any { it is dev.ai.elements.core.model.ToolPart }) IconButton(
+            onClick = { openPlayback(message.id, 0) },
+            shapes = IconButtonDefaults.shapes(),
+            modifier = Modifier.compactIconButton().testTag("run-playback-open"),
+        ) { Icon(AiIcons.Slideshow, stringResource(R.string.ai_run_playback), Modifier.size(AiSize.compactIcon)) }
         IconButton(
             onClick = { showGraph = true },
             shapes = IconButtonDefaults.shapes(),

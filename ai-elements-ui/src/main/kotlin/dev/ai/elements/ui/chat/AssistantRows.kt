@@ -71,6 +71,18 @@ internal sealed interface AssistantRow {
         override val contentType = "markdown"
     }
 
+    /** The screenshots a tool call produced ([StepMedia]), right under the call. */
+    data class StepMediaRow(
+        val messageId: String,
+        val stepIndex: Int,
+        val files: List<FilePart>,
+        override val first: Boolean,
+        override val streaming: Boolean,
+    ) : AssistantRow {
+        override val key = "$messageId/step-media/$stepIndex"
+        override val contentType = "step-media"
+    }
+
     /** Sources and actions; the only row that needs the whole message. */
     data class FooterRow(val message: Message, override val first: Boolean) : AssistantRow {
         override val key = "${message.id}/footer"
@@ -83,7 +95,18 @@ internal sealed interface AssistantRow {
 internal fun assistantRows(message: Message): List<AssistantRow> {
     val sources = message.parts.filterIsInstance<SourcePart>()
     val rows = mutableListOf<AssistantRow>()
+    var step = -1
+    var afterTool = false
     message.parts.forEach { part ->
+        // Images right after a tool call are its screenshots: one compact row per step.
+        if (part is FilePart && part.isImage && afterTool) {
+            val previous = rows.lastOrNull() as? AssistantRow.StepMediaRow
+            if (previous != null && previous.stepIndex == step) rows[rows.lastIndex] = previous.copy(files = previous.files + part)
+            else rows += AssistantRow.StepMediaRow(message.id, step, listOf(part), first = rows.isEmpty(), streaming = false)
+            return@forEach
+        }
+        afterTool = part is ToolPart
+        if (part is ToolPart) step++
         when (part) {
             is TextPart -> if (part.text.isNotBlank()) {
                 val blocks = markdownBlocks(part.text, sources)
@@ -130,6 +153,7 @@ internal fun AssistantRowItem(
                     is FilePart -> FileAttachment(part)
                     is TextPart, is SourcePart -> Unit
                 }
+                is AssistantRow.StepMediaRow -> StepMedia(row.messageId, row.stepIndex, row.files)
                 is AssistantRow.FooterRow -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Sources(row.message.parts.filterIsInstance<SourcePart>())
                     if (!row.message.isStreaming) MessageActions(row.message, prompt, onRegenerate, onSelectVersion)

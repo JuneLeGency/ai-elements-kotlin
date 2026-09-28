@@ -144,4 +144,21 @@ class HumanInTheLoopTest {
         runCurrent()
         assertEquals(ToolState.APPROVAL_REQUESTED, state("c1"))
     }
+
+    @Test
+    fun toolFiles_followTheCall() = runBlocking {
+        val tool = object : AgentTool {
+            override val name = "browse"
+            override val description = "Open a page"
+            override val parameters = buildJsonObject { put("type", "object") }
+            override suspend fun execute(arguments: JsonObject): String {
+                dev.ai.elements.core.agent.ToolCallContext.current()!!.file("image/png", "data:image/png;base64,AAAA")
+                return "Opened"
+            }
+        }
+        val events = flow { runTool(listOf(tool), ToolApprover.AlwaysApprove, "c1", "browse", "{}") }.toList()
+        val file = events.filterIsInstance<ChatEvent.File>().single()
+        assertEquals("c1-file-0" to "image/png", file.id to file.mediaType)
+        assertTrue(events.indexOf(file) < events.indexOfFirst { it is ChatEvent.ToolOutput && !it.preliminary })
+    }
 }

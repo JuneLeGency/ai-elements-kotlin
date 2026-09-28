@@ -1,5 +1,7 @@
 package dev.ai.elements.ui
 
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.runtime.getValue
@@ -416,6 +418,34 @@ class ElementsTest {
         compose.onNodeWithTag("pdf-page-1").assertExists()
         compose.onNodeWithTag("pdf-close").performClick()
         compose.onNodeWithTag("pdf-viewer").assertDoesNotExist()
+    }
+
+    /** Screenshots follow their tool call as a compact strip, and open the run playback at that step. */
+    @Test fun runPlayback_stepsWithScreenshots() {
+        val png = android.util.Base64.encodeToString(
+            java.io.ByteArrayOutputStream().also { android.graphics.Bitmap.createBitmap(60, 40, android.graphics.Bitmap.Config.ARGB_8888).compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }.toByteArray(),
+            android.util.Base64.NO_WRAP,
+        )
+        fun shot(id: String) = dev.ai.elements.core.model.FilePart(id, "image/png", "data:image/png;base64,$png")
+        val message = Message(
+            "a1", Role.ASSISTANT,
+            listOf(
+                ToolPart("t1", "navigate", ToolState.OUTPUT_AVAILABLE, """{"url":"https://example.com"}""", output = "Opened"),
+                shot("f1"),
+                ToolPart("t2", "click", ToolState.OUTPUT_AVAILABLE, """{"selector":"#signup"}""", output = "Clicked"),
+                shot("f2"),
+                TextPart("x", "Done."),
+            ),
+        )
+        compose.setContent { AiElementsTheme(dynamicColor = false) { Conversation(ChatState(messages = listOf(message))) } }
+        assertEquals(2, compose.onAllNodesWithTag("step-media").fetchSemanticsNodes().size)
+        compose.onAllNodesWithTag("step-media")[0].onChildren()[0].performClick()
+        compose.onNodeWithTag("run-playback").assertExists()
+        compose.onNodeWithTag("run-step-counter").assertTextContains("1", substring = true)
+        compose.onNodeWithTag("run-next").performClick()
+        compose.onNodeWithTag("run-step-counter").assertTextContains("2", substring = true)
+        compose.onNodeWithTag("run-playback-close").performClick()
+        compose.onNodeWithTag("run-playback").assertDoesNotExist()
     }
 
     @Test fun checkpoint_restoresOnlyAfterConfirming() {

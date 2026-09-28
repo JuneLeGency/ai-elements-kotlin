@@ -205,4 +205,9 @@
     <string name="ai_play_video">Play video</string>
     <string name="ai_pages">%1$d pages</string>
     <string name="ai_open_with">Open with…</string>
+    <string name="ai_run_playback">Run playback</string>
+    <string name="ai_step_of">Step %1$d of %2$d</string>
+    <string name="ai_no_steps">This reply used no tools</string>
+    <string name="ai_previous_step">Previous step</string>
+    <string name="ai_next_step">Next step</string>
 </resources>

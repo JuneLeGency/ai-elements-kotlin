@@ -107,6 +107,7 @@ private suspend fun FlowCollector<ChatEvent>.executeReporting(
             is ToolCallContext.Update.Preliminary -> emit(ChatEvent.ToolOutput(id, update.output, preliminary = true))
             is ToolCallContext.Update.Subagent -> emit(ChatEvent.SubagentUpdate(id, update.message))
             is ToolCallContext.Update.Data -> emit(ChatEvent.Data(update.id, update.name, update.data))
+            is ToolCallContext.Update.File -> emit(ChatEvent.File(update.id, update.mediaType, update.url))
         }
     }
     result.await()

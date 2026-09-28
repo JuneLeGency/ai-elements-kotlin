@@ -1,5 +1,9 @@
 package dev.ai.elements.harness.browser
 
+import java.io.ByteArrayOutputStream
+import dev.ai.elements.core.agent.ToolCallContext
+import android.util.Base64
+import android.graphics.Canvas
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
@@ -38,6 +42,10 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  * Selectors are CSS selectors, `aria-ref=eN` handles from `snapshot`, or
  * `x,y` CSS-pixel coordinates. Only `http(s)` pages load; results are capped
  * at [maxContentTokens] (4 characters per token), keeping the head.
+ *
+ * With [screenshots], every call that changes the page (navigate, click, type, keys, scroll,
+ * back, forward) attaches a screenshot of the viewport to the call, so the chat's steps view shows
+ * what the agent saw. The model keeps working from the text.
  */
 class WebBrowser(
     private val context: Context,
@@ -46,6 +54,7 @@ class WebBrowser(
     val navigationTimeoutMs: Long = 60_000,
     private val viewportWidth: Int = 1080,
     private val viewportHeight: Int = 1920,
+    val screenshots: Boolean = true,
 ) : Capability {
     private val lock = Mutex()
     private var webView: WebView? = null
@@ -192,6 +201,8 @@ class WebBrowser(
             }
             override fun onPageFinished(view: WebView, url: String?) { pageLoad?.complete(Unit) }
         }
+        // Off-screen, a hardware-rendered WebView never draws: render in software so screenshots work.
+        if (screenshots) setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         // Lay it out off-screen so pages see a real viewport.
         measure(View.MeasureSpec.makeMeasureSpec(viewportWidth, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(viewportHeight, View.MeasureSpec.EXACTLY))
         layout(0, 0, viewportWidth, viewportHeight)
@@ -214,10 +225,33 @@ class WebBrowser(
             put("required", JsonArray((if (required.isEmpty() && params.firstOrNull()?.first in setOf("url", "direction", "key")) listOf(params.first().first) else required).map(::JsonPrimitive)))
         }
         override fun titleFor(arguments: JsonObject) = arguments.s("url") ?: arguments.s("selector") ?: arguments.s("text")
-        override suspend fun execute(arguments: JsonObject) = run(arguments)
+        override suspend fun execute(arguments: JsonObject) = run(arguments).also { if (name in PAGE_CHANGING) attachScreenshot() }
+    }
+
+    /** The viewport as a JPEG on the current call (see [screenshots]); failures never fail the call. */
+    private suspend fun attachScreenshot() {
+        if (!screenshots) return
+        val call = ToolCallContext.current() ?: return
+        val jpeg = runCatching {
+            withContext(Dispatchers.Main) {
+                val view = webView ?: return@withContext null
+                val scale = SCREENSHOT_WIDTH.toFloat() / viewportWidth
+                val bitmap = Bitmap.createBitmap(SCREENSHOT_WIDTH, (viewportHeight * scale).toInt(), Bitmap.Config.ARGB_8888)
+                Canvas(bitmap).apply { scale(scale, scale); view.draw(this) }
+                bitmap
+            }?.let { bitmap ->
+                withContext(Dispatchers.Default) {
+                    ByteArrayOutputStream().also { bitmap.compress(Bitmap.CompressFormat.JPEG, 70, it) }.toByteArray()
+                }
+            }
+        }.getOrNull() ?: return
+        call.file("image/jpeg", "data:image/jpeg;base64," + Base64.encodeToString(jpeg, Base64.NO_WRAP))
     }
 
     private companion object {
+        const val SCREENSHOT_WIDTH = 720
+        val PAGE_CHANGING = setOf("navigate", "click", "type_text", "press_key", "select_option", "scroll", "go_back", "go_forward")
+
         fun str(description: String) = buildJsonObject { put("type", "string"); put("description", description) }
         fun bool(description: String) = buildJsonObject { put("type", "boolean"); put("description", description) }
         fun int() = buildJsonObject { put("type", "integer"); put("description", "Timeout in milliseconds.") }

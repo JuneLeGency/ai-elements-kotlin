@@ -388,7 +388,11 @@ internal class AgUiParser(private val nested: Boolean = false) {
                 return subagents[id]?.let { finishSubagent(it, event, type == "SUBAGENT_ERROR") } ?: route(id, event, strip = null)
             }
             // AG-UI 1.x tool results may be content parts; kotlin-core 0.4 only models strings.
-            "TOOL_CALL_RESULT" -> if (event["content"] is JsonArray) return toolResult(event.str("toolCallId").orEmpty(), event.str("messageId"), event["content"].asText())
+            // Media parts (a screenshot) become file parts after the call's output.
+            "TOOL_CALL_RESULT" -> (event["content"] as? JsonArray)?.let { parts ->
+                val toolCallId = event.str("toolCallId").orEmpty()
+                return toolResult(toolCallId, event.str("messageId"), parts.asText(), parts) + mediaFiles(toolCallId, parts)
+            }
         }
         // Everything else is decoded into the official AG-UI Kotlin SDK types.
         val typed = runCatching { AgUiJson.decodeFromJsonElement(BaseEvent.serializer(), event) }.getOrNull() ?: return emptyList()
@@ -480,14 +484,15 @@ internal class AgUiParser(private val nested: Boolean = false) {
         return if (delta.isEmpty()) emptyList() else listOf(ChatEvent.ToolInputDelta(id, delta))
     }
 
-    private fun toolResult(toolCallId: String, messageId: String?, content: String): List<ChatEvent> {
+    private fun toolResult(toolCallId: String, messageId: String?, content: String, parts: JsonArray? = null): List<ChatEvent> {
         results += toolCallId
         val id = messageId ?: "result-$toolCallId"
         transcript += id to buildJsonObject {
             put("id", id)
             put("role", "tool")
             put("toolCallId", toolCallId)
-            put("content", content)
+            // The tool message goes back as it came: content parts stay parts.
+            if (parts != null) put("content", parts) else put("content", content)
         }
         val sub = subagents.values.firstOrNull { it.toolCallId == toolCallId && !it.synthetic }
         return listOfNotNull(
@@ -567,9 +572,27 @@ internal class AgUiParser(private val nested: Boolean = false) {
         fun JsonElement?.asText(): String = when (this) {
             null -> ""
             is JsonPrimitive -> contentOrNull.orEmpty()
-            // 1.x tool results may be content parts: keep the text.
-            is JsonArray -> mapNotNull { (it as? JsonObject)?.str("text") }.joinToString("\n").ifEmpty { toString() }
+            // 1.x tool results may be content parts: keep the text (media parts become files).
+            is JsonArray -> mapNotNull { (it as? JsonObject)?.str("text") }.joinToString("\n")
             else -> toString()
+        }
+
+        /**
+         * AG-UI 1.x media content parts (`image`, `audio`, `video`, `document`) of a tool result as
+         * file events: a `data` source as a `data:` URL, a `url` source as is. `file` sources name
+         * bytes only their provider can read, so they are left out.
+         */
+        fun mediaFiles(toolCallId: String, parts: JsonArray): List<ChatEvent> = parts.mapIndexedNotNull { index, element ->
+            val part = element as? JsonObject ?: return@mapIndexedNotNull null
+            if (part.str("type") !in setOf("image", "audio", "video", "document")) return@mapIndexedNotNull null
+            val source = part["source"] as? JsonObject ?: return@mapIndexedNotNull null
+            val mime = source.str("mimeType") ?: "application/octet-stream"
+            val url = when (source.str("type")) {
+                "data" -> source.str("value")?.let { "data:$mime;base64,$it" }
+                "url" -> source.str("value")
+                else -> null
+            } ?: return@mapIndexedNotNull null
+            ChatEvent.File(part.str("id") ?: "$toolCallId-file-$index", mime, url)
         }
     }
 }
