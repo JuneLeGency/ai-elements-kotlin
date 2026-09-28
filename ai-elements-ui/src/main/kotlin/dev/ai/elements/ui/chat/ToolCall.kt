@@ -28,6 +28,7 @@ import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,12 +49,14 @@ import dev.ai.elements.core.model.ToolKind
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
 import dev.ai.elements.ui.R
+import dev.ai.elements.ui.code.AnsiText
 import dev.ai.elements.ui.icons.AiIcons
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
 import dev.ai.elements.ui.theme.AiType
 import dev.ai.elements.ui.theme.LocalCodeFontFamily
 import dev.ai.elements.ui.theme.fadingHorizontalScroll
+import dev.ai.elements.ui.theme.isDark
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
@@ -121,6 +125,7 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
                     when {
                         part.state == ToolState.OUTPUT_DENIED -> Section(stringResource(R.string.ai_tool_output), stringResource(R.string.ai_denied_by_user), scheme.error)
                         part.errorText != null -> Section(stringResource(R.string.ai_tool_error), part.errorText!!, scheme.error)
+                        part.output != null && AnsiText.isTerminalOutput(part.output!!) -> TerminalSection(stringResource(R.string.ai_tool_output), part.output!!)
                         part.output != null -> Section(stringResource(R.string.ai_tool_output), part.output!!.prettyJson())
                     }
                 }
@@ -212,8 +217,24 @@ internal fun StatusPill(state: ToolState) {
     }
 }
 
+/** Output written for a terminal (colors, progress redraws), shown as a terminal would. */
 @Composable
-private fun Section(title: String, body: String, color: Color = MaterialTheme.colorScheme.onSurface) {
+private fun TerminalSection(title: String, output: String) {
+    val scheme = MaterialTheme.colorScheme
+    val dark = MaterialTheme.isDark
+    val hidden = stringResource(R.string.ai_earlier_lines)
+    val text = remember(output, dark) {
+        AnsiText.parse(output, scheme.onSurface, scheme.surfaceContainerHighest, darkSurface = dark, scrollback = 1_000, hiddenNote = { n -> hidden.format(n) })
+    }
+    StyledSection(title, text)
+}
+
+@Composable
+private fun Section(title: String, body: String, color: Color = MaterialTheme.colorScheme.onSurface) =
+    StyledSection(title, AnnotatedString(body), color)
+
+@Composable
+private fun StyledSection(title: String, body: AnnotatedString, color: Color = MaterialTheme.colorScheme.onSurface) {
     Column {
         Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Surface(

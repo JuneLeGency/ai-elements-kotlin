@@ -23,9 +23,12 @@ import dev.ai.elements.core.model.ToolState
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -96,6 +99,29 @@ class AcpRecordedTest {
         assertEquals(ToolCategory.READ, tool.category)
         assertEquals("/tmp/README.md", tool.location)
         assertEquals(ToolState.OUTPUT_AVAILABLE, tool.state)
+    }
+
+    /** `session/load` replays the session; each reply's turn is found by its metadata and mapped as when it streamed. */
+    @Test fun replay_loadsTheSessionAndPlaysTheReplysTurn() = runBlocking {
+        val lines = javaClass.getResource("/acp/load.jsonl")!!.readText().lines().filter { it.isNotBlank() }
+        val sessionId = lines.firstNotNullOf { Regex("\"sessionId\": \"([0-9a-f]+)\"").find(it)?.groupValues?.get(1) }
+        fun reply(turn: Int) = Message("a$turn", Role.ASSISTANT, metadata = buildJsonObject {
+            putJsonObject(AcpBackend.METADATA_KEY) { put("sessionId", sessionId); put("turn", turn) }
+        })
+        suspend fun replay(turn: Int): Message {
+            val agent = AcpAgent("recorded", cwd = "/tmp") { ReplayTransport(lines) }
+            val events = AcpBackend(agent).replayOf(reply(turn), speed = 1_000f)!!.toList()
+            agent.close()
+            return fold(events)
+        }
+        val first = replay(0)
+        val read = first.parts.filterIsInstance<ToolPart>().single()
+        assertEquals("read_file", read.name)
+        assertEquals(ToolCategory.READ, read.category)
+        assertEquals(ToolState.OUTPUT_AVAILABLE, read.state)
+        assertTrue(first.parts.filterIsInstance<TextPart>().joinToString("") { it.text }.isNotBlank())
+        assertEquals("get_current_time", replay(1).parts.filterIsInstance<ToolPart>().single().name)
+        assertEquals(null, AcpBackend(AcpAgent("x", cwd = "/tmp") { ReplayTransport(lines) }).replayOf(Message("m", Role.ASSISTANT)))
     }
 
     @Test fun diff_isAUnifiedDiff() {

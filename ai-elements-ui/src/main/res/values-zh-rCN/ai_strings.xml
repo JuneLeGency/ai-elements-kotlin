@@ -222,4 +222,5 @@
         <item quantity="one">%d 步</item>
         <item quantity="other">%d 步</item>
     </plurals>
+    <string name="ai_earlier_lines">已省略前面的 %1$d 行</string>
 </resources>

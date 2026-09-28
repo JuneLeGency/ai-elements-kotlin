@@ -1,0 +1,21 @@
+[1mdiff --git a/ai-elements-chat/src/main/kotlin/dev/ai/elements/core/chat/ChatBackend.kt b/ai-elements-chat/src/main/kotlin/dev/ai/elements/core/chat/ChatBackend.kt[m
+[1mindex a881522..3fbfb5d 100644[m
+[1m--- a/ai-elements-chat/src/main/kotlin/dev/ai/elements/core/chat/ChatBackend.kt[m
+[1m+++ b/ai-elements-chat/src/main/kotlin/dev/ai/elements/core/chat/ChatBackend.kt[m
+[36m@@ -1,6 +1,7 @@[m
+ package dev.ai.elements.core.chat[m
+ [m
+ import dev.ai.elements.core.model.Message[m
+[32m+[m[32mimport dev.ai.elements.core.model.ToolCategory[m
+ import dev.ai.elements.core.model.ToolKind[m
+ import kotlinx.coroutines.flow.Flow[m
+ import kotlinx.coroutines.flow.emitAll[m
+[36m@@ -39,6 +40,8 @@[m [msealed interface ChatEvent {[m
+         val title: String? = null,[m
+         val kind: ToolKind? = null,[m
+         val source: String? = null,[m
+[32m+[m[32m        val category: ToolCategory? = null,[m
+[32m+[m[32m        val location: String? = null,[m
+     ) : ChatEvent[m
+ [m
+     /** A tool result; [preliminary] results are replaced by later ones (AI SDK preliminary tool results). */[m

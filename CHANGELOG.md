@@ -163,6 +163,23 @@
   the client's input in `RUN_STARTED.input`; `AgUiEventLog.replayOf(message)` replays a reply
   through the same parser at the recorded pace — `Chat(replay = …)` offers "Replay run".
 
+- Terminal output as a terminal shows it: `TerminalText` (in `ai-elements-chat`) interprets the
+  ECMA-48 / xterm subset programs write — 16 / 256 / 24-bit colours and backgrounds, bold, dim,
+  italic, underline, inverse, strikethrough, `\r` / `\b` redraws, cursor moves and erases, OSC 8
+  links. `Terminal` and tool outputs render it (VS Code's dark and light palettes, 1 000-line
+  scrollback); on the device `Shell` gives the model the plain text the terminal would show
+  (`TERM=dumb` for Android's shell too).
+- AG-UI log compaction: `AgUiEventLog.compact`, ported from the reference `compactEvents`;
+  `AgUiEventLog.delete` (the demo deletes a conversation's logs with it).
+- ACP replay: `AcpBackend.replayOf` reopens the session with `session/load` on a connection of its
+  own and plays the reply's turn; replies record their turn in the `acp` metadata. The reference
+  server's ACP agent keeps sessions (Harness `InMemorySessionStore`).
+- The agent's computer on long runs: a continuous timeline beyond 20 steps, lazy screenshot strips,
+  step views capped at 100 000 characters.
+- Docs: "Choose your setup" — which artifacts, backend and UI level for each kind of agent, what
+  the agent's computer gets from each protocol, and what the library vs. the app decides for
+  storing, compacting, replaying and reconnecting.
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

@@ -22,13 +22,18 @@ from pydantic_ai_harness.experimental import HarnessExperimentalWarning
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", HarnessExperimentalWarning)
-    from pydantic_ai_harness.experimental.acp import AcpSession, AcpSessionConfig, PydanticAIACPAgent, run_acp_stdio
+    from pydantic_ai_harness.experimental.acp import AcpSession, AcpSessionConfig, InMemorySessionStore, PydanticAIACPAgent, run_acp_stdio
 
 import main
 
 
 def session_config(session: AcpSession) -> AcpSessionConfig[main.RunState]:
     return AcpSessionConfig(deps=main.RunState(protocol="acp", acp=(session.client, session.session_id)))
+
+
+# Sessions outlive their connection, so a client can reopen one with `session/load`: the adapter
+# replays its transcript as `session/update`s (how an ACP client restores or replays a session).
+SESSIONS = InMemorySessionStore()
 
 
 def build_adapter() -> PydanticAIACPAgent:
@@ -38,6 +43,7 @@ def build_adapter() -> PydanticAIACPAgent:
         session_config=session_config,
         models=[main.DEFAULT_MODEL],
         model_resolver=main.resolve_model,
+        session_store=SESSIONS,
     )
 
 
@@ -125,4 +131,5 @@ if __name__ == "__main__":
         session_config=session_config,
         models=[main.DEFAULT_MODEL],
         model_resolver=main.resolve_model,
+        session_store=SESSIONS,
     ))

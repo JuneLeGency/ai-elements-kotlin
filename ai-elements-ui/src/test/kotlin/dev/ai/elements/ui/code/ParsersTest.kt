@@ -9,19 +9,29 @@ import org.junit.Test
 
 class ParsersTest {
     @Test fun ansi_colorsBoldAndReset() {
-        val text = AnsiText.parse("\u001B[1mbold\u001B[0m plain \u001B[31mred\u001B[39m back", Color.White)
+        val text = AnsiText.parse("\u001B[1mbold\u001B[0m plain \u001B[31mred\u001B[39m back", Color.White, Color.Black)
         assertEquals("bold plain red back", text.text)
         val bold = text.spanStyles.first { text.text.substring(it.start, it.end) == "bold" }
         assertEquals(FontWeight.Bold, bold.item.fontWeight)
         val red = text.spanStyles.first { text.text.substring(it.start, it.end) == "red" }
-        assertEquals(AnsiText.Red, red.item.color)
+        assertEquals(Color(0xFFCD3131), red.item.color) // VS Code's dark terminal red
         val back = text.spanStyles.first { text.text.substring(it.start, it.end) == " back" }
         assertEquals(Color.White, back.item.color)
     }
 
     @Test fun ansi_stripsCursorSequences() {
         assertEquals("done", AnsiText.strip("\u001B[2K\u001B[1Gdone"))
-        assertEquals("ok", AnsiText.parse("\u001B[?25lok\u001B[?25h", Color.White).text)
+        assertEquals("ok", AnsiText.parse("\u001B[?25lok\u001B[?25h", Color.White, Color.Black).text)
+    }
+
+    @Test fun ansi_lightPaletteLinksAndScrollback() {
+        val light = AnsiText.parse("\u001B[33my\u001B[0m", Color.Black, Color.White, darkSurface = false)
+        assertEquals(Color(0xFF949800), light.spanStyles.single().item.color)
+        val link = AnsiText.parse("\u001B]8;;https://example.com\u001B\\docs\u001B]8;;\u001B\\", Color.White, Color.Black)
+        assertEquals("docs", link.text)
+        assertEquals("https://example.com", (link.getLinkAnnotations(0, 4).single().item as androidx.compose.ui.text.LinkAnnotation.Url).url)
+        val long = AnsiText.parse((1..50).joinToString("\n") { "l$it" }, Color.White, Color.Black, scrollback = 10, hiddenNote = { "hidden $it" })
+        assertEquals("hidden 40\nl41", long.text.lines().take(2).joinToString("\n"))
     }
 
     @Test fun stackTrace_jvm() {

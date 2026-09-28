@@ -298,6 +298,49 @@ def acp_session(keyword: str, approve: bool = True) -> None:
     print("wrote", path)
 
 
+def acp_load() -> None:
+    """A turn, then `session/load` of that session in the same process: the agent replays the
+    session's transcript as `session/update`s before answering (ACP session/load)."""
+    import asyncio
+    import acp
+    from acp import schema
+    from acp.connection import StreamDirection
+
+    received: list[dict] = []
+    recording = False
+
+    class Client:
+        async def session_update(self, session_id, update, **kwargs):
+            pass
+
+        async def request_permission(self, session_id, tool_call, options, **kwargs):
+            option = next(o for o in options if o.kind == "allow_once")
+            return schema.RequestPermissionResponse(outcome=schema.AllowedOutcome(outcome="selected", option_id=option.option_id))
+
+    async def run() -> None:
+        def observe(event) -> None:
+            if recording and event.direction == StreamDirection.INCOMING:
+                received.append(event.message)
+
+        async with acp.spawn_agent_process(lambda _agent: Client(), sys.executable, "acp_agent.py",
+                                           cwd=Path(__file__).resolve().parent, observers=[observe]) as (conn, _process):
+            nonlocal recording
+            # Recorded: the handshake and the load (what a client that reopens the session sees).
+            recording = True
+            await conn.initialize(protocol_version=acp.PROTOCOL_VERSION, client_capabilities=schema.ClientCapabilities())
+            recording = False
+            session = await conn.new_session(cwd="/tmp", mcp_servers=[])
+            await conn.prompt(session_id=session.session_id, prompt=[acp.text_block("please read the workspace readme")])
+            await conn.prompt(session_id=session.session_id, prompt=[acp.text_block("what time is it? please time")])
+            recording = True
+            await conn.load_session(cwd="/tmp", session_id=session.session_id, mcp_servers=[])
+
+    asyncio.run(run())
+    path = ACP_OUT / "load.jsonl"
+    path.write_text("".join(json.dumps(m, ensure_ascii=False) + "\n" for m in received))
+    print("wrote", path)
+
+
 def agui_tool_media() -> None:
     """An AG-UI 1.x tool result with media content parts (a screenshot), encoded by the official
     `ag_ui` SDK: Pydantic AI's AG-UI adapter sends tool results as text only for now."""
@@ -327,6 +370,9 @@ if __name__ == "__main__":
     if sys.argv[2:] == ["browse"]:
         aisdk("browse")
         agui_tool_media()
+        sys.exit()
+    if sys.argv[2:] == ["acp-load"]:
+        acp_load()
         sys.exit()
     if sys.argv[2:] == ["read"]:
         acp_session("read")

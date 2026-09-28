@@ -65,6 +65,25 @@ backend; no protocol is involved. `ai-elements-ui` declares the package-visibili
 both services; the app declares `RECORD_AUDIO`. Voice features hide themselves on devices without a
 speech recognizer.
 
+## Terminal output
+
+`Terminal`, and tool outputs that contain terminal control codes, render what a program writes for a
+terminal. `TerminalText` in `ai-elements-chat` interprets the ECMA-48 / xterm subset that programs
+use for output:
+
+- SGR colours: 16, 256 and 24-bit, foreground and background;
+- bold, dim, italic, underline, inverse, strikethrough;
+- `\r` and `\b` redraws, so progress bars end in their final state;
+- cursor moves and erases in the line and the display;
+- OSC 8 hyperlinks.
+
+The 16 theme colours follow VS Code's terminal in dark and light. The scrollback is 1 000 lines.
+
+On the device, `Shell` gives the model the same text as plain text, as the terminal would show it,
+so escape codes and redrawn progress bars cost no tokens. The sandbox sets `TERM=dumb`, as agent
+shells do, so most programs print plain text anyway. Interactive full-screen programs (`vim`, `top`)
+need a pseudo-terminal and a terminal emulator, and are out of scope for command output.
+
 ## Documents
 
 Mobile best practice for artifacts such as reports and slides:

@@ -222,4 +222,5 @@
         <item quantity="one">%d ステップ</item>
         <item quantity="other">%d ステップ</item>
     </plurals>
+    <string name="ai_earlier_lines">前の %1$d 行は省略されています</string>
 </resources>

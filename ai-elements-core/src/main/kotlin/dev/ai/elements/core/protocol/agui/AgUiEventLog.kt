@@ -1,5 +1,6 @@
 package dev.ai.elements.core.protocol.agui
 
+import com.reidsync.kxjsonpatch.JsonPatch
 import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.http.BackendJson
 import dev.ai.elements.core.http.str
@@ -13,6 +14,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
@@ -35,6 +37,9 @@ interface AgUiEventLog {
 
     suspend fun load(threadId: String): List<JsonObject>
 
+    /** Forgets [threadId]'s events, e.g. when its conversation is deleted. */
+    suspend fun delete(threadId: String)
+
     /**
      * The recorded run of [message] (the runs named in its metadata, see [runsOf]) played back
      * through the event parser, or null when this log has no runs for it. For `Chat(replay = …)`.
@@ -52,6 +57,8 @@ interface AgUiEventLog {
         override suspend fun append(threadId: String, events: List<JsonObject>) = lock.withLock { threads[threadId] = threads[threadId].orEmpty() + events }
 
         override suspend fun load(threadId: String): List<JsonObject> = lock.withLock { threads[threadId].orEmpty() }
+
+        override suspend fun delete(threadId: String) = lock.withLock { threads.remove(threadId); Unit }
     }
 
     /** One JSON file per thread in [directory] (`<threadId>.json`, a JSON array of events). */
@@ -67,6 +74,8 @@ interface AgUiEventLog {
         }
 
         override suspend fun load(threadId: String): List<JsonObject> = lock.withLock { withContext(Dispatchers.IO) { read(file(threadId)) } }
+
+        override suspend fun delete(threadId: String) = lock.withLock { withContext(Dispatchers.IO) { file(threadId).delete(); Unit } }
 
         private fun file(threadId: String) = File(directory, threadId.replace(Regex("[^A-Za-z0-9._-]"), "_") + ".json")
 
@@ -118,6 +127,110 @@ interface AgUiEventLog {
                 parser.parse(event).forEach { emit(it) }
             }
             emit(ChatEvent.Finish)
+        }
+
+        /**
+         * The events compacted as AG-UI's reference client does (`compactEvents` in `@ag-ui/client`,
+         * AG-UI serialization §Compaction): each text message's and tool call's deltas become one
+         * `…_CONTENT` / `TOOL_CALL_ARGS` event, events that arrived mid-stream follow the stream they
+         * interrupted, and each run's state events become one `STATE_SNAPSHOT` from the last snapshot
+         * on (deltas with no snapshot before them stay as they are). Collapsed events keep the
+         * metadata of what they replace (merged key by key) and the time of the last one. Like the
+         * reference, it reorders (a run's state moves to its end, mid-stream events after their
+         * stream), so it suits archiving finished runs; keep the log as recorded for event-level replay.
+         */
+        fun compact(events: List<JsonObject>): List<JsonObject> {
+            class Stream(var start: JsonObject? = null, var end: JsonObject? = null) {
+                val deltas = mutableListOf<JsonObject>()
+                val others = mutableListOf<JsonObject>()
+                var postStartMetadata: JsonObject? = null
+            }
+            val out = mutableListOf<JsonObject>()
+            val texts = linkedMapOf<String, Stream>()
+            val calls = linkedMapOf<String, Stream>()
+            var state = mutableListOf<JsonObject>()
+
+            fun flush(idKey: String, id: String, deltaType: String, stream: Stream) {
+                stream.start?.let { out += it }
+                if (stream.deltas.isNotEmpty()) out += JsonObject(buildMap {
+                    put("type", JsonPrimitive(deltaType))
+                    put(idKey, JsonPrimitive(id))
+                    put("delta", JsonPrimitive(stream.deltas.joinToString("") { it.str("delta").orEmpty() }))
+                    stream.deltas.last()["timestamp"]?.let { put("timestamp", it) }
+                    stream.postStartMetadata?.let { put("metadata", it) }
+                })
+                stream.end?.let { out += it }
+                out += stream.others
+            }
+
+            fun flushState() {
+                if (state.isEmpty()) return
+                val last = state.indexOfLast { it.str("type") == "STATE_SNAPSHOT" }
+                if (last < 0) { out += state; state = mutableListOf(); return }
+                var doc: JsonElement = JsonObject(emptyMap())
+                state.drop(last).forEach { e ->
+                    doc = if (e.str("type") == "STATE_SNAPSHOT") e["snapshot"] ?: JsonObject(emptyMap())
+                    else runCatching { JsonPatch.apply(e["delta"] ?: JsonArray(emptyList()), doc) }.getOrDefault(doc)
+                }
+                val metadata = state.fold(null as JsonObject?) { m, e -> mergeMetadata(m, e["metadata"] as? JsonObject) }
+                out += JsonObject(buildMap {
+                    put("type", JsonPrimitive("STATE_SNAPSHOT"))
+                    put("snapshot", doc)
+                    state.last()["timestamp"]?.let { put("timestamp", it) }
+                    metadata?.let { put("metadata", it) }
+                })
+                state = mutableListOf()
+            }
+
+            fun start(streams: MutableMap<String, Stream>, id: String, event: JsonObject) {
+                val stream = streams.getOrPut(id) { Stream() }
+                if (stream.deltas.isEmpty()) {
+                    // A start replayed before its deltas: both starts' metadata apply.
+                    val merged = mergeMetadata(stream.start?.get("metadata") as? JsonObject, event["metadata"] as? JsonObject)
+                    stream.start = if (merged == null) event else JsonObject(event + ("metadata" to merged))
+                } else {
+                    // Replayed after deltas: its fields win, its metadata rides the collapsed delta.
+                    val carried = stream.start?.get("metadata")
+                    stream.start = JsonObject(event - "metadata" + (carried?.let { mapOf("metadata" to it) } ?: emptyMap()))
+                    stream.postStartMetadata = mergeMetadata(stream.postStartMetadata, event["metadata"] as? JsonObject)
+                }
+            }
+
+            fun delta(streams: MutableMap<String, Stream>, id: String, event: JsonObject) {
+                val stream = streams.getOrPut(id) { Stream() }
+                stream.deltas += event
+                stream.postStartMetadata = mergeMetadata(stream.postStartMetadata, event["metadata"] as? JsonObject)
+            }
+
+            events.forEach { event ->
+                val messageId = event.str("messageId").orEmpty()
+                val toolCallId = event.str("toolCallId").orEmpty()
+                when (event.str("type")) {
+                    "TEXT_MESSAGE_START" -> start(texts, messageId, event)
+                    "TEXT_MESSAGE_CONTENT" -> delta(texts, messageId, event)
+                    "TEXT_MESSAGE_END" -> texts.getOrPut(messageId) { Stream() }.let { it.end = event; flush("messageId", messageId, "TEXT_MESSAGE_CONTENT", it); texts.remove(messageId) }
+                    "TOOL_CALL_START" -> start(calls, toolCallId, event)
+                    "TOOL_CALL_ARGS" -> delta(calls, toolCallId, event)
+                    "TOOL_CALL_END" -> calls.getOrPut(toolCallId) { Stream() }.let { it.end = event; flush("toolCallId", toolCallId, "TOOL_CALL_ARGS", it); calls.remove(toolCallId) }
+                    "RUN_STARTED", "RUN_FINISHED", "RUN_ERROR" -> { flushState(); out += event }
+                    "STATE_SNAPSHOT", "STATE_DELTA" -> state += event
+                    else -> {
+                        val open = texts.values.firstOrNull { it.start != null && it.end == null } ?: calls.values.firstOrNull { it.start != null && it.end == null }
+                        if (open != null) open.others += event else out += event
+                    }
+                }
+            }
+            texts.forEach { (id, stream) -> flush("messageId", id, "TEXT_MESSAGE_CONTENT", stream) }
+            calls.forEach { (id, stream) -> flush("toolCallId", id, "TOOL_CALL_ARGS", stream) }
+            flushState()
+            return out
+        }
+
+        /** AG-UI `mergeMetadata`: the incoming keys replace the existing ones. */
+        private fun mergeMetadata(existing: JsonObject?, incoming: JsonObject?): JsonObject? = when {
+            incoming == null -> existing
+            existing == null -> incoming
+            else -> JsonObject(existing + incoming)
         }
 
         /**

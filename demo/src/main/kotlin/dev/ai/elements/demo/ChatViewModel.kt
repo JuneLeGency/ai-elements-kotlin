@@ -1,31 +1,31 @@
 package dev.ai.elements.demo
 
-import dev.ai.elements.genui.a2ui.send
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import dev.ai.elements.core.auth.OAuthProvider
 import dev.ai.elements.core.chat.ChatController
 import dev.ai.elements.core.chat.ChatState
 import dev.ai.elements.core.chat.InputResponse
 import dev.ai.elements.core.chat.ToolDecision
+import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.core.mcp.McpAuthRequiredException
 import dev.ai.elements.core.mcp.McpServerConfig
 import dev.ai.elements.core.mcp.McpServerStatus
-import kotlinx.coroutines.flow.update
-import dev.ai.elements.core.auth.OAuthProvider
-import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.FilePart
-import dev.ai.elements.mcpapps.McpAppModelContext
 import dev.ai.elements.demo.auth.SignInController
 import dev.ai.elements.demo.data.AppSettings
 import dev.ai.elements.demo.data.Conversation
 import dev.ai.elements.demo.data.ConversationRepository
-import java.util.UUID
+import dev.ai.elements.genui.a2ui.send
+import dev.ai.elements.mcpapps.McpAppModelContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 /**
  * App-wide state: providers, conversation history and the active chat.
@@ -106,6 +106,10 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
 
     fun delete(id: String) {
         viewModelScope.launch {
+            // Its AG-UI event logs go with it (the app's retention policy).
+            repository.get(id)?.messages.orEmpty()
+                .mapNotNull { dev.ai.elements.core.protocol.agui.AgUiEventLog.runsOf(it)?.first }.toSet()
+                .forEach { runtime.agUiEventLog.delete(it) }
             repository.delete(id)
             if (id == _conversationId.value) newChat()
         }

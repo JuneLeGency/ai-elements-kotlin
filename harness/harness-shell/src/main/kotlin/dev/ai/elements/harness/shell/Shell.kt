@@ -2,6 +2,7 @@ package dev.ai.elements.harness.shell
 
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.Capability
+import dev.ai.elements.core.model.TerminalText
 import dev.ai.elements.core.protocol.ToolConventions
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +50,10 @@ class AndroidShellRuntime(private val workingDirectory: File) : ShellRuntime {
     override val isolated = false
 
     override fun start(command: String): Process =
-        ProcessBuilder("/system/bin/sh", "-c", command).directory(workingDirectory.apply { mkdirs() }).start()
+        ProcessBuilder("/system/bin/sh", "-c", command).directory(workingDirectory.apply { mkdirs() })
+            // No terminal: programs print plain text (as in the sandbox and agent shells generally).
+            .apply { environment()["TERM"] = "dumb" }
+            .start()
 }
 
 /**
@@ -110,7 +114,7 @@ class Shell(
                 Triple(out.await(), err.await(), finished)
             } ?: return "[Command timed out after ${format(timeout)}s]"
             val (stdout, stderr, exit) = output
-            val parts = listOfNotNull(stdout.takeIf { it.isNotEmpty() }?.let { "[stdout]\n$it" }, stderr.takeIf { it.isNotEmpty() }?.let { "[stderr]\n$it" })
+            val parts = listOfNotNull(stdout.takeIf { it.isNotEmpty() }?.let { "[stdout]\n${screen(it)}" }, stderr.takeIf { it.isNotEmpty() }?.let { "[stderr]\n${screen(it)}" })
             var result = parts.joinToString("\n").ifEmpty { "(no output)" }
             if (exit != 0) result += "\n[exit code: $exit]"
             truncateTail(result, maxOutputChars)
@@ -157,8 +161,8 @@ class Shell(
     fun close() = background.keys.toList().forEach { id -> background.remove(id)?.process?.destroyTree() }
 
     private fun sections(bg: Background) = listOfNotNull(
-        bg.stdout.toString().takeIf { it.isNotEmpty() }?.let { "[stdout]\n$it" },
-        bg.stderr.toString().takeIf { it.isNotEmpty() }?.let { "[stderr]\n$it" },
+        bg.stdout.toString().takeIf { it.isNotEmpty() }?.let { "[stdout]\n${screen(it)}" },
+        bg.stderr.toString().takeIf { it.isNotEmpty() }?.let { "[stderr]\n${screen(it)}" },
     ).joinToString("\n")
 
     private fun tool(name: String, description: String, properties: Map<String, JsonObject>, required: List<String>, approval: Boolean = false, run: suspend (JsonObject) -> String) = object : AgentTool {
@@ -176,6 +180,12 @@ class Shell(
     }
 
     companion object {
+        /**
+         * Output as a terminal would show it ([TerminalText.plain]): progress bars redrawn with `\r`
+         * collapse to their last state and escape codes go, so the model reads text, not control codes.
+         */
+        fun screen(output: String): String = TerminalText.plain(output)
+
         /** Keep the end of [text] (errors land there), marking what was cut, within [maxChars] (Harness `truncate_tail`). */
         fun truncateTail(text: String, maxChars: Int): String {
             if (text.length <= maxChars) return text

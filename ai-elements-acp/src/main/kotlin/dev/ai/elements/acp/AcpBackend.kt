@@ -28,8 +28,10 @@ import dev.ai.elements.core.model.ToolCategory
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -38,6 +40,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
@@ -80,7 +83,9 @@ class AcpBackend(
             throw e
         }
         val sessionId = session.sessionId.value
-        send(ChatEvent.Metadata(buildJsonObject { putJsonObject(METADATA_KEY) { put("sessionId", sessionId) } }))
+        // Which of the session's prompt turns this is, to find it in a `session/load` replay.
+        val turn = history.count { m -> m.role == Role.ASSISTANT && m.acpSessionId() == sessionId }
+        send(ChatEvent.Metadata(buildJsonObject { putJsonObject(METADATA_KEY) { put("sessionId", sessionId); put("turn", turn) } }))
 
         val info = agent.info()
         val earlier = if (sessionId != previousId && history.count { it.role == Role.USER } > 1) transcript(history.dropLast(1)) else null
@@ -106,6 +111,30 @@ class AcpBackend(
             agent.turns.remove(sessionId)
         }
         send(ChatEvent.Finish)
+    }
+
+    /**
+     * Replays [message]'s turn from the agent's own record of the session: ACP `session/load`
+     * streams the session back as `session/update`s, and the turn's updates go through the same
+     * mapping as a live turn. ACP updates carry no timestamps, so they play at a steady pace
+     * ([speed] 2 is twice as fast). Null when [message] did not come from an ACP session; the flow
+     * fails if the agent cannot load it.
+     */
+    fun replayOf(message: Message, speed: Float = 1f): Flow<ChatEvent>? {
+        val meta = message.metadata?.get(METADATA_KEY) as? JsonObject ?: return null
+        val sessionId = (meta["sessionId"] as? JsonPrimitive)?.contentOrNull ?: return null
+        val turn = (meta["turn"] as? JsonPrimitive)?.intOrNull ?: return null
+        return flow {
+            val transcript = requireNotNull(agent.transcript(sessionId)) { "The agent cannot load sessions (ACP loadSession)" }
+            val mapper = Mapper()
+            turns(transcript).getOrNull(turn).orEmpty().forEach { update ->
+                val chunk = update is SessionUpdate.AgentMessageChunk || update is SessionUpdate.AgentThoughtChunk
+                delay(((if (chunk) REPLAY_CHUNK_MS else REPLAY_STEP_MS) / speed.coerceAtLeast(0.01f)).toLong())
+                mapper.map(update).forEach { emit(it) }
+            }
+            mapper.end().forEach { emit(it) }
+            emit(ChatEvent.Finish)
+        }
     }
 
     private suspend fun SendChannel<ChatEvent>.permission(
@@ -219,9 +248,34 @@ class AcpBackend(
         private fun endText(): List<ChatEvent> = listOfNotNull(text?.let { ChatEvent.TextEnd(it) }).also { text = null }
         private fun endReasoning(): List<ChatEvent> = listOfNotNull(reasoning?.let { ChatEvent.ReasoningEnd(it) }).also { reasoning = null }
         private fun endAll(): List<ChatEvent> = endReasoning() + endText()
+
+        /** Ends open text and reasoning (a replayed turn has no prompt response). */
+        fun end(): List<ChatEvent> = endAll()
     }
 
     companion object {
+        private const val REPLAY_CHUNK_MS = 30L
+        private const val REPLAY_STEP_MS = 500L
+
+        /** The agent-side updates of each prompt turn in a `session/load` replay (turns start at the user's message). */
+        internal fun turns(transcript: List<SessionUpdate>): List<List<SessionUpdate>> {
+            val turns = mutableListOf<MutableList<SessionUpdate>>()
+            var inUser = false
+            transcript.forEach { update ->
+                if (update is SessionUpdate.UserMessageChunk) {
+                    if (!inUser) turns += mutableListOf<SessionUpdate>()
+                    inUser = true
+                } else {
+                    inUser = false
+                    if (turns.isEmpty()) turns += mutableListOf<SessionUpdate>()
+                    turns.last() += update
+                }
+            }
+            return turns
+        }
+
+        private fun Message.acpSessionId(): String? = ((metadata?.get(METADATA_KEY) as? JsonObject)?.get("sessionId") as? JsonPrimitive)?.contentOrNull
+
         /** ACP `ToolKind` in the model's vocabulary, which is ACP's own. */
         internal fun category(kind: ToolKind): ToolCategory = when (kind) {
             ToolKind.READ -> ToolCategory.READ

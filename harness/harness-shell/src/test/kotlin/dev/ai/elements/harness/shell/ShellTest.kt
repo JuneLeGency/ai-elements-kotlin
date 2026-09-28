@@ -25,6 +25,13 @@ class ShellTest {
     }
 
     @Test
+    fun terminalOutput_readsAsTheTerminalShowsIt() = runBlocking<Unit> {
+        // Colors and a progress bar redrawn with \r: the model gets the final text only.
+        val out = shell.runCommand("printf '\\033[32mok\\033[0m\\n 10%%\\r 50%%\\r100%%\\n'")
+        assertEquals("[stdout]\nok\n100%", out)
+    }
+
+    @Test
     fun longOutput_keepsTheTail() {
         val text = "x".repeat(100) + "END"
         val cut = Shell.truncateTail(text, 60)

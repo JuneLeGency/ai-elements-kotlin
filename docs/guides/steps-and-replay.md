@@ -54,7 +54,7 @@ the existing elements:
 | Step | View |
 |---|---|
 | has a screenshot | the screenshot, under an address bar when the location is a URL |
-| execute | `Terminal` with the command and its output |
+| execute | `Terminal` with the command and its output: colours (16, 256 and 24-bit), bold, italic, underline, inverse, `\r` progress redraws, cursor moves and erases, OSC 8 links (ECMA-48 / xterm); a scrollback of 1 000 lines |
 | edit | the unified diff, with added and removed lines coloured (ACP diffs arrive as one), else the file in a `CodeBlock` |
 | read, search, delete, move | the path and the output in a `CodeBlock` |
 | fetch | an address bar and the page text |
@@ -118,10 +118,33 @@ life of the process. Implement the interface to store logs elsewhere, for exampl
 database or on your server. Screenshots make logs large, so prefer `url` sources to inline data
 for runs you keep.
 
+### ACP: the agent's own record
+
+An ACP agent that can load sessions (`loadSession`) replays a session on `session/load`: it streams
+the whole conversation back as `session/update`s. Pydantic AI Harness does this when the adapter
+has a `SessionStore`. `AcpBackend.replayOf(message)` does the following:
+
+1. It opens a connection of its own, so the session you are chatting in is left alone.
+2. It loads the session.
+3. It takes the reply's turn (its metadata records which turn it was).
+4. It plays that turn through the same mapping as a live turn.
+
+ACP updates carry no timestamps, so a replay plays at a steady pace. An agent that runs as a local
+process only has sessions its store keeps across processes.
+
+### Compacting logs
+
+`AgUiEventLog.compact` implements AG-UI's compaction, ported from the reference `compactEvents`:
+
+- a message's or tool call's deltas become one event;
+- each run's state becomes one `STATE_SNAPSHOT`;
+- events that arrived mid-stream move after that stream.
+
+Compaction reorders events, so compact a thread when you archive it. Keep the recorded log for as
+long as you want event-level replay.
+
 ### Other protocols
 
-- **ACP.** `session/load` has the agent stream a stored session back as `session/update`
-  notifications. Replaying a session is the agent's job.
 - **AI SDK.** The AI SDK has no client-side event log. `resumeStream` continues an in-flight
   response from the server's stream store; it does not replay one. Use message-level replay.
 - **On-device agents.** Their replies are stored as messages; use message-level replay.
@@ -129,3 +152,6 @@ for runs you keep.
   recovering, continuing and forking runs.
 - **Traces.** For debugging and evaluation, use OpenTelemetry's GenAI semantic conventions (Pydantic
   Logfire, Langfuse and similar).
+
+See [Choose your setup](../getting-started/choose.md#4-storing-compacting-replaying-and-reconnecting)
+for which of these the library provides and which your app decides.

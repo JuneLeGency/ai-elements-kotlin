@@ -498,6 +498,34 @@ class ElementsTest {
         assertTrue("the pane sits beside the conversation", pane.left >= list.right)
     }
 
+    /** Hundreds of steps, a very long output and long names: everything stays usable (phone width). */
+    @Test fun agentComputer_longRunsAndLongContent() {
+        val long = "x".repeat(400)
+        val log = (1..20_000).joinToString("\n") { "\u001b[32mline $it\u001b[0m" }
+        val steps = (0 until 300).map { i ->
+            ToolPart(
+                "s$i", "run_command", ToolState.OUTPUT_AVAILABLE, """{"command":"step $i"}""",
+                output = if (i == 299) log else "ok $i", title = "step $i $long",
+                category = dev.ai.elements.core.model.ToolCategory.EXECUTE, location = "/very/$long/path",
+            )
+        }
+        val message = Message("a1", Role.ASSISTANT, steps)
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                androidx.compose.foundation.layout.Box(Modifier.requiredWidth(360.dp).fillMaxHeight()) { Conversation(ChatState(messages = listOf(message))) }
+            }
+        }
+        compose.onNodeWithTag("agent-computer-card").assertIsDisplayed().performClick()
+        compose.onNodeWithTag("run-step-counter").assertTextContains("300", substring = true)
+        // The last step's 20 000 lines keep the terminal's scrollback, with a note.
+        compose.onNodeWithTag("terminal").assertExists()
+        compose.onNodeWithText(s(R.string.ai_earlier_lines, 19_001), substring = true).assertExists()
+        compose.onNodeWithTag("run-steps").performScrollToIndex(0)
+        compose.onNodeWithTag("run-step-0").performClick()
+        compose.onNodeWithTag("run-step-counter").assertTextContains("1", substring = true)
+        compose.onNodeWithTag("run-next").assertIsDisplayed()
+    }
+
     /** A recorded run replays event by event into the computer, then returns to the stored reply. */
     @Test fun agentComputer_replaysARecordedRun() {
         val message = Message("a1", Role.ASSISTANT, codingRun.take(2))

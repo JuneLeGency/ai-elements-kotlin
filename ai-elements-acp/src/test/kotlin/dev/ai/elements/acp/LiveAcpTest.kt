@@ -21,7 +21,7 @@ import org.junit.Test
  * Against the reference server's ACP agent (Pydantic AI Harness, scripted model):
  *
  *     ./gradlew :ai-elements-acp:testDebugUnitTest --tests '*LiveAcpTest*' \
- *         -PliveAcpCommand="uv run --directory server python acp_agent.py" \
+ *         -PliveAcpCommand="uv run --directory $PWD/server python acp_agent.py" \
  *         -PliveAcp=ws://localhost:8788/acp
  */
 class LiveAcpTest {
@@ -29,7 +29,8 @@ class LiveAcpTest {
     @Test fun stdio_twoTurnsInOneSessionWithAnApproval() = runBlocking {
         val command = System.getProperty("live.acp.command")
         assumeTrue("set -PliveAcpCommand", command != null)
-        conversation(AcpAgent.process(command!!.split(" "), cwd = System.getProperty("java.io.tmpdir")))
+        // A replay connection would start a new agent process, which does not have this session.
+        conversation(AcpAgent.process(command!!.split(" "), cwd = System.getProperty("java.io.tmpdir")), replay = false)
     }
 
     @Test fun webSocket_twoTurnsInOneSessionWithAnApproval() = runBlocking {
@@ -38,7 +39,7 @@ class LiveAcpTest {
         conversation(AcpAgent.webSocket(url!!, cwd = "/tmp"))
     }
 
-    private suspend fun conversation(agent: AcpAgent) = agent.use {
+    private suspend fun conversation(agent: AcpAgent, replay: Boolean = true) = agent.use {
         assertEquals("AI Elements agent", agent.displayName())
         val approvals = mutableListOf<String>()
         val backend = AcpBackend(agent, ToolApprover { id -> approvals += id; true })
@@ -53,7 +54,14 @@ class LiveAcpTest {
         assertEquals(listOf(note.id), approvals)
         assertEquals(ToolState.OUTPUT_AVAILABLE, note.state)
         // Same ACP session: the agent kept the history.
-        assertEquals(first.metadata!!["acp"], second.metadata!!["acp"])
+        fun session(m: Message) = (m.metadata!!["acp"] as kotlinx.serialization.json.JsonObject)["sessionId"]
+        assertEquals(session(first), session(second))
+
+        if (!replay) return@use
+        // Replays: `session/load` streams the session back; each reply's turn plays as it streamed.
+        suspend fun replayed(m: Message) = withTimeout(30_000) { backend.replayOf(m, speed = 100f)!!.toList() }.fold(Message("r", Role.ASSISTANT)) { r, e -> r.reduce(e, 0) }
+        assertEquals("write_plan", replayed(first).parts.filterIsInstance<ToolPart>().single().name)
+        assertEquals(note.id, replayed(second).parts.filterIsInstance<ToolPart>().single().id)
     }
 
     private suspend fun turn(backend: AcpBackend, history: List<Message>): Message = withTimeout(60_000) {

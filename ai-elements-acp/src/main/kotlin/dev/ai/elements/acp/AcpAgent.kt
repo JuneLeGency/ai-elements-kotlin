@@ -29,9 +29,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -94,6 +94,26 @@ class AcpAgent(
         (session ?: conn.client.newSession(parameters, ::operations)).also { conn.sessions[it.sessionId.value] = it }
     }
 
+    /**
+     * Session [id]'s transcript as the agent replays it on `session/load` (ACP: the agent streams
+     * the whole conversation back as `session/update`s before answering), or null when the agent
+     * cannot load sessions. It uses a connection of its own, closed afterwards, so a session open
+     * for chatting is left as it is.
+     */
+    internal suspend fun transcript(id: String): List<SessionUpdate>? {
+        val child = CoroutineScope(scope.coroutineContext + SupervisorJob(scope.coroutineContext[kotlinx.coroutines.Job]))
+        try {
+            val conn = open(child)
+            if (!conn.info.capabilities.loadSession) return null
+            val updates = java.util.Collections.synchronizedList(mutableListOf<SessionUpdate>())
+            val parameters = SessionCreationParameters(cwd, mcpServers = emptyList())
+            conn.client.loadSession(SessionId(id), parameters) { sessionId, response -> operations(sessionId, response) { updates += it } }
+            return updates.toList()
+        } finally {
+            child.cancel()
+        }
+    }
+
     /** Forget the connection after a failure; the next turn reconnects. */
     internal suspend fun reset() = lock.withLock { connection?.scope?.cancel(); connection = null }
 
@@ -109,26 +129,35 @@ class AcpAgent(
         connection?.let { return it }
         val child = CoroutineScope(scope.coroutineContext + SupervisorJob(scope.coroutineContext[kotlinx.coroutines.Job]))
         try {
-            val protocol = Protocol(child, connect(child))
-            val client = Client(protocol)
-            protocol.start()
-            val info = client.initialize(
-                ClientInfo(
-                    capabilities = ClientCapabilities(
-                        fs = files?.let { FileSystemCapability(readTextFile = true, writeTextFile = !it.readOnly) },
-                        terminal = false,
-                    ),
-                    implementation = Implementation("ai-elements-kotlin", BuildConfig.VERSION, "AI Elements"),
-                ),
-            )
-            return Connection(child, client, info).also { connection = it }
+            return open(child).also { connection = it }
         } catch (e: Throwable) {
             child.cancel()
             throw e
         }
     }
 
-    private fun operations(sessionId: SessionId, @Suppress("UNUSED_PARAMETER") response: Any?): ClientSessionOperations =
+    /** A new initialized connection living in [child]. */
+    private suspend fun open(child: CoroutineScope): Connection {
+        val protocol = Protocol(child, connect(child))
+        val client = Client(protocol)
+        protocol.start()
+        val info = client.initialize(
+            ClientInfo(
+                capabilities = ClientCapabilities(
+                    fs = files?.let { FileSystemCapability(readTextFile = true, writeTextFile = !it.readOnly) },
+                    terminal = false,
+                ),
+                implementation = Implementation("ai-elements-kotlin", BuildConfig.VERSION, "AI Elements"),
+            ),
+        )
+        return Connection(child, client, info)
+    }
+
+    private fun operations(
+        sessionId: SessionId,
+        @Suppress("UNUSED_PARAMETER") response: Any?,
+        onUpdate: (SessionUpdate) -> Unit = {},
+    ): ClientSessionOperations =
         object : ClientSessionOperations {
             override suspend fun requestPermissions(
                 toolCall: SessionUpdate.ToolCallUpdate,
@@ -139,9 +168,9 @@ class AcpAgent(
                     // No turn is listening (e.g. it was stopped): the prompt turn is cancelled.
                     ?: RequestPermissionResponse(RequestPermissionOutcome.Cancelled)
 
-            // Updates outside a prompt turn (e.g. `session/load` replaying history) are not shown:
-            // the conversation already holds them.
-            override suspend fun notify(notification: SessionUpdate, _meta: JsonElement?) = Unit
+            // Updates outside a prompt turn: `session/load` replaying the session. Resuming a
+            // conversation ignores them (it already holds them); [transcript] collects them.
+            override suspend fun notify(notification: SessionUpdate, _meta: JsonElement?) = onUpdate(notification)
 
             override suspend fun fsReadTextFile(path: String, line: UInt?, limit: UInt?, _meta: JsonElement?): ReadTextFileResponse =
                 ReadTextFileResponse(requireNotNull(files) { "No file system" }.read(path, line?.toInt(), limit?.toInt()))

@@ -1,6 +1,5 @@
 package dev.ai.elements.ui.code
 
-import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,13 +28,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.ai.elements.core.model.TerminalText
 import dev.ai.elements.ui.R
+import dev.ai.elements.ui.icons.AiIcons
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiType
 import dev.ai.elements.ui.theme.compactIconButton
@@ -51,6 +56,7 @@ enum class TerminalStatus { RUNNING, SUCCESS, ERROR }
  * and an optional clear action.
  *
  * @param exitCode shown next to a finished status.
+ * @param scrollback lines kept from very long output (the last ones), as a terminal's scrollback.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -62,13 +68,17 @@ fun Terminal(
     exitCode: Int? = null,
     maxHeight: Dp = 320.dp,
     onClear: (() -> Unit)? = null,
+    scrollback: Int = 1_000,
 ) {
     val dark = MaterialTheme.isDark
     val colors = MaterialTheme.colorScheme
     // A console reads as a console in both themes: always a dark surface.
     val background = if (dark) colors.surfaceContainerLowest else colors.inverseSurface
     val foreground = if (dark) colors.onSurface else colors.inverseOnSurface
-    val text = remember(output, dark) { AnsiText.parse(output, foreground) }
+    val hidden = stringResource(R.string.ai_earlier_lines)
+    val text = remember(output, dark, scrollback) {
+        AnsiText.parse(output, foreground, background, scrollback = scrollback, hiddenNote = { n -> hidden.format(n) })
+    }
     val scroll = rememberScrollState()
     LaunchedEffect(output, status) { if (status == TerminalStatus.RUNNING) scroll.scrollTo(scroll.maxValue) }
 
@@ -112,43 +122,80 @@ fun Terminal(
     }
 }
 
-/** Minimal ANSI SGR rendering: reset, bold, dim, and the 16 foreground colors. */
+/**
+ * Terminal output ([TerminalText]: colors, attributes, `\r` redraws, cursor moves, OSC 8 links) as
+ * styled text. The 16 theme colors follow VS Code's integrated terminal: a dark palette for the
+ * console's dark surface, a light one for output shown on light surfaces.
+ */
 internal object AnsiText {
-    val Red = Color(0xFFFF8A80)
-    val Green = Color(0xFF7FD99A)
-    private val palette = listOf(
-        Color(0xFF5C5F66), Red, Green, Color(0xFFF7D774), Color(0xFF8AB4F8), Color(0xFFD7A6FF), Color(0xFF7FDBE8), Color(0xFFE4E1E6),
-    )
-    private val bright = palette.map { it.copy(alpha = 1f) }
-    private val sgr = Regex("\u001B\\[([0-9;]*)m")
-    private val other = Regex("\u001B\\[[0-9;?]*[A-Za-z]")
+    val Red = Color(0xFFF14C4C)
+    val Green = Color(0xFF23D18B)
 
-    fun strip(text: String) = other.replace(sgr.replace(text, ""), "")
+    private val dark = listOf(
+        0xFF000000, 0xFFCD3131, 0xFF0DBC79, 0xFFE5E510, 0xFF2472C8, 0xFFBC3FBC, 0xFF11A8CD, 0xFFE5E5E5,
+        0xFF666666, 0xFFF14C4C, 0xFF23D18B, 0xFFF5F543, 0xFF3B8EEA, 0xFFD670D6, 0xFF29B8DB, 0xFFFFFFFF,
+    ).map(::Color)
+    private val light = listOf(
+        0xFF000000, 0xFFCD3131, 0xFF00BC00, 0xFF949800, 0xFF0451A5, 0xFFBC05BC, 0xFF0598BC, 0xFF555555,
+        0xFF666666, 0xFFCD3131, 0xFF14CE14, 0xFFB5BA00, 0xFF0451A5, 0xFFBC05BC, 0xFF0598BC, 0xFFA5A5A5,
+    ).map(::Color)
 
-    fun parse(text: String, default: Color): AnnotatedString = buildAnnotatedString {
-        var color: Color? = null
-        var bold = false
-        var dim = false
-        var last = 0
-        fun flush(end: Int) {
-            if (end <= last) return
-            val chunk = other.replace(text.substring(last, end), "")
-            withStyle(SpanStyle(color = (color ?: default).let { if (dim) it.copy(alpha = 0.6f) else it }, fontWeight = if (bold) FontWeight.Bold else null)) { append(chunk) }
+    fun strip(text: String) = TerminalText.plain(text)
+
+    /** Whether [text] has anything a terminal would interpret (escape sequences, redraws). */
+    fun isTerminalOutput(text: String) = text.any { it == '\u001b' || it == '\r' || it == '\b' }
+
+    /**
+     * [text] styled; with [scrollback], only its last lines (terminals keep a scrollback of about a
+     * thousand lines: xterm, VS Code), preceded by [hiddenNote] with the number of lines left out.
+     */
+    fun parse(
+        text: String,
+        default: Color,
+        background: Color,
+        darkSurface: Boolean = true,
+        scrollback: Int = Int.MAX_VALUE,
+        hiddenNote: (Int) -> String = { "… $it" },
+    ): AnnotatedString {
+        val palette = if (darkSurface) dark else light
+        fun color(c: TerminalText.Color?): Color? = when (c) {
+            null -> null
+            is TerminalText.Color.Indexed -> if (c.index < 16) palette[c.index] else TerminalText.indexedRgb(c.index).let { Color(it.red, it.green, it.blue) }
+            is TerminalText.Color.Rgb -> Color(c.red, c.green, c.blue)
         }
-        for (m in sgr.findAll(text)) {
-            flush(m.range.first)
-            last = m.range.last + 1
-            val codes = m.groupValues[1].split(';').mapNotNull { it.toIntOrNull() }.ifEmpty { listOf(0) }
-            for (code in codes) when (code) {
-                0 -> { color = null; bold = false; dim = false }
-                1 -> bold = true
-                2 -> dim = true
-                22 -> { bold = false; dim = false }
-                39 -> color = null
-                in 30..37 -> color = palette[code - 30]
-                in 90..97 -> color = bright[code - 90]
+        val terminal = TerminalText.parse(text, maxLines = scrollback)
+        return buildAnnotatedString {
+            if (terminal.droppedLines > 0) {
+                withStyle(SpanStyle(color = default.copy(alpha = 0.6f), fontStyle = FontStyle.Italic)) { append(hiddenNote(terminal.droppedLines)) }
+                append('\n')
+            }
+            terminal.lines.forEachIndexed { i, line ->
+                if (i > 0) append('\n')
+                line.forEach { span ->
+                    val st = span.style
+                    var fg = color(st.foreground) ?: default
+                    var bg = color(st.background)
+                    if (st.bold && st.foreground is TerminalText.Color.Indexed && (st.foreground as TerminalText.Color.Indexed).index < 8) {
+                        fg = palette[(st.foreground as TerminalText.Color.Indexed).index + 8] // bold as bright, as xterm does
+                    }
+                    if (st.inverse) { val f = fg; fg = bg ?: background; bg = f }
+                    if (st.dim) fg = fg.copy(alpha = fg.alpha * 0.6f)
+                    if (st.conceal) fg = Color.Transparent
+                    val style = SpanStyle(
+                        color = fg,
+                        background = bg ?: Color.Unspecified,
+                        fontWeight = if (st.bold) FontWeight.Bold else null,
+                        fontStyle = if (st.italic) FontStyle.Italic else null,
+                        textDecoration = listOfNotNull(
+                            TextDecoration.Underline.takeIf { st.underline || st.link != null },
+                            TextDecoration.LineThrough.takeIf { st.strikethrough },
+                        ).takeIf { it.isNotEmpty() }?.let(TextDecoration::combine),
+                    )
+                    val link = st.link
+                    if (link != null) withLink(LinkAnnotation.Url(link)) { withStyle(style) { append(span.text) } }
+                    else withStyle(style) { append(span.text) }
+                }
             }
         }
-        flush(text.length)
     }
 }

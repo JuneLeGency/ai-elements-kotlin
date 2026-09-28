@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -280,6 +281,10 @@ fun AgentComputerPanel(state: AgentComputerState, message: Message, modifier: Mo
     val canReplay = remember(message.id, message.isStreaming) { !message.isStreaming && state.canReplay(message) }
 
     Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = modifier.testTag("agent-computer")) {
+        BoxWithConstraints {
+        // Short panels (a phone in landscape) give the screen the room: the step chips go, the
+        // timeline and previous / next still move between steps.
+        val short = maxHeight < 560.dp
         Column(Modifier.padding(horizontal = 16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 8.dp)) {
                 Icon(AiIcons.Computer, null, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.primary)
@@ -333,7 +338,8 @@ fun AgentComputerPanel(state: AgentComputerState, message: Message, modifier: Mo
                 value = index.toFloat(),
                 onValueChange = { pick(it.toInt()) },
                 valueRange = 0f..last.toFloat(),
-                steps = (steps.size - 2).coerceAtLeast(0),
+                // Tick marks only while they stay readable; a long run scrubs continuously.
+                steps = if (steps.size <= MAX_TICKS) (steps.size - 2).coerceAtLeast(0) else 0,
                 modifier = Modifier.testTag("run-timeline"),
             )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
@@ -357,12 +363,13 @@ fun AgentComputerPanel(state: AgentComputerState, message: Message, modifier: Mo
             }
             // Every step, to jump to one.
             val list = rememberLazyListState()
-            LaunchedEffect(index, steps.size) { if (steps.isNotEmpty()) list.animateScrollToItem(index) }
-            LazyRow(state = list, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 8.dp).height(72.dp).testTag("run-steps")) {
+            LaunchedEffect(index, steps.size, short) { if (steps.isNotEmpty() && !short) list.animateScrollToItem(index) }
+            if (!short) LazyRow(state = list, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 8.dp).height(72.dp).testTag("run-steps")) {
                 itemsIndexed(steps) { i, s ->
                     StepChip(s, selected = i == index, modifier = Modifier.testTag("run-step-$i")) { pick(i) }
                 }
             }
+        }
         }
     }
 }
@@ -376,14 +383,16 @@ fun AgentComputerPanel(state: AgentComputerState, message: Message, modifier: Mo
 fun StepView(step: AgentStep, modifier: Modifier = Modifier) {
     val tool = step.tool
     val shot = step.files.lastOrNull()
-    val result = tool.errorText ?: tool.output
+    val raw = tool.errorText ?: tool.output
+    val result = raw?.capped()
     when {
         shot != null -> Column(modifier) {
             tool.location?.takeIf(::isWebUrl)?.let { AddressBar(it) }
             FileImage(shot, Modifier.fillMaxWidth().weight(1f), contentScale = ContentScale.Fit, maxDecodePx = 2048)
         }
         tool.category == ToolCategory.EXECUTE -> Terminal(
-            output = "$ ${tool.title ?: tool.input}\n${result.orEmpty()}",
+            // A terminal keeps the end of its output (its scrollback), not the beginning.
+            output = "$ ${tool.title ?: tool.input}\n${raw?.takeLast(MAX_TERMINAL_CHARS).orEmpty()}",
             status = when (tool.state) {
                 ToolState.OUTPUT_AVAILABLE -> TerminalStatus.SUCCESS
                 ToolState.OUTPUT_ERROR, ToolState.OUTPUT_DENIED -> TerminalStatus.ERROR
@@ -394,7 +403,7 @@ fun StepView(step: AgentStep, modifier: Modifier = Modifier) {
         )
         tool.category == ToolCategory.FETCH -> Column(modifier) {
             tool.location?.let { AddressBar(it) }
-            PlainOutput(result ?: tool.input, Modifier.weight(1f))
+            PlainOutput(result ?: tool.input.capped(), Modifier.weight(1f))
         }
         tool.category in FILE_CATEGORIES -> Column(modifier.verticalScroll(rememberScrollState()).padding(12.dp)) {
             tool.location?.let { path ->
@@ -403,10 +412,10 @@ fun StepView(step: AgentStep, modifier: Modifier = Modifier) {
                     Text(path, style = MaterialTheme.typography.labelLarge, fontFamily = LocalCodeFontFamily.current, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
-            val text = result ?: tool.input.compactJson()
+            val text = result ?: tool.input.capped().compactJson()
             if (isUnifiedDiff(text)) DiffText(text) else CodeBlock(text, language = tool.location?.substringAfterLast('.', "")?.takeIf { it.isNotEmpty() && result != null })
         }
-        else -> PlainOutput(result ?: tool.input.compactJson(), modifier)
+        else -> PlainOutput(result ?: tool.input.capped().compactJson(), modifier)
     }
 }
 
@@ -537,6 +546,17 @@ internal fun isUnifiedDiff(text: String): Boolean = text.lineSequence().any { it
 
 private fun isWebUrl(location: String) = location.startsWith("https://") || location.startsWith("http://")
 
+/** Longest text a step view shows: highlighting and layout stay fast on very large outputs. */
+private const val MAX_VIEW_CHARS = 100_000
+
+/** Longest terminal output a step view reads (its end); the terminal then keeps its scrollback. */
+private const val MAX_TERMINAL_CHARS = 1_000_000
+
+/** Most steps the timeline marks with ticks. */
+private const val MAX_TICKS = 20
+
+private fun String.capped() = if (length <= MAX_VIEW_CHARS) this else take(MAX_VIEW_CHARS) + "\n…"
+
 private val FILE_CATEGORIES = setOf(ToolCategory.READ, ToolCategory.EDIT, ToolCategory.DELETE, ToolCategory.MOVE, ToolCategory.SEARCH)
 
 @Composable
@@ -568,8 +588,9 @@ private fun StepChip(step: AgentStep, selected: Boolean, modifier: Modifier = Mo
 @Composable
 internal fun StepMedia(messageId: String, stepIndex: Int, files: List<FilePart>, modifier: Modifier = Modifier) {
     val computer = LocalAgentComputer.current
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = modifier.horizontalScroll(rememberScrollState()).testTag("step-media")) {
-        files.forEach { file ->
+    // Lazy: a step can attach many screenshots.
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = modifier.testTag("step-media")) {
+        items(files, key = { it.id }) { file ->
             FileImage(
                 file,
                 contentScale = ContentScale.Crop,

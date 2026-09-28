@@ -22,6 +22,7 @@ nav = [
   { "Home" = "index.md" },
   { "Get started" = [
     "getting-started/installation.md",
+    "getting-started/choose.md",
     "getting-started/pure-client.md",
     "getting-started/in-app-agent.md",
   ] },

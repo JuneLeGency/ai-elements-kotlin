@@ -1,0 +1,3 @@
+[33me2b6641[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Agent's computer (live card, adaptive panel) and AG-UI event-log replay
+[33mef77a2a[m Tool categories and locations (ACP ToolKind vocabulary), set upstream
+[33mf3663d5[m Steps with screenshots and run playback; replay guide
