@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mcpapps_exit_full_screen">結束全螢幕</string>
+    <string name="mcpapps_allow_title">允許呼叫 %1$s？</string>
+    <string name="mcpapps_allow_text">這個應用程式想在它的伺服器上執行 %1$s。</string>
+    <string name="mcpapps_allow">允許</string>
+    <string name="mcpapps_deny">拒絕</string>
+</resources>

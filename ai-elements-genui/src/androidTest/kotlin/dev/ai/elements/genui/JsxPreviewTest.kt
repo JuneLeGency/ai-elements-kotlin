@@ -99,7 +99,7 @@ class JsxPreviewTest {
         compose.onNodeWithText("Hello from JSX", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("jsx-preview", useUnmergedTree = true).assertExists()
         shot("fence")
-        compose.onNodeWithText("Code", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("jsx-code-toggle").performClick()
         compose.onNodeWithTag("jsx-preview", useUnmergedTree = true).assertDoesNotExist()
     }
 }

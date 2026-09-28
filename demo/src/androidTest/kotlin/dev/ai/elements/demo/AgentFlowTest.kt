@@ -87,7 +87,9 @@ class AgentFlowTest {
         awaitTurnEnd(60_000)
         scrollTo(hasTestTag("jsx-preview"))
         compose.onNodeWithTag("jsx-preview").assertExists()
-        compose.onNodeWithText("Book").assertExists()
+        // The offline agent answers in the prompt's language.
+        val book = listOf("Book", "预订", "預訂", "予約")
+        assertTrue(book.any { compose.onAllNodesWithText(it).fetchSemanticsNodes().isNotEmpty() })
     }
 
     /** The offline agent's scripted browser run: each step on the agent's computer, with screenshots. */

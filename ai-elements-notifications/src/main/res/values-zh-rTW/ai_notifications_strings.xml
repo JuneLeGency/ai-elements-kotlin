@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="ai_notif_channel">智慧體執行</string>
-    <string name="ai_notif_channel_description">智慧體工作時的進展，以及回覆何時就緒。</string>
+    <string name="ai_notif_channel">代理執行</string>
+    <string name="ai_notif_channel_description">代理工作時的進展，以及回覆何時就緒。</string>
     <string name="ai_notif_thinking">思考中…</string>
     <string name="ai_notif_writing">正在撰寫回覆</string>
-    <string name="ai_notif_approval">等待你核准 · %1$s</string>
-    <string name="ai_notif_input">智慧體有問題需要你回答</string>
+    <string name="ai_notif_approval">等待你確認 · %1$s</string>
+    <string name="ai_notif_input">代理有問題需要你回答</string>
     <string name="ai_notif_done">回覆已就緒</string>
     <string name="ai_notif_failed">執行已停止</string>
-    <string name="ai_notif_chip_waiting">待處理</string>
+    <string name="ai_notif_chip_waiting">待你處理</string>
     <string name="ai_notif_chip_step">第 %1$d 步</string>
-    <string name="ai_notif_review">查看</string>
+    <string name="ai_notif_review">前往處理</string>
     <string name="ai_notif_stop">停止</string>
 </resources>

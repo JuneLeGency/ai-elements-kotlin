@@ -185,8 +185,6 @@ val DefaultOpenInTargets = listOf(
 @Composable
 fun OpenInChat(prompt: String, modifier: Modifier = Modifier, targets: List<OpenInTarget> = DefaultOpenInTargets) {
     var open by remember { mutableStateOf(false) }
-    val uriHandler = LocalUriHandler.current
-    val context = LocalContext.current
     androidx.compose.foundation.layout.Box(modifier) {
         IconButton(
             onClick = { open = true },
@@ -194,32 +192,40 @@ fun OpenInChat(prompt: String, modifier: Modifier = Modifier, targets: List<Open
             modifier = Modifier.compactIconButton().testTag("open-in"),
         ) { Icon(AiIcons.OpenInNew, stringResource(R.string.ai_open_in_menu), Modifier.size(AiSize.compactIcon)) }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            Text(
-                stringResource(R.string.ai_open_in),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            )
-            targets.forEach { target ->
-                DropdownMenuItem(
-                    text = { Text(target.label) },
-                    onClick = {
-                        open = false
-                        val q = URLEncoder.encode(prompt, "UTF-8").replace("+", "%20")
-                        runCatching { uriHandler.openUri(target.urlTemplate.replace("{q}", q)) }
-                    },
-                )
-            }
-            HorizontalDivider()
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.ai_share)) },
-                leadingIcon = { Icon(AiIcons.Share, null) },
-                onClick = {
-                    open = false
-                    val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, prompt)
-                    context.startActivity(Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                },
-            )
+            OpenInMenuItems(prompt, targets, onDone = { open = false })
         }
     }
+}
+
+/** [OpenInChat]'s menu entries, for a host menu (a reply's overflow). */
+@Composable
+internal fun OpenInMenuItems(prompt: String, targets: List<OpenInTarget>, onDone: () -> Unit) {
+    val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
+    Text(
+        stringResource(R.string.ai_open_in),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+    )
+    targets.forEach { target ->
+        DropdownMenuItem(
+            text = { Text(target.label) },
+            onClick = {
+                onDone()
+                val q = URLEncoder.encode(prompt, "UTF-8").replace("+", "%20")
+                runCatching { uriHandler.openUri(target.urlTemplate.replace("{q}", q)) }
+            },
+        )
+    }
+    HorizontalDivider()
+    DropdownMenuItem(
+        text = { Text(stringResource(R.string.ai_share)) },
+        leadingIcon = { Icon(AiIcons.Share, null) },
+        onClick = {
+            onDone()
+            val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, prompt)
+            context.startActivity(Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        },
+    )
 }

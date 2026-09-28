@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mcpapps_exit_full_screen">全画面を終了</string>
+    <string name="mcpapps_allow_title">%1$s を許可しますか？</string>
+    <string name="mcpapps_allow_text">このアプリがサーバーで %1$s を実行しようとしています。</string>
+    <string name="mcpapps_allow">許可</string>
+    <string name="mcpapps_deny">拒否</string>
+</resources>

@@ -35,14 +35,15 @@ class MockAgentBackend(
 
     override fun stream(history: List<Message>): Flow<ChatEvent> = flow {
         val prompt = history.lastOrNull { it.role == Role.USER }?.text.orEmpty()
+        val copy = MockCopy.of(prompt)
         val math = extractExpression(prompt)
         val named = tools.filter { prompt.contains(it.name) }.maxByOrNull { it.name.length }
         if (JSX_WORDS.any { prompt.contains(it, ignoreCase = true) }) {
-            generativeUi()
+            generativeUi(copy)
             return@flow
         }
         if (tools.any { it.name == "navigate" } && BROWSE_WORDS.any { prompt.contains(it, ignoreCase = true) }) {
-            browse(prompt)
+            browse(prompt, copy)
             return@flow
         }
         val wantsCopy = tools.any { it.name == "copy_to_clipboard" } &&
@@ -50,14 +51,14 @@ class MockAgentBackend(
 
         // A live plan (AI SDK `data-plan` part): re-emitted with the same id as steps progress.
         val planId = "plan-${UUID.randomUUID()}"
-        val stepLabels = listOf("Think about the request", "Call a tool", "Write the answer")
+        val stepLabels = copy.planSteps
         suspend fun plan(active: Int) = emit(
             ChatEvent.Data(
                 planId,
                 "plan",
                 buildJsonObject {
-                    put("title", "Answer plan")
-                    put("description", "${stepLabels.size} steps")
+                    put("title", copy.planTitle)
+                    put("description", copy.planDescription(stepLabels.size))
                     put("streaming", active < stepLabels.size)
                     putJsonArray("steps") {
                         stepLabels.forEachIndexed { i, label ->
@@ -73,16 +74,13 @@ class MockAgentBackend(
         plan(0)
 
         val reasoningId = "reasoning-${UUID.randomUUID()}"
-        streamText(
-            "The user asked: \"${prompt.take(80)}\". I should " +
-                (when {
-                    named != null -> "call the ${named.name} tool the user named"
-                    wantsCopy -> "copy the text to the clipboard, which needs the user's approval"
-                    math != null -> "evaluate the expression with the calculator tool"
-                    else -> "check the current time with a tool"
-                }) +
-                ", then answer with a structured Markdown overview and a Mermaid diagram of the agent loop.",
-        ) { emit(ChatEvent.ReasoningDelta(reasoningId, it)) }
+        val intent = when {
+            named != null -> MockCopy.Intent.NAMED
+            wantsCopy -> MockCopy.Intent.COPY
+            math != null -> MockCopy.Intent.MATH
+            else -> MockCopy.Intent.TIME
+        }
+        streamText(copy.reasoning(prompt.take(80), intent, named?.name)) { emit(ChatEvent.ReasoningDelta(reasoningId, it)) }
         emit(ChatEvent.ReasoningEnd(reasoningId))
 
         val callId = "call_${UUID.randomUUID()}"
@@ -92,7 +90,7 @@ class MockAgentBackend(
                 val end = rest.lastIndexOf('}')
                 if (start >= 0 && end > start) rest.substring(start, end + 1) else "{}"
             }
-            wantsCopy -> "copy_to_clipboard" to """{"text": "Hello from the AI Elements agent"}"""
+            wantsCopy -> "copy_to_clipboard" to buildJsonObject { put("text", copy.copiedText) }.toString()
             math != null -> "calculate" to """{"expression": "${math.replace("\"", "")}"}"""
             else -> "get_current_time" to """{"timezone": "Asia/Shanghai"}"""
         }
@@ -107,8 +105,8 @@ class MockAgentBackend(
 
         plan(2)
         val textId = "text-${UUID.randomUUID()}"
-        val body = answer(prompt, toolName, result) +
-            if (listOf("long", "长", "長").any { prompt.contains(it, ignoreCase = true) }) longTail() else ""
+        val body = copy.answer(toolName, result) +
+            if (listOf("long", "长", "長").any { prompt.contains(it, ignoreCase = true) }) (1..24).joinToString("", transform = copy::longSection) else ""
         streamText(body) { emit(ChatEvent.TextDelta(textId, it)) }
         emit(ChatEvent.TextEnd(textId))
         plan(3)
@@ -122,7 +120,7 @@ class MockAgentBackend(
      * look at the result with `screenshot`. Each step shows in the agent's computer with its
      * screenshot, the clicked link outlined.
      */
-    private suspend fun FlowCollector<ChatEvent>.browse(prompt: String) {
+    private suspend fun FlowCollector<ChatEvent>.browse(prompt: String, copy: MockCopy) {
         // A URL is RFC 3986 characters only: prose around it (a full-width comma, CJK text) is not part of it.
         val url = Regex("""https?://[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]+""").find(prompt)?.value?.trimEnd('.', ',', ')', ';', '!', '?') ?: "https://example.com"
         suspend fun say(text: String) {
@@ -137,29 +135,24 @@ class MockAgentBackend(
             return runTool(tools, approver, id, name, args)
         }
         val reasoningId = "reasoning-${UUID.randomUUID()}"
-        streamText("The user wants me to use the browser. I'll open $url, read the page structure, follow a link and check the result visually.") {
+        streamText(copy.browseReasoning(url)) {
             emit(ChatEvent.ReasoningDelta(reasoningId, it))
         }
         emit(ChatEvent.ReasoningEnd(reasoningId))
-        say("I'll open the page first.")
+        say(copy.browseOpening)
         val opened = call("navigate", buildJsonObject { put("url", url) }.toString())
         if (opened.startsWith("Error")) {
-            say("The page did not open ($opened). Check the network and try again.")
+            say(copy.browseFailed(opened))
             emit(ChatEvent.Finish)
             return
         }
         val link = Regex("""- link "([^"]*)" \[ref=(e\d+)]""").find(call("snapshot", "{}"))
         if (link != null) {
-            say("The page has a link, “${link.groupValues[1]}”. I'll follow it.")
+            say(copy.browseFollow(link.groupValues[1]))
             call("click", buildJsonObject { put("selector", "aria-ref=${link.groupValues[2]}") }.toString())
         }
         val shot = call("screenshot", "{}")
-        say(
-            "Done. I opened **$url**, read its structure with `snapshot`" +
-                (if (link != null) ", clicked **${link.groupValues[1].escapeMarkdown()}**" else "") +
-                " and took a `screenshot` (${shot.substringBefore('\n')}).\n\n" +
-                "Open the agent's computer below to step through the run: each step has its screenshot, with the element the agent acted on outlined.",
-        )
+        say(copy.browseDone(url, link?.groupValues?.get(1)?.escapeMarkdown(), shot.substringBefore('\n')))
         emit(ChatEvent.Finish)
     }
 
@@ -167,12 +160,9 @@ class MockAgentBackend(
      * An answer with interface: a ```jsx fence (the AI Elements `JSXPreview` input) that apps
      * rendering JSX show as a live, native form while it streams.
      */
-    private suspend fun FlowCollector<ChatEvent>.generativeUi() {
+    private suspend fun FlowCollector<ChatEvent>.generativeUi(copy: MockCopy) {
         val id = "text-${UUID.randomUUID()}"
-        streamText(
-            "Here is a booking form you can fill in right here:\n\n```jsx\n" + BOOKING_JSX + "\n```\n\n" +
-                "It is JSX rendered natively: the fields write into its data model, and **Book** sends them back as an action.",
-        ) { emit(ChatEvent.TextDelta(id, it)) }
+        streamText(copy.formIntro + "\n\n```jsx\n" + copy.bookingJsx + "\n```\n\n" + copy.formOutro) { emit(ChatEvent.TextDelta(id, it)) }
         emit(ChatEvent.TextEnd(id))
         emit(ChatEvent.Finish)
     }
@@ -188,66 +178,9 @@ class MockAgentBackend(
         if (chunkDelayMs > 0) delay(chunkDelayMs * factor)
     }
 
-    private fun answer(prompt: String, tool: String, result: String) = """
-        |## Offline agent demo
-        |
-        |You said: *${prompt.take(120).escapeMarkdown()}*. The agent called **`$tool`** and got `$result`.
-        |
-        |### What just happened
-        |1. **Reasoning** streamed into the collapsible *Thinking* block.
-        |2. A **tool call** ran on-device and its input/output are shown above.
-        |3. This answer streams as GitHub-flavoured Markdown.
-        |
-        |The UI follows AI Elements [1] with Material 3 Expressive styling [2]; diagrams render with Mermaid [3].
-        |
-        || Provider | Where the agent loop runs | Protocol |
-        ||---|---|---|
-        || Agent server | PydanticAI (server) | UI Message Stream (SSE) |
-        || OpenAI-compatible | On-device | Chat Completions (SSE) |
-        || Anthropic | On-device | Messages API (SSE) |
-        || Offline demo | On-device | — |
-        |
-        |```mermaid
-        |flowchart LR
-        |    U([User]) --> C[ChatController]
-        |    C --> B{Backend}
-        |    B -->|tool_calls| T[[Agent tools]]
-        |    T -->|results| B
-        |    B -->|text / reasoning| R[Markdown + Mermaid UI]
-        |```
-        |
-        |```kotlin
-        |val controller = ChatController(backend = { provider.createBackend(key) }, scope)
-        |controller.send("Plan a trip to Kyoto")
-        |```
-        |
-        |> Switch providers from the chip in the top bar — the conversation is kept.
-        """.trimMargin()
-
-    /** Extra sections for "long" prompts, to exercise streaming and scrolling. */
-    private fun longTail() = (1..24).joinToString("") { i ->
-        "\n\n### Section $i\n\nThis is paragraph $i of a long streamed answer. It keeps growing so the " +
-            "conversation must follow the bottom while you watch, and stay perfectly still once you scroll up to read. " +
-            "Item **$i** has `inline code`, a [link](https://example.com/$i) and some *emphasis*."
-    }
-
     companion object {
         /** Prompts that get an answer with interface (JSX). */
         private val JSX_WORDS = listOf("jsx", "generative ui", "画面を作")
-
-        private val BOOKING_JSX = """
-            <Card>
-              <h3>Stay in Kyoto</h3>
-              <small>Hotel Lumen · from ${'$'}180 / night</small>
-              <input name="guest" placeholder="Guest name" />
-              <DateTimeInput label="Check-in" value={checkin} enableDate={true} />
-              <select name="room" label="Room"><option value="standard">Standard</option><option value="deluxe">Deluxe</option><option value="suite">Suite</option></select>
-              <Slider label="Nights" min={1} max={14} value={nights} />
-              <div className="flex justify-end">
-                <Button variant="primary" onClick={book}>Book</Button>
-              </div>
-            </Card>
-        """.trimIndent()
 
         /** Prompts that start the scripted browser run (with the browser's tools available). */
         private val BROWSE_WORDS = listOf("browse", "browser", "浏览", "网页", "瀏覽", "網頁", "ブラウズ", "ブラウザ")

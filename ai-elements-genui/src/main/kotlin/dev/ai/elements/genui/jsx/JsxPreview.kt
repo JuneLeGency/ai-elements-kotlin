@@ -15,7 +15,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.ai.elements.genui.R
 import dev.ai.elements.genui.a2ui.A2ui
 import dev.ai.elements.genui.a2ui.A2uiAction
 import dev.ai.elements.genui.a2ui.A2uiCatalog
@@ -68,8 +70,8 @@ fun jsxCodeBlocks(onAction: (A2uiAction) -> Unit = {}): CodeBlockRenderer = Code
     var showCode by rememberSaveable(source.take(64)) { mutableStateOf(false) }
     OutlinedCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(8.dp)) {
-            TextButton(onClick = { showCode = !showCode }) {
-                Text(if (showCode) "Preview" else "Code", style = MaterialTheme.typography.labelMedium)
+            TextButton(onClick = { showCode = !showCode }, modifier = Modifier.testTag("jsx-code-toggle")) {
+                Text(stringResource(if (showCode) R.string.genui_preview else R.string.genui_code), style = MaterialTheme.typography.labelMedium)
             }
             if (showCode) CodeBlock(source, "jsx") else JsxPreview(source, onAction = onAction)
         }

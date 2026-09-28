@@ -113,6 +113,7 @@ reference only, never copied).
 | Tool titles (`title`), preliminary output, skill and MCP badges in `ToolCall` | ✅ |
 | AG-UI state / activity rendering (`state.plan` → `Plan`) | ✅ `DataPartView` renders the `state` part's `plan` / `task` / `chain-of-thought` keys (rest as JSON), activity types case-insensitively; component test + AG-UI E2E (server STATE_SNAPSHOT → Plan) |
 | A2A agent card view (extend `Agent`) | ✅ `description` + `toolsTitle` (skills) |
+| User-journey review (phone + tablet): first launch, history, provider, reply, approval, settings, components | ✅ `UxWalkthroughScreenshots` (opt-in `-e ux true -e size phone\|tablet`); fixed: top-left new-chat FAB → top bar + bottom of the drawer, approval answers (5 buttons → Deny / Allow + menu), reply actions (6 icons → 4 + menu), duplicate token chip, starter prompts, provider subtitles, English-only offline replies, HITL / agent terms in zh-CN / zh-TW / ja |
 | UI review matrix (GOAL W4 DoD): light/dark × en/zh-CN/zh-TW/ja × phone/tablet | ✅ `ScreenshotMatrixTest` (opt-in `-e screenshots true`, `-e size tablet` after `wm size 2560x1600`); 16 shots reviewed: translations, dark Mermaid/code, list-detail tablet layout OK. An early collapsed-table/diagram artefact was the Compose test clock (streaming fade-ins frozen during `Thread.sleep`); the test now advances `mainClock` first — all 16 shots correct |
 
 ### W4b · Generative UI (open specs)

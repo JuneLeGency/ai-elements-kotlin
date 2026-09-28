@@ -292,10 +292,12 @@ class ElementsTest {
                 )
             }
         }
+        compose.onNodeWithTag("approval-more").performClick()
         compose.onNodeWithTag("deny-with-reason", useUnmergedTree = true).performClick()
         compose.onNodeWithTag("deny-reason").performTextInput("Not that note")
         compose.onNodeWithTag("deny-with-reason-send", useUnmergedTree = true).performClick()
         compose.onNodeWithText(s(R.string.ai_cancel)).performClick()
+        compose.onNodeWithTag("approval-more").performClick()
         compose.onNodeWithTag("edit-and-approve", useUnmergedTree = true).performClick()
         compose.onNodeWithTag("edit-arguments").performTextReplacement("not json")
         compose.onNodeWithTag("edit-and-approve-send", useUnmergedTree = true).assertIsNotEnabled()
@@ -354,6 +356,7 @@ class ElementsTest {
                 )
             }
         }
+        compose.onNodeWithTag("approval-more").performClick()
         compose.onNodeWithTag("approve-always", useUnmergedTree = true).performClick()
         assertEquals(listOf(ToolDecision(true, remember = true)), decisions)
     }

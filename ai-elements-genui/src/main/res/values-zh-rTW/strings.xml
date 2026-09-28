@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="genui_preview">預覽</string>
+    <string name="genui_code">原始碼</string>
+    <string name="genui_play_video">播放影片</string>
+    <string name="genui_filter">篩選</string>
+</resources>

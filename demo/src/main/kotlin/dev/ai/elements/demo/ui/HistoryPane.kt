@@ -22,7 +22,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -71,7 +72,8 @@ import java.util.Calendar
 internal fun HistoryPane(
     conversations: List<Conversation>,
     currentId: String,
-    onNew: () -> Unit,
+    /** Starts a chat, from a button at the bottom; `null` when the chat's top bar is beside the list. */
+    onNew: (() -> Unit)?,
     onOpen: (String) -> Unit,
     onDelete: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -91,14 +93,10 @@ internal fun HistoryPane(
     val now = remember(conversations) { System.currentTimeMillis() }
 
     Column(modifier.fillMaxHeight().padding(horizontal = 12.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)) {
-            ExtendedFloatingActionButton(
-                onClick = onNew,
-                icon = { Icon(DemoIcons.EditNote, null) },
-                text = { Text(stringResource(R.string.new_chat)) },
-                modifier = Modifier.padding(start = 4.dp),
-            )
-            Spacer(Modifier.weight(1f))
+        // Title and search on top; starting a chat is at the bottom, in the thumb's reach (and on the
+        // chat's top bar), not in the hard-to-reach top-left corner.
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.heightIn(min = 64.dp).padding(start = 16.dp)) {
+            Text(stringResource(R.string.conversations), style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
             if (conversations.size > 3 && !searching) {
                 IconButton(onClick = { searching = true }, shapes = IconButtonDefaults.shapes(), modifier = Modifier.testTag("history-search-open")) {
                     Icon(DemoIcons.Search, stringResource(R.string.search_chats))
@@ -153,11 +151,22 @@ internal fun HistoryPane(
                 }
             }
         }
+        onNew?.let {
+            FilledTonalButton(
+                onClick = it,
+                shapes = ButtonDefaults.shapes(),
+                modifier = Modifier.padding(top = 8.dp).fillMaxWidth().heightIn(min = 48.dp).testTag("history-new-chat"),
+            ) {
+                Icon(DemoIcons.EditNote, null, Modifier.size(ButtonDefaults.IconSize))
+                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                Text(stringResource(R.string.new_chat))
+            }
+        }
         footer?.let {
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
             it()
-            Spacer(Modifier.height(8.dp))
         }
+        Spacer(Modifier.height(12.dp))
     }
 }
 
@@ -263,7 +272,8 @@ private fun String.stripInlineMarkdown(): String {
     val parked = replace(Regex("""\\(\p{Punct})""")) { "\uE000" + it.groupValues[1] }
     return parked
         .replace(Regex("""\[\d+]|`|(?<!\uE000)\*\*|(?<!\uE000)__"""), "")
-        .replace(Regex("""(?<=^|\s)(?<!\uE000)[*_](?=\S)|(?<=[^\s\uE000])[*_](?=\s|$|\p{Punct})"""), "")
+        // Openers after a space or punctuation (CJK too: "：*text*。"), closers before one.
+        .replace(Regex("""(?<=^|\s|[\p{P}&&[^*_\\]])(?<!\uE000)[*_](?=\S)|(?<=[^\s\uE000])[*_](?=\s|$|\p{P})"""), "")
         .replace("\uE000", "")
 }
 

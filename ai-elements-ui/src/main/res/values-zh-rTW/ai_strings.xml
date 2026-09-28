@@ -11,7 +11,7 @@
     <string name="ai_open">開啟</string>
     <string name="ai_chain_of_thought">思考鏈</string>
     <string name="ai_step_done">已完成</string>
-    <string name="ai_step_pending">待處理</string>
+    <string name="ai_step_pending">未開始</string>
     <string name="ai_zoom_in">放大</string>
     <string name="ai_zoom_out">縮小</string>
     <string name="ai_fit_screen">符合螢幕</string>
@@ -30,9 +30,9 @@
     <string name="ai_open_in_browser">在瀏覽器中開啟</string>
     <string name="ai_previous_version">上一個版本</string>
     <string name="ai_next_version">下一個版本</string>
-    <string name="ai_checkpoint">檢查點</string>
+    <string name="ai_checkpoint">還原點</string>
     <string name="ai_restore">還原</string>
-    <string name="ai_restore_checkpoint_title">要還原到此檢查點嗎？</string>
+    <string name="ai_restore_checkpoint_title">要還原到這個還原點嗎？</string>
     <string name="ai_restore_checkpoint_text">此處之後的訊息將從對話中移除。</string>
     <string name="ai_cancel">取消</string>
     <string name="ai_queued">佇列中（%1$d）</string>
@@ -54,15 +54,15 @@
     <string name="ai_tool_input">輸入</string>
     <string name="ai_tool_output">輸出</string>
     <string name="ai_tool_error">錯誤</string>
-    <string name="ai_denied_by_user">已被使用者拒絕</string>
+    <string name="ai_denied_by_user">已拒絕</string>
     <string name="ai_tool_running">執行中</string>
     <string name="ai_tool_done">完成</string>
-    <string name="ai_tool_approval">待核准</string>
+    <string name="ai_tool_approval">待確認</string>
     <string name="ai_tool_denied">已拒絕</string>
     <string name="ai_copy">複製</string>
     <string name="ai_regenerate">重新產生</string>
-    <string name="ai_view_agent_run">查看代理程式執行過程</string>
-    <string name="ai_agent_run">代理程式執行</string>
+    <string name="ai_view_agent_run">查看代理執行過程</string>
+    <string name="ai_agent_run">代理執行</string>
     <string name="ai_close">關閉</string>
     <string name="ai_copy_code">複製程式碼</string>
     <string name="ai_diagram_error">圖表錯誤：%1$s</string>
@@ -77,7 +77,7 @@
     <string name="ai_usage_output">輸出</string>
     <string name="ai_usage_total">合計</string>
     <string name="ai_usage_context_window">上下文視窗</string>
-    <string name="ai_tokens">%1$s tokens</string>
+    <string name="ai_tokens">%1$s token</string>
     <string name="ai_image">圖片</string>
     <string name="ai_remove_attachment">移除附件</string>
     <plurals name="ai_used_sources">
@@ -156,7 +156,7 @@
     <plurals name="ai_show_all_frames">
         <item quantity="other">顯示全部 %d 個框架</item>
     </plurals>
-    <string name="ai_subagent">子 Agent</string>
+    <string name="ai_subagent">子代理</string>
     <string name="ai_subagent_task">任務</string>
     <string name="ai_subagent_thinking">思考中…</string>
     <string name="ai_subagent_calling">正在呼叫 %1$s</string>
@@ -173,13 +173,13 @@
     <string name="ai_voice_thinking">思考中…</string>
     <string name="ai_voice_tap_to_interrupt">輕觸即可打斷</string>
     <string name="ai_voice_muted">麥克風已關閉</string>
-    <string name="ai_voice_needs_you">代理程式需要你核准或回答</string>
+    <string name="ai_voice_needs_you">代理需要你確認或回答</string>
     <string name="ai_voice_open_chat">回到對話</string>
     <string name="ai_voice_mute">靜音</string>
     <string name="ai_voice_unmute">取消靜音</string>
     <string name="ai_voice_end">結束語音模式</string>
     <string name="ai_input_other">其他…</string>
-    <string name="ai_input_decline">拒絕</string>
+    <string name="ai_input_decline">暫不回答</string>
     <string name="ai_input_open_link">開啟連結</string>
     <string name="ai_input_done">完成</string>
     <string name="ai_input_required">必填</string>
@@ -189,7 +189,7 @@
     <string name="ai_input_from">來自 %1$s</string>
     <string name="ai_input_invalid_email">請輸入電子郵件地址</string>
     <string name="ai_deny_with_reason">拒絕並說明理由</string>
-    <string name="ai_deny_reason">理由（會告訴 agent）</string>
+    <string name="ai_deny_reason">理由（代理會看到）</string>
     <string name="ai_approve_always">一律允許</string>
     <string name="ai_edit_and_approve">修改後允許</string>
     <string name="ai_edit_arguments">參數（JSON）</string>
@@ -203,9 +203,9 @@
     <string name="ai_no_steps">這則回覆沒有呼叫工具</string>
     <string name="ai_previous_step">上一步</string>
     <string name="ai_next_step">下一步</string>
-    <string name="ai_agent_computer">智慧體的電腦</string>
+    <string name="ai_agent_computer">代理的電腦</string>
     <string name="ai_live">即時</string>
-    <string name="ai_back_to_live">回到即時</string>
+    <string name="ai_back_to_live">回到最新</string>
     <string name="ai_replay_run">重播執行過程</string>
     <string name="ai_replaying">重播中</string>
     <string name="ai_exit_replay">結束重播</string>
@@ -223,4 +223,6 @@
         <item quantity="other">%d 步</item>
     </plurals>
     <string name="ai_earlier_lines">已省略前面的 %1$d 行</string>
+    <string name="ai_more_actions">更多操作</string>
+    <string name="ai_more_answers">更多選項</string>
 </resources>

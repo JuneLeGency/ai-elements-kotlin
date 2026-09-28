@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="genui_preview">プレビュー</string>
+    <string name="genui_code">コード</string>
+    <string name="genui_play_video">動画を再生</string>
+    <string name="genui_filter">絞り込み</string>
+</resources>

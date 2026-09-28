@@ -72,7 +72,8 @@ class HumanInTheLoopTest {
         compose.onNodeWithTag("send-button").performClick()
 
         // A write: the user changes the restaurant, then approves.
-        waitForTag("edit-and-approve")
+        waitForTag("approval-more")
+        compose.onNodeWithTag("approval-more").performClick()
         compose.onNodeWithTag("edit-and-approve", useUnmergedTree = true).performClick()
         compose.onNodeWithTag("edit-arguments").performTextReplacement("""{"restaurant": "Hoshi"}""")
         scenario!!.hideKeyboard()

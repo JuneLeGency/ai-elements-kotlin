@@ -137,12 +137,13 @@ class ConversationFeaturesTest {
 
         // Canvas: the agent run as a node graph.
         compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("regenerate"))
-        // Several replies each have a run-graph action; click the one on screen.
+        // Several replies each have an overflow menu with the run graph; open the one on screen.
         val viewport = compose.onNodeWithTag("conversation").fetchSemanticsNode().boundsInRoot
-        val visible = compose.onAllNodesWithTag("run-graph").fetchSemanticsNodes()
+        val visible = compose.onAllNodesWithTag("message-more").fetchSemanticsNodes()
             .indexOfFirst { it.boundsInRoot.top >= viewport.top && it.boundsInRoot.bottom <= viewport.bottom }
-        check(visible >= 0) { "no run-graph action on screen" }
-        compose.onAllNodesWithTag("run-graph")[visible].performSemanticsAction(SemanticsActions.OnClick)
+        check(visible >= 0) { "no reply menu on screen" }
+        compose.onAllNodesWithTag("message-more")[visible].performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("run-graph").performClick()
         runCatching { compose.waitUntilAtLeastOneExists(hasTestTag("workflow-canvas"), 5_000) }.onFailure {
             val shot = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
             val dir = File(context.getExternalFilesDir(null), "screens").apply { mkdirs() }

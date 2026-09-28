@@ -8,6 +8,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -221,12 +224,27 @@ internal fun MessageActions(
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.compactIconButton().testTag("run-playback-open"),
         ) { Icon(AiIcons.Slideshow, stringResource(R.string.ai_agent_computer), Modifier.size(AiSize.compactIcon)) }
-        IconButton(
-            onClick = { showGraph = true },
-            shapes = IconButtonDefaults.shapes(),
-            modifier = Modifier.compactIconButton().testTag("run-graph"),
-        ) { Icon(AiIcons.AccountTree, stringResource(R.string.ai_view_agent_run), Modifier.size(AiSize.compactIcon)) }
-        if (!prompt.isNullOrBlank()) OpenInChat(prompt)
+        // Less frequent actions in one overflow menu: a reply row shows at most four icons.
+        var more by remember { mutableStateOf(false) }
+        Box {
+            IconButton(
+                onClick = { more = true },
+                shapes = IconButtonDefaults.shapes(),
+                modifier = Modifier.compactIconButton().testTag("message-more"),
+            ) { Icon(AiIcons.MoreHoriz, stringResource(R.string.ai_more_actions), Modifier.size(AiSize.compactIcon)) }
+            DropdownMenu(expanded = more, onDismissRequest = { more = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.ai_view_agent_run)) },
+                    leadingIcon = { Icon(AiIcons.AccountTree, null) },
+                    onClick = { more = false; showGraph = true },
+                    modifier = Modifier.testTag("run-graph"),
+                )
+                if (!prompt.isNullOrBlank()) {
+                    HorizontalDivider()
+                    OpenInMenuItems(prompt, DefaultOpenInTargets, onDone = { more = false })
+                }
+            }
+        }
         message.usage?.takeIf { it.totalTokens > 0 }?.let { ContextUsage(it, Modifier.padding(start = 4.dp)) }
     }
     if (showGraph) AgentRunDialog(message, prompt, onDismiss = { showGraph = false })

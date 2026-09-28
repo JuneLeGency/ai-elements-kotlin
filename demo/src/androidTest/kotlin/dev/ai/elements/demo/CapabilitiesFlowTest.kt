@@ -92,7 +92,8 @@ class CapabilitiesFlowTest {
     fun agUi_interrupt_editArgumentsBeforeApproving() {
         launchWith(ProviderKind.AG_UI)
         send("save a note")
-        compose.waitUntil(60_000) { compose.onAllNodesWithTag("edit-and-approve", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(60_000) { compose.onAllNodesWithTag("approval-more").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("approval-more").performClick()
         compose.onNodeWithTag("edit-and-approve", useUnmergedTree = true).performClick()
         compose.onNodeWithTag("edit-arguments").performTextReplacement("""{"title":"Edited in the app","content":"From the approval card"}""")
         scenario!!.hideKeyboard()
@@ -108,7 +109,8 @@ class CapabilitiesFlowTest {
     fun aiSdk_approval_denyWithAReason() {
         launchWith(ProviderKind.AGENT_SERVER)
         send("save a note")
-        compose.waitUntil(60_000) { compose.onAllNodesWithTag("deny-with-reason", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(60_000) { compose.onAllNodesWithTag("approval-more").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("approval-more").performClick()
         compose.onNodeWithTag("deny-with-reason", useUnmergedTree = true).performClick()
         compose.onNodeWithTag("deny-reason").performTextInput("Not today")
         scenario!!.hideKeyboard()
@@ -194,8 +196,14 @@ class CapabilitiesFlowTest {
         send("please note")
         scenario!!.hideKeyboard()
         compose.waitUntil(60_000) { compose.onAllNodesWithTag("approve").fetchSemanticsNodes().isNotEmpty() }
-        assertTrue(compose.onAllNodesWithTag("edit-and-approve", useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
-        assertTrue(compose.onAllNodesWithTag("deny-with-reason", useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
+        // ACP answers are allow / reject (once or always): no edited arguments, no reason.
+        if (compose.onAllNodesWithTag("approval-more").fetchSemanticsNodes().isNotEmpty()) {
+            compose.onNodeWithTag("approval-more").performClick()
+            assertTrue(compose.onAllNodesWithTag("edit-and-approve", useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
+            assertTrue(compose.onAllNodesWithTag("deny-with-reason", useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
+            androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().uiAutomation.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK)
+            compose.waitForIdle()
+        }
         compose.onNodeWithTag("approve").performClick()
         compose.waitUntil(60_000) {
             runCatching { compose.onNodeWithTag("conversation").performScrollToNode(hasText("Saved note", substring = true)) }.isSuccess

@@ -96,7 +96,6 @@ import dev.ai.elements.ui.chat.AgentComputerPanel
 import dev.ai.elements.ui.chat.AgentComputerScaffold
 import dev.ai.elements.ui.chat.AgentComputerState
 import dev.ai.elements.ui.chat.ChatEmptyState
-import dev.ai.elements.ui.chat.ContextUsage
 import dev.ai.elements.ui.chat.Conversation
 import dev.ai.elements.ui.chat.PromptInput
 import dev.ai.elements.ui.chat.Queue
@@ -114,14 +113,10 @@ private fun demoSuggestions(): List<Suggestion> {
     val resources = LocalResources.current
     return remember(resources) {
         listOf(
-            R.string.sugg_agent_loop_prompt to R.string.sugg_agent_loop,
             R.string.sugg_browse_prompt to R.string.sugg_browse,
             R.string.sugg_jsx_prompt to R.string.sugg_jsx,
-            R.string.sugg_time_prompt to R.string.sugg_time,
-            R.string.sugg_calc_prompt to R.string.sugg_calc,
-            R.string.sugg_kotlin_prompt to R.string.sugg_kotlin,
+            R.string.sugg_agent_loop_prompt to R.string.sugg_agent_loop,
             R.string.sugg_clipboard_prompt to R.string.sugg_clipboard,
-            R.string.sugg_long_prompt to R.string.sugg_long,
         ).map { (prompt, label) -> Suggestion(resources.getString(prompt), resources.getString(label)) }
     }
 }
@@ -188,7 +183,7 @@ fun ChatScreen(
                             modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical)),
                             conversations = conversations,
                             currentId = currentId,
-                            onNew = { viewModel.newChat(); showChat() },
+                            onNew = if (twoPane) null else ({ viewModel.newChat(); showChat() }),
                             onOpen = { viewModel.open(it); showChat() },
                             onDelete = viewModel::delete,
                         )
@@ -307,8 +302,6 @@ private fun ChatPane(
     val pickImages = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(4)) { uris ->
         scope.launch { attachments = attachments + uris.mapNotNull { context.imageAttachment(it) } }
     }
-    // Context used by the conversation so far ≈ the last turn's input + output.
-    val lastUsage = state.messages.lastOrNull { it.usage != null }?.usage
 
     // Notifications follow the agent's run (a Live Update while it works, "reply ready" after):
     // asked for once, in context, the first time the user starts a run.
@@ -332,7 +325,6 @@ private fun ChatPane(
 
     // Short windows (phone landscape) with the keyboard up: give every pixel to the conversation.
     val hideTopBar = compactHeight && WindowInsets.isImeVisible
-    val compactWidth = LocalConfiguration.current.screenWidthDp < 600
     Scaffold(containerColor = Color.Transparent, 
         modifier = modifier.noAutoFocusInTouchMode(),
         topBar = {
@@ -344,7 +336,8 @@ private fun ChatPane(
                 },
                 title = { ProviderButton(provider, onClick = { providerSheet = true }) },
                 actions = {
-                    IconButton(onClick = viewModel::newChat, shapes = IconButtonDefaults.shapes(), modifier = Modifier.testTag("new-chat")) {
+                    // Already a new chat: nothing to start.
+                    IconButton(onClick = viewModel::newChat, enabled = state.messages.isNotEmpty(), shapes = IconButtonDefaults.shapes(), modifier = Modifier.testTag("new-chat")) {
                         Icon(DemoIcons.EditNote, stringResource(R.string.new_chat))
                     }
                 },
@@ -372,7 +365,6 @@ private fun ChatPane(
                     if (state.messages.isEmpty() && !state.isBusy) {
                         ChatEmptyState(
                             title = stringResource(R.string.empty_title),
-                            subtitle = listOf(provider.name, provider.kind.label).distinct().joinToString(" · "),
                             suggestions = demoSuggestions(),
                             onSelect = { submit(it.text) },
                             showHero = !compactHeight,
@@ -427,8 +419,6 @@ private fun ChatPane(
                         })
                         ModelChip(viewModel, provider)
                         CapabilitiesButton(viewModel, provider, onManage = onOpenSettings)
-                        // Phones already show usage under each reply; the composer has no room for it.
-                        if (!compactWidth) lastUsage?.let { ContextUsage(it) }
                     },
                     modifier = Modifier
                         .widthIn(max = 840.dp)
@@ -487,7 +477,8 @@ private fun ProviderSheet(
                     selected = profile.id == selectedId,
                     onClick = { onSelect(profile.id) },
                     supportingContent = {
-                        Text("${profile.kind.label} · ${profile.model.ifBlank { stringResource(R.string.default_model) }}", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        // Protocol and model; an agent server picks its own model, so none is shown.
+                        Text(listOfNotNull(profile.kind.label.takeIf { it != profile.name }, profile.model.ifBlank { null }).joinToString(" · "), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     },
                     leadingContent = { RadioButton(selected = profile.id == selectedId, onClick = null) },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("provider-${profile.id}"),

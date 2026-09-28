@@ -71,7 +71,8 @@ fun Suggestions(
 @Composable
 fun ChatEmptyState(
     title: String,
-    subtitle: String,
+    /** A line under the title; `null` for none. */
+    subtitle: String? = null,
     suggestions: List<Suggestion>,
     onSelect: (Suggestion) -> Unit,
     modifier: Modifier = Modifier,
@@ -97,7 +98,7 @@ fun ChatEmptyState(
             Icon(AiIcons.AutoAwesome, null, Modifier.size(40.dp), scheme.onPrimary)
         }
         Text(title, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
-        Text(
+        if (!subtitle.isNullOrBlank()) Text(
             subtitle,
             style = MaterialTheme.typography.bodyMedium,
             color = scheme.onSurfaceVariant,

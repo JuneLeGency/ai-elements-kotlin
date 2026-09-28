@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mcpapps_exit_full_screen">退出全屏</string>
+    <string name="mcpapps_allow_title">允许调用 %1$s？</string>
+    <string name="mcpapps_allow_text">这个应用想在它的服务器上运行 %1$s。</string>
+    <string name="mcpapps_allow">允许</string>
+    <string name="mcpapps_deny">拒绝</string>
+</resources>

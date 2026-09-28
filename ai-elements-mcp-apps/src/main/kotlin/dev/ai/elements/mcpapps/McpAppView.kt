@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -44,6 +45,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import dev.ai.elements.core.mcp.McpClient
 import dev.ai.elements.core.mcp.McpTool
+import dev.ai.elements.mcpapps.R
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -334,7 +336,7 @@ private fun SessionDialogs(session: McpAppSession) {
                         onClick = { session.fullscreen = false },
                         modifier = Modifier.padding(4.dp).background(colors.surfaceContainerHigh, MaterialTheme.shapes.extraLarge).testTag("mcp-app-exit-fullscreen"),
                     ) {
-                        Icon(painterResource(android.R.drawable.ic_menu_close_clear_cancel), contentDescription = "Exit full screen")
+                        Icon(painterResource(android.R.drawable.ic_menu_close_clear_cancel), contentDescription = stringResource(R.string.mcpapps_exit_full_screen))
                     }
                 }
             }
@@ -344,10 +346,10 @@ private fun SessionDialogs(session: McpAppSession) {
     session.approval?.let { (tool, answer) ->
         AlertDialog(
             onDismissRequest = { answer.complete(false) },
-            title = { Text("Allow ${tool.displayName}?") },
-            text = { Text("The app wants to run ${tool.displayName} on its server.") },
-            confirmButton = { TextButton(onClick = { answer.complete(true) }, modifier = Modifier.testTag("mcp-app-allow")) { Text("Allow") } },
-            dismissButton = { TextButton(onClick = { answer.complete(false) }, modifier = Modifier.testTag("mcp-app-deny")) { Text("Deny") } },
+            title = { Text(stringResource(R.string.mcpapps_allow_title, tool.displayName)) },
+            text = { Text(stringResource(R.string.mcpapps_allow_text, tool.displayName)) },
+            confirmButton = { TextButton(onClick = { answer.complete(true) }, modifier = Modifier.testTag("mcp-app-allow")) { Text(stringResource(R.string.mcpapps_allow)) } },
+            dismissButton = { TextButton(onClick = { answer.complete(false) }, modifier = Modifier.testTag("mcp-app-deny")) { Text(stringResource(R.string.mcpapps_deny)) } },
         )
     }
 }

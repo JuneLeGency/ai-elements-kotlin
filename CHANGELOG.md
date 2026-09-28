@@ -249,8 +249,24 @@
   `material-icons-extended` dependency is gone. Tools show what they are with one icon everywhere
   (chat, canvas, agent cards): ƒx for functions, a puzzle piece for a provider's (MCP) tools, a book
   for skills.
-- Approvals sit inside the tool call (no card in a card) with all answers — deny with reason, edit
-  and approve, deny, approve — on one row when they fit.
+- Approvals sit inside the tool call (no card in a card) with **Deny** and **Allow**; the rarer
+  answers (always allow, edit and approve, deny with a reason) are in a "⋯" menu, so a card never
+  shows five buttons (tags unchanged: `approve-always`, `edit-and-approve`, `deny-with-reason`,
+  opened by `approval-more`).
+- A reply's action row shows copy, read aloud, regenerate and the agent's computer; the run graph
+  and "open in / share" are in its "⋯" menu (`message-more`).
+- `ChatEmptyState(subtitle)` is optional (`null` hides it).
+- The offline agent (`MockAgentBackend`) answers in the prompt's language (English, Simplified and
+  Traditional Chinese, Japanese), as a model would, and no longer echoes the prompt.
+- Translations reviewed with one glossary per language: "human in the loop" is 确认与提问 /
+  確認與提問 / 承認と質問; agent is 智能体 / 代理 / エージェント throughout; `ai-elements-genui` and
+  `ai-elements-mcp-apps` strings are resources (were English literals).
+- Demo, after a user-journey review on phone and tablet: new chat is on the chat's top bar (disabled
+  on an empty chat) and at the bottom of the history drawer, in the thumb's reach, not a
+  top-left FAB; the history has a title and search on top; four task-shaped starter prompts instead
+  of eight feature names; the provider sheet shows protocol and model without repeating the name
+  or "default"; the token count shows once, under the reply. `UxWalkthroughScreenshots` (opt-in
+  `-e ux true -e size phone|tablet`) captures the journey for review.
 - Things that belong on one line stay on one line: short inline code, "number unit" pairs,
   the composer's model chip, settings switch rows (no selected tint).
 

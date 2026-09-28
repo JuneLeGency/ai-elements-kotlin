@@ -4,12 +4,12 @@
     <string name="ai_notif_channel_description">智能体工作时的进展，以及回复何时就绪。</string>
     <string name="ai_notif_thinking">思考中…</string>
     <string name="ai_notif_writing">正在撰写回复</string>
-    <string name="ai_notif_approval">等待你批准 · %1$s</string>
+    <string name="ai_notif_approval">等待你确认 · %1$s</string>
     <string name="ai_notif_input">智能体有问题需要你回答</string>
     <string name="ai_notif_done">回复已就绪</string>
     <string name="ai_notif_failed">运行已停止</string>
-    <string name="ai_notif_chip_waiting">待处理</string>
+    <string name="ai_notif_chip_waiting">待你处理</string>
     <string name="ai_notif_chip_step">第 %1$d 步</string>
-    <string name="ai_notif_review">查看</string>
+    <string name="ai_notif_review">去处理</string>
     <string name="ai_notif_stop">停止</string>
 </resources>

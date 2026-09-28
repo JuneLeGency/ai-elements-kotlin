@@ -60,12 +60,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.FilePart
+import dev.ai.elements.genui.R
 import dev.ai.elements.genui.icons.GenUiIcons
 import dev.ai.elements.ui.chat.FileImage
 import dev.ai.elements.ui.markdown.MarkdownContent
@@ -225,7 +227,7 @@ private fun VideoComponent(s: ComponentScope, m: Modifier) {
     // No bundled media player: show the poster and open the video in the system player.
     Box(m.padding(LeafMargin).fillWidth().widthIn(min = 160.dp).aspectRatio(16f / 9f).clip(MaterialTheme.shapes.medium).clickable { uri.openUri(url) }, contentAlignment = Alignment.Center) {
         s.string("posterUrl")?.let { FileImage(FilePart("${s.id}-poster", "image/*", it), Modifier.matchParentSize()) }
-        Icon(GenUiIcons.PlayArrow, contentDescription = "Play video", modifier = Modifier.size(48.dp))
+        Icon(GenUiIcons.PlayArrow, contentDescription = stringResource(R.string.genui_play_video), modifier = Modifier.size(48.dp))
     }
 }
 
@@ -394,7 +396,7 @@ private fun ChoicePickerComponent(s: ComponentScope, m: Modifier) {
     Column(m.padding(LeafMargin)) {
         s.string("label")?.let { Text(it, style = MaterialTheme.typography.labelLarge) }
         if (s.boolean("filterable") == true) {
-            OutlinedTextField(filter, { filter = it }, singleLine = true, placeholder = { Text("Filter") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(filter, { filter = it }, singleLine = true, placeholder = { Text(stringResource(R.string.genui_filter)) }, modifier = Modifier.fillMaxWidth())
         }
         if (s.string("displayStyle") == "chips") {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

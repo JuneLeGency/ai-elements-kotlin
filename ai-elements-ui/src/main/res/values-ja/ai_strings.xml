@@ -11,11 +11,11 @@
     <string name="ai_open">開く</string>
     <string name="ai_chain_of_thought">思考の過程</string>
     <string name="ai_step_done">完了</string>
-    <string name="ai_step_pending">保留中</string>
+    <string name="ai_step_pending">未着手</string>
     <string name="ai_zoom_in">拡大</string>
     <string name="ai_zoom_out">縮小</string>
     <string name="ai_fit_screen">画面に合わせる</string>
-    <string name="ai_graph_prompt">プロンプト</string>
+    <string name="ai_graph_prompt">質問</string>
     <string name="ai_graph_thinking">思考</string>
     <string name="ai_graph_answer">回答</string>
     <string name="ai_graph_file">ファイル</string>
@@ -23,7 +23,7 @@
     <string name="ai_prompt_placeholder">何でも聞いてください</string>
     <string name="ai_attach_image">画像を添付</string>
     <string name="ai_send">送信</string>
-    <string name="ai_add_to_queue">キューに追加</string>
+    <string name="ai_add_to_queue">送信待ちに追加</string>
     <string name="ai_stop">停止</string>
     <string name="ai_back">戻る</string>
     <string name="ai_reload">再読み込み</string>
@@ -35,12 +35,12 @@
     <string name="ai_restore_checkpoint_title">このチェックポイントに復元しますか？</string>
     <string name="ai_restore_checkpoint_text">これ以降のメッセージは会話から削除されます。</string>
     <string name="ai_cancel">キャンセル</string>
-    <string name="ai_queued">キュー（%1$d）</string>
-    <string name="ai_queued_paused">キュー · 一時停止中（%1$d）</string>
+    <string name="ai_queued">送信待ち（%1$d）</string>
+    <string name="ai_queued_paused">送信待ち · 一時停止中（%1$d）</string>
     <string name="ai_hide">隠す</string>
     <string name="ai_show">表示</string>
     <string name="ai_send_now">今すぐ送信</string>
-    <string name="ai_remove_from_queue">キューから削除</string>
+    <string name="ai_remove_from_queue">送信待ちから削除</string>
     <string name="ai_open_in_menu">他のアプリで開く…</string>
     <string name="ai_open_in">開く</string>
     <string name="ai_share">共有…</string>
@@ -179,7 +179,7 @@
     <string name="ai_voice_unmute">ミュート解除</string>
     <string name="ai_voice_end">音声モードを終了</string>
     <string name="ai_input_other">その他…</string>
-    <string name="ai_input_decline">断る</string>
+    <string name="ai_input_decline">回答しない</string>
     <string name="ai_input_open_link">リンクを開く</string>
     <string name="ai_input_done">完了</string>
     <string name="ai_input_required">必須</string>
@@ -205,7 +205,7 @@
     <string name="ai_next_step">次のステップ</string>
     <string name="ai_agent_computer">エージェントのコンピューター</string>
     <string name="ai_live">ライブ</string>
-    <string name="ai_back_to_live">ライブに戻る</string>
+    <string name="ai_back_to_live">最新に戻る</string>
     <string name="ai_replay_run">実行を再生</string>
     <string name="ai_replaying">再生中</string>
     <string name="ai_exit_replay">再生を終了</string>
@@ -223,4 +223,6 @@
         <item quantity="other">%d ステップ</item>
     </plurals>
     <string name="ai_earlier_lines">前の %1$d 行は省略されています</string>
+    <string name="ai_more_actions">その他の操作</string>
+    <string name="ai_more_answers">その他の回答</string>
 </resources>

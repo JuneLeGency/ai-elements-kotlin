@@ -3,17 +3,20 @@ package dev.ai.elements.ui.chat
 import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -74,7 +77,7 @@ fun Confirmation(
 }
 
 /** [Confirmation] without its container, for a host that already is one (the tool call's card). */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ConfirmationContent(
     title: String,
@@ -136,31 +139,46 @@ internal fun ConfirmationContent(
             }
             else -> Unit
         }
-        // One row of actions when it fits (secondary answers first), wrapping on narrow screens.
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
-            itemVerticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
+        // Deny and Allow are the answers; the rarer ones (always allow, edit, deny with a reason) sit
+        // in a menu, so the card never shows five buttons (M3: one primary action, overflow for the rest).
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             if (onDecide != null) {
-                if (withReason) TextButton(onClick = { mode = DecisionMode.REASON }, contentPadding = CompactPadding, modifier = Modifier.testTag("deny-with-reason")) { Text(stringResource(R.string.ai_deny_with_reason), maxLines = 1) }
-                if (input != null) TextButton(onClick = { mode = DecisionMode.EDIT }, contentPadding = CompactPadding, modifier = Modifier.testTag("edit-and-approve")) { Text(stringResource(R.string.ai_edit_and_approve), maxLines = 1) }
-                // Allow this tool for the rest of the conversation.
-                TextButton(onClick = { onDecide(ToolDecision(true, remember = true)) }, contentPadding = CompactPadding, modifier = Modifier.testTag("approve-always")) { Text(stringResource(R.string.ai_approve_always), maxLines = 1) }
+                var more by remember { mutableStateOf(false) }
+                Box {
+                    IconButton(onClick = { more = true }, shapes = IconButtonDefaults.shapes(), modifier = Modifier.testTag("approval-more")) {
+                        Icon(AiIcons.MoreHoriz, stringResource(R.string.ai_more_answers))
+                    }
+                    DropdownMenu(expanded = more, onDismissRequest = { more = false }) {
+                        // Allow this tool for the rest of the conversation.
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.ai_approve_always)) },
+                            onClick = { more = false; onDecide(ToolDecision(true, remember = true)) },
+                            modifier = Modifier.testTag("approve-always"),
+                        )
+                        if (input != null) DropdownMenuItem(
+                            text = { Text(stringResource(R.string.ai_edit_and_approve)) },
+                            onClick = { more = false; mode = DecisionMode.EDIT },
+                            modifier = Modifier.testTag("edit-and-approve"),
+                        )
+                        if (withReason) DropdownMenuItem(
+                            text = { Text(stringResource(R.string.ai_deny_with_reason)) },
+                            onClick = { more = false; mode = DecisionMode.REASON },
+                            modifier = Modifier.testTag("deny-with-reason"),
+                        )
+                    }
+                }
             }
+            Spacer(Modifier.weight(1f))
             if (onApprove != null && onDeny != null) {
-                // Text-only and tight, so all four answers fit one row on a phone.
-                OutlinedButton(onClick = onDeny, shapes = ButtonDefaults.shapes(), contentPadding = CompactPadding, modifier = Modifier.testTag("deny")) {
+                OutlinedButton(onClick = onDeny, shapes = ButtonDefaults.shapes(), modifier = Modifier.testTag("deny")) {
                     Text(stringResource(R.string.ai_deny), maxLines = 1)
                 }
-                Button(onClick = onApprove, shapes = ButtonDefaults.shapes(), contentPadding = CompactPadding, modifier = Modifier.testTag("approve")) {
+                Button(onClick = onApprove, shapes = ButtonDefaults.shapes(), modifier = Modifier.testTag("approve")) {
                     Text(stringResource(R.string.ai_approve), maxLines = 1)
                 }
             }
         }
     }
 }
-
-private val CompactPadding = PaddingValues(horizontal = 12.dp)
 
 private enum class DecisionMode { NONE, REASON, EDIT }
