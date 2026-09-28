@@ -1,12 +1,25 @@
 package dev.ai.elements.core.provider.openai
 
+import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.agent.runTool
+import dev.ai.elements.core.agent.runToolWithContent
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatBackendException
 import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.chat.ToolApprover
-import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.http.BackendJson
+import dev.ai.elements.core.http.DefaultHttpClient
+import dev.ai.elements.core.http.errorMessage
+import dev.ai.elements.core.http.int
+import dev.ai.elements.core.http.jsonPost
+import dev.ai.elements.core.http.obj
+import dev.ai.elements.core.http.sse
+import dev.ai.elements.core.http.str
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
+import dev.ai.elements.core.model.hasContent
+import dev.ai.elements.core.model.images
+import dev.ai.elements.core.model.inlineModelContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
@@ -23,18 +36,6 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import okhttp3.OkHttpClient
-import dev.ai.elements.core.model.hasContent
-import dev.ai.elements.core.model.inlineModelContext
-import dev.ai.elements.core.http.str
-import dev.ai.elements.core.http.DefaultHttpClient
-import dev.ai.elements.core.http.BackendJson
-import dev.ai.elements.core.model.images
-import dev.ai.elements.core.http.int
-import dev.ai.elements.core.http.jsonPost
-import dev.ai.elements.core.http.obj
-import dev.ai.elements.core.agent.runTool
-import dev.ai.elements.core.http.sse
-import dev.ai.elements.core.http.errorMessage
 
 /**
  * The **OpenAI Responses API** (`POST /responses`, streaming) — OpenAI's
@@ -69,15 +70,18 @@ class OpenAiResponsesBackend(
             }
             // Echo reasoning + function_call items back, then the tool outputs.
             input += output.filter { it.str("type") in setOf("reasoning", "function_call") }
-            calls.forEach { call ->
+            val content = calls.flatMap { call ->
                 val callId = call.str("call_id").orEmpty()
-                val result = runTool(tools, approver, callId, call.str("name").orEmpty(), call.str("arguments").orEmpty())
+                val result = runToolWithContent(tools, approver, callId, call.str("name").orEmpty(), call.str("arguments").orEmpty())
                 input += buildJsonObject {
                     put("type", "function_call_output")
                     put("call_id", callId)
-                    put("output", result)
+                    put("output", result.text)
                 }
+                result.content
             }
+            // What tools returned for the model (screenshots…) follows as a user message.
+            if (content.isNotEmpty()) input += Message("tool-content", Role.USER, content).toInputItem()
         }
         emit(ChatEvent.Error("Agent stopped after $maxSteps steps"))
     }.flowOn(Dispatchers.IO)

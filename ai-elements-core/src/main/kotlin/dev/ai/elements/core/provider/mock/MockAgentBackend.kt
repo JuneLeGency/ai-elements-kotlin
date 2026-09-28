@@ -1,21 +1,22 @@
 package dev.ai.elements.core.provider.mock
 
+import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.agent.BuiltinTools
+import dev.ai.elements.core.agent.runTool
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.chat.ToolApprover
-import dev.ai.elements.core.agent.AgentTool
-import dev.ai.elements.core.agent.BuiltinTools
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import java.util.UUID
-import dev.ai.elements.core.agent.runTool
 
 /**
  * An offline agent that exercises every part type — reasoning, a real tool call
@@ -36,6 +37,10 @@ class MockAgentBackend(
         val prompt = history.lastOrNull { it.role == Role.USER }?.text.orEmpty()
         val math = extractExpression(prompt)
         val named = tools.filter { prompt.contains(it.name) }.maxByOrNull { it.name.length }
+        if (tools.any { it.name == "navigate" } && BROWSE_WORDS.any { prompt.contains(it, ignoreCase = true) }) {
+            browse(prompt)
+            return@flow
+        }
         val wantsCopy = tools.any { it.name == "copy_to_clipboard" } &&
             listOf("copy", "clipboard", "复制", "剪贴板", "複製", "剪貼簿", "コピー", "クリップボード").any { prompt.contains(it, ignoreCase = true) }
 
@@ -107,6 +112,53 @@ class MockAgentBackend(
         emit(ChatEvent.Finish)
     }
 
+    /**
+     * A scripted browser-use run with the browser's own tools (as the reference server's scripted
+     * model does): open a page, read its structure, follow the first link from the snapshot, and
+     * look at the result with `screenshot`. Each step shows in the agent's computer with its
+     * screenshot, the clicked link outlined.
+     */
+    private suspend fun FlowCollector<ChatEvent>.browse(prompt: String) {
+        // A URL is RFC 3986 characters only: prose around it (a full-width comma, CJK text) is not part of it.
+        val url = Regex("""https?://[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]+""").find(prompt)?.value?.trimEnd('.', ',', ')', ';', '!', '?') ?: "https://example.com"
+        suspend fun say(text: String) {
+            val id = "text-${UUID.randomUUID()}"
+            streamText(text) { emit(ChatEvent.TextDelta(id, it)) }
+            emit(ChatEvent.TextEnd(id))
+        }
+        suspend fun call(name: String, args: String): String {
+            val id = "call_${UUID.randomUUID()}"
+            emit(ChatEvent.ToolInputStart(id, name))
+            pause(10)
+            return runTool(tools, approver, id, name, args)
+        }
+        val reasoningId = "reasoning-${UUID.randomUUID()}"
+        streamText("The user wants me to use the browser. I'll open $url, read the page structure, follow a link and check the result visually.") {
+            emit(ChatEvent.ReasoningDelta(reasoningId, it))
+        }
+        emit(ChatEvent.ReasoningEnd(reasoningId))
+        say("I'll open the page first.")
+        val opened = call("navigate", buildJsonObject { put("url", url) }.toString())
+        if (opened.startsWith("Error")) {
+            say("The page did not open ($opened). Check the network and try again.")
+            emit(ChatEvent.Finish)
+            return
+        }
+        val link = Regex("""- link "([^"]*)" \[ref=(e\d+)]""").find(call("snapshot", "{}"))
+        if (link != null) {
+            say("The page has a link, “${link.groupValues[1]}”. I'll follow it.")
+            call("click", buildJsonObject { put("selector", "aria-ref=${link.groupValues[2]}") }.toString())
+        }
+        val shot = call("screenshot", "{}")
+        say(
+            "Done. I opened **$url**, read its structure with `snapshot`" +
+                (if (link != null) ", clicked **${link.groupValues[1].escapeMarkdown()}**" else "") +
+                " and took a `screenshot` (${shot.substringBefore('\n')}).\n\n" +
+                "Open the agent's computer below to step through the run: each step has its screenshot, with the element the agent acted on outlined.",
+        )
+        emit(ChatEvent.Finish)
+    }
+
     private suspend fun streamText(text: String, emitChunk: suspend (String) -> Unit) {
         text.chunked(6).forEach {
             emitChunk(it)
@@ -162,6 +214,9 @@ class MockAgentBackend(
     }
 
     companion object {
+        /** Prompts that start the scripted browser run (with the browser's tools available). */
+        private val BROWSE_WORDS = listOf("browse", "browser", "浏览", "网页", "瀏覽", "網頁", "ブラウズ", "ブラウザ")
+
         private val expression = Regex("""[(\d.][\d.+\-*/^%() ]*[-+*/^%][\d.+\-*/^%() ]*[\d.)]""")
 
         /** The first arithmetic expression in [text], with its parentheses balanced. */

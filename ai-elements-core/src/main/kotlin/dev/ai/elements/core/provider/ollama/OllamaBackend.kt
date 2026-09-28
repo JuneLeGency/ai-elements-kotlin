@@ -1,12 +1,24 @@
 package dev.ai.elements.core.provider.ollama
 
+import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.agent.runTool
+import dev.ai.elements.core.agent.runToolWithContent
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatBackendException
 import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.chat.ToolApprover
-import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.http.DefaultHttpClient
+import dev.ai.elements.core.http.int
+import dev.ai.elements.core.http.jsonPost
+import dev.ai.elements.core.http.ndjson
+import dev.ai.elements.core.http.obj
+import dev.ai.elements.core.http.str
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
+import dev.ai.elements.core.model.hasContent
+import dev.ai.elements.core.model.images
+import dev.ai.elements.core.model.inlineModelContext
+import dev.ai.elements.core.provider.openai.toOpenAi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
@@ -23,17 +35,6 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import okhttp3.OkHttpClient
 import java.util.UUID
-import dev.ai.elements.core.provider.openai.toOpenAi
-import dev.ai.elements.core.model.hasContent
-import dev.ai.elements.core.model.inlineModelContext
-import dev.ai.elements.core.http.str
-import dev.ai.elements.core.http.obj
-import dev.ai.elements.core.http.ndjson
-import dev.ai.elements.core.http.jsonPost
-import dev.ai.elements.core.http.int
-import dev.ai.elements.core.http.DefaultHttpClient
-import dev.ai.elements.core.agent.runTool
-import dev.ai.elements.core.model.images
 
 /**
  * Ollama's **native** chat API (`POST /api/chat`, newline-delimited JSON).
@@ -86,13 +87,21 @@ class OllamaBackend(
                     }
                 }
             }
-            calls.forEach { call ->
-                val result = runTool(tools, approver, call.id, call.name, call.arguments.toString())
+            val content = calls.flatMap { call ->
+                val result = runToolWithContent(tools, approver, call.id, call.name, call.arguments.toString())
                 messages += buildJsonObject {
                     put("role", "tool")
                     put("tool_name", call.name)
-                    put("content", result)
+                    put("content", result.text)
                 }
+                result.content
+            }
+            // What tools returned for the model (screenshots…) follows as a user message.
+            val images = content.mapNotNull { it.base64Data }
+            if (images.isNotEmpty()) messages += buildJsonObject {
+                put("role", "user")
+                put("content", "")
+                putJsonArray("images") { images.forEach { add(JsonPrimitive(it)) } }
             }
         }
         emit(ChatEvent.Error("Agent stopped after $maxSteps steps"))

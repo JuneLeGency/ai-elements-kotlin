@@ -42,7 +42,23 @@ suspend fun FlowCollector<ChatEvent>.runTool(
     id: String,
     name: String,
     rawArgs: String,
-): String {
+): String = runToolWithContent(tools, approver, id, name, rawArgs).text
+
+/**
+ * What a tool call gives the model: its [text] result and the [content] it returned for the model
+ * ([ToolCallContext.content]; Pydantic AI `ToolReturn.content`), which a model loop sends in a user
+ * message after the tool results.
+ */
+data class ToolResult(val text: String, val content: List<FilePart> = emptyList())
+
+/** [runTool], with the content the tool returned for the model. */
+suspend fun FlowCollector<ChatEvent>.runToolWithContent(
+    tools: List<AgentTool>,
+    approver: ToolApprover,
+    id: String,
+    name: String,
+    rawArgs: String,
+): ToolResult {
     val tool = tools.firstOrNull { it.name == name }
     val args = runCatching {
         if (rawArgs.isBlank()) JsonObject(emptyMap()) else BackendJson.parseToJsonElement(rawArgs).jsonObject
@@ -66,7 +82,7 @@ suspend fun FlowCollector<ChatEvent>.runTool(
             val decision = approver.decide(id)
             if (!decision.approved) {
                 emit(ChatEvent.ToolDenied(id, decision.reason))
-                return decision.reason?.let { "$DENIED_RESULT Reason: $it" } ?: DENIED_RESULT
+                return ToolResult(decision.reason?.let { "$DENIED_RESULT Reason: $it" } ?: DENIED_RESULT)
             }
             decision.editedInput?.let { edited ->
                 arguments = edited
@@ -74,13 +90,13 @@ suspend fun FlowCollector<ChatEvent>.runTool(
             }
             emit(ChatEvent.ToolApproved(id))
         }
-        executeReporting(tool, arguments, id, approver).also { emit(ChatEvent.ToolOutput(id, it)) }
+        executeReporting(tool, arguments, id, approver).also { emit(ChatEvent.ToolOutput(id, it.text)) }
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
         val message = e.message ?: e::class.simpleName.orEmpty()
         emit(ChatEvent.ToolError(id, message))
-        "Error: $message"
+        ToolResult("Error: $message")
     }
 }
 
@@ -94,8 +110,9 @@ private suspend fun FlowCollector<ChatEvent>.executeReporting(
     arguments: JsonObject,
     id: String,
     approver: ToolApprover,
-): String = coroutineScope {
+): ToolResult = coroutineScope {
     val updates = Channel<ToolCallContext.Update>(Channel.BUFFERED)
+    val content = mutableListOf<FilePart>()
     val context = ToolCallContext(id, approver) { updates.send(it) }
     val result = async(context) {
         try {
@@ -109,9 +126,12 @@ private suspend fun FlowCollector<ChatEvent>.executeReporting(
             is ToolCallContext.Update.Preliminary -> emit(ChatEvent.ToolOutput(id, update.output, preliminary = true))
             is ToolCallContext.Update.Subagent -> emit(ChatEvent.SubagentUpdate(id, update.message))
             is ToolCallContext.Update.Data -> emit(ChatEvent.Data(update.id, update.name, update.data))
-            is ToolCallContext.Update.File -> emit(ChatEvent.File(update.id, update.mediaType, update.url))
+            is ToolCallContext.Update.File -> {
+                emit(ChatEvent.File(update.id, update.mediaType, update.url))
+                if (update.forModel) content += FilePart(update.id, update.mediaType, update.url)
+            }
         }
     }
-    result.await()
+    ToolResult(result.await(), content)
 }
 

@@ -1,12 +1,25 @@
 package dev.ai.elements.core.provider.anthropic
 
+import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.agent.runTool
+import dev.ai.elements.core.agent.runToolWithContent
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatBackendException
 import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.chat.ToolApprover
-import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.http.BackendJson
+import dev.ai.elements.core.http.DefaultHttpClient
+import dev.ai.elements.core.http.errorMessage
+import dev.ai.elements.core.http.int
+import dev.ai.elements.core.http.jsonPost
+import dev.ai.elements.core.http.obj
+import dev.ai.elements.core.http.sse
+import dev.ai.elements.core.http.str
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
+import dev.ai.elements.core.model.hasContent
+import dev.ai.elements.core.model.images
+import dev.ai.elements.core.model.inlineModelContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
@@ -24,18 +37,6 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
 import okhttp3.OkHttpClient
 import java.util.UUID
-import dev.ai.elements.core.model.hasContent
-import dev.ai.elements.core.model.inlineModelContext
-import dev.ai.elements.core.http.str
-import dev.ai.elements.core.http.sse
-import dev.ai.elements.core.http.obj
-import dev.ai.elements.core.http.jsonPost
-import dev.ai.elements.core.http.int
-import dev.ai.elements.core.http.errorMessage
-import dev.ai.elements.core.http.DefaultHttpClient
-import dev.ai.elements.core.http.BackendJson
-import dev.ai.elements.core.agent.runTool
-import dev.ai.elements.core.model.images
 
 /**
  * The **Anthropic Messages API** (`POST /v1/messages`, streaming), usable with
@@ -84,8 +85,9 @@ class AnthropicBackend(
                 put("content", buildJsonArray { blocks.forEach { add(it.toContent()) } })
             }
             val results = toolUses.map { block ->
-                block to runTool(tools, approver, block.id, block.name, block.text.toString())
+                block to runToolWithContent(tools, approver, block.id, block.name, block.text.toString())
             }
+            val content = results.flatMap { it.second.content }
             messages += buildJsonObject {
                 put("role", "user")
                 put("content", buildJsonArray {
@@ -93,9 +95,11 @@ class AnthropicBackend(
                         addJsonObject {
                             put("type", "tool_result")
                             put("tool_use_id", block.id)
-                            put("content", output)
+                            put("content", output.text)
                         }
                     }
+                    // What tools returned for the model (screenshots…), after the results.
+                    if (content.isNotEmpty()) (Message("tool-content", Role.USER, content).anthropicContent() as? JsonArray)?.forEach { add(it) }
                 })
             }
         }

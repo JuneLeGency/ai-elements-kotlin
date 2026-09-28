@@ -2,8 +2,8 @@ package dev.ai.elements.core.agent
 
 import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.model.Message
-import kotlinx.serialization.json.JsonElement
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.serialization.json.JsonElement
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 
@@ -38,8 +38,11 @@ class ToolCallContext internal constructor(
         /** A data part of the reply (same [id] replaces), e.g. a live plan. */
         data class Data(val id: String, val name: String, val data: JsonElement) : Update
 
-        /** A file the call produced (a screenshot, an image), shown after the call. */
-        data class File(val id: String, val mediaType: String, val url: String) : Update
+        /**
+         * A file the call produced (a screenshot, an image), shown after the call; with [forModel]
+         * also sent to the model (see [content]).
+         */
+        data class File(val id: String, val mediaType: String, val url: String, val forModel: Boolean = false) : Update
     }
 
     /** Show [output] as an interim result (AI SDK preliminary tool result). */
@@ -62,6 +65,14 @@ class ToolCallContext internal constructor(
      * [url] is a `data:` or `http(s)` URL.
      */
     suspend fun file(mediaType: String, url: String) = sink(Update.File("$toolCallId-file-${files++}", mediaType, url))
+
+    /**
+     * Return [url] to the model as well, as Pydantic AI's `ToolReturn.content`: on-device model loops
+     * send it in a user message right after the tool results, so a vision model sees it (e.g. a
+     * browser screenshot); the chat shows it with the call, like [file]. Servers' protocols carry
+     * tool results as text, so it reaches only models the device calls.
+     */
+    suspend fun content(mediaType: String, url: String) = sink(Update.File("$toolCallId-file-${files++}", mediaType, url, forModel = true))
 
     companion object Key : CoroutineContext.Key<ToolCallContext> {
         /** The call being executed, or null outside an agent loop (e.g. in a unit test). */

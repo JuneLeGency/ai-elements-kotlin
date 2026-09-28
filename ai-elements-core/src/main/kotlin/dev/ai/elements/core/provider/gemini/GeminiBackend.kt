@@ -1,12 +1,25 @@
 package dev.ai.elements.core.provider.gemini
 
+import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.agent.runTool
+import dev.ai.elements.core.agent.runToolWithContent
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatBackendException
 import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.chat.ToolApprover
-import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.http.BackendJson
+import dev.ai.elements.core.http.DefaultHttpClient
+import dev.ai.elements.core.http.errorMessage
+import dev.ai.elements.core.http.int
+import dev.ai.elements.core.http.jsonPost
+import dev.ai.elements.core.http.obj
+import dev.ai.elements.core.http.sse
+import dev.ai.elements.core.http.str
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
+import dev.ai.elements.core.model.hasContent
+import dev.ai.elements.core.model.images
+import dev.ai.elements.core.model.inlineModelContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
@@ -25,18 +38,6 @@ import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 import okhttp3.OkHttpClient
 import java.util.UUID
-import dev.ai.elements.core.model.hasContent
-import dev.ai.elements.core.model.inlineModelContext
-import dev.ai.elements.core.http.str
-import dev.ai.elements.core.http.sse
-import dev.ai.elements.core.http.obj
-import dev.ai.elements.core.http.jsonPost
-import dev.ai.elements.core.http.errorMessage
-import dev.ai.elements.core.http.DefaultHttpClient
-import dev.ai.elements.core.http.BackendJson
-import dev.ai.elements.core.agent.runTool
-import dev.ai.elements.core.model.images
-import dev.ai.elements.core.http.int
 
 /**
  * Google **Gemini** native API (`:streamGenerateContent?alt=sse`).
@@ -69,21 +70,26 @@ class GeminiBackend(
                 put("role", "model")
                 put("parts", JsonArray(parts))
             }
-            val responses = calls.map { call ->
+            val results = calls.map { call ->
                 val id = call.str("id") ?: "call_${UUID.randomUUID()}"
                 val name = call.str("name").orEmpty()
-                val result = runTool(tools, approver, id, name, call["args"]?.toString() ?: "{}")
+                call to runToolWithContent(tools, approver, id, name, call["args"]?.toString() ?: "{}")
+            }
+            val responses = results.map { (call, result) ->
                 buildJsonObject {
                     putJsonObject("functionResponse") {
                         call.str("id")?.let { put("id", it) }
-                        put("name", name)
-                        putJsonObject("response") { put("result", result) }
+                        put("name", call.str("name").orEmpty())
+                        putJsonObject("response") { put("result", result.text) }
                     }
                 }
             }
+            // What tools returned for the model (screenshots…), after the responses.
+            val content = results.flatMap { it.second.content }
+            val extra = if (content.isEmpty()) emptyList() else ((Message("tool-content", Role.USER, content).toContent() as JsonObject)["parts"] as? JsonArray).orEmpty()
             contents += buildJsonObject {
                 put("role", "user")
-                put("parts", JsonArray(responses))
+                put("parts", JsonArray(responses + extra))
             }
         }
         emit(ChatEvent.Error("Agent stopped after $maxSteps steps"))

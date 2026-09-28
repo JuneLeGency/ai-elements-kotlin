@@ -17,7 +17,7 @@ arguments and behaviour, so on-device and server agents render identically.
 | `Shell` + `AlpineSandbox` | `harness-shell`, `harness-sandbox-proot` | `run_command`, `start_command`, `check_command`, `stop_command` |
 | `Memory` | `harness-memory` | `write_memory`, `read_memory`, `delete_memory`, `search_memory` |
 | `Planning` | `harness-planning` | `write_plan`, `read_plan`, `add_task`, `update_task_status(es)`, `remove_task` |
-| `WebBrowser` | `harness-browser` | `navigate`, `snapshot`, `click`, `type_text`, `get_text`, … |
+| `WebBrowser` | `harness-browser` | `navigate`, `snapshot`, `click`, `type_text`, `get_text`, `screenshot`, … |
 | `DeviceTools` | `harness-device` | device info, clipboard, calendar, contacts, location, alarms, notifications |
 | `Speech` | `harness-speech` | `speak`, `stop_speaking` |
 | `Scheduler` | `harness-scheduler` | `schedule_task`, `list_scheduled_tasks`, `cancel_scheduled_task` |
@@ -47,6 +47,32 @@ a `.zip`; the demo bundles the skills in the repository's `skills/` folder.
 
 `FileSystem` works in the app's workspace and in folders the user shares through the Storage Access
 Framework (`SharedFolders`), mounted at `/mnt/<name>`. Writes ask for approval.
+
+## The browser
+
+`WebBrowser` gives the agent a browser on an off-screen `WebView`, with the tools of the Pydantic AI
+Harness browser: `navigate`, `snapshot` (interactive elements with `aria-ref` handles), `click`,
+`type_text`, `press_key`, `select_option`, `hover`, `wait_for`, `get_text`, `scroll`, `go_back`,
+`go_forward` and `screenshot`. Only `http(s)` pages load.
+
+Screenshots go to two places:
+
+- **To the model.** `screenshot(full_page?)` returns the viewport, or the whole page, as a PNG for
+  vision models, and `screenshotOnNavigate = true` adds one to every `navigate`. Both follow the
+  Harness contract: the text says `Screenshot captured. URL: …` and the image goes to the model as
+  Pydantic AI `ToolReturn.content`. On-device model loops send it in a user message after the tool
+  results, which works with every model API. Images over 5 MB become a short error instead.
+- **To the user.** With `screenshots = true` (the default), every call that changes the page also
+  attaches a smaller JPEG of the viewport for the agent's computer view. The element the call acted
+  on is outlined, the way agent computer views such as Manus mark each action. The model does not
+  get these.
+
+A tool of your own returns an image to the model the same way, with
+`ToolCallContext.current()?.content(mediaType, url)`.
+
+The demo's offline agent shows a scripted browser-use run without a model. Tap **Browse a web page**:
+it opens a page, reads it with `snapshot`, follows a link and takes a `screenshot`. Each step then
+appears on the agent's computer.
 
 ## The Linux sandbox
 

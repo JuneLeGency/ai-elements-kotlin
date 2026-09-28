@@ -180,6 +180,14 @@
   the agent's computer gets from each protocol, and what the library vs. the app decides for
   storing, compacting, replaying and reconnecting.
 
+- Browser screenshots for the model (Pydantic AI Harness browser contract): `WebBrowser`'s
+  `screenshot(full_page?)` tool and `screenshotOnNavigate`, PNG up to 5 MB. Tools return content to
+  the model with `ToolCallContext.content` (Pydantic AI `ToolReturn.content`); on-device model loops
+  (OpenAI Chat / Responses, Anthropic, Gemini, Ollama) send it after the tool results
+  (`runToolWithContent`, `ToolResult`). The steps view's screenshots outline the element an action
+  targeted, and are drawn at the page's scroll position. The demo's offline agent runs a scripted
+  browser session ("Browse a web page").
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

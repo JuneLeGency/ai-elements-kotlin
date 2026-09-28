@@ -1,14 +1,17 @@
 package dev.ai.elements.core.protocol
 
-import dev.ai.elements.core.model.ToolKind
 import com.sun.net.httpserver.HttpServer
+import dev.ai.elements.core.agent.BuiltinTools
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatBackendException
 import dev.ai.elements.core.chat.ChatEvent
-import dev.ai.elements.core.agent.BuiltinTools
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.TextPart
+import dev.ai.elements.core.model.ToolKind
+import dev.ai.elements.core.protocol.aisdk.UiMessageStreamBackend
+import dev.ai.elements.core.provider.anthropic.AnthropicBackend
+import dev.ai.elements.core.provider.openai.OpenAiChatBackend
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -18,9 +21,6 @@ import org.junit.Before
 import org.junit.Test
 import java.net.InetSocketAddress
 import java.util.concurrent.CopyOnWriteArrayList
-import dev.ai.elements.core.provider.anthropic.AnthropicBackend
-import dev.ai.elements.core.provider.openai.OpenAiChatBackend
-import dev.ai.elements.core.protocol.aisdk.UiMessageStreamBackend
 
 /**
  * Drives each real backend against an in-process HTTP server replaying recorded
@@ -104,6 +104,60 @@ class BackendProtocolTest {
         val request = requests.single()
         assertTrue(request, request.startsWith("POST /api/chat?model=demo"))
         assertTrue(request, request.contains(""""parts":[{"type":"text","text":"What time is it?"}]"""))
+    }
+
+    /** A tool that returns a screenshot for the model (Pydantic AI `ToolReturn.content`), like the browser's `screenshot`. */
+    private val screenshotTool = object : dev.ai.elements.core.agent.AgentTool {
+        override val name = "screenshot"
+        override val description = "Capture the page"
+        override val parameters = kotlinx.serialization.json.buildJsonObject { put("type", kotlinx.serialization.json.JsonPrimitive("object")) }
+        override suspend fun execute(arguments: kotlinx.serialization.json.JsonObject): String {
+            dev.ai.elements.core.agent.ToolCallContext.current()!!.content("image/png", "data:image/png;base64,iVBORw0KGgo=")
+            return "Screenshot captured. URL: https://example.com"
+        }
+    }
+
+    @Test
+    fun toolContent_reachesTheModelAfterTheToolResults() {
+        // OpenAI Chat Completions: tool messages carry text only; the image follows as a user message.
+        respond(
+            """
+            data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call_1","type":"function","function":{"name":"screenshot","arguments":"{}"}}]}}]}
+
+            data: {"choices":[{"delta":{},"finish_reason":"tool_calls"}]}
+
+            data: [DONE]
+
+            """.trimIndent(),
+        )
+        respond("data: {\"choices\":[{\"delta\":{\"content\":\"A sign-up page.\"}}]}\n\ndata: [DONE]\n\n")
+        val events = OpenAiChatBackend(base, "m", apiKey = "k", tools = listOf(screenshotTool)).events()
+        // The chat shows it with the call too.
+        assertTrue(events.any { it is ChatEvent.File && it.mediaType == "image/png" })
+        val second = requests[1]
+        val tool = second.indexOf(""""role":"tool","tool_call_id":"call_1","content":"Screenshot captured. URL: https://example.com"""")
+        val image = second.indexOf(""""role":"user","content":[{"type":"image_url","image_url":{"url":"data:image/png;base64,iVBORw0KGgo="}}]""")
+        assertTrue(second, tool in 0 until image)
+
+        // Anthropic Messages: the image block follows the tool_result blocks in the same user turn.
+        requests.clear()
+        respond(
+            """
+            event: content_block_start
+            data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_1","name":"screenshot","input":{}}}
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":0}
+
+            event: message_delta
+            data: {"type":"message_delta","delta":{"stop_reason":"tool_use"}}
+
+            """.trimIndent(),
+        )
+        respond("event: message_delta\ndata: {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"end_turn\"}}\n\n")
+        AnthropicBackend(base, "m", apiKey = "k", tools = listOf(screenshotTool)).events()
+        val next = requests[1]
+        assertTrue(next, next.contains(""""type":"tool_result","tool_use_id":"toolu_1","content":"Screenshot captured. URL: https://example.com"},{"type":"image","source":{"type":"base64","media_type":"image/png","data":"iVBORw0KGgo="}}"""))
     }
 
     @Test

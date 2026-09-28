@@ -44,9 +44,12 @@ import kotlin.coroutines.resume
  * `x,y` CSS-pixel coordinates. Only `http(s)` pages load; results are capped
  * at [maxContentTokens] (4 characters per token), keeping the head.
  *
- * With [screenshots], every call that changes the page (navigate, click, type, keys, scroll,
- * back, forward) attaches a screenshot of the viewport to the call, so the chat's steps view shows
- * what the agent saw. The model keeps working from the text.
+ * `screenshot(full_page?)` returns the page as a PNG for vision models (Pydantic AI
+ * `ToolReturn.content`, as the Harness browser does), and [screenshotOnNavigate] adds one to every
+ * `navigate` result; both are capped at 5 MB like the Harness'. With [screenshots], every call that
+ * changes the page (navigate, click, type, keys, scroll, back, forward) also attaches a smaller
+ * screenshot for the chat's steps view, with the element the call acted on outlined, as agent
+ * computer views do; the model does not get those.
  */
 class WebBrowser(
     private val context: Context,
@@ -56,6 +59,7 @@ class WebBrowser(
     private val viewportWidth: Int = 1080,
     private val viewportHeight: Int = 1920,
     val screenshots: Boolean = true,
+    val screenshotOnNavigate: Boolean = false,
 ) : Capability {
     private val lock = Mutex()
     private var webView: WebView? = null
@@ -68,7 +72,12 @@ class WebBrowser(
 
     override suspend fun tools(): List<AgentTool> = listOf(
         tool("navigate", "Navigate to a URL and return the page's title and visible text.", "url" to str("The http(s) URL to open."), "timeout_ms" to int()) { a ->
-            navigate(a.s("url")!!, a.i("timeout_ms")?.toLong())
+            navigate(a.s("url")!!, a.i("timeout_ms")?.toLong()).also { result ->
+                if (screenshotOnNavigate && !result.startsWith("Error:")) capture(fullPage = false)?.let { returnImage(it) }
+            }
+        },
+        tool("screenshot", "Capture a screenshot of the current page (the viewport, or the whole page with `full_page`), returned as an image. Use it only for visual checks (charts, layout); read pages with `snapshot` or `get_text`.", "full_page" to bool("Capture the full scrollable page instead of the viewport."), "timeout_ms" to int()) { a ->
+            screenshot(fullPage = (a["full_page"] as? JsonPrimitive)?.booleanOrNull ?: false)
         },
         tool("snapshot", "Return the page's interactive elements and headings with `aria-ref` handles to use as selectors.", "timeout_ms" to int()) { snapshot() },
         tool("click", "Click an element; `selector` is a CSS selector, an `aria-ref=` handle, or 'x,y' pixel coordinates.", "selector" to str("Element to click."), "timeout_ms" to int(), required = listOf("selector")) { a ->
@@ -140,7 +149,80 @@ class WebBrowser(
         if (error.isNotEmpty()) throw IllegalArgumentException(error)
         delay(300) // let the page react (navigation, rendering)
         withTimeoutOrNull(navigationTimeoutMs) { awaitReady() }
+        // The acted-on element's box, still set when the page stayed (a new page has a new window).
+        target = runCatching {
+            Json.parseToJsonElement(js("var t=window.__aiTarget||null;delete window.__aiTarget;return t")) as? JsonArray
+        }.getOrNull()?.map { it.jsonPrimitive.content.toFloat() }?.takeIf { it.size == 5 }?.let { (x, y, w, h, dpr) ->
+            android.graphics.RectF(x * dpr, y * dpr, (x + w) * dpr, (y + h) * dpr)
+        }
         return truncate(result())
+    }
+
+    /** The element the last action targeted, in view pixels; outlined on the steps view's screenshot. */
+    private var target: android.graphics.RectF? = null
+
+    /** Harness `screenshot`: a note with the URL, and the PNG for the model (or a bounded error). */
+    private suspend fun screenshot(fullPage: Boolean): String {
+        val png = capture(fullPage) ?: return "Error: the page could not be captured."
+        if (png.size > MAX_SCREENSHOT_BYTES) {
+            return "Error: screenshot is ${png.size} bytes, over the $MAX_SCREENSHOT_BYTES byte image limit; " +
+                "capture the viewport (full_page=False) or scroll and capture sections instead."
+        }
+        returnImage(png)
+        return truncate("Screenshot captured. URL: ${url()}")
+    }
+
+    /** Returns [png] to the model (Pydantic AI `ToolReturn.content`); the chat shows it with the call. */
+    private suspend fun returnImage(png: ByteArray) {
+        if (png.size > MAX_SCREENSHOT_BYTES) return
+        ToolCallContext.current()?.content("image/png", "data:image/png;base64," + Base64.encodeToString(png, Base64.NO_WRAP))
+    }
+
+    /**
+     * The page as a PNG at the viewport's resolution: the viewport, or with [fullPage] the whole
+     * document (the off-screen view is laid out at the document's height, up to [MAX_FULL_PAGE_SCREENS]
+     * screens, then back).
+     */
+    private suspend fun capture(fullPage: Boolean): ByteArray? = runCatching {
+        awaitVisualState()
+        withContext(Dispatchers.Main) {
+            val view = webView ?: return@withContext null
+            val height = if (!fullPage) viewportHeight else {
+                val content = (view.contentHeight * view.resources.displayMetrics.density).toInt()
+                content.coerceIn(viewportHeight, viewportHeight * MAX_FULL_PAGE_SCREENS)
+            }
+            val scrollY = view.scrollY
+            if (height != viewportHeight) {
+                view.measure(View.MeasureSpec.makeMeasureSpec(viewportWidth, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY))
+                view.layout(0, 0, viewportWidth, height)
+                view.scrollTo(0, 0)
+            }
+            try {
+                Bitmap.createBitmap(viewportWidth, height, Bitmap.Config.ARGB_8888).also { Canvas(it).drawPage(view) }
+            } finally {
+                if (height != viewportHeight) {
+                    view.measure(View.MeasureSpec.makeMeasureSpec(viewportWidth, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(viewportHeight, View.MeasureSpec.EXACTLY))
+                    view.layout(0, 0, viewportWidth, viewportHeight)
+                    view.scrollTo(0, scrollY)
+                }
+            }
+        }?.let { bitmap ->
+            withContext(Dispatchers.Default) { ByteArrayOutputStream().also { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }.toByteArray() }
+        }
+    }.getOrNull()
+
+    /** Until the page's current DOM has been rendered (WebView.VisualStateCallback), at most a moment. */
+    private suspend fun awaitVisualState() = withContext(Dispatchers.Main) {
+        val view = webView ?: return@withContext
+        withTimeoutOrNull(VISUAL_STATE_TIMEOUT_MS) {
+            suspendCancellableCoroutine { done ->
+                view.postVisualStateCallback(0, object : WebView.VisualStateCallback() {
+                    override fun onComplete(requestId: Long) {
+                        if (done.isActive) done.resume(Unit)
+                    }
+                })
+            }
+        }
     }
 
     private suspend fun waitFor(selector: String?, text: String?, gone: Boolean, timeoutMs: Long): String {
@@ -236,24 +318,17 @@ class WebBrowser(
         if (!screenshots) return
         val call = ToolCallContext.current() ?: return
         val jpeg = runCatching {
-            // Draw only once the page's current DOM has been rendered (WebView.VisualStateCallback).
-            withContext(Dispatchers.Main) {
-                val view = webView ?: return@withContext
-                withTimeoutOrNull(VISUAL_STATE_TIMEOUT_MS) {
-                    suspendCancellableCoroutine { done ->
-                        view.postVisualStateCallback(0, object : WebView.VisualStateCallback() {
-                            override fun onComplete(requestId: Long) {
-                                if (done.isActive) done.resume(Unit)
-                            }
-                        })
-                    }
-                }
-            }
+            awaitVisualState()
+            val outline = target.also { target = null }
             withContext(Dispatchers.Main) {
                 val view = webView ?: return@withContext null
                 val scale = SCREENSHOT_WIDTH.toFloat() / viewportWidth
                 val bitmap = Bitmap.createBitmap(SCREENSHOT_WIDTH, (viewportHeight * scale).toInt(), Bitmap.Config.ARGB_8888)
-                Canvas(bitmap).apply { scale(scale, scale); view.draw(this) }
+                Canvas(bitmap).apply {
+                    scale(scale, scale)
+                    drawPage(view)
+                    outline?.let { drawTarget(it, 1 / scale) }
+                }
                 bitmap
             }?.let { bitmap ->
                 withContext(Dispatchers.Default) {
@@ -264,9 +339,31 @@ class WebBrowser(
         call.file("image/jpeg", "data:image/jpeg;base64," + Base64.encodeToString(jpeg, Base64.NO_WRAP))
     }
 
+    /** The page as the view shows it: a parent draws a scrolled view shifted by its scroll offset. */
+    private fun Canvas.drawPage(view: WebView) {
+        val saved = save()
+        translate(-view.scrollX.toFloat(), -view.scrollY.toFloat())
+        view.draw(this)
+        restoreToCount(saved)
+    }
+
+    /** Outlines the element an action targeted, the way agent computer views mark where the agent acted. */
+    private fun Canvas.drawTarget(box: android.graphics.RectF, px: Float) {
+        val pad = 4 * px
+        val rect = android.graphics.RectF(box.left - pad, box.top - pad, box.right + pad, box.bottom + pad)
+        val radius = 8 * px
+        drawRoundRect(rect, radius, radius, android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = TARGET_COLOR; alpha = 48 })
+        drawRoundRect(rect, radius, radius, android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = TARGET_COLOR; style = android.graphics.Paint.Style.STROKE; strokeWidth = 4 * px })
+    }
+
     private companion object {
         const val SCREENSHOT_WIDTH = 720
+        const val TARGET_COLOR = 0xFFFF5722.toInt()
         const val VISUAL_STATE_TIMEOUT_MS = 2_000L
+
+        /** Largest screenshot returned to the model: the strictest mainstream per-image limit (as the Harness). */
+        const val MAX_SCREENSHOT_BYTES = 5_000_000
+        const val MAX_FULL_PAGE_SCREENS = 10
         /** Calls that retrieve a page or its content (ACP `fetch`); the others act on the page. */
         val FETCHING = setOf("navigate", "go_back", "go_forward", "snapshot", "get_text")
 
@@ -291,6 +388,7 @@ function __aiAct(action,sel,arg){
   var el=sel?__aiEl(sel):document.activeElement||document.body;
   if(!el) return "No element matches '"+sel+"'.";
   el.scrollIntoView({block:'center'});
+  var r=el.getBoundingClientRect();window.__aiTarget=[r.left,r.top,r.width,r.height,devicePixelRatio];
   if(action==='click'){el.click();return '';}
   if(action==='hover'){['mouseover','mouseenter','mousemove'].forEach(function(t){el.dispatchEvent(new MouseEvent(t,{bubbles:true}))});return '';}
   if(action==='type'){el.focus();var d=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el),'value');if(d&&d.set)d.set.call(el,arg);else el.value=arg;

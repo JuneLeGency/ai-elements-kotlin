@@ -15,6 +15,8 @@
     <string name="sugg_clipboard">剪貼簿（需確認）</string>
     <string name="sugg_long_prompt">寫一段很長的回答，方便我測試串流輸出和捲動</string>
     <string name="sugg_long">長篇串流回答</string>
+    <string name="sugg_browse_prompt">用瀏覽器打開 https://example.com，點進其中的連結並截圖</string>
+    <string name="sugg_browse">瀏覽網頁（智慧體的電腦）</string>
     <string name="conversations">對話</string>
     <string name="new_chat">新對話</string>
     <string name="empty_title">今天想聊點什麼？</string>

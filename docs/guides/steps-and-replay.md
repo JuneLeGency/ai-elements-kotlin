@@ -32,7 +32,7 @@ standard way to carry them, and no extension is needed:
 | AI SDK server | a `file` part after the tool output (Pydantic AI: a `FileChunk` in `ToolReturn.metadata`) |
 | AG-UI server | an `image` content part in `TOOL_CALL_RESULT.content` (AG-UI 1.x media parts, `data` or `url` source) |
 | MCP server | `image` content in the `CallToolResult` |
-| On the device | `ToolCallContext.file(mediaType, url)` from the tool; `WebBrowser` attaches the viewport after every call that changes the page |
+| On the device | `ToolCallContext.file(mediaType, url)` from the tool, or `content(…)` when the model should see it too. `WebBrowser` attaches the viewport, with the acted-on element outlined, after every call that changes the page, and its `screenshot` tool returns the page to the model ([The browser](harness.md#the-browser)). |
 
 In the conversation, a step's screenshots show as a small strip under its tool call. Tapping one
 opens the agent's computer at that step. If you build your own view, `agentSteps(message)` returns

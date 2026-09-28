@@ -1,11 +1,14 @@
 package dev.ai.elements.demo
 
 import android.content.Context
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -14,12 +17,13 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
-import dev.ai.elements.ui.R as UiR
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.ai.elements.core.config.ProviderKind
 import dev.ai.elements.core.config.ProviderProfile
+import dev.ai.elements.ui.R as UiR
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
@@ -74,6 +78,26 @@ class AgentFlowTest {
     }
 
     private fun awaitTurnEnd(timeoutMs: Long) = compose.awaitTurnEnd(timeoutMs)
+
+    /** The offline agent's scripted browser run: each step on the agent's computer, with screenshots. */
+    @Test
+    fun offlineAgent_browsesAndShowsTheAgentComputer() {
+        assumeTrue("needs the internet", runCatching { (java.net.URL("https://example.com").openConnection() as java.net.HttpURLConnection).responseCode == 200 }.getOrDefault(false))
+        launchWith(ProviderProfile.Presets.first { it.kind == ProviderKind.MOCK })
+        send(s(R.string.sugg_browse_prompt))
+        awaitTurnEnd(120_000)
+        scrollTo(hasTestTag("agent-computer-card"))
+        compose.onNodeWithTag("agent-computer-card").performClick()
+        compose.onNodeWithTag("agent-computer").assertExists()
+        // navigate, snapshot, click, screenshot.
+        val counter = compose.onNodeWithTag("run-step-counter").fetchSemanticsNode().config
+            .getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text)?.joinToString { it.text }.orEmpty()
+        val notOpened = compose.onAllNodesWithText("did not open", substring = true).fetchSemanticsNodes().firstOrNull()
+            ?.config?.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text)?.joinToString { it.text }
+        val noLink = compose.onAllNodesWithText("I'll follow it", substring = true).fetchSemanticsNodes().isEmpty()
+        assertTrue("steps: $counter; not opened: $notOpened; no link found: $noLink", counter.contains("4"))
+        compose.onNodeWithTag("run-screen").assertExists()
+    }
 
     @Test
     fun offlineAgent_runsToolAndRendersMarkdownAndMermaid() {

@@ -16,6 +16,8 @@
     <string name="sugg_clipboard">Clipboard (needs approval)</string>
     <string name="sugg_long_prompt">Write a long answer so I can test streaming and scrolling</string>
     <string name="sugg_long">Long streaming answer</string>
+    <string name="sugg_browse_prompt">Use the browser: open https://example.com, follow its link and take a screenshot</string>
+    <string name="sugg_browse">Browse a web page (agent computer)</string>
     <string name="conversations">Conversations</string>
     <string name="new_chat">New chat</string>
     <string name="empty_title">What shall we explore?</string>

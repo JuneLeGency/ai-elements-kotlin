@@ -1,11 +1,12 @@
 package dev.ai.elements.demo
 
-import dev.ai.elements.core.agent.runTool
-import kotlinx.coroutines.flow.toList
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import dev.ai.elements.core.agent.runTool
+import dev.ai.elements.core.agent.runToolWithContent
 import dev.ai.elements.harness.browser.WebBrowser
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -64,5 +65,57 @@ class BrowserTest {
         val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
         val colors = (0 until bitmap.height step 16).flatMap { y -> (0 until bitmap.width step 16).map { x -> bitmap.getPixel(x, y) } }.toSet()
         assertTrue("screenshot looks blank (${colors.size} colours)", colors.size > 3)
+    }
+
+    /** `screenshot` returns the page to the model as a PNG (Harness contract); the chat shows it too. */
+    @Test
+    fun screenshot_returnsThePageToTheModel() = runBlocking<Unit> {
+        assumeTrue(runCatching { (URL("$server/health").openConnection() as HttpURLConnection).responseCode == 200 }.getOrDefault(false))
+        val browser = WebBrowser(ApplicationProvider.getApplicationContext())
+        val tools = browser.tools()
+        lateinit var result: dev.ai.elements.core.agent.ToolResult
+        val events = kotlinx.coroutines.flow.flow<dev.ai.elements.core.chat.ChatEvent> {
+            runTool(tools, dev.ai.elements.core.chat.ToolApprover.AlwaysApprove, "c1", "navigate", buildJsonObject { put("url", "$server/browser-test") }.toString())
+            result = runToolWithContent(tools, dev.ai.elements.core.chat.ToolApprover.AlwaysApprove, "c2", "screenshot", "{}")
+        }.toList()
+        assertTrue(result.text, result.text == "Screenshot captured. URL: $server/browser-test")
+        val png = result.content.single()
+        assertTrue(png.mediaType == "image/png")
+        val bytes = android.util.Base64.decode(png.url.substringAfter("base64,"), android.util.Base64.DEFAULT)
+        val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        assertTrue("${bitmap.width}", bitmap.width == 1080)
+        assertTrue("screenshot looks blank", (0 until bitmap.height step 32).flatMap { y -> (0 until bitmap.width step 32).map { x -> bitmap.getPixel(x, y) } }.toSet().size > 3)
+        // Shown with the call as well.
+        assertTrue(events.any { it is dev.ai.elements.core.chat.ChatEvent.File && it.id.startsWith("c2-") })
+        lateinit var full: dev.ai.elements.core.agent.ToolResult
+        kotlinx.coroutines.flow.flow<dev.ai.elements.core.chat.ChatEvent> {
+            full = runToolWithContent(tools, dev.ai.elements.core.chat.ToolApprover.AlwaysApprove, "c3", "screenshot", """{"full_page":true}""")
+        }.toList()
+        assertTrue(full.text, full.text.startsWith("Screenshot captured.") && full.content.size == 1)
+        browser.close()
+    }
+
+    /** The steps view's screenshot outlines the element an action targeted. */
+    @Test
+    fun actionScreenshot_outlinesTheTarget() = runBlocking<Unit> {
+        assumeTrue(runCatching { (URL("$server/health").openConnection() as HttpURLConnection).responseCode == 200 }.getOrDefault(false))
+        val browser = WebBrowser(ApplicationProvider.getApplicationContext())
+        val tools = browser.tools()
+        val events = kotlinx.coroutines.flow.flow<dev.ai.elements.core.chat.ChatEvent> {
+            runTool(tools, dev.ai.elements.core.chat.ToolApprover.AlwaysApprove, "c1", "navigate", buildJsonObject { put("url", "$server/browser-test") }.toString())
+            runTool(tools, dev.ai.elements.core.chat.ToolApprover.AlwaysApprove, "c2", "type_text", """{"selector":"input[name=name]","text":"Ann"}""")
+        }.toList()
+        fun orange(id: String): Int {
+            val file = events.filterIsInstance<dev.ai.elements.core.chat.ChatEvent.File>().single { it.id.startsWith(id) }
+            val bytes = android.util.Base64.decode(file.url.substringAfter("base64,"), android.util.Base64.DEFAULT)
+            val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            return (0 until bitmap.height).sumOf { y -> (0 until bitmap.width).count { x ->
+                val c = bitmap.getPixel(x, y)
+                android.graphics.Color.red(c) > 220 && android.graphics.Color.green(c) in 60..120 && android.graphics.Color.blue(c) < 80
+            } }
+        }
+        assertTrue("the navigation has no outline", orange("c1-") == 0)
+        assertTrue("the typed-into field is outlined", orange("c2-") > 100)
+        browser.close()
     }
 }

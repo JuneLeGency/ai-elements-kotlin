@@ -50,7 +50,7 @@ In-app agent capabilities (group `io.github.junelegency.harness`):
 | `harness-planning` | `write_plan`, `read_plan`, `add_task`, `update_task_status(es)`, `remove_task`; drives the `Plan` element. | 26 |
 | `harness-shell` | `run_command`, `start_command`, `check_command`, `stop_command` over a pluggable runtime. | 26 |
 | `harness-sandbox-proot` | Alpine Linux via PRoot (bundled executable, GPL-2.0, see its NOTICE). | 26 |
-| `harness-browser` | `navigate`, `snapshot`, `click`, `type_text`, `get_text`, … on an off-screen WebView. | 26 |
+| `harness-browser` | `navigate`, `snapshot`, `click`, `type_text`, `get_text`, `screenshot`, … on an off-screen WebView. | 26 |
 | `harness-device` | Device info, clipboard, calendar, contacts, location, alarms, notifications (asks for permissions). | 26 |
 | `harness-speech` | `speak`, `stop_speaking` on the platform text-to-speech engine. | 26 |
 | `harness-scheduler` | `schedule_task`, `list_scheduled_tasks`, `cancel_scheduled_task`: background runs on WorkManager. | 26 |
