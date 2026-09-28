@@ -197,4 +197,6 @@
     <string name="ai_view_image">查看图片</string>
     <string name="ai_rotate">旋转</string>
     <string name="ai_play_video">播放视频</string>
+    <string name="ai_pages">%1$d 页</string>
+    <string name="ai_open_with">用其他应用打开</string>
 </resources>

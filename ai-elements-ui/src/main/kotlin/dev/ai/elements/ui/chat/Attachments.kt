@@ -88,7 +88,7 @@ fun FileImage(
     }
 }
 
-/** A file part inside a message: images, videos and audio inline, other files as a chip. */
+/** A file part inside a message: images, videos and audio inline; documents (PDF preview, others open in an app). */
 @Composable
 fun FileAttachment(file: FilePart, modifier: Modifier = Modifier, imageHeight: Dp = 220.dp) {
     if (file.isImage) {
@@ -111,12 +111,7 @@ fun FileAttachment(file: FilePart, modifier: Modifier = Modifier, imageHeight: D
         val source by produceState<String?>(null, file.url) { value = runCatching { playableUri(context, file).toString() }.getOrNull() }
         source?.let { dev.ai.elements.ui.voice.AudioPlayer(dev.ai.elements.ui.voice.rememberAudioPlayerState(it), modifier, title = file.filename) }
     } else {
-        Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium, modifier = modifier) {
-            Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(AiIcons.Description, null)
-                Text(file.filename ?: file.mediaType, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-        }
+        DocumentAttachment(file, modifier)
     }
 }
 

@@ -39,7 +39,7 @@ Where the names differ:
 | `ReasoningPart` | `Reasoning`: one quiet line ("Thought for 2s") that expands |
 | `ToolPart` | `ToolCall`, `Subagent` for delegations, a skill badge for skill loads, `Confirmation` while it waits for approval |
 | `SourcePart` | `Sources`, and `InlineCitation` for `[n]` markers |
-| `FilePart` | images (upright by EXIF; tap for `ImageViewer`: zoom, pan, rotate), videos (`VideoAttachment`: first frame, duration, full-screen player), audio (`AudioPlayer`) and other files |
+| `FilePart` | images (upright by EXIF; tap for `ImageViewer`: zoom, pan, rotate), videos (`VideoAttachment`: first frame, duration, full-screen player), audio (`AudioPlayer`) and documents (`DocumentAttachment`: PDF preview and viewer; other formats open in an app) |
 | `DataPart` | `Plan`, `Task`, A2UI surfaces, MCP Apps views, or your own renderer |
 
 Long conversations stay at the bottom while they stream, unless the user scrolls up.
@@ -64,6 +64,20 @@ Voice uses the platform speech engines (`SpeechRecognizer`, `TextToSpeech`) and 
 backend; no protocol is involved. `ai-elements-ui` declares the package-visibility `<queries>` for
 both services; the app declares `RECORD_AUDIO`. Voice features hide themselves on devices without a
 speech recognizer.
+
+## Documents
+
+Mobile best practice for artifacts such as reports and slides:
+
+- **PDF** renders in the app with the platform `PdfRenderer`: the first page and page count in the
+  message, every page in `PdfViewerDialog`. For text selection and search, Jetpack's `androidx.pdf`
+  viewer (Android 9+) is the upgrade path.
+- **Word, Excel, PowerPoint** have no platform renderer. They open in an app the user has (WPS,
+  Microsoft Office, Google Docs, …) through `openExternally`, which shares the file with a
+  `content:` URI from the library's own `FileProvider`. When the agent can produce a PDF rendition,
+  send it too: it previews inline.
+- Embedding an online viewer (for example Google's document viewer in a WebView) is not used: it
+  sends the file's URL to a third party, needs a public URL and is unavailable in some regions.
 
 ## Layout
 

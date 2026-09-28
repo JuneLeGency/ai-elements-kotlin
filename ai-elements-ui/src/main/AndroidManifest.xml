@@ -10,4 +10,17 @@
             <action android:name="android.intent.action.TTS_SERVICE" />
         </intent>
     </queries>
+
+    <application>
+        <!-- "Open with" for documents the elements show (see DocumentAttachment). -->
+        <provider
+            android:name="dev.ai.elements.ui.chat.AiElementsFileProvider"
+            android:authorities="${applicationId}.aielements.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/ai_elements_file_paths" />
+        </provider>
+    </application>
 </manifest>

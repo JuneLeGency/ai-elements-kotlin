@@ -140,6 +140,11 @@
   controls); audio files get the `AudioPlayer`. `data:` media is cached to a file
   (`playableUri`). No new dependencies.
 
+- Documents in messages (`DocumentAttachment`): PDFs show their first page and page count and
+  open in `PdfViewerDialog` (platform `PdfRenderer`, every page, pinch zoom); Word, Excel,
+  PowerPoint and other files open in an app that can show them (`openExternally`, through the
+  library's own `AiElementsFileProvider`, `${applicationId}.aielements.files`). No new dependencies.
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

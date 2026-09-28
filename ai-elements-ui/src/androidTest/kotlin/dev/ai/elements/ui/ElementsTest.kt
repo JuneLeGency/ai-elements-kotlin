@@ -1,5 +1,7 @@
 package dev.ai.elements.ui
 
+import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -383,6 +385,37 @@ class ElementsTest {
         compose.onNodeWithTag("video-player").assertExists()
         compose.onNodeWithTag("video-close").performClick()
         compose.onNodeWithTag("video-player").assertDoesNotExist()
+    }
+
+    /** A PDF previews its first page and page count, and reads page by page; other documents open in an app. */
+    @Test fun documents_pdfPreviewAndViewer_officeOpensWith() {
+        val pdf = android.graphics.pdf.PdfDocument()
+        repeat(2) { i ->
+            val page = pdf.startPage(android.graphics.pdf.PdfDocument.PageInfo.Builder(300, 400, i + 1).create())
+            page.canvas.drawText("Page ${i + 1}", 40f, 60f, android.graphics.Paint().apply { textSize = 24f })
+            pdf.finishPage(page)
+        }
+        val bytes = java.io.ByteArrayOutputStream().also { pdf.writeTo(it); pdf.close() }.toByteArray()
+        val report = dev.ai.elements.core.model.FilePart("d1", "application/pdf", "data:application/pdf;base64," + android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP), filename = "report.pdf")
+        val word = dev.ai.elements.core.model.FilePart("d2", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "data:application/octet-stream;base64,AAAA", filename = "plan.docx")
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                androidx.compose.foundation.layout.Column {
+                    dev.ai.elements.ui.chat.FileAttachment(report)
+                    dev.ai.elements.ui.chat.FileAttachment(word)
+                }
+            }
+        }
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("document-preview", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText("PDF · 2", substring = true).assertExists()
+        compose.onNodeWithText("Word", substring = true).assertExists()
+        compose.onAllNodesWithTag("file-document")[0].performClick()
+        compose.onNodeWithTag("pdf-viewer").assertExists()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("pdf-page-0").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("pdf-pages").performScrollToIndex(1)
+        compose.onNodeWithTag("pdf-page-1").assertExists()
+        compose.onNodeWithTag("pdf-close").performClick()
+        compose.onNodeWithTag("pdf-viewer").assertDoesNotExist()
     }
 
     @Test fun checkpoint_restoresOnlyAfterConfirming() {

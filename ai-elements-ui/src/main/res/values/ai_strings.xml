@@ -203,4 +203,6 @@
     <string name="ai_view_image">View image</string>
     <string name="ai_rotate">Rotate</string>
     <string name="ai_play_video">Play video</string>
+    <string name="ai_pages">%1$d pages</string>
+    <string name="ai_open_with">Open with…</string>
 </resources>
