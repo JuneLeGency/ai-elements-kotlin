@@ -234,4 +234,9 @@
     <string name="voice_rate">Speech rate</string>
     <string name="voice_preview">Preview</string>
     <string name="voice_sample">Hello! This is how replies will sound when they are read aloud.</string>
+    <string name="font_serif">Serif</string>
+    <string name="code_font">Code font</string>
+    <string name="code_font_desc">Monospace fonts under the SIL Open Font License; Chinese falls back to the system font</string>
+    <string name="code_font_follow">Match the UI font</string>
+    <string name="code_font_system">System monospace</string>
 </resources>

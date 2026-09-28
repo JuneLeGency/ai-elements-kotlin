@@ -33,7 +33,6 @@ import dev.ai.elements.demo.data.AppLocale
 import dev.ai.elements.demo.data.DiagramSize
 import dev.ai.elements.demo.data.ThemeMode
 import dev.ai.elements.demo.ui.DemoApp
-import dev.ai.elements.demo.ui.codeFamily
 import dev.ai.elements.demo.ui.family
 import dev.ai.elements.mermaid.NativeMermaidRenderer
 import dev.ai.elements.ui.markdown.LocalMermaidRenderer
@@ -71,7 +70,7 @@ class MainActivity : ComponentActivity() {
                 palette = appearance.palette,
                 contrast = appearance.contrast,
                 fontFamily = appearance.font.family,
-                codeFontFamily = appearance.font.codeFamily,
+                codeFontFamily = appearance.codeFont.family(appearance.font),
             ) {
                 val renderer = if (appearance.nativeMermaid) NativeMermaidRenderer else MermaidRenderer.WebView
                 val sizing = when (appearance.diagramSize) {

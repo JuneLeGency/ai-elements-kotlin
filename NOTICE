@@ -20,6 +20,8 @@ ai-elements-mermaid-native (dependency)
 demo app only (res/font/, licenses in demo/src/main/assets/licenses/)
   * Geist and Geist Mono — SIL Open Font License 1.1, Copyright 2024 The Geist Project Authors
   * Inter — SIL Open Font License 1.1, Copyright 2020 The Inter Project Authors
+  * JetBrains Mono — SIL Open Font License 1.1, Copyright 2020 The JetBrains Mono Project Authors
+  * Fira Code — SIL Open Font License 1.1, Copyright 2014-2020 The Fira Code Project Authors
   * WenKai GB Screen Subset — SIL Open Font License 1.1, a renamed subset of
     LXGW WenKai Screen, Copyright 2021-2026 LXGW
 

@@ -1,5 +1,6 @@
 package dev.ai.elements.demo.ui
 
+import dev.ai.elements.demo.data.CodeFont
 import dev.ai.elements.demo.data.speech
 import dev.ai.elements.ui.voice.rememberSpeechOutputState
 import dev.ai.elements.ui.voice.isOnDeviceRecognitionAvailable
@@ -320,6 +321,7 @@ private fun TextPane(viewModel: ChatViewModel, showBack: Boolean, onClose: () ->
                 Text(
                     when (font) {
                         AppFont.SYSTEM -> stringResource(R.string.font_system)
+                        AppFont.SERIF -> stringResource(R.string.font_serif)
                         AppFont.GEIST -> "Geist"
                         AppFont.INTER -> "Inter"
                         AppFont.WENKAI -> stringResource(R.string.font_wenkai)
@@ -348,6 +350,28 @@ private fun TextPane(viewModel: ChatViewModel, showBack: Boolean, onClose: () ->
                     ),
                     maxLines = 1,
                 )
+            }
+        }
+        item {
+            SettingLabel(stringResource(R.string.code_font), stringResource(R.string.code_font_desc))
+            CodeFont.entries.forEach { option ->
+                val family = option.family(appearance.font)
+                ListItem(
+                    onClick = { viewModel.settings.update(appearance.copy(codeFont = option)) },
+                    leadingContent = { RadioButton(selected = appearance.codeFont == option, onClick = null) },
+                    supportingContent = { Text("val 你好 = listOf(0, O, 1, l, I) != null", fontFamily = family, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("code-font-${option.name.lowercase()}"),
+                ) {
+                    Text(
+                        when (option) {
+                            CodeFont.FOLLOW -> stringResource(R.string.code_font_follow)
+                            CodeFont.SYSTEM -> stringResource(R.string.code_font_system)
+                            CodeFont.GEIST_MONO -> "Geist Mono"
+                            CodeFont.JETBRAINS_MONO -> "JetBrains Mono"
+                            CodeFont.FIRA_CODE -> "Fira Code"
+                        },
+                    )
+                }
             }
         }
     }

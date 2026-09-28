@@ -127,6 +127,10 @@
   for dictation, "Read aloud" and voice mode; `recognitionServices()` and `SpeechOutputState.engines`
   / `voices` list what the device has. The demo has a Voice settings page with a preview.
 
+- Demo fonts: a serif UI font (the platform serif, Noto Serif CJK / 思源宋体 for Chinese, adds
+  nothing to the APK) and a separate code font with previews: match the UI, system monospace, Geist
+  Mono, JetBrains Mono, Fira Code (SIL OFL 1.1, bundled variable fonts).
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

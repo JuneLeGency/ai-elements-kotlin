@@ -11,8 +11,11 @@ enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
 enum class DiagramSize { SMALL, MEDIUM, LARGE }
 
-/** Bundled UI fonts (all SIL OFL 1.1, see assets/licenses/FONTS.md). */
-enum class AppFont { SYSTEM, GEIST, INTER, WENKAI }
+/** UI fonts: the system's (sans and serif, e.g. Noto Sans / Serif CJK) and bundled ones (SIL OFL 1.1, see assets/licenses/FONTS.md). */
+enum class AppFont { SYSTEM, SERIF, GEIST, INTER, WENKAI }
+
+/** Code fonts (bundled ones SIL OFL 1.1); FOLLOW pairs with the UI font. */
+enum class CodeFont { FOLLOW, SYSTEM, GEIST_MONO, JETBRAINS_MONO, FIRA_CODE }
 
 /** In-app text size, multiplied onto the system font scale. */
 enum class TextSize(val scale: Float) { SMALL(0.9f), DEFAULT(1f), LARGE(1.1f), EXTRA_LARGE(1.25f) }
@@ -24,6 +27,7 @@ data class Appearance(
     val nativeMermaid: Boolean = false,
     val diagramSize: DiagramSize = DiagramSize.MEDIUM,
     val font: AppFont = AppFont.SYSTEM,
+    val codeFont: CodeFont = CodeFont.FOLLOW,
     val textSize: TextSize = TextSize.DEFAULT,
     /** Offer subscription sign-ins through vendors' CLI clients (see OAuthProvider). */
     val subscriptionSignIn: Boolean = false,
@@ -47,6 +51,7 @@ class AppSettings(context: Context) {
             nativeMermaid = prefs.getBoolean("native_mermaid", false),
             diagramSize = runCatching { DiagramSize.valueOf(prefs.getString("diagram_size", null)!!) }.getOrDefault(DiagramSize.MEDIUM),
             font = runCatching { AppFont.valueOf(prefs.getString("font", null)!!) }.getOrDefault(AppFont.SYSTEM),
+            codeFont = runCatching { CodeFont.valueOf(prefs.getString("code_font", null)!!) }.getOrDefault(CodeFont.FOLLOW),
             textSize = runCatching { TextSize.valueOf(prefs.getString("text_size", null)!!) }.getOrDefault(TextSize.DEFAULT),
             subscriptionSignIn = prefs.getBoolean("subscription_sign_in", false),
             palette = runCatching { AiPalette.valueOf(prefs.getString("palette", null)!!) }.getOrDefault(AiPalette.VIOLET),
@@ -68,6 +73,7 @@ class AppSettings(context: Context) {
             .putBoolean("native_mermaid", appearance.nativeMermaid)
             .putString("diagram_size", appearance.diagramSize.name)
             .putString("font", appearance.font.name)
+            .putString("code_font", appearance.codeFont.name)
             .putString("text_size", appearance.textSize.name)
             .putBoolean("subscription_sign_in", appearance.subscriptionSignIn)
             .putString("palette", appearance.palette.name)

@@ -232,4 +232,9 @@
     <string name="voice_rate">語速</string>
     <string name="voice_preview">試聽</string>
     <string name="voice_sample">你好！回覆被朗讀時就是這個聲音。</string>
+    <string name="font_serif">宋體</string>
+    <string name="code_font">程式碼字型</string>
+    <string name="code_font_desc">採用 SIL Open Font License 的等寬字型；中文使用系統字型</string>
+    <string name="code_font_follow">跟隨介面字型</string>
+    <string name="code_font_system">系統等寬</string>
 </resources>

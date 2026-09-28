@@ -232,4 +232,9 @@
     <string name="voice_rate">話す速さ</string>
     <string name="voice_preview">試聴</string>
     <string name="voice_sample">こんにちは。返信はこの声で読み上げられます。</string>
+    <string name="font_serif">明朝</string>
+    <string name="code_font">コードのフォント</string>
+    <string name="code_font_desc">SIL Open Font License の等幅フォント。日本語はシステムのフォント</string>
+    <string name="code_font_follow">UI フォントに合わせる</string>
+    <string name="code_font_system">システムの等幅</string>
 </resources>
