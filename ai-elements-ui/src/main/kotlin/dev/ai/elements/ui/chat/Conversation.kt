@@ -1,11 +1,5 @@
 package dev.ai.elements.ui.chat
 
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.saveable.rememberSaveable
-import dev.ai.elements.ui.voice.LocalSpeechOutput
-import dev.ai.elements.ui.voice.rememberSpeechOutputState
-import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
@@ -32,13 +26,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import dev.ai.elements.core.chat.InputResponse
-import dev.ai.elements.core.chat.ToolDecision
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -46,13 +41,18 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.chat.ChatState
+import dev.ai.elements.core.chat.InputResponse
+import dev.ai.elements.core.chat.ToolDecision
 import dev.ai.elements.core.model.ChatStatus
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
 import dev.ai.elements.ui.R
+import dev.ai.elements.ui.icons.AiIcons
 import dev.ai.elements.ui.theme.AiSpacing
-import java.util.IdentityHashMap
+import dev.ai.elements.ui.voice.LocalSpeechOutput
+import dev.ai.elements.ui.voice.rememberSpeechOutputState
 import kotlinx.coroutines.launch
+import java.util.IdentityHashMap
 
 /**
  * The scrolling message list (AI Elements `<Conversation>`).
@@ -83,16 +83,11 @@ fun Conversation(
     /** Answers [ChatState.inputRequests], shown as [InputRequestCard]s after the last message. */
     onInputResponse: ((requestId: String, response: InputResponse) -> Unit)? = null,
 ) {
-    // The run playback of one message, opened from its step screenshots or its actions.
-    var playback by rememberSaveable { mutableStateOf<Pair<String, Int>?>(null) }
-    playback?.let { (messageId, step) ->
-        state.messages.firstOrNull { it.id == messageId }?.let { message ->
-            AgentRunPlayback(message, onDismiss = { playback = null }, initialStep = step)
-        }
-    }
+    // The agent's computer view: the enclosing Chat's, else our own (a bottom sheet or side pane).
+    val outer = LocalAgentComputer.current
+    val computer = outer ?: rememberAgentComputerState()
     CompositionLocalProvider(
         LocalToolDecision provides onToolDecision,
-        LocalOpenRunPlayback provides { messageId, step -> playback = messageId to step },
         // "Read aloud" works without setup; an app can provide its own engine to share it.
         LocalSpeechOutput provides (LocalSpeechOutput.current ?: rememberSpeechOutputState()),
     ) {
@@ -119,89 +114,97 @@ fun Conversation(
         val conversationKey = state.messages.firstOrNull()?.id
         LaunchedEffect(userCount, conversationKey) { if (userCount > 0) stick.jumpToLatest() }
 
-        Box(modifier.nestedScroll(stick.connection)) {
-            LazyColumn(
-                state = listState,
-                contentPadding = contentPadding,
-                verticalArrangement = Arrangement.Bottom,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxSize().testTag("conversation"),
-            ) {
-                state.messages.forEachIndexed { index, message ->
-                    // Space between turns; slices of one reply sit closer together.
-                    val turnGap = Modifier.padding(top = if (index == 0) 0.dp else AiSpacing.turn)
-                    if (message.role == Role.USER) {
-                        item(key = message.id, contentType = "user") {
-                            MessageItem(message, turnGap.widthIn(max = maxContentWidth).fillMaxWidth())
+        MaybeComputerScaffold(if (outer == null) computer else null, state.messages, modifier) {
+            Box(Modifier.fillMaxSize().nestedScroll(stick.connection)) {
+                LazyColumn(
+                    state = listState,
+                    contentPadding = contentPadding,
+                    verticalArrangement = Arrangement.Bottom,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize().testTag("conversation"),
+                ) {
+                    state.messages.forEachIndexed { index, message ->
+                        // Space between turns; slices of one reply sit closer together.
+                        val turnGap = Modifier.padding(top = if (index == 0) 0.dp else AiSpacing.turn)
+                        if (message.role == Role.USER) {
+                            item(key = message.id, contentType = "user") {
+                                MessageItem(message, turnGap.widthIn(max = maxContentWidth).fillMaxWidth())
+                            }
+                        } else {
+                            rowsFor(message).forEach { row ->
+                                item(key = row.key, contentType = row.contentType) {
+                                    AssistantRowItem(
+                                        row = row,
+                                        prompt = prompts[message.id],
+                                        onRegenerate = if (message.id == lastAssistantId && !state.isBusy) onRegenerate else null,
+                                        onToolApproval = onToolApproval,
+                                        onSelectVersion = onSelectVersion?.takeIf { !state.isBusy }?.let { cb -> { i -> cb(message.id, i) } },
+                                        modifier = (if (row.first) turnGap else Modifier.padding(top = AiSpacing.s))
+                                            .widthIn(max = maxContentWidth)
+                                            .fillMaxWidth(),
+                                    )
+                                }
+                            }
                         }
-                    } else {
-                        rowsFor(message).forEach { row ->
-                            item(key = row.key, contentType = row.contentType) {
-                                AssistantRowItem(
-                                    row = row,
-                                    prompt = prompts[message.id],
-                                    onRegenerate = if (message.id == lastAssistantId && !state.isBusy) onRegenerate else null,
-                                    onToolApproval = onToolApproval,
-                                    onSelectVersion = onSelectVersion?.takeIf { !state.isBusy }?.let { cb -> { i -> cb(message.id, i) } },
-                                    modifier = (if (row.first) turnGap else Modifier.padding(top = AiSpacing.s))
-                                        .widthIn(max = maxContentWidth)
-                                        .fillMaxWidth(),
+                        // A checkpoint after every finished turn that has later messages.
+                        if (onRestoreCheckpoint != null && index < state.messages.lastIndex && message.role == Role.ASSISTANT && !state.isBusy) {
+                            item(key = "checkpoint-${message.id}", contentType = "checkpoint") {
+                                Checkpoint(
+                                    onRestore = { onRestoreCheckpoint(message.id) },
+                                    modifier = Modifier.padding(top = AiSpacing.s).widthIn(max = maxContentWidth),
                                 )
                             }
                         }
                     }
-                    // A checkpoint after every finished turn that has later messages.
-                    if (onRestoreCheckpoint != null && index < state.messages.lastIndex && message.role == Role.ASSISTANT && !state.isBusy) {
-                        item(key = "checkpoint-${message.id}", contentType = "checkpoint") {
-                            Checkpoint(
-                                onRestore = { onRestoreCheckpoint(message.id) },
-                                modifier = Modifier.padding(top = AiSpacing.s).widthIn(max = maxContentWidth),
-                            )
+                    if (state.status == ChatStatus.SUBMITTED) {
+                        item(key = "pending", contentType = "pending") {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.padding(top = AiSpacing.turn).widthIn(max = maxContentWidth).fillMaxWidth().testTag("pending"),
+                            ) {
+                                AssistantAvatar(active = true)
+                                LoadingIndicator(Modifier.size(36.dp))
+                            }
+                        }
+                    }
+                    if (onInputResponse != null) {
+                        state.inputRequests.forEach { request ->
+                            item(key = "input-${request.id}", contentType = "input-request") {
+                                InputRequestCard(
+                                    request,
+                                    onRespond = { onInputResponse(request.id, it) },
+                                    modifier = Modifier.padding(top = AiSpacing.l).widthIn(max = maxContentWidth),
+                                )
+                            }
+                        }
+                    }
+                    if (state.status == ChatStatus.ERROR && state.error != null) {
+                        item(key = "error", contentType = "error") {
+                            ErrorCard(state.error!!, onRetry, onDismissError, Modifier.padding(top = AiSpacing.l).widthIn(max = maxContentWidth))
                         }
                     }
                 }
-                if (state.status == ChatStatus.SUBMITTED) {
-                    item(key = "pending", contentType = "pending") {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.padding(top = AiSpacing.turn).widthIn(max = maxContentWidth).fillMaxWidth().testTag("pending"),
-                        ) {
-                            AssistantAvatar(active = true)
-                            LoadingIndicator(Modifier.size(36.dp))
-                        }
-                    }
-                }
-                if (onInputResponse != null) {
-                    state.inputRequests.forEach { request ->
-                        item(key = "input-${request.id}", contentType = "input-request") {
-                            InputRequestCard(
-                                request,
-                                onRespond = { onInputResponse(request.id, it) },
-                                modifier = Modifier.padding(top = AiSpacing.l).widthIn(max = maxContentWidth),
-                            )
-                        }
-                    }
-                }
-                if (state.status == ChatStatus.ERROR && state.error != null) {
-                    item(key = "error", contentType = "error") {
-                        ErrorCard(state.error!!, onRetry, onDismissError, Modifier.padding(top = AiSpacing.l).widthIn(max = maxContentWidth))
-                    }
-                }
-            }
 
-            AnimatedVisibility(
-                visible = stick.showJumpToLatest,
-                enter = scaleIn(MaterialTheme.motionScheme.fastSpatialSpec()),
-                exit = scaleOut(MaterialTheme.motionScheme.fastSpatialSpec()),
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp),
-            ) {
-                SmallFloatingActionButton(onClick = { scope.launch { stick.jumpToLatest(animated = true) } }) {
-                    Icon(AiIcons.KeyboardArrowDown, stringResource(R.string.ai_scroll_to_latest))
+                AnimatedVisibility(
+                    visible = stick.showJumpToLatest,
+                    enter = scaleIn(MaterialTheme.motionScheme.fastSpatialSpec()),
+                    exit = scaleOut(MaterialTheme.motionScheme.fastSpatialSpec()),
+                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp),
+                ) {
+                    SmallFloatingActionButton(onClick = { scope.launch { stick.jumpToLatest(animated = true) } }) {
+                        Icon(AiIcons.KeyboardArrowDown, stringResource(R.string.ai_scroll_to_latest))
+                    }
                 }
             }
         }
     }
+}
+
+/** [content] in an [AgentComputerScaffold] of [state], or as is when the caller already has one. */
+@Composable
+private fun MaybeComputerScaffold(state: AgentComputerState?, messages: List<Message>, modifier: Modifier, content: @Composable () -> Unit) {
+    if (state == null) Box(modifier) { content() } else AgentComputerScaffold(state, messages, modifier, content)
 }
 
 @Composable

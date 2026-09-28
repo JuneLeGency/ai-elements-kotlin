@@ -75,8 +75,9 @@ own artifacts: `ai-elements-a2a`, `harness/*`.
 Elements render the in-process models only (`core.model`, `core.chat`); they never import
 `protocol`, `provider`, `agent`, `mcp`, `skills`, `http` or other artifacts, and never interpret
 tool names or protocol conventions. What a part *means* is a model field set upstream:
-`ToolPart.kind` (`Function` / `Delegation` / `Skill`) and `ToolPart.source` are declared by
-on-device tools (`AgentTool.kindFor` / `source`) or mapped from a protocol in `core`
+`ToolPart.kind` (`Function` / `Delegation` / `Skill`), `ToolPart.source` and `ToolPart.category` /
+`location` (ACP `ToolKind` vocabulary) are declared by on-device tools (`AgentTool.kindFor` / `source` /
+`categoryFor` / `locationFor`) or mapped from a protocol in `core`
 (`protocol.ToolConventions`, AG-UI `SUBAGENT_*`); shared agent state is `DataPart.STATE`.
 If an element needs more, extend the model — do not special-case a name in the UI.
 `LayeringTest` (ai-elements-ui unit tests) enforces this. Apps customise rendering through

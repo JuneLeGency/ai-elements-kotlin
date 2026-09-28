@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -22,6 +23,7 @@ import dev.ai.elements.a2a.A2aBackend
 import dev.ai.elements.a2a.asSubAgent
 import dev.ai.elements.acp.AcpAgent
 import dev.ai.elements.acp.AcpBackend
+import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatController
 import dev.ai.elements.core.chat.ChatEvent
@@ -34,8 +36,10 @@ import dev.ai.elements.core.mcp.McpApps
 import dev.ai.elements.core.mcp.McpClient
 import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.Message
+import dev.ai.elements.core.model.ToolCategory
 import dev.ai.elements.core.model.ToolKind
 import dev.ai.elements.core.protocol.agui.AgUiBackend
+import dev.ai.elements.core.protocol.agui.AgUiEventLog
 import dev.ai.elements.core.protocol.aisdk.UiMessageStreamBackend
 import dev.ai.elements.core.skills.SkillLibrary
 import dev.ai.elements.core.skills.Skills
@@ -67,7 +71,10 @@ import dev.ai.elements.ui.theme.AiElementsTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import java.io.File
 
@@ -205,6 +212,33 @@ fun CustomRendering(controller: ChatController, myHttp: MyHttp) {
         Chat(controller)
     }
     // --8<-- [end:renderers]
+}
+
+@Composable
+fun ReplayableRuns(context: android.content.Context) {
+    // --8<-- [start:replay]
+    // AG-UI serialization: every run's events, one JSON log per thread.
+    val log = remember { AgUiEventLog.Files(File(context.filesDir, "agui-events")) }
+    val controller = rememberChat { approver ->
+        AgUiBackend("https://agents.example.com/api/agui", approver = approver, eventLog = log)
+    }
+    // The agent's computer offers "Replay run" for replies with recorded events.
+    Chat(controller, replay = { message -> log.replayOf(message) })
+    // --8<-- [end:replay]
+}
+
+object ToolCategories {
+    // --8<-- [start:categories]
+    val listFiles = object : AgentTool {
+        override val name = "list_files"
+        override val description = "List the files in a folder."
+        override val parameters = buildJsonObject { put("type", "object") }
+        // What the call does (ACP ToolKind) and where: the computer shows it as a search of that folder.
+        override fun categoryFor(arguments: JsonObject) = ToolCategory.SEARCH
+        override fun locationFor(arguments: JsonObject) = arguments["path"]?.jsonPrimitive?.contentOrNull
+        override suspend fun execute(arguments: JsonObject) = "README.md\nsrc/"
+    }
+    // --8<-- [end:categories]
 }
 
 @Composable

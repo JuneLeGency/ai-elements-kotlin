@@ -16,12 +16,13 @@ AiElementsTheme {
 ```
 
 That is a complete chat: streaming Markdown, reasoning, tool calls with approvals, sub-agents, plans
-and sources. Swap the backend to talk to another protocol; the UI stays the same.
+and sources, and a live view of the agent's computer (screenshots, terminal, diffs) with a timeline
+and replay. Swap the backend to talk to another protocol; the UI stays the same.
 
 **[Documentation](docs/index.md)**: [install](docs/getting-started/installation.md) ·
 [pure client](docs/getting-started/pure-client.md) · [in-app agent](docs/getting-started/in-app-agent.md) ·
 [protocols](docs/protocols/index.md) · [elements](docs/guides/elements.md) ·
-[human in the loop](docs/guides/human-in-the-loop.md) · [architecture](docs/concepts/architecture.md).
+[human in the loop](docs/guides/human-in-the-loop.md) · [steps and replay](docs/guides/steps-and-replay.md) · [architecture](docs/concepts/architecture.md).
 Build the site with `tools/build-docs.sh`, or preview it with `uvx zensical serve`.
 
 ## Two ways to use it

@@ -199,9 +199,27 @@
     <string name="ai_play_video">播放影片</string>
     <string name="ai_pages">%1$d 頁</string>
     <string name="ai_open_with">用其他應用程式開啟</string>
-    <string name="ai_run_playback">執行回放</string>
     <string name="ai_step_of">第 %1$d / %2$d 步</string>
     <string name="ai_no_steps">這則回覆沒有呼叫工具</string>
     <string name="ai_previous_step">上一步</string>
     <string name="ai_next_step">下一步</string>
+    <string name="ai_agent_computer">智慧體的電腦</string>
+    <string name="ai_live">即時</string>
+    <string name="ai_back_to_live">回到即時</string>
+    <string name="ai_replay_run">重播執行過程</string>
+    <string name="ai_replaying">重播中</string>
+    <string name="ai_exit_replay">結束重播</string>
+    <string name="ai_activity_read">讀取</string>
+    <string name="ai_activity_edit">編輯</string>
+    <string name="ai_activity_delete">刪除</string>
+    <string name="ai_activity_move">移動</string>
+    <string name="ai_activity_search">搜尋</string>
+    <string name="ai_activity_execute">執行指令</string>
+    <string name="ai_activity_think">思考</string>
+    <string name="ai_activity_fetch">瀏覽</string>
+    <string name="ai_activity_switch_mode">切換模式</string>
+    <plurals name="ai_steps">
+        <item quantity="one">%d 步</item>
+        <item quantity="other">%d 步</item>
+    </plurals>
 </resources>

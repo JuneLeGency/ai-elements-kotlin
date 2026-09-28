@@ -236,6 +236,19 @@ class WebBrowser(
         if (!screenshots) return
         val call = ToolCallContext.current() ?: return
         val jpeg = runCatching {
+            // Draw only once the page's current DOM has been rendered (WebView.VisualStateCallback).
+            withContext(Dispatchers.Main) {
+                val view = webView ?: return@withContext
+                withTimeoutOrNull(VISUAL_STATE_TIMEOUT_MS) {
+                    suspendCancellableCoroutine { done ->
+                        view.postVisualStateCallback(0, object : WebView.VisualStateCallback() {
+                            override fun onComplete(requestId: Long) {
+                                if (done.isActive) done.resume(Unit)
+                            }
+                        })
+                    }
+                }
+            }
             withContext(Dispatchers.Main) {
                 val view = webView ?: return@withContext null
                 val scale = SCREENSHOT_WIDTH.toFloat() / viewportWidth
@@ -253,6 +266,7 @@ class WebBrowser(
 
     private companion object {
         const val SCREENSHOT_WIDTH = 720
+        const val VISUAL_STATE_TIMEOUT_MS = 2_000L
         /** Calls that retrieve a page or its content (ACP `fetch`); the others act on the page. */
         val FETCHING = setOf("navigate", "go_back", "go_forward", "snapshot", "get_text")
 

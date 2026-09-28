@@ -1,22 +1,23 @@
 package dev.ai.elements.core.config
 
-import dev.ai.elements.core.chat.ChatBackend
-import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.BuiltinTools
+import dev.ai.elements.core.auth.OAuthBackend
 import dev.ai.elements.core.auth.OAuthProvider
 import dev.ai.elements.core.auth.TokenSource
-import dev.ai.elements.core.protocol.agui.AgUiBackend
-import dev.ai.elements.core.provider.anthropic.AnthropicBackend
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.http.DefaultHttpClient
+import dev.ai.elements.core.http.getJson
+import dev.ai.elements.core.protocol.agui.AgUiBackend
+import dev.ai.elements.core.protocol.agui.AgUiEventLog
+import dev.ai.elements.core.protocol.aisdk.UiMessageStreamBackend
+import dev.ai.elements.core.provider.anthropic.AnthropicBackend
 import dev.ai.elements.core.provider.gemini.GeminiBackend
 import dev.ai.elements.core.provider.mock.MockAgentBackend
-import dev.ai.elements.core.auth.OAuthBackend
 import dev.ai.elements.core.provider.ollama.OllamaBackend
 import dev.ai.elements.core.provider.openai.OpenAiChatBackend
 import dev.ai.elements.core.provider.openai.OpenAiResponsesBackend
-import dev.ai.elements.core.protocol.aisdk.UiMessageStreamBackend
-import dev.ai.elements.core.http.getJson
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
@@ -92,6 +93,7 @@ data class ProviderProfile(
      * @param instructions extra guidance (e.g. [dev.ai.elements.core.agent.Capability]
      *   instructions): appended to the system prompt of on-device loops and sent to AG-UI
      *   servers as `context`.
+     * @param agUiEventLog where an AG-UI backend keeps its event log, for replays ([AgUiEventLog]).
      */
     fun createBackend(
         apiKey: String,
@@ -99,6 +101,7 @@ data class ProviderProfile(
         approver: ToolApprover = ToolApprover.AlwaysApprove,
         headers: Map<String, String> = emptyMap(),
         instructions: String = "",
+        agUiEventLog: AgUiEventLog? = null,
     ): ChatBackend {
         val agentTools = if (useTools) tools else emptyList()
         val base = baseUrl.trimEnd('/')
@@ -109,6 +112,7 @@ data class ProviderProfile(
             ProviderKind.AG_UI -> AgUiBackend(
                 "$base/api/agui", apiKey, agentTools, approver,
                 context = listOfNotNull(instructions.takeIf { it.isNotBlank() }?.let { "Client capabilities" to it }),
+                eventLog = agUiEventLog,
             )
             ProviderKind.OPENAI -> OpenAiChatBackend(base, model, apiKey, system, agentTools, approver, extraHeaders = headers)
             ProviderKind.OPENAI_RESPONSES -> OpenAiResponsesBackend(base, model, apiKey, system, agentTools, approver, extraHeaders = headers)

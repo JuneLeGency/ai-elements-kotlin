@@ -1,13 +1,11 @@
 package dev.ai.elements.demo.ui
 
-import dev.ai.elements.ui.voice.VoiceMode
-import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.Dialog
 import android.speech.SpeechRecognizer
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +18,7 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.only
@@ -55,9 +54,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.clickable
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
@@ -75,6 +71,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalConfiguration
@@ -84,6 +81,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.core.model.FilePart
@@ -92,14 +91,18 @@ import dev.ai.elements.demo.ChatViewModel
 import dev.ai.elements.demo.R
 import dev.ai.elements.demo.data.Conversation
 import dev.ai.elements.demo.data.imageAttachment
+import dev.ai.elements.ui.chat.AgentComputerScaffold
 import dev.ai.elements.ui.chat.ChatEmptyState
 import dev.ai.elements.ui.chat.ContextUsage
 import dev.ai.elements.ui.chat.Conversation
 import dev.ai.elements.ui.chat.PromptInput
 import dev.ai.elements.ui.chat.Queue
+import dev.ai.elements.ui.chat.RunReplay
+import dev.ai.elements.ui.chat.rememberAgentComputerState
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
 import dev.ai.elements.ui.voice.SpeechInput
+import dev.ai.elements.ui.voice.VoiceMode
 import kotlinx.coroutines.launch
 
 /** Starter prompts, in the UI language (the model answers in kind). */
@@ -295,80 +298,90 @@ private fun ChatPane(
             )
         },
     ) { padding ->
-        Column(
+        // The agent's computer: beside the chat on wide windows, a bottom sheet on phones; AG-UI runs replay from their event log.
+        val eventLog = viewModel.runtime.agUiEventLog
+        val computer = rememberAgentComputerState(remember(eventLog) { RunReplay { eventLog.replayOf(it) } })
+        AgentComputerScaffold(
+            computer,
+            state.messages,
             Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .consumeWindowInsets(padding)
-                .imePadding(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .consumeWindowInsets(padding),
         ) {
-            Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                if (state.messages.isEmpty() && !state.isBusy) {
-                    ChatEmptyState(
-                        title = stringResource(R.string.empty_title),
-                        subtitle = listOf(provider.name, provider.kind.label).distinct().joinToString(" · "),
-                        suggestions = demoSuggestions(),
-                        onSelect = { submit(it.text) },
-                        showHero = !compactHeight,
-                        modifier = Modifier.verticalScroll(rememberScrollState()),
-                    )
-                } else {
-                    Conversation(
-                        state = state,
-                        onRegenerate = viewModel::regenerate,
-                        onDismissError = viewModel::dismissError,
-                        onToolApproval = viewModel::respondToApproval,
-                        onToolDecision = viewModel::respondToDecision,
-                        onInputResponse = viewModel::respondToInput,
-                        onSelectVersion = viewModel::selectVersion,
-                        onRestoreCheckpoint = viewModel::restoreCheckpoint,
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                        modifier = Modifier.fillMaxSize(),
-                    )
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .imePadding(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    if (state.messages.isEmpty() && !state.isBusy) {
+                        ChatEmptyState(
+                            title = stringResource(R.string.empty_title),
+                            subtitle = listOf(provider.name, provider.kind.label).distinct().joinToString(" · "),
+                            suggestions = demoSuggestions(),
+                            onSelect = { submit(it.text) },
+                            showHero = !compactHeight,
+                            modifier = Modifier.verticalScroll(rememberScrollState()),
+                        )
+                    } else {
+                        Conversation(
+                            state = state,
+                            onRegenerate = viewModel::regenerate,
+                            onDismissError = viewModel::dismissError,
+                            onToolApproval = viewModel::respondToApproval,
+                            onToolDecision = viewModel::respondToDecision,
+                            onInputResponse = viewModel::respondToInput,
+                            onSelectVersion = viewModel::selectVersion,
+                            onRestoreCheckpoint = viewModel::restoreCheckpoint,
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
                 }
+                Queue(
+                    items = state.queue,
+                    paused = state.queuePaused,
+                    onRemove = { viewModel.removeQueued(it.id) },
+                    onSendNow = { viewModel.sendQueuedNow(it.id) },
+                    modifier = Modifier.widthIn(max = 840.dp).padding(start = 12.dp, end = 12.dp, bottom = 8.dp),
+                )
+                PromptInput(
+                    allowQueue = true,
+                    value = input,
+                    onValueChange = { input = it },
+                    onSubmit = { submit(input) },
+                    onStop = viewModel::stop,
+                    busy = state.isBusy,
+                    placeholder = stringResource(R.string.message_placeholder, provider.name),
+                    attachments = attachments,
+                    onAddAttachment = {
+                        pickImages.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
+                    onRemoveAttachment = { removed -> attachments = attachments.filterNot { it.id == removed.id } },
+                    onVoiceMode = if (canTalk) ({ talking = true }) else null,
+                    toolbar = {
+                        // Dictation appends to what's typed; partial results update in place.
+                        SpeechInput(onTranscript = { text, isFinal ->
+                            val base = dictationBase ?: input.also { dictationBase = it }
+                            input = listOf(base, text).filter { it.isNotBlank() }.joinToString(" ")
+                            if (isFinal) dictationBase = null
+                        }, onCancel = {
+                            // Cancelled: back to what was typed before dictating.
+                            dictationBase?.let { input = it }
+                            dictationBase = null
+                        })
+                        ModelChip(viewModel, provider)
+                        CapabilitiesButton(viewModel, provider, onManage = onOpenSettings)
+                        // Phones already show usage under each reply; the composer has no room for it.
+                        if (!compactWidth) lastUsage?.let { ContextUsage(it) }
+                    },
+                    modifier = Modifier
+                        .widthIn(max = 840.dp)
+                        .padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
+                )
             }
-            Queue(
-                items = state.queue,
-                paused = state.queuePaused,
-                onRemove = { viewModel.removeQueued(it.id) },
-                onSendNow = { viewModel.sendQueuedNow(it.id) },
-                modifier = Modifier.widthIn(max = 840.dp).padding(start = 12.dp, end = 12.dp, bottom = 8.dp),
-            )
-            PromptInput(
-                allowQueue = true,
-                value = input,
-                onValueChange = { input = it },
-                onSubmit = { submit(input) },
-                onStop = viewModel::stop,
-                busy = state.isBusy,
-                placeholder = stringResource(R.string.message_placeholder, provider.name),
-                attachments = attachments,
-                onAddAttachment = {
-                    pickImages.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                },
-                onRemoveAttachment = { removed -> attachments = attachments.filterNot { it.id == removed.id } },
-                onVoiceMode = if (canTalk) ({ talking = true }) else null,
-                toolbar = {
-                    // Dictation appends to what's typed; partial results update in place.
-                    SpeechInput(onTranscript = { text, isFinal ->
-                        val base = dictationBase ?: input.also { dictationBase = it }
-                        input = listOf(base, text).filter { it.isNotBlank() }.joinToString(" ")
-                        if (isFinal) dictationBase = null
-                    }, onCancel = {
-                        // Cancelled: back to what was typed before dictating.
-                        dictationBase?.let { input = it }
-                        dictationBase = null
-                    })
-                    ModelChip(viewModel, provider)
-                    CapabilitiesButton(viewModel, provider, onManage = onOpenSettings)
-                    // Phones already show usage under each reply; the composer has no room for it.
-                    if (!compactWidth) lastUsage?.let { ContextUsage(it) }
-                },
-                modifier = Modifier
-                    .widthIn(max = 840.dp)
-                    .padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
-            )
         }
     }
 

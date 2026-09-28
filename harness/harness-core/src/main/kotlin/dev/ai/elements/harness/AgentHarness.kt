@@ -1,22 +1,23 @@
 package dev.ai.elements.harness
 
-import dev.ai.elements.core.chat.ChatBackend
-import dev.ai.elements.core.chat.ChatEvent
-import dev.ai.elements.core.model.Message
-import dev.ai.elements.core.model.Role
-import dev.ai.elements.core.model.TextPart
-import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
-import dev.ai.elements.core.chat.finishStreaming
-import dev.ai.elements.core.chat.reduce
 import dev.ai.elements.core.agent.Capability
 import dev.ai.elements.core.agent.SubAgent
 import dev.ai.elements.core.agent.SubAgents
 import dev.ai.elements.core.agent.collectTools
 import dev.ai.elements.core.agent.composeInstructions
 import dev.ai.elements.core.auth.TokenSource
-import dev.ai.elements.core.config.ProviderProfile
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.chat.deferredBackend
+import dev.ai.elements.core.chat.finishStreaming
+import dev.ai.elements.core.chat.reduce
+import dev.ai.elements.core.config.ProviderProfile
+import dev.ai.elements.core.model.Message
+import dev.ai.elements.core.model.Role
+import dev.ai.elements.core.model.TextPart
+import dev.ai.elements.core.protocol.agui.AgUiEventLog
 
 /**
  * How to reach a model: builds the backend of one agent run from its tools
@@ -26,12 +27,20 @@ fun interface ModelBinding {
     fun backend(tools: List<AgentTool>, instructions: String, approver: ToolApprover): ChatBackend
 }
 
-/** This provider as a [ModelBinding] (API key, or signed-in [tokens]); [systemPrompt] overrides the profile's. */
-fun ProviderProfile.model(apiKey: String = "", tokens: TokenSource? = null, systemPrompt: String? = null): ModelBinding {
+/**
+ * This provider as a [ModelBinding] (API key, or signed-in [tokens]); [systemPrompt] overrides the
+ * profile's; an AG-UI server's events go to [agUiEventLog] for replays.
+ */
+fun ProviderProfile.model(
+    apiKey: String = "",
+    tokens: TokenSource? = null,
+    systemPrompt: String? = null,
+    agUiEventLog: AgUiEventLog? = null,
+): ModelBinding {
     val profile = systemPrompt?.let { copy(systemPrompt = it) } ?: this
     return ModelBinding { tools, instructions, approver ->
         if (tokens != null) profile.createOAuthBackend(tokens, tools, approver, instructions)
-        else profile.createBackend(apiKey, tools, approver, instructions = instructions)
+        else profile.createBackend(apiKey, tools, approver, instructions = instructions, agUiEventLog = agUiEventLog)
     }
 }
 

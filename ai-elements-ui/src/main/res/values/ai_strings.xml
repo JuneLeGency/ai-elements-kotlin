@@ -205,9 +205,27 @@
     <string name="ai_play_video">Play video</string>
     <string name="ai_pages">%1$d pages</string>
     <string name="ai_open_with">Open with…</string>
-    <string name="ai_run_playback">Run playback</string>
     <string name="ai_step_of">Step %1$d of %2$d</string>
     <string name="ai_no_steps">This reply used no tools</string>
     <string name="ai_previous_step">Previous step</string>
     <string name="ai_next_step">Next step</string>
+    <string name="ai_agent_computer">Agent’s computer</string>
+    <string name="ai_live">Live</string>
+    <string name="ai_back_to_live">Back to live</string>
+    <string name="ai_replay_run">Replay run</string>
+    <string name="ai_replaying">Replaying</string>
+    <string name="ai_exit_replay">Exit replay</string>
+    <string name="ai_activity_read">Reading</string>
+    <string name="ai_activity_edit">Editing</string>
+    <string name="ai_activity_delete">Deleting</string>
+    <string name="ai_activity_move">Moving</string>
+    <string name="ai_activity_search">Searching</string>
+    <string name="ai_activity_execute">Running command</string>
+    <string name="ai_activity_think">Thinking</string>
+    <string name="ai_activity_fetch">Browsing</string>
+    <string name="ai_activity_switch_mode">Switching mode</string>
+    <plurals name="ai_steps">
+        <item quantity="one">%d step</item>
+        <item quantity="other">%d steps</item>
+    </plurals>
 </resources>

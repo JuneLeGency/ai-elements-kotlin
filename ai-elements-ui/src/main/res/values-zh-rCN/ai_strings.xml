@@ -199,9 +199,27 @@
     <string name="ai_play_video">播放视频</string>
     <string name="ai_pages">%1$d 页</string>
     <string name="ai_open_with">用其他应用打开</string>
-    <string name="ai_run_playback">运行回放</string>
     <string name="ai_step_of">第 %1$d / %2$d 步</string>
     <string name="ai_no_steps">这条回复没有调用工具</string>
     <string name="ai_previous_step">上一步</string>
     <string name="ai_next_step">下一步</string>
+    <string name="ai_agent_computer">智能体的电脑</string>
+    <string name="ai_live">实时</string>
+    <string name="ai_back_to_live">回到实时</string>
+    <string name="ai_replay_run">回放运行过程</string>
+    <string name="ai_replaying">回放中</string>
+    <string name="ai_exit_replay">退出回放</string>
+    <string name="ai_activity_read">读取</string>
+    <string name="ai_activity_edit">编辑</string>
+    <string name="ai_activity_delete">删除</string>
+    <string name="ai_activity_move">移动</string>
+    <string name="ai_activity_search">搜索</string>
+    <string name="ai_activity_execute">运行命令</string>
+    <string name="ai_activity_think">思考</string>
+    <string name="ai_activity_fetch">浏览</string>
+    <string name="ai_activity_switch_mode">切换模式</string>
+    <plurals name="ai_steps">
+        <item quantity="one">%d 步</item>
+        <item quantity="other">%d 步</item>
+    </plurals>
 </resources>

@@ -1,6 +1,5 @@
 package dev.ai.elements.ui.chat
 
-import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -12,10 +11,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialShapes
@@ -24,11 +26,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.material3.HorizontalDivider
-import dev.ai.elements.ui.theme.AiType
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -38,18 +35,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.ai.elements.core.model.ToolCategory
 import dev.ai.elements.core.model.ToolKind
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
 import dev.ai.elements.ui.R
+import dev.ai.elements.ui.icons.AiIcons
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
+import dev.ai.elements.ui.theme.AiType
 import dev.ai.elements.ui.theme.LocalCodeFontFamily
 import dev.ai.elements.ui.theme.fadingHorizontalScroll
 import kotlinx.serialization.json.Json
@@ -128,12 +129,25 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
     }
 }
 
-/** What kind of tool: a skill, a provider's (e.g. an MCP server's), or a plain function. */
+/** What kind of tool: a skill, what the call does ([ToolPart.category]), a provider's (e.g. an MCP server's), or a plain function. */
 internal val ToolPart.icon: ImageVector
     get() = when {
         kind is ToolKind.Skill -> AiIcons.MenuBook
-        source != null -> AiIcons.Extension
-        else -> AiIcons.Function
+        else -> category?.icon ?: if (source != null) AiIcons.Extension else AiIcons.Function
+    }
+
+internal val ToolCategory.icon: ImageVector
+    get() = when (this) {
+        ToolCategory.READ -> AiIcons.Description
+        ToolCategory.EDIT -> AiIcons.Edit
+        ToolCategory.DELETE -> AiIcons.Delete
+        ToolCategory.MOVE -> AiIcons.DriveFileMove
+        ToolCategory.SEARCH -> AiIcons.Search
+        ToolCategory.EXECUTE -> AiIcons.Terminal
+        ToolCategory.THINK -> AiIcons.Psychology
+        ToolCategory.FETCH -> AiIcons.Language
+        ToolCategory.SWITCH_MODE -> AiIcons.SwapHoriz
+        ToolCategory.OTHER -> AiIcons.Function
     }
 
 /**

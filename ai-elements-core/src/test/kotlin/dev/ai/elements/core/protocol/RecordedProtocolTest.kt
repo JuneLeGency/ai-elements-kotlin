@@ -1,27 +1,30 @@
 package dev.ai.elements.core.protocol
 
-import kotlinx.serialization.json.JsonPrimitive
-import dev.ai.elements.core.agent.AskUser
 import com.sun.net.httpserver.HttpServer
+import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.agent.AskUser
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.chat.InputRequest
 import dev.ai.elements.core.chat.InputResponse
 import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.chat.ToolDecision
-import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.chat.reduce
 import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
-import dev.ai.elements.core.chat.reduce
+import dev.ai.elements.core.protocol.agui.AgUiBackend
+import dev.ai.elements.core.protocol.agui.AgUiEventLog
+import dev.ai.elements.core.protocol.aisdk.UiMessageStreamBackend
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -29,13 +32,12 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.net.InetSocketAddress
 import java.util.concurrent.CopyOnWriteArrayList
-import dev.ai.elements.core.protocol.aisdk.UiMessageStreamBackend
-import dev.ai.elements.core.protocol.agui.AgUiBackend
 
 /**
  * Replays protocol fixtures recorded from real implementations (`server/record_fixtures.py`:
@@ -160,6 +162,30 @@ class RecordedProtocolTest {
                 put("Features", kotlinx.serialization.json.JsonArray(listOf(JsonPrimitive("Sign-in"), JsonPrimitive("Search"))))
             }).also { assertEquals(setOf("Database", "Features"), properties.keys) }
         }
+    }
+
+    @Test
+    fun agUi_eventLog_replaysTheReplyThroughTheSameParser() {
+        replay("agui/device.sse", "agui/device-continued.sse")
+        val tool = object : AgentTool {
+            override val name = "get_device_info"
+            override val description = "Device model and Android version"
+            override val parameters = buildJsonObject { put("type", "object") }
+            override suspend fun execute(arguments: JsonObject) = "Pixel 10, Android 17"
+        }
+        val log = AgUiEventLog.InMemory()
+        val (_, live) = run(AgUiBackend("$base/api/agui", tools = listOf(tool), threadId = "t", eventLog = log))
+        val (thread, runs) = AgUiEventLog.runsOf(live)!!
+        assertEquals("t", thread)
+        assertEquals(listOf("r1", "r2"), runs)
+        // Continuation runs name their parent (AG-UI serialization: a lineage of runs).
+        assertNull(requests[0]["parentRunId"])
+        assertEquals("r1", requests[1]["parentRunId"]!!.jsonPrimitive.content)
+        val events = runBlocking { AgUiEventLog.eventsOf(log.load(thread), runs) }
+        assertTrue(events.all { it["timestamp"] != null })
+        val replayed = runBlocking { AgUiEventLog.replay(events, speed = 1_000f).toList() }
+            .fold(Message("a", Role.ASSISTANT)) { m, e -> m.reduce(e, 0) }
+        assertEquals(live.parts, replayed.parts)
     }
 
     @Test

@@ -1,8 +1,5 @@
 package dev.ai.elements.ui.chat
 
-import dev.ai.elements.ui.voice.LocalSpeechOutput
-import dev.ai.elements.ui.voice.speakableText
-import dev.ai.elements.ui.icons.AiIcons
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -59,11 +56,14 @@ import dev.ai.elements.core.model.SourcePart
 import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.ui.R
+import dev.ai.elements.ui.icons.AiIcons
 import dev.ai.elements.ui.markdown.MarkdownContent
 import dev.ai.elements.ui.theme.AiSize
 import dev.ai.elements.ui.theme.AiSpacing
 import dev.ai.elements.ui.theme.AiType
 import dev.ai.elements.ui.theme.compactIconButton
+import dev.ai.elements.ui.voice.LocalSpeechOutput
+import dev.ai.elements.ui.voice.speakableText
 import dev.ai.elements.ui.workflow.WorkflowCanvas
 import dev.ai.elements.ui.workflow.agentRunGraph
 import dev.ai.elements.ui.workflow.rememberAgentRunLabels
@@ -214,13 +214,13 @@ internal fun MessageActions(
                 modifier = Modifier.compactIconButton().testTag("regenerate"),
             ) { Icon(AiIcons.Refresh, stringResource(R.string.ai_regenerate), Modifier.size(AiSize.compactIcon)) }
         }
-        // Step through the run (tool calls and their screenshots), when it had any.
-        val openPlayback = LocalOpenRunPlayback.current
-        if (openPlayback != null && message.parts.any { it is dev.ai.elements.core.model.ToolPart }) IconButton(
-            onClick = { openPlayback(message.id, 0) },
+        // Step through the run on the agent's computer, when it used tools.
+        val computer = LocalAgentComputer.current
+        if (computer != null && message.parts.any { it is dev.ai.elements.core.model.ToolPart }) IconButton(
+            onClick = { computer.open(message.id, 0) },
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.compactIconButton().testTag("run-playback-open"),
-        ) { Icon(AiIcons.Slideshow, stringResource(R.string.ai_run_playback), Modifier.size(AiSize.compactIcon)) }
+        ) { Icon(AiIcons.Slideshow, stringResource(R.string.ai_agent_computer), Modifier.size(AiSize.compactIcon)) }
         IconButton(
             onClick = { showGraph = true },
             shapes = IconButtonDefaults.shapes(),

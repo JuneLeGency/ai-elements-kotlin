@@ -145,12 +145,23 @@
   PowerPoint and other files open in an app that can show them (`openExternally`, through the
   library's own `AiElementsFileProvider`, `${applicationId}.aielements.files`). No new dependencies.
 
-- Steps with screenshots and run playback (like Manus's computer view): a tool call's screenshots
-  (AI SDK `file` parts after the output, AG-UI 1.x media parts in `TOOL_CALL_RESULT`, MCP image
-  content, on-device `ToolCallContext.file`) show as a strip under the call; `AgentRunPlayback`
-  steps through a reply's run with its screenshots, a timeline and autoplay, live or from history.
-  `WebBrowser` attaches a viewport screenshot after each page-changing call. The reference server
-  has a `browse` tool that returns one.
+- Steps with screenshots (like Manus's computer view): a tool call's screenshots (AI SDK `file`
+  parts after the output, AG-UI 1.x media parts in `TOOL_CALL_RESULT`, MCP image content, on-device
+  `ToolCallContext.file`) show as a strip under the call. `WebBrowser` attaches a viewport
+  screenshot after each page-changing call; the reference server has a `browse` tool that returns one.
+- Tool categories: `ToolPart.category` / `location` in the ACP `ToolKind` vocabulary, set upstream
+  — ACP `kind` + `locations`, the Pydantic AI Harness file-system and shell tools (mapped as the
+  Harness ACP presenter does), `AgentTool.categoryFor` / `locationFor` on device (harness
+  `FileSystem`, `Shell`, `WebBrowser` declare theirs). The reference server reads a workspace through
+  the Harness `FileSystem` capability (read-only).
+- The agent's computer: `AgentComputerCard` (live preview under a working reply) and
+  `AgentComputerPanel` (each step by its category: screenshot with address bar, `Terminal`, diff,
+  file, page; timeline, autoplay, "back to live"), in `AgentComputerScaffold`: a side pane from
+  720dp, a bottom sheet below. Replaces `AgentRunPlayback`.
+- AG-UI event logs (AG-UI serialization): `AgUiBackend(eventLog = …)` keeps each thread's events
+  (`AgUiEventLog.Files` / `InMemory`), timestamps them, links runs with `parentRunId` and records
+  the client's input in `RUN_STARTED.input`; `AgUiEventLog.replayOf(message)` replays a reply
+  through the same parser at the recorded pace — `Chat(replay = …)` offers "Replay run".
 
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,

@@ -1,8 +1,26 @@
 # Steps and replay
 
-Agents that browse, run code or operate apps are easier to trust when the user can see each step,
-like Manus's "computer" view. AI Elements shows every tool call with what it produced, including
-screenshots, and plays a run back step by step, live or from history.
+Agents that browse, run commands or edit files are easier to trust when the user can watch them
+work, as in Manus's "computer" view. AI Elements shows each step for what it is and keeps a live
+preview while the agent runs. The whole view expands into a panel with a timeline. Any run can be
+stepped through afterwards, and runs with a recorded event log can be replayed event by event.
+
+## What a step does: tool categories
+
+A tool call carries two model fields, `ToolPart.category` and `ToolPart.location`. The category
+uses the Agent Client Protocol's `ToolKind` vocabulary: read, edit, delete, move, search, execute,
+think, fetch, switch_mode and other. The location is the path or URL the call acts on. Like every
+model field, both are set upstream, never guessed by the UI:
+
+| Where the call comes from | How it gets its category |
+|---|---|
+| ACP agent | `tool_call.kind` and `locations[0].path` |
+| AI SDK or AG-UI server running Pydantic AI Harness tools | The tool name. `ToolConventions` maps the Harness `FileSystem` and `Shell` tools exactly as the Harness ACP adapter presents them (`default_coding_presenter`): `read_file` → read, `edit_file` / `write_file` → edit, `search_files` → search, `run_command` → execute. |
+| On-device tool | The tool declares it with `AgentTool.categoryFor` / `locationFor`. The harness `FileSystem`, `Shell` and `WebBrowser` tools already do. |
+
+```kotlin
+--8<-- "demo/src/main/kotlin/dev/ai/elements/demo/samples/DocsSamples.kt:categories"
+```
 
 ## Screenshots of each step
 
@@ -17,43 +35,97 @@ standard way to carry them, and no extension is needed:
 | On the device | `ToolCallContext.file(mediaType, url)` from the tool; `WebBrowser` attaches the viewport after every call that changes the page |
 
 In the conversation, a step's screenshots show as a small strip under its tool call. Tapping one
-opens the run playback at that step.
+opens the agent's computer at that step. If you build your own view, `agentSteps(message)` returns
+the steps of a reply: each tool call with its image files.
 
-`agentSteps(message)` returns the steps of a reply (each tool call with its image files) if you
-build your own view.
+## The agent's computer
 
-## Run playback
+A reply whose steps have a category or a screenshot gets a live preview card
+(`AgentComputerCard`). The card shows:
 
-`AgentRunPlayback` shows a reply's run as a timeline. It opens from a step's screenshot or from the
-reply's actions.
+- the latest screenshot, or an icon for what the current step does;
+- what the agent is doing, such as "Running command · ls -la" or "Reading · src/App.kt";
+- the number of steps;
+- a live marker while the reply streams.
 
-- The selected step's latest screenshot is shown large. A step without one shows its output (or
-  error, or input).
-- Below it: the step's title, status and input, then a timeline with previous, play and next, and
-  every step as a chip.
-- While the reply is streaming, the view follows the newest step until the user picks one.
+Tapping the card opens `AgentComputerPanel`. It shows the selected step by its category, reusing
+the existing elements:
 
-Because it only reads the saved message, a past conversation plays back the same way as a live one.
+| Step | View |
+|---|---|
+| has a screenshot | the screenshot, under an address bar when the location is a URL |
+| execute | `Terminal` with the command and its output |
+| edit | the unified diff, with added and removed lines coloured (ACP diffs arrive as one), else the file in a `CodeBlock` |
+| read, search, delete, move | the path and the output in a `CodeBlock` |
+| fetch | an address bar and the page text |
+| anything else | its output |
 
-## Replay: what to store
+Below the view the panel has:
 
-The standards for replaying agent runs, from the lightest to the most detailed:
+- the step's status;
+- a timeline slider;
+- previous, play and next buttons;
+- a chip for every step.
 
-1. **Messages.** Store the conversation as messages: AI SDK `UIMessage[]` (what `useChat` persists
-   in `onFinish`), or AG-UI messages (`MESSAGES_SNAPSHOT`). Each message keeps its parts in order,
-   including tool calls, their outputs and files, so the steps view and playback work from storage
-   alone. The demo app stores conversations this way.
-2. **Event logs.** For event-level fidelity (timing, deltas, state changes), AG-UI specifies
-   [serialization](https://docs.ag-ui.com/concepts/serialization): an append-only JSON log of
-   events per thread, indexed by `threadId`, `runId` and timestamps. `RunStarted.parentRunId` records
-   branches for time travel, and compaction folds deltas into `MESSAGES_SNAPSHOT` and
-   `STATE_SNAPSHOT`. Replaying the log through the same backend reproduces the run. The recorded
-   fixtures in this repository are such logs.
-3. **Resuming a live stream.** After a dropped connection, SSE reconnects with `Last-Event-ID`
-   (HTML Living Standard), and the AI SDK resumes an in-flight response from a stream store
-   (`resumeStream`). This continues a run rather than replaying it.
-4. **Traces.** For debugging and evaluation, OpenTelemetry's GenAI semantic conventions record
-   model calls and tool executions (Pydantic Logfire, Langfuse and similar tools replay those).
+While the reply streams, the panel follows the newest step. Picking an earlier step stops
+following, and **Back to live** resumes it.
 
-Screenshots make logs large: keep them as URLs to stored files rather than inline `data:` URLs
-when you persist runs.
+The layout adapts to the space the chat actually has (`AgentComputerScaffold`). At 720 dp or wider,
+the panel is a side pane next to the conversation, as in Material 3's supporting-pane layout. This
+also works inside a list–detail layout, because the width checked is the chat's own, not the
+window's. When narrower, the panel is a `ModalBottomSheet`. `Chat` and `Conversation` set this up.
+To share one panel across your own layout, create a state with `rememberAgentComputerState` and
+wrap your layout in `AgentComputerScaffold`.
+
+Stepping through works on any saved conversation, because it only reads the stored message.
+
+## Replay
+
+Replay has two levels.
+
+- **Steps, from the messages.** This is how the AI SDK persists chats: `UIMessage[]`, as `useChat`
+  stores them in `onFinish`. It is also how AG-UI's `MESSAGES_SNAPSHOT` carries them. The panel
+  above needs nothing more, and it works for every backend.
+- **Events, from AG-UI's event log.** This is the standard for event-level fidelity: the timing,
+  every delta and every state change.
+
+### AG-UI event logs
+
+AG-UI [serialization](https://docs.ag-ui.com/concepts/serialization) defines the log. Give
+`AgUiBackend` an `eventLog` and it keeps one:
+
+- **Events as streamed.** One append-only log per `threadId`, stored as a JSON array of events.
+  Events without a `timestamp` get the time they arrived; `BaseEvent.timestamp` is the spec's own
+  field.
+- **Runs linked by `parentRunId`.** Each run names the one before it, in both `RunAgentInput` and
+  the logged `RUN_STARTED`. This is the spec's branching lineage.
+- **What the client added, in `RUN_STARTED.input`.** When the server did not echo the input, the
+  log records it there, keeping only messages not already in the log, as the spec's compaction
+  rule says. This matters for frontend tools: their results exist only on the client.
+- **The runs that produced a reply, in its metadata.** They are stored under the `agui` key of
+  `Message.metadata`, so a stored conversation still knows which runs to replay.
+
+`AgUiEventLog.replayOf(message)` plays a reply's runs back through the same AG-UI event parser the
+live stream used, at the recorded pace, and rebuilds the reply as it happened. Pass it to `Chat`,
+and the panel offers **Replay run**:
+
+```kotlin
+--8<-- "demo/src/main/kotlin/dev/ai/elements/demo/samples/DocsSamples.kt:replay"
+```
+
+`AgUiEventLog.Files` keeps one file per thread; `AgUiEventLog.InMemory` keeps the log for the
+life of the process. Implement the interface to store logs elsewhere, for example in your own
+database or on your server. Screenshots make logs large, so prefer `url` sources to inline data
+for runs you keep.
+
+### Other protocols
+
+- **ACP.** `session/load` has the agent stream a stored session back as `session/update`
+  notifications. Replaying a session is the agent's job.
+- **AI SDK.** The AI SDK has no client-side event log. `resumeStream` continues an in-flight
+  response from the server's stream store; it does not replay one. Use message-level replay.
+- **On-device agents.** Their replies are stored as messages; use message-level replay.
+- **Server side.** Pydantic AI Harness `StepPersistence` keeps an agent's append-only step log for
+  recovering, continuing and forking runs.
+- **Traces.** For debugging and evaluation, use OpenTelemetry's GenAI semantic conventions (Pydantic
+  Logfire, Langfuse and similar).

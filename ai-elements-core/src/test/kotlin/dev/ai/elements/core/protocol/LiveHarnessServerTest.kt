@@ -113,4 +113,40 @@ class LiveHarnessServerTest {
         assertEquals("Pixel 10, Android 17", reply.tool("get_device_info").output)
         assertTrue("the agent continued after the frontend tool: ${reply.text}", reply.text.contains("Pixel 10"))
     }
+
+    @Test
+    fun harnessFileSystem_readFile_hasItsCategoryAndPath() {
+        assumeTrue(server.isNotEmpty())
+        protocols.forEach { p ->
+            val call = run(p.create(emptyList(), ToolApprover.AlwaysApprove), "read the workspace readme").second.tool("read_file")
+            assertEquals(p.name, dev.ai.elements.core.model.ToolCategory.READ, call.category)
+            assertEquals(p.name, "README.md", call.location)
+            assertTrue("${p.name}: ${call.output}", call.output!!.contains("Demo workspace"))
+        }
+    }
+
+    @Test
+    fun agUiEventLog_linksRunsAndReplaysTheReply() {
+        assumeTrue(server.isNotEmpty())
+        val deviceInfo = object : AgentTool {
+            override val name = "get_device_info"
+            override val description = "Device model and Android version"
+            override val parameters = buildJsonObject { put("type", "object") }
+            override suspend fun execute(arguments: JsonObject) = "Pixel 10, Android 17"
+        }
+        val log = dev.ai.elements.core.protocol.agui.AgUiEventLog.InMemory()
+        val (events, live) = run(AgUiBackend("$server/api/agui", tools = listOf(deviceInfo), eventLog = log), "device info")
+        assertTrue("$events", events.none { it is ChatEvent.Error })
+        val (thread, runs) = dev.ai.elements.core.protocol.agui.AgUiEventLog.runsOf(live)!!
+        assertEquals(2, runs.size)
+        val logged = runBlocking { log.load(thread) }
+        val second = logged.filter { it["type"].toString() == "\"RUN_STARTED\"" }[1]
+        // The server echoes the lineage the client sent (RunAgentInput.parentRunId → RUN_STARTED.parentRunId), or the log has it from the input.
+        val parent = (second["parentRunId"] ?: (second["input"] as JsonObject)["parentRunId"]).toString().trim('"')
+        assertEquals(runs[0], parent)
+        val replayed = runBlocking { log.replayOf(live, speed = 100f)!!.toList() }.fold(Message("a", Role.ASSISTANT)) { m, e -> m.reduce(e, 0) }
+        assertEquals(live.parts.map { it.id }, replayed.parts.map { it.id })
+        assertEquals("Pixel 10, Android 17", replayed.tool("get_device_info").output)
+        assertEquals(live.text, replayed.text)
+    }
 }

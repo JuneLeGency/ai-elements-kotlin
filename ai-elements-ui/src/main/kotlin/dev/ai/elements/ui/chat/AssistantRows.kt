@@ -83,6 +83,13 @@ internal sealed interface AssistantRow {
         override val contentType = "step-media"
     }
 
+    /** The live preview of the agent's computer ([AgentComputerCard]) when the reply did work worth watching. */
+    data class ComputerRow(val message: Message, override val first: Boolean) : AssistantRow {
+        override val key = "${message.id}/computer"
+        override val contentType = "computer"
+        override val streaming get() = message.isStreaming
+    }
+
     /** Sources and actions; the only row that needs the whole message. */
     data class FooterRow(val message: Message, override val first: Boolean) : AssistantRow {
         override val key = "${message.id}/footer"
@@ -123,6 +130,7 @@ internal fun assistantRows(message: Message): List<AssistantRow> {
             }
         }
     }
+    if (hasComputerSteps(message)) rows += AssistantRow.ComputerRow(message, first = rows.isEmpty())
     if (sources.isNotEmpty() || (!message.isStreaming && message.parts.isNotEmpty())) {
         rows += AssistantRow.FooterRow(message, first = rows.isEmpty())
     }
@@ -154,6 +162,7 @@ internal fun AssistantRowItem(
                     is TextPart, is SourcePart -> Unit
                 }
                 is AssistantRow.StepMediaRow -> StepMedia(row.messageId, row.stepIndex, row.files)
+                is AssistantRow.ComputerRow -> AgentComputerCard(row.message)
                 is AssistantRow.FooterRow -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Sources(row.message.parts.filterIsInstance<SourcePart>())
                     if (!row.message.isStreaming) MessageActions(row.message, prompt, onRegenerate, onSelectVersion)

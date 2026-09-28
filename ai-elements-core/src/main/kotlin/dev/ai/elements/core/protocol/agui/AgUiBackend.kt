@@ -1,36 +1,5 @@
 package dev.ai.elements.core.protocol.agui
 
-import dev.ai.elements.core.model.ToolKind
-import dev.ai.elements.core.protocol.withConventions
-import dev.ai.elements.core.chat.ChatBackend
-import dev.ai.elements.core.chat.ChatEvent
-import dev.ai.elements.core.chat.InputRequest
-import dev.ai.elements.core.chat.InputResponse
-import dev.ai.elements.core.chat.ToolApprover
-import dev.ai.elements.core.agent.AgentTool
-import dev.ai.elements.core.chat.finishStreaming
-import dev.ai.elements.core.model.DataPart
-import dev.ai.elements.core.model.Message
-import dev.ai.elements.core.model.Role
-import dev.ai.elements.core.model.TextPart
-import dev.ai.elements.core.model.ToolPart
-import dev.ai.elements.core.model.ToolState
-import dev.ai.elements.core.chat.reduce
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.flow
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.addJsonObject
-import kotlinx.serialization.json.buildJsonArray
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.put
-import kotlinx.serialization.json.putJsonArray
-import kotlinx.serialization.json.putJsonObject
 import com.agui.core.types.ActivityDeltaEvent
 import com.agui.core.types.ActivitySnapshotEvent
 import com.agui.core.types.AgUiJson
@@ -63,19 +32,52 @@ import com.agui.core.types.ToolCallEndEvent
 import com.agui.core.types.ToolCallResultEvent
 import com.agui.core.types.ToolCallStartEvent
 import com.reidsync.kxjsonpatch.JsonPatch
+import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.agent.DENIED_RESULT
+import dev.ai.elements.core.agent.runTool
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.chat.InputRequest
+import dev.ai.elements.core.chat.InputResponse
+import dev.ai.elements.core.chat.ToolApprover
+import dev.ai.elements.core.chat.finishStreaming
+import dev.ai.elements.core.chat.reduce
+import dev.ai.elements.core.http.BackendJson
+import dev.ai.elements.core.http.DefaultHttpClient
+import dev.ai.elements.core.http.int
+import dev.ai.elements.core.http.jsonPost
+import dev.ai.elements.core.http.sse
+import dev.ai.elements.core.http.str
+import dev.ai.elements.core.model.DataPart
+import dev.ai.elements.core.model.Message
+import dev.ai.elements.core.model.Role
+import dev.ai.elements.core.model.TextPart
+import dev.ai.elements.core.model.ToolKind
+import dev.ai.elements.core.model.ToolPart
+import dev.ai.elements.core.model.ToolState
+import dev.ai.elements.core.model.hasContent
+import dev.ai.elements.core.model.images
+import dev.ai.elements.core.model.modelContext
+import dev.ai.elements.core.protocol.withConventions
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.addJsonObject
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
+import kotlinx.serialization.json.putJsonObject
 import okhttp3.OkHttpClient
 import java.util.UUID
-import dev.ai.elements.core.http.str
-import dev.ai.elements.core.http.sse
-import dev.ai.elements.core.http.jsonPost
-import dev.ai.elements.core.http.DefaultHttpClient
-import dev.ai.elements.core.http.BackendJson
-import dev.ai.elements.core.agent.runTool
-import dev.ai.elements.core.agent.DENIED_RESULT
-import dev.ai.elements.core.model.hasContent
-import dev.ai.elements.core.model.modelContext
-import dev.ai.elements.core.model.images
-import dev.ai.elements.core.http.int
 
 /**
  * The [AG-UI](https://docs.ag-ui.com) protocol (1.x): `POST` a
@@ -113,6 +115,8 @@ class AgUiBackend(
     private val threadId: String? = null,
     private val client: OkHttpClient = DefaultHttpClient,
     private val maxRuns: Int = 8,
+    private val eventLog: AgUiEventLog? = null,
+    private val clock: () -> Long = System::currentTimeMillis,
 ) : ChatBackend {
 
     override fun stream(history: List<Message>): Flow<ChatEvent> = flow {
@@ -122,12 +126,20 @@ class AgUiBackend(
         var resume: List<JsonObject>? = null
         val parser = AgUiParser()
         val headers = mapOf("Authorization" to if (apiKey.isBlank()) "" else "Bearer $apiKey")
+        // Runs form a lineage (AG-UI serialization): each run's parent is the one before it.
+        var parentRunId = history.lastOrNull { it.role == Role.ASSISTANT }?.let { AgUiEventLog.runsOf(it) }?.second?.lastOrNull()
+        val runIds = mutableListOf<String>()
+        // What each run adds to the conversation, logged as `RUN_STARTED.input` (AG-UI serialization
+        // keeps only messages not already in the log): the user's message, then frontend tool results.
+        val newInput = history.lastOrNull()?.takeIf { it.role == Role.USER }?.toAgUi().orEmpty().toMutableList()
 
         repeat(maxRuns) {
             parser.startRun()
+            val runId = UUID.randomUUID().toString()
             val body = buildJsonObject {
                 put("threadId", thread)
-                put("runId", UUID.randomUUID().toString())
+                put("runId", runId)
+                parentRunId?.let { put("parentRunId", it) }
                 put("protocolVersion", PROTOCOL_VERSION)
                 put("state", state)
                 put("messages", JsonArray(messages))
@@ -151,10 +163,31 @@ class AgUiBackend(
                 }
                 resume?.let { put("resume", JsonArray(it)) }
             }
-            client.sse(jsonPost(endpoint, body, headers)).collect { sse ->
-                val event = runCatching { BackendJson.parseToJsonElement(sse.data).jsonObject }.getOrNull() ?: return@collect
-                parser.parse(event).forEach { emit(it) }
+            val logged = mutableListOf<JsonObject>()
+            try {
+                client.sse(jsonPost(endpoint, body, headers)).collect { sse ->
+                    val event = runCatching { BackendJson.parseToJsonElement(sse.data).jsonObject }.getOrNull() ?: return@collect
+                    if (eventLog != null) logged += stamped(event, clock()).let { e ->
+                        if (logged.isEmpty() && e.str("type") == "RUN_STARTED" && e["input"] == null) {
+                            JsonObject(e + ("input" to JsonObject(body + ("messages" to JsonArray(newInput.toList())))))
+                        } else e
+                    }
+                    parser.parse(event).forEach { emit(it) }
+                }
+            } finally {
+                if (logged.isNotEmpty()) withContext(NonCancellable) { eventLog?.append(thread, logged) }
             }
+            // The run as the server named it, else as requested.
+            val started = logged.firstOrNull { e -> (e["type"] as? JsonPrimitive)?.contentOrNull == "RUN_STARTED" }
+            runIds += (started?.get("runId") as? JsonPrimitive)?.contentOrNull ?: runId
+            parentRunId = runIds.last()
+            newInput.clear()
+            if (eventLog != null) emit(ChatEvent.Metadata(buildJsonObject {
+                putJsonObject(AgUiEventLog.METADATA_KEY) {
+                    put("threadId", thread)
+                    put("runIds", JsonArray(runIds.map(::JsonPrimitive)))
+                }
+            }))
             if (parser.failed) return@flow
             parser.state?.let { state = it }
             messages += parser.transcript()
@@ -169,12 +202,14 @@ class AgUiBackend(
             if (pending.isNotEmpty()) {
                 pending.forEach { call ->
                     val result = runTool(tools, approver, call.id, call.name, call.args.toString())
-                    messages += buildJsonObject {
+                    val message = buildJsonObject {
                         put("id", "result-${call.id}")
                         put("role", "tool")
                         put("toolCallId", call.id)
                         put("content", result)
                     }
+                    messages += message
+                    newInput += message
                 }
                 return@repeat
             }

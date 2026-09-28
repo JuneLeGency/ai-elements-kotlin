@@ -1,38 +1,39 @@
 package dev.ai.elements.demo
 
-import dev.ai.elements.core.agent.AskUser
 import dev.ai.elements.a2a.A2aAgent
 import dev.ai.elements.a2a.A2aBackend
+import dev.ai.elements.a2a.asSubAgent
 import dev.ai.elements.acp.AcpAgent
 import dev.ai.elements.acp.AcpBackend
-import dev.ai.elements.a2a.asSubAgent
-import dev.ai.elements.core.chat.ChatBackend
-import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
+import dev.ai.elements.core.agent.AskUser
 import dev.ai.elements.core.agent.BuiltinTools
 import dev.ai.elements.core.agent.Capability
 import dev.ai.elements.core.agent.StaticCapability
+import dev.ai.elements.core.chat.ChatBackend
+import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.config.McpServerStore
 import dev.ai.elements.core.config.ProviderKind
 import dev.ai.elements.core.config.ProviderProfile
 import dev.ai.elements.core.config.ProviderStore
+import dev.ai.elements.core.protocol.agui.AgUiEventLog
 import dev.ai.elements.core.skills.Skills
 import dev.ai.elements.demo.data.AgentsStore
 import dev.ai.elements.demo.data.SkillsRepository
 import dev.ai.elements.harness.AgentHarness
 import dev.ai.elements.harness.LocalSubAgent
 import dev.ai.elements.harness.ModelBinding
-import dev.ai.elements.harness.model
+import dev.ai.elements.harness.browser.WebBrowser
+import dev.ai.elements.harness.device.DeviceTools
 import dev.ai.elements.harness.filesystem.FileSystem
 import dev.ai.elements.harness.filesystem.SharedFolders
 import dev.ai.elements.harness.memory.FileMemoryStore
 import dev.ai.elements.harness.memory.Memory
+import dev.ai.elements.harness.model
 import dev.ai.elements.harness.planning.Planning
 import dev.ai.elements.harness.sandbox.AlpineSandbox
-import dev.ai.elements.harness.shell.Shell
-import dev.ai.elements.harness.browser.WebBrowser
-import dev.ai.elements.harness.device.DeviceTools
 import dev.ai.elements.harness.scheduler.Scheduler
+import dev.ai.elements.harness.shell.Shell
 import dev.ai.elements.harness.speech.Speech
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -57,6 +58,9 @@ class AgentRuntime(
 
     /** The agent's workspace: shared by the file tools and the Linux sandbox (mounted at /workspace). */
     val workspace = java.io.File(context.filesDir, "workspace").apply { mkdirs() }
+
+    /** AG-UI runs as the spec serializes them (one JSON event log per thread), for replays. */
+    val agUiEventLog: AgUiEventLog = AgUiEventLog.Files(java.io.File(context.filesDir, "agui-events"))
     val sandbox = AlpineSandbox(context, workspace)
     private val shell = Shell(sandbox, defaultTimeoutSeconds = 120.0)
     /** Folders the user shared (Storage Access Framework), mounted at /mnt/<name> for the file tools. */
@@ -118,7 +122,7 @@ class AgentRuntime(
         profile.kind == ProviderKind.ACP -> ModelBinding { _, _, approver -> AcpBackend(acpAgent(profile.baseUrl), approver) }
         profile.usesTokens -> profile.model(tokens = providers.tokenSource(profile))
         agents.settings.value.koogRuntime -> profile.koogModel(providers.apiKey(profile.id)) ?: profile.model(apiKey = providers.apiKey(profile.id))
-        else -> profile.model(apiKey = providers.apiKey(profile.id))
+        else -> profile.model(apiKey = providers.apiKey(profile.id), agUiEventLog = agUiEventLog)
     }
 
     /** [serverSide]: only what the device alone can do (app tools, MCP); servers have their own clock, calculator and skills. */

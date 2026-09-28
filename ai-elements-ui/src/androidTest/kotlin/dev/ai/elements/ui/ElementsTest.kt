@@ -1,73 +1,80 @@
 package dev.ai.elements.ui
 
-import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.onChildren
-import androidx.compose.ui.test.performScrollToIndex
-import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
-import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.foundation.layout.height
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.unit.dp
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import dev.ai.elements.core.chat.ChatState
 import dev.ai.elements.core.chat.InputRequest
 import dev.ai.elements.core.chat.InputResponse
 import dev.ai.elements.core.chat.ToolDecision
+import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
-import dev.ai.elements.ui.chat.Conversation
-import dev.ai.elements.ui.chat.InputRequestCard
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
+import dev.ai.elements.core.model.TextPart
 import dev.ai.elements.core.model.ToolKind
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
-import dev.ai.elements.core.model.DataPart
+import dev.ai.elements.ui.chat.AgentComputerScaffold
 import dev.ai.elements.ui.chat.BranchSelector
 import dev.ai.elements.ui.chat.Chat
-import dev.ai.elements.ui.chat.rememberChat
-import dev.ai.elements.ui.chat.DataPartView
 import dev.ai.elements.ui.chat.Checkpoint
+import dev.ai.elements.ui.chat.Conversation
+import dev.ai.elements.ui.chat.DataPartView
+import dev.ai.elements.ui.chat.InputRequestCard
 import dev.ai.elements.ui.chat.ModelOption
 import dev.ai.elements.ui.chat.ModelSelector
 import dev.ai.elements.ui.chat.Question
 import dev.ai.elements.ui.chat.QuestionAnswer
 import dev.ai.elements.ui.chat.QuestionOption
+import dev.ai.elements.ui.chat.RunReplay
 import dev.ai.elements.ui.chat.ToolCall
 import dev.ai.elements.ui.chat.ToolPartView
-import dev.ai.elements.core.model.TextPart
+import dev.ai.elements.ui.chat.rememberAgentComputerState
+import dev.ai.elements.ui.chat.rememberChat
 import dev.ai.elements.ui.code.EnvironmentVariable
 import dev.ai.elements.ui.code.EnvironmentVariables
 import dev.ai.elements.ui.theme.AiElementsTheme
 import dev.ai.elements.ui.voice.TranscriptSegment
 import dev.ai.elements.ui.voice.Transcription
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.Rule
 import org.junit.Assert.assertTrue
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.size
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -440,12 +447,79 @@ class ElementsTest {
         compose.setContent { AiElementsTheme(dynamicColor = false) { Conversation(ChatState(messages = listOf(message))) } }
         assertEquals(2, compose.onAllNodesWithTag("step-media").fetchSemanticsNodes().size)
         compose.onAllNodesWithTag("step-media")[0].onChildren()[0].performClick()
-        compose.onNodeWithTag("run-playback").assertExists()
+        compose.onNodeWithTag("agent-computer").assertExists()
         compose.onNodeWithTag("run-step-counter").assertTextContains("1", substring = true)
         compose.onNodeWithTag("run-next").performClick()
         compose.onNodeWithTag("run-step-counter").assertTextContains("2", substring = true)
         compose.onNodeWithTag("run-playback-close").performClick()
-        compose.onNodeWithTag("run-playback").assertDoesNotExist()
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag("agent-computer").fetchSemanticsNodes().isEmpty() }
+    }
+
+    private val codingRun = listOf(
+        ToolPart("c1", "run_command", ToolState.OUTPUT_AVAILABLE, """{"command":"ls"}""", output = "README.md", title = "ls", category = dev.ai.elements.core.model.ToolCategory.EXECUTE),
+        ToolPart(
+            "c2", "edit_file", ToolState.OUTPUT_AVAILABLE, """{"path":"README.md"}""",
+            output = "--- a/README.md\n+++ b/README.md\n@@ -1 +1 @@\n-Old\n+New",
+            category = dev.ai.elements.core.model.ToolCategory.EDIT, location = "README.md",
+        ),
+        ToolPart("c3", "navigate", ToolState.INPUT_AVAILABLE, """{"url":"https://example.com"}""", category = dev.ai.elements.core.model.ToolCategory.FETCH, location = "https://example.com"),
+    )
+
+    /** The live card opens the computer; each step shows by what it did; "back to live" follows again. */
+    @Test fun agentComputer_liveCard_categoryViews_backToLive() {
+        val message = Message("a1", Role.ASSISTANT, codingRun)
+        compose.setContent { AiElementsTheme(dynamicColor = false) { Conversation(ChatState(messages = listOf(message))) } }
+        compose.onNodeWithTag("agent-computer-card").assertTextContains(s(R.string.ai_live), substring = true).performClick()
+        // Following the live run: the newest step, a page being fetched.
+        compose.onNodeWithTag("run-step-counter").assertTextContains("3", substring = true)
+        compose.onNodeWithTag("run-address").assertTextEquals("https://example.com")
+        compose.onNodeWithTag("run-live").assertDoesNotExist()
+        compose.onNodeWithTag("run-previous").performClick()
+        compose.onNodeWithTag("run-diff").assertExists()
+        compose.onNodeWithTag("run-previous").performClick()
+        compose.onNodeWithTag("terminal").assertExists()
+        compose.onNodeWithTag("run-live").performClick()
+        compose.onNodeWithTag("run-step-counter").assertTextContains("3", substring = true)
+    }
+
+    /** Wide enough, the computer is a side pane next to the conversation; narrow, a bottom sheet over it. */
+    @Test fun agentComputer_sidePaneWhenWide() {
+        val message = Message("a1", Role.ASSISTANT, codingRun.map { it.copy(state = ToolState.OUTPUT_AVAILABLE) })
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                androidx.compose.foundation.layout.Box(Modifier.requiredWidth(900.dp).fillMaxHeight()) { Conversation(ChatState(messages = listOf(message))) }
+            }
+        }
+        compose.onNodeWithTag("agent-computer-card").performClick()
+        compose.onNodeWithTag("agent-computer").assertIsDisplayed()
+        compose.onNodeWithTag("conversation").assertIsDisplayed()
+        val pane = compose.onNodeWithTag("agent-computer").fetchSemanticsNode().boundsInRoot
+        val list = compose.onNodeWithTag("conversation").fetchSemanticsNode().boundsInRoot
+        assertTrue("the pane sits beside the conversation", pane.left >= list.right)
+    }
+
+    /** A recorded run replays event by event into the computer, then returns to the stored reply. */
+    @Test fun agentComputer_replaysARecordedRun() {
+        val message = Message("a1", Role.ASSISTANT, codingRun.take(2))
+        val events = listOf(
+            dev.ai.elements.core.chat.ChatEvent.ToolInputAvailable("c1", "run_command", """{"command":"ls"}""", title = "ls", category = dev.ai.elements.core.model.ToolCategory.EXECUTE),
+            dev.ai.elements.core.chat.ChatEvent.ToolOutput("c1", "README.md"),
+            dev.ai.elements.core.chat.ChatEvent.Finish,
+        )
+        val replay = RunReplay { kotlinx.coroutines.flow.flow { events.forEach { kotlinx.coroutines.delay(300); emit(it) } } }
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                val computer = rememberAgentComputerState(replay)
+                AgentComputerScaffold(computer, listOf(message)) { Conversation(ChatState(messages = listOf(message))) }
+            }
+        }
+        compose.onNodeWithTag("agent-computer-card").performClick()
+        compose.onNodeWithTag("run-step-counter").assertTextContains("2", substring = true)
+        compose.onNodeWithTag("run-replay").performClick()
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag("terminal").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("run-step-counter").assertTextContains(s(R.string.ai_replaying), substring = true)
+        compose.onNodeWithTag("run-exit-replay").performClick()
+        compose.onNodeWithTag("run-step-counter").assertTextContains("2", substring = true)
     }
 
     @Test fun checkpoint_restoresOnlyAfterConfirming() {

@@ -18,7 +18,7 @@ Where the names differ:
 
 | Group (package) | Elements |
 |---|---|
-| Chat (`ui.chat`) | `Chat` · `Conversation` · `MessageItem` · `PromptInput` · `Suggestions` · `Reasoning` · `ToolCall` + `Confirmation` · `InputRequestCard` · `Subagent` · `Sources` · `InlineCitation` · `ContextUsage` · `BranchSelector` · `Checkpoint` · `Queue` · `OpenInChat` · `ModelSelector` · `Question` · `Agent` |
+| Chat (`ui.chat`) | `Chat` · `Conversation` · `AgentComputerPanel` · `MessageItem` · `PromptInput` · `Suggestions` · `Reasoning` · `ToolCall` + `Confirmation` · `InputRequestCard` · `Subagent` · `Sources` · `InlineCitation` · `ContextUsage` · `BranchSelector` · `Checkpoint` · `Queue` · `OpenInChat` · `ModelSelector` · `Question` · `Agent` |
 | Agent structure (`ui.chat`) | `ChainOfThought` · `Plan` · `Task` · `DataPartView` |
 | Workflow (`ui.workflow`) | `WorkflowCanvas` · `agentRunGraph` |
 | Content (`ui.markdown`) | `MarkdownContent` · `CodeBlock` · `MermaidDiagram` · `MathBlock` · attachments |
@@ -37,7 +37,7 @@ Where the names differ:
 |---|---|
 | `TextPart` | `MarkdownContent`: GitHub-flavoured Markdown, code with highlighting, Mermaid, KaTeX |
 | `ReasoningPart` | `Reasoning`: one quiet line ("Thought for 2s") that expands |
-| `ToolPart` | `ToolCall`, `Subagent` for delegations, a skill badge for skill loads, `Confirmation` while it waits for approval; its screenshots as a strip that opens `AgentRunPlayback` ([Steps and replay](steps-and-replay.md)) |
+| `ToolPart` | `ToolCall`, `Subagent` for delegations, a skill badge for skill loads, `Confirmation` while it waits for approval; its screenshots as a strip; replies that browse, run commands or edit files get the agent's computer: a live `AgentComputerCard` and an `AgentComputerPanel` beside the chat or in a bottom sheet ([Steps and replay](steps-and-replay.md)) |
 | `SourcePart` | `Sources`, and `InlineCitation` for `[n]` markers |
 | `FilePart` | images (upright by EXIF; tap for `ImageViewer`: zoom, pan, rotate), videos (`VideoAttachment`: first frame, duration, full-screen player), audio (`AudioPlayer`) and documents (`DocumentAttachment`: PDF preview and viewer; other formats open in an app) |
 | `DataPart` | `Plan`, `Task`, A2UI surfaces, MCP Apps views, or your own renderer |
