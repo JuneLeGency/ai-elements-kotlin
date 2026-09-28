@@ -2,6 +2,7 @@ package dev.ai.elements.harness.shell
 
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.Capability
+import dev.ai.elements.core.protocol.ToolConventions
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -170,6 +171,7 @@ class Shell(
         }
         override val requiresApproval = approval
         override fun titleFor(arguments: JsonObject) = arguments.s("command")?.lineSequence()?.first()?.take(60) ?: arguments.s("command_id")
+        override fun categoryFor(arguments: JsonObject) = ToolConventions.categoryOf(name, arguments)
         override suspend fun execute(arguments: JsonObject) = run(arguments)
     }
 

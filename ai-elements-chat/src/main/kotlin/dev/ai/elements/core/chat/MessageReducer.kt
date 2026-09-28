@@ -42,11 +42,11 @@ fun Message.reduce(event: ChatEvent, now: Long): Message = when (event) {
 
     is ChatEvent.ToolInputAvailable -> upsert<ToolPart>(
         event.id,
-        { ToolPart(event.id, event.name, ToolState.INPUT_AVAILABLE, event.input, title = event.title, kind = event.kind ?: ToolKind.Function, source = event.source) },
+        { ToolPart(event.id, event.name, ToolState.INPUT_AVAILABLE, event.input, title = event.title, kind = event.kind ?: ToolKind.Function, source = event.source, category = event.category, location = event.location) },
     ) {
         // A call that already has a (preliminary) result or awaits approval keeps its state.
         val state = if (it.state == ToolState.INPUT_STREAMING) ToolState.INPUT_AVAILABLE else it.state
-        it.copy(name = event.name, state = state, input = event.input, title = event.title ?: it.title, kind = event.kind ?: it.kind, source = event.source ?: it.source)
+        it.copy(name = event.name, state = state, input = event.input, title = event.title ?: it.title, kind = event.kind ?: it.kind, source = event.source ?: it.source, category = event.category ?: it.category, location = event.location ?: it.location)
     }
 
     is ChatEvent.ToolOutput -> updateExisting<ToolPart>(event.id) {

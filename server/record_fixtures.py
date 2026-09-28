@@ -328,6 +328,10 @@ if __name__ == "__main__":
         aisdk("browse")
         agui_tool_media()
         sys.exit()
+    if sys.argv[2:] == ["read"]:
+        acp_session("read")
+        aisdk("read")
+        sys.exit()
     if sys.argv[2:] == ["acp"]:
         for keyword in ["plan", "time"]:
             acp_session(keyword)

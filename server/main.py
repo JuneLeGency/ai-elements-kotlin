@@ -44,7 +44,7 @@ from fastapi.responses import HTMLResponse, Response
 from mcp.server.transport_security import TransportSecuritySettings
 from pydantic_ai import Agent, BinaryImage, CustomEvent, DeferredToolRequests, RunContext
 from pydantic_ai.mcp import MCPToolset
-from pydantic_ai_harness import Planning, Skills, SubAgent, SubAgents
+from pydantic_ai_harness import FileSystem, Planning, Skills, SubAgent, SubAgents
 from pydantic_ai_harness import AskUser
 from pydantic_ai_harness.ask_user import TOOL_NAME as ASK_USER_TOOL_NAME
 from pydantic_ai.toolsets import ExternalToolset
@@ -93,6 +93,8 @@ For multi-step tasks keep a plan with the planning tools. Answer in the user's l
 # `load_capability`, `write_plan`, MCP tools); the plan is additionally mirrored to the UI
 # through each protocol's own state channel (see `mirror_plan`).
 SKILLS_DIR = Path(__file__).resolve().parent.parent / "skills"
+# Files the agent may read (Harness `FileSystem`, read-only): its calls carry ACP `kind` and `locations`.
+WORKSPACE_DIR = Path(__file__).resolve().parent / "workspace"
 MCP_URL = os.environ.get("MCP_URL", f"http://127.0.0.1:{os.environ.get('PORT', '8788')}/mcp")
 PUBLIC_URL = os.environ.get("PUBLIC_URL", f"http://127.0.0.1:{os.environ.get('PORT', '8788')}")
 # MCP tools that change data ask the user first (AG-UI interrupt / AI SDK 6 tool approval).
@@ -147,6 +149,7 @@ agent = Agent(
         Planning(store_resolver=lambda ctx: ctx.deps.plan),
         SubAgents(agents=[SubAgent(researcher), SubAgent(writer)]),
         Skills(SKILLS_DIR),
+        FileSystem(root_dir=WORKSPACE_DIR, read_only=True),
     ],
 )
 
@@ -408,6 +411,7 @@ controller.send("Hello")
 # Keyword → the harness tool the scripted model calls first, so every capability can be
 # exercised end to end (and recorded as protocol fixtures) without an LLM.
 _DEMO_SCRIPTS = [
+    ("read", "read_file", {"path": "README.md"}),
     # Pydantic AI Harness `ask_user_question`, answered by the user on the device (a client tool).
     ("browse", "browse", {"url": "https://example.com/pricing"}),
     ("ask", "ask_user_question", {"questions": [

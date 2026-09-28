@@ -1,6 +1,7 @@
 package dev.ai.elements.core.chat
 
 import dev.ai.elements.core.model.Message
+import dev.ai.elements.core.model.ToolCategory
 import dev.ai.elements.core.model.ToolKind
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
@@ -39,6 +40,8 @@ sealed interface ChatEvent {
         val title: String? = null,
         val kind: ToolKind? = null,
         val source: String? = null,
+        val category: ToolCategory? = null,
+        val location: String? = null,
     ) : ChatEvent
 
     /** A tool result; [preliminary] results are replaced by later ones (AI SDK preliminary tool results). */

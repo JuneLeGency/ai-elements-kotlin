@@ -1,0 +1,166 @@
+data: {"type":"start"}
+
+data: {"type":"start-step"}
+
+data: {"type":"tool-input-start","toolCallId":"pyd_ai_fc1a42b888794aed881a25aa15dcb103","toolName":"read_file"}
+
+data: {"type":"tool-input-delta","toolCallId":"pyd_ai_fc1a42b888794aed881a25aa15dcb103","inputTextDelta":"{\"path\":\"README.md\"}"}
+
+data: {"type":"tool-input-available","toolCallId":"pyd_ai_fc1a42b888794aed881a25aa15dcb103","toolName":"read_file","input":{"path":"README.md"}}
+
+data: {"type":"tool-output-available","toolCallId":"pyd_ai_fc1a42b888794aed881a25aa15dcb103","output":"[README.md | 4 lines | hash:fe3baee8c1ff]\n     1\t# Demo workspace\n     2\t\n     3\tThe reference agent's `FileSystem` capability (Pydantic AI Harness) reads this directory,\n     4\tread-only. Ask it to \"read the workspace readme\".\n"}
+
+data: {"type":"finish-step"}
+
+data: {"type":"start-step"}
+
+data: {"type":"text-start","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"## Agent run","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":" complete\n\nT","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"he request w","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"ent **app → ","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"agent server","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":" → PydanticA","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"I agent → to","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"ol → model**","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":" and\nback as","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":" a UI Messag","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"e Stream. Th","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"e tool repor","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"ted: `[READM","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"E.md | 4 lin","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"es | hash:fe","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"3baee8c1ff]`","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":".\n\n| Stage |","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":" Protocol |\n","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"|---|---|\n| ","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"App → server","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":" | `POST /ap","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"i/chat` (AI ","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"SDK `UIMessa","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"ge[]`) |\n| S","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"erver → app ","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"| SSE UI Mes","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"sage Stream ","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"v1 |\n| Agent","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":" → tools | P","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"ydanticAI fu","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"nction tools","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":" |\n\n```merma","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"id\nsequenceD","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"iagram\n    p","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"articipant A","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"pp as Androi","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"d app\n    pa","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"rticipant S ","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"as Agent ser","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"ver\n    part","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"icipant A as","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":" PydanticAI ","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"agent\n    pa","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"rticipant T ","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"as get_curre","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"nt_time\n    ","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"App->>S: POS","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"T /api/chat\n","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"    S->>A: r","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"un(messages)","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"\n    A->>T: ","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"call()\n    T","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"-->>A: [READ","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"ME.md | 4 li","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"nes | hash:f","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"e3baee8c1ff]","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"\n    A-->>S:","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":" text deltas","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"\n    S-->>Ap","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"p: SSE text-","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"delta\n```\n\n`","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"``kotlin\nval","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":" controller ","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"= ChatContro","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"ller(backend","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":")\ncontroller","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":".send(\"Hello","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-delta","delta":"\")\n```\n","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"text-end","id":"2ec25b80-a6bb-44c8-ab33-5487e9d8aa90"}
+
+data: {"type":"message-metadata","messageMetadata":{"usage":{"inputTokens":100,"outputTokens":174}}}
+
+data: {"type":"message-metadata","messageMetadata":{"pydantic_ai":{"timestamp":"2026-09-28T02:47:52.774109Z"}}}
+
+data: {"type":"finish-step"}
+
+data: {"type":"finish"}
+
+data: [DONE]
+

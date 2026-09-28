@@ -1,5 +1,6 @@
 package dev.ai.elements.core.agent
 
+import dev.ai.elements.core.model.ToolCategory
 import dev.ai.elements.core.model.ToolKind
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -41,6 +42,12 @@ interface AgentTool {
 
     /** What one call means for the UI (a delegation, a skill load…); an ordinary function by default. */
     fun kindFor(arguments: JsonObject): ToolKind = ToolKind.Function
+
+    /** What one call does (ACP `ToolKind` vocabulary), which picks its step view; none by default. */
+    fun categoryFor(arguments: JsonObject): ToolCategory? = null
+
+    /** The file path or URL one call acts on (ACP `ToolCallLocation`); none by default. */
+    fun locationFor(arguments: JsonObject): String? = null
 
     /** Run the tool. Throwing reports a tool error back to the model. */
     suspend fun execute(arguments: JsonObject): String

@@ -13,7 +13,9 @@ import com.agentclientprotocol.model.RequestPermissionResponse
 import com.agentclientprotocol.model.SessionUpdate
 import com.agentclientprotocol.model.StopReason
 import com.agentclientprotocol.model.ToolCallContent
+import com.agentclientprotocol.model.ToolCallLocation
 import com.agentclientprotocol.model.ToolCallStatus
+import com.agentclientprotocol.model.ToolKind
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ChatEvent
 import dev.ai.elements.core.chat.ToolApprover
@@ -22,6 +24,7 @@ import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.TextPart
+import dev.ai.elements.core.model.ToolCategory
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.SendChannel
@@ -134,7 +137,7 @@ class AcpBackend(
         private val tools = mutableMapOf<String, Tool>()
         private val denied = mutableSetOf<String>()
 
-        private class Tool(var title: String, val name: String, var input: String, var output: String? = null)
+        private class Tool(var title: String, val name: String, var input: String, var output: String? = null, var category: ToolCategory? = null, var location: String? = null)
 
         /** `rawInput` as JSON text; agents may send the arguments as an encoded JSON string. */
         private fun inputText(raw: JsonElement): String? = when {
@@ -149,8 +152,8 @@ class AcpBackend(
                 val t = update.content as? ContentBlock.Text
                 if (t == null) emptyList() else endText() + ChatEvent.ReasoningDelta(reasoning ?: "reasoning-$turn-${segment++}".also { reasoning = it }, t.text)
             }
-            is SessionUpdate.ToolCall -> endAll() + tool(update.toolCallId.value, update.title, update.rawInput, update.status, update.content, update.rawOutput)
-            is SessionUpdate.ToolCallUpdate -> endAll() + tool(update.toolCallId.value, update.title, update.rawInput, update.status, update.content, update.rawOutput)
+            is SessionUpdate.ToolCall -> endAll() + tool(update.toolCallId.value, update.title, update.rawInput, update.status, update.content, update.rawOutput, update.kind, update.locations)
+            is SessionUpdate.ToolCallUpdate -> endAll() + tool(update.toolCallId.value, update.title, update.rawInput, update.status, update.content, update.rawOutput, update.kind, update.locations)
             is SessionUpdate.PlanUpdate -> listOf(ChatEvent.Data("acp-plan-$turn", "plan", plan(update.entries)))
             else -> emptyList()
         }
@@ -187,14 +190,21 @@ class AcpBackend(
             status: ToolCallStatus?,
             content: List<ToolCallContent>?,
             rawOutput: JsonElement?,
+            kind: ToolKind?,
+            locations: List<ToolCallLocation>?,
         ): List<ChatEvent> = buildList {
             val known = tools[id]
             val tool = known ?: Tool(title ?: "tool", title ?: "tool", "{}").also { tools[id] = it }
             val input = rawInput?.let(::inputText)
-            val changed = known == null || (title != null && title != tool.title) || (input != null && input != tool.input)
+            val category = kind?.let(::category)
+            val location = locations?.firstOrNull()?.path
+            val changed = known == null || (title != null && title != tool.title) || (input != null && input != tool.input) ||
+                (category != null && category != tool.category) || (location != null && location != tool.location)
             title?.let { tool.title = it }
             input?.let { tool.input = it }
-            if (changed) add(ChatEvent.ToolInputAvailable(id, tool.name, tool.input, title = tool.title))
+            category?.let { tool.category = it }
+            location?.let { tool.location = it }
+            if (changed) add(ChatEvent.ToolInputAvailable(id, tool.name, tool.input, title = tool.title, category = tool.category, location = tool.location))
             val output = content?.takeIf { it.isNotEmpty() }?.let(::render)
                 ?: rawOutput?.takeIf { it !is JsonNull }?.let { (it as? JsonPrimitive)?.contentOrNull ?: it.toString() }
             if (id in denied) return@buildList
@@ -212,6 +222,20 @@ class AcpBackend(
     }
 
     companion object {
+        /** ACP `ToolKind` in the model's vocabulary, which is ACP's own. */
+        internal fun category(kind: ToolKind): ToolCategory = when (kind) {
+            ToolKind.READ -> ToolCategory.READ
+            ToolKind.EDIT -> ToolCategory.EDIT
+            ToolKind.DELETE -> ToolCategory.DELETE
+            ToolKind.MOVE -> ToolCategory.MOVE
+            ToolKind.SEARCH -> ToolCategory.SEARCH
+            ToolKind.EXECUTE -> ToolCategory.EXECUTE
+            ToolKind.THINK -> ToolCategory.THINK
+            ToolKind.FETCH -> ToolCategory.FETCH
+            ToolKind.SWITCH_MODE -> ToolCategory.SWITCH_MODE
+            ToolKind.OTHER -> ToolCategory.OTHER
+        }
+
         /** [Message.metadata] key holding `{sessionId}`. */
         const val METADATA_KEY = "acp"
 

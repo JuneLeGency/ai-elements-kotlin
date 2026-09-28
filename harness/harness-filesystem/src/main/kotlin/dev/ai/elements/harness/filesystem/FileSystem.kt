@@ -2,6 +2,7 @@ package dev.ai.elements.harness.filesystem
 
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.Capability
+import dev.ai.elements.core.protocol.ToolConventions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
@@ -475,6 +476,8 @@ class FileSystem(
         }
         override val requiresApproval = change && approveChanges
         override fun titleFor(arguments: JsonObject) = arguments.opt("path") ?: arguments.opt("pattern")
+        override fun categoryFor(arguments: JsonObject) = ToolConventions.categoryOf(name, arguments)
+        override fun locationFor(arguments: JsonObject) = ToolConventions.locationOf(name, arguments)
         override suspend fun execute(arguments: JsonObject) = run(arguments)
     }
 

@@ -1,15 +1,16 @@
 package dev.ai.elements.core.agent
 
-import dev.ai.elements.core.chat.ChatEvent
-import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.ToolCallContext
-import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.coroutineScope
+import dev.ai.elements.core.chat.ChatEvent
+import dev.ai.elements.core.chat.ToolApprover
+import dev.ai.elements.core.http.BackendJson
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Message
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -17,7 +18,6 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import dev.ai.elements.core.http.BackendJson
 
 /** Text fed back to the model when the user denies a tool call. */
 internal const val DENIED_RESULT = "The user denied this tool call. Do not retry it; continue without it."
@@ -54,6 +54,8 @@ suspend fun FlowCollector<ChatEvent>.runTool(
             title = parsed?.let { tool?.titleFor(it) } ?: tool?.title,
             kind = parsed?.let { tool?.kindFor(it) },
             source = tool?.source,
+            category = parsed?.let { tool?.categoryFor(it) },
+            location = parsed?.let { tool?.locationFor(it) },
         ),
     )
     return try {
@@ -68,7 +70,7 @@ suspend fun FlowCollector<ChatEvent>.runTool(
             }
             decision.editedInput?.let { edited ->
                 arguments = edited
-                emit(ChatEvent.ToolInputAvailable(id, name, edited.toString(), title = tool.titleFor(edited), kind = tool.kindFor(edited), source = tool.source))
+                emit(ChatEvent.ToolInputAvailable(id, name, edited.toString(), title = tool.titleFor(edited), kind = tool.kindFor(edited), source = tool.source, category = tool.categoryFor(edited), location = tool.locationFor(edited)))
             }
             emit(ChatEvent.ToolApproved(id))
         }

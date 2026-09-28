@@ -216,6 +216,16 @@ class RecordedProtocolTest {
         assertTrue(reply.parts.indexOf(call) < reply.parts.indexOf(file))
     }
 
+    @Test
+    fun aiSdk_harnessReadFile_hasTheAcpCategoryAndPath() {
+        replay("aisdk/read.sse")
+        val (_, reply) = run(aiSdk())
+        val call = reply.tool("read_file")
+        assertEquals(dev.ai.elements.core.model.ToolCategory.READ, call.category)
+        assertEquals("README.md", call.location)
+        assertTrue(call.output!!.contains("Demo workspace"))
+    }
+
     // --- A2UI (generative UI) on each transport's binding -------------------------------
 
     private val bookAction = Json.parseToJsonElement(

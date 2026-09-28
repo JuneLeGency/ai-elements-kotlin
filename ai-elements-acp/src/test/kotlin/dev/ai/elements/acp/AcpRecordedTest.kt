@@ -17,6 +17,7 @@ import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.Message
 import dev.ai.elements.core.model.Role
 import dev.ai.elements.core.model.TextPart
+import dev.ai.elements.core.model.ToolCategory
 import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
 import kotlinx.coroutines.flow.toList
@@ -87,6 +88,14 @@ class AcpRecordedTest {
         assertEquals("Not now", tool.errorText)
         assertFalse(events.any { it is ChatEvent.ToolError })
         assertEquals("reject_once", selectedOption(sent))
+    }
+
+    @Test fun kindAndLocations_becomeCategoryAndLocation() = runBlocking {
+        val (events, _) = replay("read")
+        val tool = fold(events).parts.filterIsInstance<ToolPart>().single()
+        assertEquals(ToolCategory.READ, tool.category)
+        assertEquals("/tmp/README.md", tool.location)
+        assertEquals(ToolState.OUTPUT_AVAILABLE, tool.state)
     }
 
     @Test fun diff_isAUnifiedDiff() {

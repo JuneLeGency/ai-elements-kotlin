@@ -137,6 +137,10 @@ data class ToolPart(
     val kind: ToolKind = ToolKind.Function,
     /** Who provides the tool when it is not the agent itself, e.g. an MCP server's name. */
     val source: String? = null,
+    /** What the call does to the world (ACP `ToolKind`); decides how a step is shown. Set upstream, like [kind]. */
+    val category: ToolCategory? = null,
+    /** The file path or URL the call acts on (ACP `ToolCallLocation`), when it has one. */
+    val location: String? = null,
     /** While [ToolState.APPROVAL_REQUESTED]: what the approval can answer besides yes / no. */
     val approvalAnswers: ApprovalAnswers = ApprovalAnswers.All,
 ) : Part {
@@ -182,6 +186,26 @@ sealed interface ToolKind {
     @Serializable
     @SerialName("skill")
     data class Skill(val skill: String? = null) : ToolKind
+}
+
+/**
+ * What a tool call does, in the vocabulary of the Agent Client Protocol's `ToolKind` (read, edit,
+ * delete, move, search, execute, think, fetch, switch_mode, other), which Pydantic AI Harness also uses for its
+ * file-system and shell tools. Elements pick a step's view from it: a terminal for [EXECUTE], a
+ * diff for [EDIT], a browser frame for [FETCH].
+ */
+@Serializable
+enum class ToolCategory {
+    @SerialName("read") READ,
+    @SerialName("edit") EDIT,
+    @SerialName("delete") DELETE,
+    @SerialName("move") MOVE,
+    @SerialName("search") SEARCH,
+    @SerialName("execute") EXECUTE,
+    @SerialName("think") THINK,
+    @SerialName("fetch") FETCH,
+    @SerialName("switch_mode") SWITCH_MODE,
+    @SerialName("other") OTHER,
 }
 
 /** A cited source (URL and title), shown by [dev.ai.elements.ui.chat.Sources] and inline citations. */

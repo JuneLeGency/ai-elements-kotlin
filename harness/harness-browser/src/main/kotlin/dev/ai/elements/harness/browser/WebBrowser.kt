@@ -1,21 +1,22 @@
 package dev.ai.elements.harness.browser
 
-import java.io.ByteArrayOutputStream
-import dev.ai.elements.core.agent.ToolCallContext
-import android.util.Base64
-import android.graphics.Canvas
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.util.Base64
 import android.view.View
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import dev.ai.elements.core.agent.AgentTool
 import dev.ai.elements.core.agent.Capability
+import dev.ai.elements.core.agent.ToolCallContext
+import dev.ai.elements.core.model.ToolCategory
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -30,8 +31,8 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import java.io.ByteArrayOutputStream
 import kotlin.coroutines.resume
-import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * A web browser for the agent, with the tools and result texts of the
@@ -225,6 +226,8 @@ class WebBrowser(
             put("required", JsonArray((if (required.isEmpty() && params.firstOrNull()?.first in setOf("url", "direction", "key")) listOf(params.first().first) else required).map(::JsonPrimitive)))
         }
         override fun titleFor(arguments: JsonObject) = arguments.s("url") ?: arguments.s("selector") ?: arguments.s("text")
+        override fun categoryFor(arguments: JsonObject) = if (name in FETCHING) ToolCategory.FETCH else ToolCategory.OTHER
+        override fun locationFor(arguments: JsonObject) = arguments.s("url")
         override suspend fun execute(arguments: JsonObject) = run(arguments).also { if (name in PAGE_CHANGING) attachScreenshot() }
     }
 
@@ -250,6 +253,9 @@ class WebBrowser(
 
     private companion object {
         const val SCREENSHOT_WIDTH = 720
+        /** Calls that retrieve a page or its content (ACP `fetch`); the others act on the page. */
+        val FETCHING = setOf("navigate", "go_back", "go_forward", "snapshot", "get_text")
+
         val PAGE_CHANGING = setOf("navigate", "click", "type_text", "press_key", "select_option", "scroll", "go_back", "go_forward")
 
         fun str(description: String) = buildJsonObject { put("type", "string"); put("description", description) }
