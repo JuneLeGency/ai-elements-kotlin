@@ -1,0 +1,29 @@
+# Keeps dependencies current (AGENTS.md §2): Gradle version catalog, GitHub Actions and the
+# reference server's uv lockfile. Weekly, grouped, so updates arrive as a few reviewable PRs.
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      androidx:
+        patterns: ["androidx.*"]
+      kotlin:
+        patterns: ["org.jetbrains.kotlin*", "org.jetbrains.kotlinx*", "com.google.devtools.ksp*"]
+      other:
+        patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+  - package-ecosystem: uv
+    directory: /server
+    schedule:
+      interval: weekly
+    groups:
+      server:
+        patterns: ["*"]

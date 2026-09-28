@@ -1,0 +1,20 @@
+name: Feature request
+description: A new element, protocol feature or capability.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What you want to do
+      description: The use case, not only the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: spec
+    attributes:
+      label: Specification or reference
+      description: Protocol work follows public specs only (see AGENTS.md). Link the spec section, the AI Elements component, or the official SDK behaviour this maps to.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered

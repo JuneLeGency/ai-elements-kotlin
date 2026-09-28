@@ -161,21 +161,15 @@ data class ProviderProfile(
                 "Answer in the user's language."
 
         /**
-         * Presets. `10.0.2.2` is the Android emulator's alias for the host
-         * machine; on a physical device use the host's LAN address.
+         * The public model APIs (and the offline demo agent), for [ProviderStore]. Apps add their
+         * own agent servers: `ProviderStore(context, ProviderProfile.Presets + mine)`.
          */
         val Presets: List<ProviderProfile> = listOf(
             ProviderProfile("mock", "Offline demo", ProviderKind.MOCK, model = "mock-agent", builtIn = true),
-            ProviderProfile("agent-server", "PydanticAI · AI SDK stream", ProviderKind.AGENT_SERVER, "http://10.0.2.2:8788", "", builtIn = true),
-            ProviderProfile("agent-server-agui", "PydanticAI · AG-UI", ProviderKind.AG_UI, "http://10.0.2.2:8788", "", builtIn = true),
-            ProviderProfile("ollama", "Ollama", ProviderKind.OLLAMA, "http://10.0.2.2:11434", "qwen3:4b", builtIn = true),
-            ProviderProfile("cliproxy", "CLIProxyAPI", ProviderKind.OPENAI, "http://10.0.2.2:8317/v1", "gpt-5", builtIn = true),
             ProviderProfile("openai", "OpenAI", ProviderKind.OPENAI_RESPONSES, "https://api.openai.com/v1", "gpt-5", builtIn = true),
             ProviderProfile("anthropic", "Anthropic", ProviderKind.ANTHROPIC, "https://api.anthropic.com", "claude-sonnet-5", builtIn = true),
             ProviderProfile("gemini", "Google Gemini", ProviderKind.GEMINI, "https://generativelanguage.googleapis.com", "gemini-2.5-flash", builtIn = true),
             ProviderProfile("openrouter", "OpenRouter", ProviderKind.OPENAI, "https://openrouter.ai/api/v1", "openai/gpt-5", builtIn = true),
-            ProviderProfile("a2a-research", "Research agent · A2A", ProviderKind.A2A, "http://10.0.2.2:8788", "", builtIn = true),
-            ProviderProfile("acp-agent", "PydanticAI · ACP", ProviderKind.ACP, "ws://10.0.2.2:8788/acp", "", builtIn = true),
         )
     }
 }

@@ -27,6 +27,11 @@ val model = profile.model(apiKey = key)                                  // for 
 `ProviderStore` keeps API keys encrypted with an Android Keystore key (`SecretStore`); they are never
 logged.
 
+Its built-in profiles are `ProviderProfile.Presets` (OpenAI, Anthropic, Gemini, OpenRouter and the
+offline demo agent). Add your own agent servers to them:
+`ProviderStore(context, ProviderProfile.Presets + myServers)`. The demo adds the bundled reference
+server over each protocol this way (`DemoPresets`).
+
 Some providers support signing in instead of an API key, with OAuth 2.1 (PKCE `S256`, a loopback
 redirect on `127.0.0.1` or the device flow, RFC 8628): OpenRouter, and, experimentally, ChatGPT
 (Codex), xAI and Kimi Code subscriptions. Tokens are refreshed automatically.

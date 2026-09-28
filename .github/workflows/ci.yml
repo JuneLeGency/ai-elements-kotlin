@@ -29,8 +29,10 @@ jobs:
         with:
           name: site
           path: site/
-      # To publish the site, enable GitHub Pages (source: GitHub Actions) and add a deploy job with
-      # actions/upload-pages-artifact + actions/deploy-pages on pushes to main.
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name == 'push' && vars.PAGES_ENABLED == 'true'
+        with:
+          path: site/
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -38,6 +40,22 @@ jobs:
           path: |
             **/build/reports/
             **/build/test-results/
+
+  # The documentation site on GitHub Pages: set the repository variable PAGES_ENABLED=true once
+  # Pages is enabled (Settings → Pages → Source: GitHub Actions).
+  pages:
+    needs: build
+    if: github.event_name == 'push' && vars.PAGES_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
 
   ui-tests:
     runs-on: ubuntu-latest
@@ -49,6 +67,21 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
+      # The emulator's userdata partition needs ~7 GB; the runner image leaves less. Drop toolchains
+      # this job does not use.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/share/boost /usr/local/lib/node_modules "$AGENT_TOOLSDIRECTORY"
+          df -h /
+      # The reference server (Pydantic AI + Harness, scripted model: no keys) for the live E2E tests;
+      # the emulator reaches it at 10.0.2.2:8788.
+      - uses: astral-sh/setup-uv@v6
+      - name: Start the reference agent server
+        working-directory: server
+        run: |
+          uv sync
+          nohup uv run uvicorn main:app --host 0.0.0.0 --port 8788 > ../server.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:8788/health && break; sleep 2; done
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -60,10 +93,14 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
+          disk-size: 6000M
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -no-metrics
           disable-animations: true
           script: ./gradlew connectedDebugAndroidTest
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ui-test-reports
-          path: demo/build/reports/androidTests/
+          path: |
+            **/build/reports/androidTests/
+            server.log

@@ -256,6 +256,11 @@
 - A reply's action row shows copy, read aloud, regenerate and the agent's computer; the run graph
   and "open in / share" are in its "⋯" menu (`message-more`).
 - `ChatEmptyState(subtitle)` is optional (`null` hides it).
+- `ProviderProfile.Presets` holds the public model APIs only (OpenAI, Anthropic, Gemini, OpenRouter)
+  and the offline agent; the reference-server, Ollama and local-proxy profiles moved to the demo
+  (`DemoPresets`). `ProviderStore(context, presets)` takes an app's own list.
+- `ai-elements-acp` and `ai-elements-koog` ship the R8 rule for Ktor's JVM-only debugger probe, so
+  minified apps build without extra rules.
 - The offline agent (`MockAgentBackend`) answers in the prompt's language (English, Simplified and
   Traditional Chinese, Japanese), as a model would, and no longer echoes the prompt.
 - Translations reviewed with one glossary per language: "human in the loop" is 确认与提问 /

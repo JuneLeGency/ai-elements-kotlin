@@ -1,0 +1,36 @@
+name: Bug report
+description: Something does not work as documented.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead. Screenshots help for UI issues.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: The smallest code or steps that show it. For protocol issues, the backend (AI SDK, AG-UI, MCP, A2A, ACP…) and the server you talk to.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: 0.3.0
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and Android version
+      placeholder: Pixel 8, Android 16 / emulator API 36
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Remove API keys, tokens and personal data first.
+      render: text

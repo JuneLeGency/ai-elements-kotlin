@@ -68,6 +68,7 @@ nav = [
     "develop/demo-app.md",
     "develop/testing.md",
     "develop/contributing.md",
+    "develop/releasing.md",
   ] },
   { "Project" = [
     "project/roadmap.md",

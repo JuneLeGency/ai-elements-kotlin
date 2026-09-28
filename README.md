@@ -1,5 +1,10 @@
 # AI Elements for Kotlin
 
+[![CI](https://github.com/JuneLeGency/ai-elements-kotlin/actions/workflows/ci.yml/badge.svg)](https://github.com/JuneLeGency/ai-elements-kotlin/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+![minSdk](https://img.shields.io/badge/minSdk-24-green.svg)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.4-7F52FF.svg)
+
 **Material 3 Expressive** Jetpack Compose components and agent tooling for AI apps on Android: the
 Compose counterpart of [Vercel AI Elements](https://elements.ai-sdk.dev). It connects only through
 open protocols: AI SDK, AG-UI, MCP, MCP Apps, A2A, Agent Client Protocol, A2UI and Agent Skills.
@@ -58,7 +63,8 @@ dependencies {
 ```
 
 `0.3.0` is not released yet: `./gradlew publishToMavenLocal` and add `mavenLocal()`. Every artifact
-and its minSdk is listed in [Installation](docs/getting-started/installation.md).
+and its minSdk is listed in [Installation](docs/getting-started/installation.md). Until 1.0, minor
+versions may change the API; the [CHANGELOG](CHANGELOG.md) lists every change.
 
 ## Try it
 
@@ -84,6 +90,13 @@ workstreams are in the [roadmap](docs/project/roadmap.md) and changes in the [CH
 
 Toolchain: AGP 9.4 (built-in Kotlin) · Gradle 9.7 · Kotlin 2.4 · Compose 1.13 · Material 3 1.5
 (Expressive).
+
+## Contributing
+
+Issues and pull requests are welcome: read [CONTRIBUTING.md](CONTRIBUTING.md) and
+[AGENTS.md](AGENTS.md) (the protocol rules) first. Please follow the
+[Code of Conduct](CODE_OF_CONDUCT.md), and report vulnerabilities privately as described in
+[SECURITY.md](SECURITY.md).
 
 ## License
 

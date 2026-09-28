@@ -872,7 +872,7 @@ private fun ProviderEditor(
                 if (profile.builtIn) {
                     TextButton(onClick = {
                         store.reset(profile.id)
-                        draft = ProviderProfile.Presets.first { it.id == profile.id }
+                        draft = store.presets.first { it.id == profile.id }
                     }) { Text(stringResource(R.string.reset_defaults)) }
                 } else {
                     TextButton(

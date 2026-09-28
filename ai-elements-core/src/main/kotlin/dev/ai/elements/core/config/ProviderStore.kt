@@ -70,16 +70,15 @@ class SecretStore(context: Context) {
     }
 }
 
-/**
- * The configured providers plus the active one, persisted as JSON in
- * SharedPreferences and observable as [StateFlow]s. Presets are merged in on
- * load, so new presets appear after an app update.
- */
 /** SecretStore key prefix for a profile's OAuth tokens. */
 private const val TOKENS_PREFIX = "oauth-tokens:"
 
-/** Saved provider profiles (SharedPreferences) with their API keys and OAuth tokens kept encrypted in [SecretStore]; exposes the list and the selected profile as flows. */
-class ProviderStore(context: Context) {
+/**
+ * Saved provider profiles (SharedPreferences) with their API keys and OAuth tokens kept encrypted
+ * in [SecretStore]; exposes the list and the selected profile as flows. [presets] (built in, the
+ * first one selected by default) are merged in on load, so new presets appear after an app update.
+ */
+class ProviderStore(context: Context, val presets: List<ProviderProfile> = ProviderProfile.Presets) {
     private val prefs = context.getSharedPreferences("ai_elements_providers", Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val listSerializer = ListSerializer(ProviderProfile.serializer())
@@ -88,7 +87,7 @@ class ProviderStore(context: Context) {
     private val _profiles = MutableStateFlow(load())
     val profiles: StateFlow<List<ProviderProfile>> = _profiles.asStateFlow()
 
-    private val _selectedId = MutableStateFlow(prefs.getString(KEY_SELECTED, null) ?: ProviderProfile.Presets.first().id)
+    private val _selectedId = MutableStateFlow(prefs.getString(KEY_SELECTED, null) ?: presets.first().id)
     val selectedId: StateFlow<String> = _selectedId.asStateFlow()
 
     val selected: ProviderProfile
@@ -111,13 +110,13 @@ class ProviderStore(context: Context) {
         _profiles.update { list -> list.filterNot { it.id == id && !it.builtIn } }
         secrets.put(id, "")
         secrets.put(TOKENS_PREFIX + id, "")
-        if (_selectedId.value == id) select(ProviderProfile.Presets.first().id)
+        if (_selectedId.value == id) select(presets.first().id)
         save()
     }
 
     /** Restore a built-in preset to its defaults (keeps its API key). */
     fun reset(id: String) {
-        ProviderProfile.Presets.firstOrNull { it.id == id }?.let(::upsert)
+        presets.firstOrNull { it.id == id }?.let(::upsert)
     }
 
     fun apiKey(id: String): String = secrets.get(id)
@@ -150,7 +149,7 @@ class ProviderStore(context: Context) {
             ?.let { runCatching { json.decodeFromString(listSerializer, it) }.getOrNull() }
             .orEmpty()
         val savedIds = saved.map { it.id }.toSet()
-        return saved + ProviderProfile.Presets.filter { it.id !in savedIds }
+        return saved + presets.filter { it.id !in savedIds }
     }
 
     private fun save() {

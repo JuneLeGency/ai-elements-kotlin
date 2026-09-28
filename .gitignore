@@ -12,3 +12,6 @@ server/__pycache__/
 *.whl
 # Documentation site build (zensical)
 site/
+
+# Maintainer-local notes (devices, accounts, proxies)
+GOAL.local.md

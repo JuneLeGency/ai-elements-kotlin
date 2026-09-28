@@ -103,7 +103,7 @@ reference only, never copied).
 | MCP server (official `mcp` 2.2, both eras) at `/mcp` | ✅ verified with curl |
 | A2A agent (official `a2a-sdk` 1.1, 1.0 + 0.3 compat) at `/a2a` | ✅ |
 | Keyword-scripted offline model exercising every capability (for fixtures and E2E) | ✅ |
-| Real-model runs | ⬜ proxy upstreams are dead (435 / revoked); `CODEX_AUTH_FILE` option added — waiting for the user to start it with the authorized account |
+| Real-model runs | ⬜ not yet run end to end with a hosted model; the server takes any OpenAI-compatible endpoint (`AGENT_BASE_URL`, `AGENT_API_KEY`, `AGENT_MODEL`) or a Codex sign-in (`CODEX_AUTH_FILE`) |
 
 ### W4 · UI elements
 
