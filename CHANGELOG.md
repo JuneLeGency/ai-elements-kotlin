@@ -256,6 +256,9 @@
 - A reply's action row shows copy, read aloud, regenerate and the agent's computer; the run graph
   and "open in / share" are in its "⋯" menu (`message-more`).
 - `ChatEmptyState(subtitle)` is optional (`null` hides it).
+- Links in content (citations, sources, Markdown, A2UI, MCP Apps) open in a Custom Tab with the
+  theme's colours (`CustomTabsUriHandler`, provided by `AiElementsTheme`; `openLinksInCustomTabs =
+  false` keeps the default browser). `ai-elements-ui` depends on `androidx.browser`.
 - `ProviderProfile.Presets` holds the public model APIs only (OpenAI, Anthropic, Gemini, OpenRouter)
   and the offline agent; the reference-server, Ollama and local-proxy profiles moved to the demo
   (`DemoPresets`). `ProviderStore(context, presets)` takes an app's own list.

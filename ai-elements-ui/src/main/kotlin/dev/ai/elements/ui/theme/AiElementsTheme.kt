@@ -19,8 +19,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import dev.ai.elements.ui.link.CustomTabsUriHandler
+import dev.ai.elements.ui.link.rememberCustomTabsUriHandler
 
 /**
  * Material 3 **Expressive** theme for AI Elements: expressive motion (spring
@@ -35,6 +38,9 @@ import androidx.compose.ui.unit.dp
  * @param colorScheme your brand's colors; overrides [dynamicColor] and [palette].
  * @param typography your type scale; overrides [fontFamily].
  * @param shapes your shapes; the Material 3 Expressive set by default.
+ * @param openLinksInCustomTabs web links in elements (citations, sources, Markdown, A2UI, MCP
+ *   Apps) open in a Custom Tab with the theme's colours ([CustomTabsUriHandler]); false keeps the
+ *   platform's `LocalUriHandler` (the default browser), or provide your own inside the theme.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -48,6 +54,7 @@ fun AiElementsTheme(
     colorScheme: ColorScheme? = null,
     typography: Typography? = null,
     shapes: Shapes = ExpressiveShapes,
+    openLinksInCustomTabs: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
@@ -63,7 +70,15 @@ fun AiElementsTheme(
         shapes = shapes,
         typography = type,
     ) {
-        CompositionLocalProvider(LocalCodeFontFamily provides codeFontFamily, content = content)
+        if (openLinksInCustomTabs) {
+            CompositionLocalProvider(
+                LocalCodeFontFamily provides codeFontFamily,
+                LocalUriHandler provides rememberCustomTabsUriHandler(),
+                content = content,
+            )
+        } else {
+            CompositionLocalProvider(LocalCodeFontFamily provides codeFontFamily, content = content)
+        }
     }
 }
 

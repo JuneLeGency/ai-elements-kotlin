@@ -38,6 +38,7 @@ dependencies {
     api(libs.compose.material3)
     implementation(libs.compose.ui.graphics)
     implementation(libs.activity.compose)
+    implementation(libs.androidx.browser) // Custom Tabs for links in content
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.markdown.renderer.m3)
     implementation(libs.highlights)

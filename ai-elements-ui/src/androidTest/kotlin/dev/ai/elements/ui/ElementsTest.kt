@@ -66,6 +66,8 @@ import dev.ai.elements.ui.chat.rememberAgentComputerState
 import dev.ai.elements.ui.chat.rememberChat
 import dev.ai.elements.ui.code.EnvironmentVariable
 import dev.ai.elements.ui.code.EnvironmentVariables
+import dev.ai.elements.core.model.SourcePart
+import dev.ai.elements.ui.chat.Sources
 import dev.ai.elements.ui.theme.AiElementsTheme
 import dev.ai.elements.ui.voice.TranscriptSegment
 import dev.ai.elements.ui.voice.Transcription
@@ -652,6 +654,33 @@ class ElementsTest {
         val call = ToolPart("call-2", "delegate_task", ToolState.OUTPUT_AVAILABLE, """{"agent_name":"researcher","task":"Explain"}""", output = "AG-UI streams agent events.", subagent = nested, kind = ToolKind.Delegation("researcher", "Explain"))
         compose.setContent { AiElementsTheme(dynamicColor = false) { ToolPartView(call) } }
         compose.onNodeWithTag("subagent-activity", useUnmergedTree = true).assertTextEquals("AG-UI streams agent events.")
+    }
+
+    /** Links in content open in a Custom Tab (the browser inside the app), not by leaving the app. */
+    @Test
+    fun sourceLink_opensInACustomTab() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        var launched: android.content.Intent? = null
+        // Intercepts the launch (a non-null result blocks it), so no browser opens during the test.
+        val monitor = object : android.app.Instrumentation.ActivityMonitor() {
+            override fun onStartActivity(intent: android.content.Intent): android.app.Instrumentation.ActivityResult? {
+                if (intent.action != android.content.Intent.ACTION_VIEW) return null
+                launched = intent
+                return android.app.Instrumentation.ActivityResult(0, null)
+            }
+        }
+        instrumentation.addMonitor(monitor)
+        try {
+            compose.setContent {
+                AiElementsTheme(dynamicColor = false) { Sources(listOf(SourcePart("s1", "https://example.com/doc", "Example doc"))) }
+            }
+            compose.onNodeWithText("Example doc").performClick()
+            compose.waitUntil(5_000) { launched != null }
+            assertEquals("https://example.com/doc", launched?.dataString)
+            assertTrue("not a Custom Tabs intent", launched?.hasExtra(androidx.browser.customtabs.CustomTabsIntent.EXTRA_SESSION) == true)
+        } finally {
+            instrumentation.removeMonitor(monitor)
+        }
     }
 }
 

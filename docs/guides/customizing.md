@@ -29,7 +29,18 @@ AiElementsTheme(colorScheme = brandColors, typography = brandType, shapes = bran
 }
 ```
 
-Links open through Compose's `LocalUriHandler`; provide your own to route them in the app.
+## Links
+
+Web links in content (citations, sources, Markdown links, A2UI and MCP Apps links) open in a
+[Custom Tab](https://developer.chrome.com/docs/android/custom-tabs): the user's browser inside the
+app, with the theme's colours and a way back to the chat. `mailto:`, `tel:` and other schemes go to
+the app that handles them. Every element opens links through Compose's `LocalUriHandler`, which
+`AiElementsTheme` sets to a `CustomTabsUriHandler`:
+
+- `AiElementsTheme(openLinksInCustomTabs = false)` keeps the platform handler (the default browser);
+- `CustomTabsUriHandler(context, preferNativeApp = true)` opens a link in an installed app that
+  handles it (a video in its app, for example) before the Custom Tab;
+- provide your own `LocalUriHandler` inside the theme to route links in the app.
 
 ## Tools say what they are
 
