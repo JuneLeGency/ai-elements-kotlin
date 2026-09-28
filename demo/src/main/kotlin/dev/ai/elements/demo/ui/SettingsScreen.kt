@@ -1,5 +1,12 @@
 package dev.ai.elements.demo.ui
 
+import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Dialog
 import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.StringRes
@@ -94,53 +101,32 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun SettingsScreen(viewModel: ChatViewModel, twoPane: Boolean, onBack: (() -> Unit)? = null) {
-    val profiles by viewModel.providers.profiles.collectAsStateWithLifecycle()
-    val selectedId by viewModel.providers.selectedId.collectAsStateWithLifecycle()
-    val navigator = rememberListDetailNavigator<String>(twoPane, listWidth = 400.dp)
+    val navigator = rememberListDetailNavigator<String>(twoPane, listWidth = 360.dp)
     val scope = rememberCoroutineScope()
-    val editing = profiles.firstOrNull { it.id == navigator.currentDestination?.contentKey }
+    // Two panes: a page is always open, the first one until the user picks another.
+    val key = navigator.currentDestination?.contentKey ?: SettingsPage.PROVIDERS.takeIf { twoPane }
+    val open = { page: String -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, page) }; Unit }
 
     NavigableListDetailPaneScaffold(
         navigator = navigator,
         listPane = {
             AnimatedPane {
-                SettingsList(
-                    viewModel = viewModel,
-                    profiles = profiles,
-                    selectedId = selectedId,
-                    highlightedId = if (navigator.isDetailVisible) navigator.currentDestination?.contentKey else null,
-                    onEdit = { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } },
-                    onBack = onBack,
-                )
+                SettingsHome(viewModel, highlighted = if (navigator.isDetailVisible) key else null, onOpen = open, onBack = onBack)
             }
         },
         detailPane = {
             AnimatedPane {
-                val key = navigator.currentDestination?.contentKey
-                if (CapabilityPage.isCapability(key)) {
-                    CapabilityPane(
-                        viewModel, key!!,
-                        showBack = !navigator.isListVisible,
-                        onClose = { scope.launch { navigator.navigateBack() } },
-                        modifier = if (twoPane) Modifier.padding(end = 24.dp) else Modifier,
-                    )
-                } else if (editing != null) {
-                    ProviderEditor(
-                        viewModel,
-                        editing,
-                        modifier = if (twoPane) Modifier.padding(end = 24.dp) else Modifier,
-                        showBack = !navigator.isListVisible,
-                        onClose = { scope.launch { navigator.navigateBack() } },
-                    )
-                } else {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            stringResource(R.string.select_provider_hint),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(32.dp),
-                        )
-                    }
+                val showBack = !navigator.isListVisible
+                val close = { scope.launch { navigator.navigateBack() }; Unit }
+                val paneModifier = if (twoPane) Modifier.padding(end = 24.dp) else Modifier
+                when {
+                    key == null -> Unit
+                    CapabilityPage.isCapability(key) -> CapabilityPane(viewModel, key, showBack, close, paneModifier)
+                    key == SettingsPage.PROVIDERS -> ProvidersPane(viewModel, showBack, close, paneModifier)
+                    key == SettingsPage.DEVICE -> OnDevicePane(viewModel, showBack, close, paneModifier)
+                    key == SettingsPage.APPEARANCE -> AppearancePane(viewModel, showBack, close, paneModifier)
+                    key == SettingsPage.TEXT -> TextPane(viewModel, showBack, close, paneModifier)
+                    key == SettingsPage.DIAGRAMS -> DiagramsPane(viewModel, showBack, close, paneModifier)
                 }
             }
         },
@@ -148,41 +134,28 @@ fun SettingsScreen(viewModel: ChatViewModel, twoPane: Boolean, onBack: (() -> Un
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun SettingsList(
-    viewModel: ChatViewModel,
-    profiles: List<ProviderProfile>,
-    selectedId: String,
-    highlightedId: String?,
-    onEdit: (String) -> Unit,
-    onBack: (() -> Unit)? = null,
-) {
-    val appearance by viewModel.settings.appearance.collectAsStateWithLifecycle()
-    var addMenu by remember { mutableStateOf(false) }
-    val customName = stringResource(R.string.custom_provider)
-    val noNetwork = stringResource(R.string.no_network_needed)
-    val keySet = stringResource(R.string.key_set)
-    val noKey = stringResource(R.string.no_key)
-    val signedInLabel = stringResource(R.string.signed_in)
-    val notSignedInLabel = stringResource(R.string.not_signed_in)
-    var confirmSubscription by remember { mutableStateOf(false) }
+/** The settings pages: the first level of settings, each opening its page (the second level). */
+internal object SettingsPage {
+    const val PROVIDERS = "page:providers"
+    const val DEVICE = "page:device"
+    const val APPEARANCE = "page:appearance"
+    const val TEXT = "page:text"
+    const val DIAGRAMS = "page:diagrams"
+}
 
-    if (confirmSubscription) {
-        AlertDialog(
-            onDismissRequest = { confirmSubscription = false },
-            icon = { Icon(DemoIcons.WarningAmber, null) },
-            title = { Text(stringResource(R.string.subscription_signin)) },
-            text = { Text(stringResource(R.string.subscription_warning)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    confirmSubscription = false
-                    viewModel.settings.update(appearance.copy(subscriptionSignIn = true))
-                }, modifier = Modifier.testTag("subscription-confirm")) { Text(stringResource(R.string.enable_anyway)) }
-            },
-            dismissButton = { TextButton(onClick = { confirmSubscription = false }) { Text(stringResource(R.string.cancel)) } },
-        )
-    }
+/** Settings, first level: what can be set, grouped, each with where it stands now. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SettingsHome(viewModel: ChatViewModel, highlighted: String?, onOpen: (String) -> Unit, onBack: (() -> Unit)?) {
+    val appearance by viewModel.settings.appearance.collectAsStateWithLifecycle()
+    val profiles by viewModel.providers.profiles.collectAsStateWithLifecycle()
+    val selectedId by viewModel.providers.selectedId.collectAsStateWithLifecycle()
+    val settings by viewModel.agents.settings.collectAsStateWithLifecycle()
+    val servers by viewModel.mcpServers.servers.collectAsStateWithLifecycle()
+    val skills by viewModel.skills.skills.collectAsStateWithLifecycle()
+    val active = profiles.firstOrNull { it.id == selectedId }
+    val onDevice = listOf(settings.builtinTools, settings.workspaceFiles, settings.sandboxShell, settings.memory, settings.planning, settings.webBrowser, settings.deviceTools, settings.speech, settings.scheduledTasks).count { it }
+    val off = stringResource(R.string.off)
     Scaffold(containerColor = Color.Transparent, topBar = {
         TopAppBar(
             title = { Text(stringResource(R.string.settings)) },
@@ -191,7 +164,47 @@ private fun SettingsList(
         )
     }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding).testTag("settings-list")) {
-            item { SectionHeader(stringResource(R.string.appearance)) }
+            item { SectionHeader(stringResource(R.string.settings_agent)) }
+            item { HomeRow(SettingsPage.PROVIDERS, DemoIcons.SmartToy, R.string.agent_providers, active?.name ?: "", highlighted, onOpen) }
+            item { HomeRow(CapabilityPage.MCP, DemoIcons.Hub, R.string.cap_mcp, if (settings.mcpEnabled) stringResource(R.string.cap_enabled_count, servers.count { it.enabled }) else off, highlighted, onOpen) }
+            item { HomeRow(CapabilityPage.SKILLS, DemoIcons.AutoStories, R.string.cap_skills, if (settings.skillsEnabled) stringResource(R.string.cap_enabled_count, skills.count { it.skill.name !in settings.disabledSkills }) else off, highlighted, onOpen) }
+            item { HomeRow(CapabilityPage.AGENTS, DemoIcons.Groups, R.string.cap_agents, stringResource(R.string.cap_enabled_count, settings.subAgents.count { it.enabled } + settings.remoteAgents.count { it.enabled }), highlighted, onOpen) }
+            item { HomeRow(SettingsPage.DEVICE, DemoIcons.PhoneAndroid, R.string.cap_in_app, stringResource(R.string.cap_enabled_count, onDevice), highlighted, onOpen) }
+            item { SectionHeader(stringResource(R.string.settings_app)) }
+            item {
+                val theme = stringResource(when (appearance.themeMode) { ThemeMode.SYSTEM -> R.string.theme_system; ThemeMode.LIGHT -> R.string.theme_light; ThemeMode.DARK -> R.string.theme_dark })
+                val color = if (appearance.dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) stringResource(R.string.dynamic_color) else stringResource(appearance.palette.label)
+                HomeRow(SettingsPage.APPEARANCE, DemoIcons.Palette, R.string.appearance, "$theme · $color", highlighted, onOpen)
+            }
+            item {
+                val size = stringResource(when (appearance.textSize) { TextSize.SMALL -> R.string.text_small; TextSize.DEFAULT -> R.string.text_default; TextSize.LARGE -> R.string.text_large; TextSize.EXTRA_LARGE -> R.string.text_extra_large })
+                HomeRow(SettingsPage.TEXT, DemoIcons.TextFields, R.string.settings_text_language, "${currentLanguageLabel()} · $size", highlighted, onOpen)
+            }
+            item {
+                val size = stringResource(when (appearance.diagramSize) { DiagramSize.SMALL -> R.string.size_small; DiagramSize.MEDIUM -> R.string.size_medium; DiagramSize.LARGE -> R.string.size_large })
+                HomeRow(SettingsPage.DIAGRAMS, DemoIcons.AccountTree, R.string.settings_diagrams, size, highlighted, onOpen)
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeRow(key: String, icon: ImageVector, title: Int, summary: String, highlighted: String?, onOpen: (String) -> Unit) {
+    ListItem(
+        selected = key == highlighted,
+        onClick = { onOpen(key) },
+        leadingContent = { Icon(icon, null, tint = MaterialTheme.colorScheme.primary) },
+        supportingContent = { Text(summary, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("settings-$key"),
+    ) { Text(stringResource(title)) }
+}
+
+/** Theme, color and contrast. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun AppearancePane(viewModel: ChatViewModel, showBack: Boolean, onClose: () -> Unit, modifier: Modifier) {
+    val appearance by viewModel.settings.appearance.collectAsStateWithLifecycle()
+    PaneScaffold(stringResource(R.string.appearance), showBack, onClose, modifier) {
             item {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
@@ -263,49 +276,67 @@ private fun SettingsList(
                     )
                 }
             }
-            item { LanguageItem() }
-            item {
-                SettingLabel(stringResource(R.string.font), stringResource(R.string.font_desc))
-                ConnectedChoices(
-                    options = AppFont.entries,
-                    selected = appearance.font,
-                    onSelect = { viewModel.settings.update(appearance.copy(font = it)) },
-                    tag = { "font-${it.name.lowercase()}" },
-                ) { font ->
-                    // Each option is set in its own font: the picker is the preview.
-                    Text(
-                        when (font) {
-                            AppFont.SYSTEM -> stringResource(R.string.font_system)
-                            AppFont.GEIST -> "Geist"
-                            AppFont.INTER -> "Inter"
-                            AppFont.WENKAI -> stringResource(R.string.font_wenkai)
+    }
+}
+
+/** Language, font and text size. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun TextPane(viewModel: ChatViewModel, showBack: Boolean, onClose: () -> Unit, modifier: Modifier) {
+    val appearance by viewModel.settings.appearance.collectAsStateWithLifecycle()
+    PaneScaffold(stringResource(R.string.settings_text_language), showBack, onClose, modifier) {
+        item { LanguageItem() }
+        item {
+            SettingLabel(stringResource(R.string.font), stringResource(R.string.font_desc))
+            ConnectedChoices(
+                options = AppFont.entries,
+                selected = appearance.font,
+                onSelect = { viewModel.settings.update(appearance.copy(font = it)) },
+                tag = { "font-${it.name.lowercase()}" },
+            ) { font ->
+                // Each option is set in its own font: the picker is the preview.
+                Text(
+                    when (font) {
+                        AppFont.SYSTEM -> stringResource(R.string.font_system)
+                        AppFont.GEIST -> "Geist"
+                        AppFont.INTER -> "Inter"
+                        AppFont.WENKAI -> stringResource(R.string.font_wenkai)
+                    },
+                    fontFamily = font.family,
+                    maxLines = 1,
+                )
+            }
+        }
+        item {
+            SettingLabel(stringResource(R.string.text_size), null)
+            ConnectedChoices(
+                options = TextSize.entries,
+                selected = appearance.textSize,
+                onSelect = { viewModel.settings.update(appearance.copy(textSize = it)) },
+                tag = { "text-size-${it.name.lowercase()}" },
+            ) { size ->
+                Text(
+                    stringResource(
+                        when (size) {
+                            TextSize.SMALL -> R.string.text_small
+                            TextSize.DEFAULT -> R.string.text_default
+                            TextSize.LARGE -> R.string.text_large
+                            TextSize.EXTRA_LARGE -> R.string.text_extra_large
                         },
-                        fontFamily = font.family,
-                        maxLines = 1,
-                    )
-                }
+                    ),
+                    maxLines = 1,
+                )
             }
-            item {
-                SettingLabel(stringResource(R.string.text_size), null)
-                ConnectedChoices(
-                    options = TextSize.entries,
-                    selected = appearance.textSize,
-                    onSelect = { viewModel.settings.update(appearance.copy(textSize = it)) },
-                    tag = { "text-size-${it.name.lowercase()}" },
-                ) { size ->
-                    Text(
-                        stringResource(
-                            when (size) {
-                                TextSize.SMALL -> R.string.text_small
-                                TextSize.DEFAULT -> R.string.text_default
-                                TextSize.LARGE -> R.string.text_large
-                                TextSize.EXTRA_LARGE -> R.string.text_extra_large
-                            },
-                        ),
-                        maxLines = 1,
-                    )
-                }
-            }
+        }
+    }
+}
+
+/** How Mermaid diagrams render. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun DiagramsPane(viewModel: ChatViewModel, showBack: Boolean, onClose: () -> Unit, modifier: Modifier) {
+    val appearance by viewModel.settings.appearance.collectAsStateWithLifecycle()
+    PaneScaffold(stringResource(R.string.settings_diagrams), showBack, onClose, modifier) {
             item {
                 ListItem(
                     checked = appearance.nativeMermaid,
@@ -341,128 +372,186 @@ private fun SettingsList(
                     }
                 }
             }
+    }
+}
 
-            capabilityItems(viewModel, highlightedId, onEdit)
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    SectionHeader(stringResource(R.string.agent_providers), Modifier.weight(1f))
-                    Box {
-                        TextButton(onClick = { addMenu = true }, modifier = Modifier.padding(end = 8.dp)) {
-                            Icon(DemoIcons.Add, null, Modifier.size(AiSize.compactIcon))
-                            Text(stringResource(R.string.add), Modifier.padding(start = 4.dp))
-                        }
-                        DropdownMenu(expanded = addMenu, onDismissRequest = { addMenu = false }) {
-                            ProviderKind.entries.filter { it != ProviderKind.MOCK }.forEach { kind ->
-                                DropdownMenuItem(
-                                    text = { Text(kind.label) },
-                                    leadingIcon = { Icon(kind.icon, null) },
-                                    onClick = {
-                                        addMenu = false
-                                        val profile = ProviderProfile(
-                                            id = "custom-" + UUID.randomUUID().toString().take(8),
-                                            name = String.format(customName, kind.label),
-                                            kind = kind,
-                                            baseUrl = when (kind) {
-                                                ProviderKind.AGENT_SERVER, ProviderKind.AG_UI, ProviderKind.A2A -> "http://10.0.2.2:8788"
-                                                ProviderKind.ACP -> "ws://10.0.2.2:8788/acp"
-                                                ProviderKind.ANTHROPIC -> "https://api.anthropic.com"
-                                                ProviderKind.GEMINI -> "https://generativelanguage.googleapis.com"
-                                                ProviderKind.OLLAMA -> "http://10.0.2.2:11434"
-                                                else -> "http://10.0.2.2:11434/v1"
-                                            },
-                                            model = if (kind.serverSideAgent) "" else "qwen3:4b",
-                                        )
-                                        viewModel.providers.upsert(profile)
-                                        onEdit(profile.id)
-                                    },
-                                )
-                            }
-                            HorizontalDivider()
-                            Text(
-                                stringResource(R.string.sign_in_section),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+/** The providers: which to use, adding one (with a key or by signing in), and editing one in a dialog. */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun ProvidersPane(viewModel: ChatViewModel, showBack: Boolean, onClose: () -> Unit, modifier: Modifier) {
+    val appearance by viewModel.settings.appearance.collectAsStateWithLifecycle()
+    val profiles by viewModel.providers.profiles.collectAsStateWithLifecycle()
+    val selectedId by viewModel.providers.selectedId.collectAsStateWithLifecycle()
+    var editingId by rememberSaveable { mutableStateOf<String?>(null) }
+    val highlightedId = editingId
+    val onEdit = { id: String -> editingId = id }
+    var addMenu by remember { mutableStateOf(false) }
+    val customName = stringResource(R.string.custom_provider)
+    val noNetwork = stringResource(R.string.no_network_needed)
+    val keySet = stringResource(R.string.key_set)
+    val noKey = stringResource(R.string.no_key)
+    val signedInLabel = stringResource(R.string.signed_in)
+    val notSignedInLabel = stringResource(R.string.not_signed_in)
+    var confirmSubscription by remember { mutableStateOf(false) }
+
+    if (confirmSubscription) {
+        AlertDialog(
+            onDismissRequest = { confirmSubscription = false },
+            icon = { Icon(DemoIcons.WarningAmber, null) },
+            title = { Text(stringResource(R.string.subscription_signin)) },
+            text = { Text(stringResource(R.string.subscription_warning)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmSubscription = false
+                    viewModel.settings.update(appearance.copy(subscriptionSignIn = true))
+                }, modifier = Modifier.testTag("subscription-confirm")) { Text(stringResource(R.string.enable_anyway)) }
+            },
+            dismissButton = { TextButton(onClick = { confirmSubscription = false }) { Text(stringResource(R.string.cancel)) } },
+        )
+    }
+    profiles.firstOrNull { it.id == editingId }?.let { profile ->
+        EditorDialog(onDismiss = { editingId = null }) {
+            ProviderEditor(viewModel, profile, showBack = true, onClose = { editingId = null }, inDialog = true)
+        }
+    }
+    PaneScaffold(stringResource(R.string.agent_providers), showBack, onClose, modifier) {
+        item {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                SectionHeader(stringResource(R.string.provider_list), Modifier.weight(1f))
+                Box {
+                    TextButton(onClick = { addMenu = true }, modifier = Modifier.padding(end = 8.dp)) {
+                        Icon(DemoIcons.Add, null, Modifier.size(AiSize.compactIcon))
+                        Text(stringResource(R.string.add), Modifier.padding(start = 4.dp))
+                    }
+                    DropdownMenu(expanded = addMenu, onDismissRequest = { addMenu = false }) {
+                        ProviderKind.entries.filter { it != ProviderKind.MOCK }.forEach { kind ->
+                            DropdownMenuItem(
+                                text = { Text(kind.label) },
+                                leadingIcon = { Icon(kind.icon, null) },
+                                onClick = {
+                                    addMenu = false
+                                    val profile = ProviderProfile(
+                                        id = "custom-" + UUID.randomUUID().toString().take(8),
+                                        name = String.format(customName, kind.label),
+                                        kind = kind,
+                                        baseUrl = when (kind) {
+                                            ProviderKind.AGENT_SERVER, ProviderKind.AG_UI, ProviderKind.A2A -> "http://10.0.2.2:8788"
+                                            ProviderKind.ACP -> "ws://10.0.2.2:8788/acp"
+                                            ProviderKind.ANTHROPIC -> "https://api.anthropic.com"
+                                            ProviderKind.GEMINI -> "https://generativelanguage.googleapis.com"
+                                            ProviderKind.OLLAMA -> "http://10.0.2.2:11434"
+                                            else -> "http://10.0.2.2:11434/v1"
+                                        },
+                                        model = if (kind.serverSideAgent) "" else "qwen3:4b",
+                                    )
+                                    viewModel.providers.upsert(profile)
+                                    onEdit(profile.id)
+                                },
                             )
-                            OAuthProvider.entries.filter { !it.experimental || appearance.subscriptionSignIn }.forEach { provider ->
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.sign_in_with, provider.label)) },
-                                    leadingIcon = { Icon(DemoIcons.Login, null) },
-                                    trailingIcon = if (provider.experimental) ({
-                                        Text(stringResource(R.string.experimental), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary)
-                                    }) else null,
-                                    modifier = Modifier.testTag("add-oauth-${provider.name.lowercase()}"),
-                                    onClick = {
-                                        addMenu = false
-                                        val profile = ProviderProfile(
-                                            id = "oauth-${provider.name.lowercase()}-" + UUID.randomUUID().toString().take(6),
-                                            name = provider.label,
-                                            kind = provider.kind,
-                                            baseUrl = provider.baseUrl,
-                                            model = provider.defaultModel,
-                                            oauth = provider,
-                                        )
-                                        viewModel.providers.upsert(profile)
-                                        onEdit(profile.id)
-                                    },
-                                )
-                            }
+                        }
+                        HorizontalDivider()
+                        Text(
+                            stringResource(R.string.sign_in_section),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
+                        OAuthProvider.entries.filter { !it.experimental || appearance.subscriptionSignIn }.forEach { provider ->
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.sign_in_with, provider.label)) },
+                                leadingIcon = { Icon(DemoIcons.Login, null) },
+                                trailingIcon = if (provider.experimental) ({
+                                    Text(stringResource(R.string.experimental), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary)
+                                }) else null,
+                                modifier = Modifier.testTag("add-oauth-${provider.name.lowercase()}"),
+                                onClick = {
+                                    addMenu = false
+                                    val profile = ProviderProfile(
+                                        id = "oauth-${provider.name.lowercase()}-" + UUID.randomUUID().toString().take(6),
+                                        name = provider.label,
+                                        kind = provider.kind,
+                                        baseUrl = provider.baseUrl,
+                                        model = provider.defaultModel,
+                                        oauth = provider,
+                                    )
+                                    viewModel.providers.upsert(profile)
+                                    onEdit(profile.id)
+                                },
+                            )
                         }
                     }
                 }
             }
-            items(profiles, key = { it.id }) { profile ->
-                val tokenVersion by viewModel.providers.tokenVersion.collectAsStateWithLifecycle()
-                val hasKey = remember(profile.id, highlightedId, tokenVersion) {
-                    if (profile.usesTokens) viewModel.providers.tokenStore(profile.id).load() != null
-                    else viewModel.providers.apiKey(profile.id).isNotBlank()
-                }
-                ListItem(
-                    selected = profile.id == highlightedId,
-                    onClick = { onEdit(profile.id) },
-                    supportingContent = {
-                        Text(
-                            buildString {
-                                append(if (profile.kind.label == profile.name) noNetwork else profile.kind.label)
-                                when {
-                                    profile.oauth != null -> append(" · ").append(if (hasKey) signedInLabel else notSignedInLabel)
-                                    profile.kind.needsKey -> append(if (hasKey) keySet else noKey)
-                                }
-                            },
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    },
-                    leadingContent = {
-                        Icon(profile.kind.icon, null, tint = MaterialTheme.colorScheme.primary)
-                    },
-                    trailingContent = {
-                        if (profile.id == selectedId) {
-                            Icon(DemoIcons.CheckCircle, stringResource(R.string.active), tint = MaterialTheme.colorScheme.primary)
-                        }
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("settings-provider-${profile.id}"),
-                ) { Text(profile.name) }
+        }
+        items(profiles, key = { it.id }) { profile ->
+            val tokenVersion by viewModel.providers.tokenVersion.collectAsStateWithLifecycle()
+            val hasKey = remember(profile.id, highlightedId, tokenVersion) {
+                if (profile.usesTokens) viewModel.providers.tokenStore(profile.id).load() != null
+                else viewModel.providers.apiKey(profile.id).isNotBlank()
             }
-            item {
-                Text(
-                    stringResource(R.string.emulator_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(16.dp),
-                )
-            }
-            item {
-                ListItem(
-                    checked = appearance.subscriptionSignIn,
-                    colors = switchRowColors(),
-                    onCheckedChange = {
-                        if (it) confirmSubscription = true else viewModel.settings.update(appearance.copy(subscriptionSignIn = false))
-                    },
-                    supportingContent = { Text(stringResource(R.string.subscription_signin_desc)) },
-                    trailingContent = { Switch(checked = appearance.subscriptionSignIn, onCheckedChange = null) },
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp).testTag("subscription-sign-in"),
-                ) { Text(stringResource(R.string.subscription_signin)) }
+            ListItem(
+                selected = profile.id == highlightedId,
+                onClick = { onEdit(profile.id) },
+                supportingContent = {
+                    Text(
+                        buildString {
+                            append(if (profile.kind.label == profile.name) noNetwork else profile.kind.label)
+                            when {
+                                profile.oauth != null -> append(" · ").append(if (hasKey) signedInLabel else notSignedInLabel)
+                                profile.kind.needsKey -> append(" · ").append(if (hasKey) keySet else noKey)
+                            }
+                        },
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
+                leadingContent = {
+                    Icon(profile.kind.icon, null, tint = MaterialTheme.colorScheme.primary)
+                },
+                trailingContent = {
+                    if (profile.id == selectedId) {
+                        Icon(DemoIcons.CheckCircle, stringResource(R.string.active), tint = MaterialTheme.colorScheme.primary)
+                    }
+                },
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("settings-provider-${profile.id}"),
+            ) { Text(profile.name) }
+        }
+        item {
+            Text(
+                stringResource(R.string.emulator_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(16.dp),
+            )
+        }
+        item {
+            ListItem(
+                checked = appearance.subscriptionSignIn,
+                colors = switchRowColors(),
+                onCheckedChange = {
+                    if (it) confirmSubscription = true else viewModel.settings.update(appearance.copy(subscriptionSignIn = false))
+                },
+                supportingContent = { Text(stringResource(R.string.subscription_signin_desc)) },
+                trailingContent = { Switch(checked = appearance.subscriptionSignIn, onCheckedChange = null) },
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp).testTag("subscription-sign-in"),
+            ) { Text(stringResource(R.string.subscription_signin)) }
+        }
+    }
+}
+
+/** A full-screen dialog on phones, a large centered one on wider windows. */
+@Composable
+private fun EditorDialog(onDismiss: () -> Unit, content: @Composable () -> Unit) {
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
+        BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            val compact = maxWidth < 600.dp
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                shape = if (compact) RectangleShape else MaterialTheme.shapes.extraLarge,
+                modifier = if (compact) Modifier.fillMaxSize() else Modifier.widthIn(max = 640.dp).fillMaxWidth(0.9f).fillMaxHeight(0.9f),
+            ) {
+                // A dialog is its own window: expose test tags there too (UI Automator, tests).
+                Box((if (compact) Modifier.systemBarsPadding() else Modifier).semantics { testTagsAsResourceId = true }) { content() }
             }
         }
     }
@@ -476,6 +565,7 @@ private fun ProviderEditor(
     showBack: Boolean,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    inDialog: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
     val store = viewModel.providers
@@ -499,7 +589,8 @@ private fun ProviderEditor(
                 colors = transparentAppBarColors(),
                 title = { Text(draft.name.ifBlank { stringResource(R.string.provider) }, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
-                    if (showBack) IconButton(onClick = onClose) { Icon(DemoIcons.ArrowBack, stringResource(R.string.back)) }
+                    if (inDialog) IconButton(onClick = onClose, modifier = Modifier.testTag("provider-close")) { Icon(DemoIcons.Close, stringResource(R.string.close)) }
+                    else if (showBack) IconButton(onClick = onClose) { Icon(DemoIcons.ArrowBack, stringResource(R.string.back)) }
                 },
                 actions = {
                     TextButton(onClick = ::save, enabled = dirty, modifier = Modifier.testTag("provider-save")) { Text(stringResource(R.string.save)) }
@@ -690,6 +781,13 @@ private val ProviderKind.description: Int
     }
 
 /** Per-app language: follow the system or pick one of the shipped translations. */
+/** The app language's name, for the settings home. */
+@Composable
+private fun currentLanguageLabel(): String {
+    val activity = LocalActivity.current ?: return stringResource(R.string.language_system)
+    return AppLocale.current(activity).autonym ?: stringResource(R.string.language_system)
+}
+
 @Composable
 private fun LanguageItem() {
     val activity = LocalActivity.current ?: return

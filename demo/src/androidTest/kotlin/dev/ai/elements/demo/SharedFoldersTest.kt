@@ -1,5 +1,6 @@
 package dev.ai.elements.demo
 
+import dev.ai.elements.demo.ui.SettingsPage
 import android.net.Uri
 import android.os.Build
 import androidx.compose.ui.test.hasTestTag
@@ -83,14 +84,15 @@ class SharedFoldersTest {
         assertTrue(fs.context()!!.contains("/mnt/agent-share"))
     }
 
-    /** In the app: capabilities → Manage → "Add folder", then choose Documents/[name] in the system picker, as the user would. */
+    /** In the app: capabilities → Manage → On-device agent → "Add folder", then choose Documents/[name] in the system picker, as the user would. */
     private fun pickFolderInTheApp(name: String): Uri {
         resetDemoApp(ProviderProfile.Presets.first { it.kind == ProviderKind.MOCK })
         val scenario = ActivityScenario.launch(MainActivity::class.java)
         try {
             compose.onNodeWithTag("capabilities-button").performClick()
             compose.onNodeWithTag("capabilities-manage").performClick()
-            compose.onNodeWithTag("settings-list").performScrollToNode(hasTestTag("folder-add"))
+            compose.onNodeWithTag("settings-${SettingsPage.DEVICE}").performClick()
+            compose.onNodeWithTag("settings-page").performScrollToNode(hasTestTag("folder-add"))
             compose.onNodeWithTag("folder-add").performClick()
 
             // DocumentsUI: roots drawer → internal storage → Documents → name → Use this folder → Allow.
@@ -102,7 +104,7 @@ class SharedFoldersTest {
             clickText(Pattern.compile("(?i)allow"))
 
             compose.waitUntil(15_000) { folders.folders.value.isNotEmpty() }
-            compose.onNodeWithTag("settings-list").performScrollToNode(hasTestTag("folder-$name"))
+            compose.onNodeWithTag("settings-page").performScrollToNode(hasTestTag("folder-$name"))
             return Uri.parse(folders.folders.value.single().uri)
         } finally {
             scenario.close()

@@ -117,6 +117,11 @@
 - Approvals: **always allow** a tool for the rest of the conversation (`ToolDecision.remember`);
   ACP answers with the agent's `allow_always` option.
 
+- Demo settings are two levels deep: a grouped home with each entry's current state, one page per
+  entry, editors as dialogs (full screen on phones), side by side on tablets.
+- Fixed: `tools/generate-icons.py` reads each symbol's viewport (`auto_awesome` ships with 24, not
+  960, so the assistant sparkle was invisible) and refuses paths outside it.
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

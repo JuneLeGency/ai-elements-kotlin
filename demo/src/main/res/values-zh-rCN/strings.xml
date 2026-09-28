@@ -55,8 +55,8 @@
     <string name="add">添加</string>
     <string name="custom_provider">自定义 %1$s</string>
     <string name="no_network_needed">无需联网</string>
-    <string name="key_set"> · 已设置密钥</string>
-    <string name="no_key"> · 未设置密钥</string>
+    <string name="key_set">已设置密钥</string>
+    <string name="no_key">未设置密钥</string>
     <string name="active">使用中</string>
     <string name="emulator_hint">10.0.2.2 是 Android 模拟器访问你电脑的地址。在真机上请改用电脑的局域网 IP。</string>
     <string name="select_provider_hint">选择一个服务，编辑它的地址、模型和 API 密钥。</string>
@@ -140,7 +140,7 @@
     <string name="capabilities">智能体能力</string>
     <string name="cap_mcp">MCP 服务器</string>
     <string name="cap_skills">技能</string>
-    <string name="cap_agents">智能体</string>
+    <string name="cap_agents">子智能体</string>
     <string name="cap_enabled_count">已启用 %1$d 个</string>
     <string name="cap_builtin_tools">内置工具</string>
     <string name="cap_builtin_tools_desc">时钟、计算器与剪贴板</string>
@@ -214,4 +214,12 @@
     <string name="folders_add">添加文件夹</string>
     <string name="cap_koog">使用 JetBrains Koog 运行</string>
     <string name="cap_koog_desc">由 Koog 驱动智能体循环（OpenAI、Anthropic、Ollama 提供方）；关闭则使用内置循环</string>
+    <string name="settings_agent">智能体</string>
+    <string name="settings_app">应用</string>
+    <string name="settings_text_language">文字与语言</string>
+    <string name="settings_diagrams">图表</string>
+    <string name="provider_list">已添加的服务</string>
+    <string name="cap_harness">能力</string>
+    <string name="close">关闭</string>
+    <string name="cap_runtime">运行方式</string>
 </resources>

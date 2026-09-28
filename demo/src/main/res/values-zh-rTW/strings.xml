@@ -55,8 +55,8 @@
     <string name="add">新增</string>
     <string name="custom_provider">自訂 %1$s</string>
     <string name="no_network_needed">無需連網</string>
-    <string name="key_set"> · 已設定金鑰</string>
-    <string name="no_key"> · 未設定金鑰</string>
+    <string name="key_set">已設定金鑰</string>
+    <string name="no_key">未設定金鑰</string>
     <string name="active">使用中</string>
     <string name="emulator_hint">10.0.2.2 是 Android 模擬器存取你電腦的位址。在實體裝置上請改用電腦的區域網路 IP。</string>
     <string name="select_provider_hint">選擇一個服務，編輯它的位址、模型和 API 金鑰。</string>
@@ -140,7 +140,7 @@
     <string name="capabilities">智慧代理能力</string>
     <string name="cap_mcp">MCP 伺服器</string>
     <string name="cap_skills">技能</string>
-    <string name="cap_agents">代理程式</string>
+    <string name="cap_agents">子代理程式</string>
     <string name="cap_enabled_count">已啟用 %1$d 個</string>
     <string name="cap_builtin_tools">內建工具</string>
     <string name="cap_builtin_tools_desc">時鐘、計算機與剪貼簿</string>
@@ -214,4 +214,12 @@
     <string name="folders_add">新增資料夾</string>
     <string name="cap_koog">使用 JetBrains Koog 執行</string>
     <string name="cap_koog_desc">由 Koog 驅動代理程式循環（OpenAI、Anthropic、Ollama 提供者）；關閉則使用內建循環</string>
+    <string name="settings_agent">代理程式</string>
+    <string name="settings_app">應用程式</string>
+    <string name="settings_text_language">文字與語言</string>
+    <string name="settings_diagrams">圖表</string>
+    <string name="provider_list">已新增的服務</string>
+    <string name="cap_harness">能力</string>
+    <string name="close">關閉</string>
+    <string name="cap_runtime">執行方式</string>
 </resources>

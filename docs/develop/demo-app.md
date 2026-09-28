@@ -18,8 +18,10 @@ scripted provider) and connects to the [reference server](reference-server.md) o
   repository's `skills/` folder, or imported as `.zip`), sub-agents and remote A2A agents, the
   workspace, the Linux sandbox, memory, planning, the browser, device tools and scheduled tasks.
 - **Components**: every element with sample data.
-- **Settings**: themes, palettes, contrast, fonts, text size and languages (English, 简体中文,
-  繁體中文, 日本語).
+- **Settings**, two levels deep: a grouped home (Agent: providers, MCP servers, skills,
+  sub-agents, the on-device agent; App: appearance, text and language, diagrams), each entry with
+  where it stands now, opening its page. Editors (a provider, an MCP server, a sub-agent) open as
+  dialogs. Tablets show the home and the open page side by side.
 
 ## Where things live
 

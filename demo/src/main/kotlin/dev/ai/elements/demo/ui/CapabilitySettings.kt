@@ -78,40 +78,20 @@ internal object CapabilityPage {
     fun isCapability(key: String?) = key?.startsWith("cap:") == true
 }
 
-/** The "Agent capabilities" rows of the settings list. */
-internal fun LazyListScope.capabilityItems(viewModel: ChatViewModel, highlighted: String?, onOpen: (String) -> Unit) {
-    item { SectionHeader(stringResource(R.string.capabilities)) }
-    item {
-        val settings by viewModel.agents.settings.collectAsStateWithLifecycle()
-        val servers by viewModel.mcpServers.servers.collectAsStateWithLifecycle()
-        val skills by viewModel.skills.skills.collectAsStateWithLifecycle()
-        val rows = listOf(
-            Triple(CapabilityPage.MCP, DemoIcons.Hub, R.string.cap_mcp) to servers.count { it.enabled }.takeIf { settings.mcpEnabled },
-            Triple(CapabilityPage.SKILLS, DemoIcons.AutoStories, R.string.cap_skills) to skills.count { it.skill.name !in settings.disabledSkills }.takeIf { settings.skillsEnabled },
-            Triple(CapabilityPage.AGENTS, DemoIcons.Groups, R.string.cap_agents) to (settings.subAgents.count { it.enabled } + settings.remoteAgents.count { it.enabled }),
-        )
-        Column {
-            rows.forEach { (row, count) ->
-                val (key, icon, title) = row
-                ListItem(
-                    selected = key == highlighted,
-                    onClick = { onOpen(key) },
-                    leadingContent = { Icon(icon, null) },
-                    supportingContent = { Text(if (count == null) stringResource(R.string.off) else stringResource(R.string.cap_enabled_count, count)) },
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("settings-$key"),
-                ) { Text(stringResource(title)) }
+/** The on-device agent's capabilities: built-in tools and the Harness capabilities. */
+@Composable
+internal fun OnDevicePane(viewModel: ChatViewModel, showBack: Boolean, onClose: () -> Unit, modifier: Modifier = Modifier) {
+    val settings by viewModel.agents.settings.collectAsStateWithLifecycle()
+    PaneScaffold(stringResource(R.string.cap_in_app), showBack, onClose, modifier) {
+        item { SectionHeader(stringResource(R.string.cap_runtime)) }
+        item { CapabilitySwitch(DemoIcons.Hub, R.string.cap_koog, stringResource(R.string.cap_koog_desc), settings.koogRuntime, "cap-koog") { on -> viewModel.agents.update { it.copy(koogRuntime = on) } } }
+        item { SectionHeader(stringResource(R.string.cap_harness)) }
+        item {
+            CapabilitySwitch(DemoIcons.Extension, R.string.cap_builtin_tools, stringResource(R.string.cap_builtin_tools_desc), settings.builtinTools, "cap-builtin") { on ->
+                viewModel.agents.update { it.copy(builtinTools = on) }
             }
-            InAppAgentItems(viewModel, settings)
-            ListItem(
-                checked = settings.builtinTools,
-                colors = switchRowColors(),
-        onCheckedChange = { on -> viewModel.agents.update { it.copy(builtinTools = on) } },
-                leadingContent = { Icon(DemoIcons.Extension, null, tint = MaterialTheme.colorScheme.primary) },
-                supportingContent = { Text(stringResource(R.string.cap_builtin_tools_desc)) },
-                trailingContent = { Switch(checked = settings.builtinTools, onCheckedChange = null) },
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
-            ) { Text(stringResource(R.string.cap_builtin_tools)) }
         }
+        item { InAppAgentItems(viewModel, settings) }
     }
 }
 
@@ -121,8 +101,6 @@ internal fun LazyListScope.capabilityItems(viewModel: ChatViewModel, highlighted
 private fun InAppAgentItems(viewModel: ChatViewModel, settings: dev.ai.elements.demo.data.CapabilitySettings) {
     val sandbox by viewModel.runtime.sandbox.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-    SectionHeader(stringResource(R.string.cap_in_app))
-    CapabilitySwitch(DemoIcons.Hub, R.string.cap_koog, stringResource(R.string.cap_koog_desc), settings.koogRuntime, "cap-koog") { on -> viewModel.agents.update { it.copy(koogRuntime = on) } }
     CapabilitySwitch(DemoIcons.FolderOpen, R.string.cap_workspace, stringResource(R.string.cap_workspace_desc), settings.workspaceFiles, "cap-workspace") { on -> viewModel.agents.update { it.copy(workspaceFiles = on) } }
     if (settings.workspaceFiles) SharedFolderItems(viewModel.runtime.sharedFolders)
     CapabilitySwitch(
@@ -210,7 +188,7 @@ internal fun CapabilityPane(viewModel: ChatViewModel, key: String, showBack: Boo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PaneScaffold(
+internal fun PaneScaffold(
     title: String,
     showBack: Boolean,
     onClose: () -> Unit,
@@ -229,7 +207,7 @@ private fun PaneScaffold(
                 actions = { actions() },
             )
         },
-    ) { padding -> LazyColumn(Modifier.fillMaxSize().padding(padding), content = content) }
+    ) { padding -> LazyColumn(Modifier.fillMaxSize().padding(padding).testTag("settings-page"), content = content) }
 }
 
 @Composable

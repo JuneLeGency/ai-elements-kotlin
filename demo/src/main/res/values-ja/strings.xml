@@ -55,8 +55,8 @@
     <string name="add">追加</string>
     <string name="custom_provider">カスタム %1$s</string>
     <string name="no_network_needed">ネットワーク不要</string>
-    <string name="key_set"> · キー設定済み</string>
-    <string name="no_key"> · キー未設定</string>
+    <string name="key_set">キー設定済み</string>
+    <string name="no_key">キー未設定</string>
     <string name="active">使用中</string>
     <string name="emulator_hint">10.0.2.2 は Android エミュレータからこのコンピュータを指すアドレスです。実機ではコンピュータの LAN IP を使ってください。</string>
     <string name="select_provider_hint">プロバイダを選択して、エンドポイント・モデル・API キーを編集します。</string>
@@ -140,7 +140,7 @@
     <string name="capabilities">エージェントの機能</string>
     <string name="cap_mcp">MCP サーバー</string>
     <string name="cap_skills">スキル</string>
-    <string name="cap_agents">エージェント</string>
+    <string name="cap_agents">サブエージェント</string>
     <string name="cap_enabled_count">%1$d 件有効</string>
     <string name="cap_builtin_tools">組み込みツール</string>
     <string name="cap_builtin_tools_desc">時計・電卓・クリップボード</string>
@@ -214,4 +214,12 @@
     <string name="folders_add">フォルダを追加</string>
     <string name="cap_koog">JetBrains Koog で実行</string>
     <string name="cap_koog_desc">Koog がエージェントループを実行（OpenAI・Anthropic・Ollama）。オフでは内蔵ループ</string>
+    <string name="settings_agent">エージェント</string>
+    <string name="settings_app">アプリ</string>
+    <string name="settings_text_language">文字と言語</string>
+    <string name="settings_diagrams">図</string>
+    <string name="provider_list">追加済みのサービス</string>
+    <string name="cap_harness">機能</string>
+    <string name="close">閉じる</string>
+    <string name="cap_runtime">実行方法</string>
 </resources>

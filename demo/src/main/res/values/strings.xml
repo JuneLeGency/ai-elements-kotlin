@@ -56,8 +56,8 @@
     <string name="add">Add</string>
     <string name="custom_provider">Custom %1$s</string>
     <string name="no_network_needed">No network needed</string>
-    <string name="key_set"> · key set</string>
-    <string name="no_key"> · no key</string>
+    <string name="key_set">key set</string>
+    <string name="no_key">no key</string>
     <string name="active">Active</string>
     <string name="emulator_hint">10.0.2.2 is the Android emulator\'s alias for your computer. On a physical device, use your computer\'s LAN IP instead.</string>
     <string name="select_provider_hint">Select a provider to edit its endpoint, model and API key.</string>
@@ -142,7 +142,7 @@
     <string name="capabilities">Agent capabilities</string>
     <string name="cap_mcp">MCP servers</string>
     <string name="cap_skills">Skills</string>
-    <string name="cap_agents">Agents</string>
+    <string name="cap_agents">Sub-agents</string>
     <string name="cap_enabled_count">%1$d enabled</string>
     <string name="cap_builtin_tools">Built-in tools</string>
     <string name="cap_builtin_tools_desc">Clock, calculator and clipboard</string>
@@ -216,4 +216,12 @@
     <string name="folders_add">Add folder</string>
     <string name="cap_koog">Run on JetBrains Koog</string>
     <string name="cap_koog_desc">Koog drives the agent loop (OpenAI, Anthropic and Ollama providers); off: the built-in loop</string>
+    <string name="settings_agent">Agent</string>
+    <string name="settings_app">App</string>
+    <string name="settings_text_language">Text &amp; language</string>
+    <string name="settings_diagrams">Diagrams</string>
+    <string name="provider_list">Your providers</string>
+    <string name="cap_harness">Capabilities</string>
+    <string name="close">Close</string>
+    <string name="cap_runtime">How it runs</string>
 </resources>
