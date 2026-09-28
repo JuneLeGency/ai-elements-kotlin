@@ -1,5 +1,7 @@
 package dev.ai.elements.demo
 
+import dev.ai.elements.ui.voice.LocalSpeechSettings
+import dev.ai.elements.demo.data.speech
 import dev.ai.elements.ui.chat.LocalAiElementsRenderers
 import dev.ai.elements.ui.chat.AiElementsRenderers
 import dev.ai.elements.genui.jsx.jsxCodeBlocks
@@ -106,6 +108,7 @@ class MainActivity : ComponentActivity() {
                         LocalMermaidSizing provides sizing,
                         LocalDensity provides scaled,
                         LocalAiElementsRenderers provides renderers,
+                        LocalSpeechSettings provides appearance.speech,
                     ) {
                         DemoApp(viewModel)
                     }

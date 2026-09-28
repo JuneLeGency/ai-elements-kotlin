@@ -3,6 +3,7 @@ package dev.ai.elements.ui.voice
 import android.content.Context
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.speech.tts.Voice
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Stable
@@ -21,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * active at a time, named by [speakingId]; [stop] ends it.
  */
 @Stable
-class SpeechOutputState internal constructor(context: Context) {
+class SpeechOutputState internal constructor(context: Context, private val settings: SpeechSettings = SpeechSettings()) {
     /** The id of what is being read (e.g. a message id), or null when silent. */
     var speakingId by mutableStateOf<String?>(null)
         private set
@@ -34,8 +35,23 @@ class SpeechOutputState internal constructor(context: Context) {
     private var engine: TextToSpeech? = null
     private var onDone: (() -> Unit)? = null
 
+    /** The text-to-speech engines installed on the device (for a settings screen). */
+    var engines by mutableStateOf<List<TextToSpeech.EngineInfo>>(emptyList())
+        private set
+
+    /** The voices of the engine in use, once it is ready (for a settings screen). */
+    var voices by mutableStateOf<List<Voice>>(emptyList())
+        private set
+
     init {
-        engine = TextToSpeech(context.applicationContext) { status -> isAvailable = status == TextToSpeech.SUCCESS }.apply {
+        engine = TextToSpeech(context.applicationContext, { status ->
+            isAvailable = status == TextToSpeech.SUCCESS
+            engine?.let { tts ->
+                engines = tts.engines.orEmpty()
+                voices = runCatching { tts.voices.orEmpty().sortedBy { it.name } }.getOrDefault(emptyList())
+                applySettings(tts)
+            }
+        }, settings.ttsEngine).apply {
             setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onStart(utteranceId: String?) = Unit
                 override fun onDone(utteranceId: String?) = finishOne()
@@ -44,6 +60,12 @@ class SpeechOutputState internal constructor(context: Context) {
                 override fun onStop(utteranceId: String?, interrupted: Boolean) = Unit
             })
         }
+    }
+
+    private fun applySettings(tts: TextToSpeech) {
+        tts.setSpeechRate(settings.rate)
+        tts.setPitch(settings.pitch)
+        settings.voice?.let { name -> voices.firstOrNull { it.name == name }?.let { tts.voice = it } }
     }
 
     /** Read [text] (plain text, see [speakableText]) as [id], replacing whatever is being read. */
@@ -57,7 +79,8 @@ class SpeechOutputState internal constructor(context: Context) {
         val tts = engine ?: return
         if (speakingId != id) { stop(); speakingId = id }
         onDone?.let { this.onDone = it }
-        locale?.let { tts.language = it }
+        // A chosen voice has its own language; otherwise follow the text's.
+        if (settings.voice == null) locale?.let { tts.language = it }
         chunks(text, TextToSpeech.getMaxSpeechInputLength()).forEach { chunk ->
             pending.incrementAndGet()
             tts.speak(chunk, TextToSpeech.QUEUE_ADD, null, "$id#${pending.get()}")
@@ -110,11 +133,11 @@ class SpeechOutputState internal constructor(context: Context) {
     }
 }
 
-/** Remembers a [SpeechOutputState]; the engine is released with the composition. */
+/** Remembers a [SpeechOutputState] on the engine and voice of [settings]; released with the composition. */
 @Composable
-fun rememberSpeechOutputState(): SpeechOutputState {
+fun rememberSpeechOutputState(settings: SpeechSettings = LocalSpeechSettings.current): SpeechOutputState {
     val context = LocalContext.current.applicationContext
-    val state = remember { SpeechOutputState(context) }
+    val state = remember(settings) { SpeechOutputState(context, settings) }
     DisposableEffect(state) { onDispose { state.shutdown() } }
     return state
 }

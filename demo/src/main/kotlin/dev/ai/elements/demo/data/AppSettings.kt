@@ -29,6 +29,12 @@ data class Appearance(
     val subscriptionSignIn: Boolean = false,
     val palette: AiPalette = AiPalette.VIOLET,
     val contrast: AiContrast = AiContrast.STANDARD,
+    /** Speech engines (see [dev.ai.elements.ui.voice.SpeechSettings]); null / default = the system's. */
+    val speechRecognizer: String? = null,
+    val onDeviceRecognition: Boolean = false,
+    val ttsEngine: String? = null,
+    val ttsVoice: String? = null,
+    val speechRate: Float = 1f,
 )
 
 class AppSettings(context: Context) {
@@ -45,6 +51,11 @@ class AppSettings(context: Context) {
             subscriptionSignIn = prefs.getBoolean("subscription_sign_in", false),
             palette = runCatching { AiPalette.valueOf(prefs.getString("palette", null)!!) }.getOrDefault(AiPalette.VIOLET),
             contrast = runCatching { AiContrast.valueOf(prefs.getString("contrast", null)!!) }.getOrDefault(AiContrast.STANDARD),
+            speechRecognizer = prefs.getString("speech_recognizer", null),
+            onDeviceRecognition = prefs.getBoolean("on_device_recognition", false),
+            ttsEngine = prefs.getString("tts_engine", null),
+            ttsVoice = prefs.getString("tts_voice", null),
+            speechRate = prefs.getFloat("speech_rate", 1f),
         ),
     )
     val appearance: StateFlow<Appearance> = _appearance.asStateFlow()
@@ -61,6 +72,21 @@ class AppSettings(context: Context) {
             .putBoolean("subscription_sign_in", appearance.subscriptionSignIn)
             .putString("palette", appearance.palette.name)
             .putString("contrast", appearance.contrast.name)
+            .putString("speech_recognizer", appearance.speechRecognizer)
+            .putBoolean("on_device_recognition", appearance.onDeviceRecognition)
+            .putString("tts_engine", appearance.ttsEngine)
+            .putString("tts_voice", appearance.ttsVoice)
+            .putFloat("speech_rate", appearance.speechRate)
             .apply()
     }
 }
+
+/** The speech engines the user picked, for the voice elements. */
+val Appearance.speech: dev.ai.elements.ui.voice.SpeechSettings
+    get() = dev.ai.elements.ui.voice.SpeechSettings(
+        recognizer = speechRecognizer?.let { android.content.ComponentName.unflattenFromString(it) },
+        onDeviceRecognition = onDeviceRecognition,
+        ttsEngine = ttsEngine,
+        voice = ttsVoice,
+        rate = speechRate,
+    )

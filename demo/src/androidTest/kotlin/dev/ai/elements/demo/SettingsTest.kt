@@ -36,7 +36,7 @@ class SettingsTest {
         compose.onNodeWithTag("capabilities-manage").performClick()
 
         // Every first-level entry is on the home list.
-        listOf(SettingsPage.PROVIDERS, CapabilityPage.MCP, CapabilityPage.SKILLS, CapabilityPage.AGENTS, SettingsPage.DEVICE, SettingsPage.APPEARANCE, SettingsPage.TEXT, SettingsPage.DIAGRAMS)
+        listOf(SettingsPage.PROVIDERS, CapabilityPage.MCP, CapabilityPage.SKILLS, CapabilityPage.AGENTS, SettingsPage.DEVICE, SettingsPage.APPEARANCE, SettingsPage.TEXT, SettingsPage.VOICE, SettingsPage.DIAGRAMS)
             .forEach { compose.onNodeWithTag("settings-list").performScrollToNode(hasTestTag("settings-$it")) }
 
         // A page, then its editor as a dialog, which closes back onto the page.

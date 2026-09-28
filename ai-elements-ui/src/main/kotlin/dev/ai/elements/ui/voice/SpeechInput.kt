@@ -58,7 +58,7 @@ enum class SpeechInputPhase { IDLE, LISTENING, PROCESSING }
  * a UI can show the live [level] (e.g. on a [dev.ai.elements.ui.chat.Persona]).
  */
 @Stable
-class SpeechInputState internal constructor(private val context: Context) {
+class SpeechInputState internal constructor(private val context: Context, private val settings: SpeechSettings = SpeechSettings()) {
     var phase by mutableStateOf(SpeechInputPhase.IDLE)
         private set
 
@@ -76,7 +76,7 @@ class SpeechInputState internal constructor(private val context: Context) {
 
     internal fun start(locale: Locale?) {
         error = null
-        val r = recognizer ?: SpeechRecognizer.createSpeechRecognizer(context).also { recognizer = it }
+        val r = recognizer ?: createRecognizer(context, settings).also { recognizer = it }
         r.setRecognitionListener(object : RecognitionListener {
             override fun onReadyForSpeech(params: Bundle?) { phase = SpeechInputPhase.LISTENING }
             override fun onBeginningOfSpeech() = Unit
@@ -128,11 +128,11 @@ class SpeechInputState internal constructor(private val context: Context) {
     }
 }
 
-/** Remembers a [SpeechInputState]; the recognizer is released with the composition. */
+/** Remembers a [SpeechInputState] on the recognizer of [settings]; released with the composition. */
 @Composable
-fun rememberSpeechInputState(): SpeechInputState {
+fun rememberSpeechInputState(settings: SpeechSettings = LocalSpeechSettings.current): SpeechInputState {
     val context = LocalContext.current.applicationContext
-    val state = remember { SpeechInputState(context) }
+    val state = remember(settings.recognizer, settings.onDeviceRecognition) { SpeechInputState(context, settings) }
     DisposableEffect(state) { onDispose { state.destroy() } }
     return state
 }

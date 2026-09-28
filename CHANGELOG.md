@@ -122,6 +122,11 @@
 - Fixed: `tools/generate-icons.py` reads each symbol's viewport (`auto_awesome` ships with 24, not
   960, so the assistant sparkle was invisible) and refuses paths outside it.
 
+- Speech engines are configurable: `SpeechSettings` / `LocalSpeechSettings` pick the recognition
+  service (or on-device recognition, Android 12+), the text-to-speech engine, voice, rate and pitch
+  for dictation, "Read aloud" and voice mode; `recognitionServices()` and `SpeechOutputState.engines`
+  / `voices` list what the device has. The demo has a Voice settings page with a preview.
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

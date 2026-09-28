@@ -224,4 +224,14 @@
     <string name="cap_harness">Capabilities</string>
     <string name="close">Close</string>
     <string name="cap_runtime">How it runs</string>
+    <string name="settings_voice">Voice</string>
+    <string name="voice_recognition">Speech recognition</string>
+    <string name="voice_output">Reading aloud</string>
+    <string name="system_default">System default</string>
+    <string name="on_device_recognition">On-device recognition</string>
+    <string name="on_device_recognition_desc">Audio stays on the device</string>
+    <string name="voice_voice">Voice</string>
+    <string name="voice_rate">Speech rate</string>
+    <string name="voice_preview">Preview</string>
+    <string name="voice_sample">Hello! This is how replies will sound when they are read aloud.</string>
 </resources>

@@ -56,6 +56,10 @@ Long conversations stay at the bottom while they stream, unless the user scrolls
   persona to interrupt; mute or end at any time. When the agent asks for approval or an answer it
   pauses and offers to go back to the chat.
 
+The engines are the device's: `LocalSpeechSettings` picks the recognition service (or on-device
+recognition), the text-to-speech engine, voice and rate; `recognitionServices()` and
+`SpeechOutputState.engines` / `voices` list the choices for a settings screen.
+
 Voice uses the platform speech engines (`SpeechRecognizer`, `TextToSpeech`) and works with every
 backend; no protocol is involved. `ai-elements-ui` declares the package-visibility `<queries>` for
 both services; the app declares `RECORD_AUDIO`. Voice features hide themselves on devices without a

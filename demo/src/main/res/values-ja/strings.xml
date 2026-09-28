@@ -222,4 +222,14 @@
     <string name="cap_harness">機能</string>
     <string name="close">閉じる</string>
     <string name="cap_runtime">実行方法</string>
+    <string name="settings_voice">音声</string>
+    <string name="voice_recognition">音声認識</string>
+    <string name="voice_output">読み上げ</string>
+    <string name="system_default">システムの既定</string>
+    <string name="on_device_recognition">デバイス上で認識</string>
+    <string name="on_device_recognition_desc">音声は端末の外に出ません</string>
+    <string name="voice_voice">声</string>
+    <string name="voice_rate">話す速さ</string>
+    <string name="voice_preview">試聴</string>
+    <string name="voice_sample">こんにちは。返信はこの声で読み上げられます。</string>
 </resources>

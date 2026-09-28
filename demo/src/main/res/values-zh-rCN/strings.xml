@@ -222,4 +222,14 @@
     <string name="cap_harness">能力</string>
     <string name="close">关闭</string>
     <string name="cap_runtime">运行方式</string>
+    <string name="settings_voice">语音</string>
+    <string name="voice_recognition">语音识别</string>
+    <string name="voice_output">朗读</string>
+    <string name="system_default">系统默认</string>
+    <string name="on_device_recognition">设备端识别</string>
+    <string name="on_device_recognition_desc">语音不离开设备</string>
+    <string name="voice_voice">声音</string>
+    <string name="voice_rate">语速</string>
+    <string name="voice_preview">试听</string>
+    <string name="voice_sample">你好！回复被朗读时就是这个声音。</string>
 </resources>

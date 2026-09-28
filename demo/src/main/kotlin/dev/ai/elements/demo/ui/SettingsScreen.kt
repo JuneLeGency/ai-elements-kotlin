@@ -1,5 +1,13 @@
 package dev.ai.elements.demo.ui
 
+import dev.ai.elements.demo.data.speech
+import dev.ai.elements.ui.voice.rememberSpeechOutputState
+import dev.ai.elements.ui.voice.isOnDeviceRecognitionAvailable
+import dev.ai.elements.ui.voice.recognitionServices
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.Slider
+import androidx.compose.material3.RadioButton
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -127,6 +135,7 @@ fun SettingsScreen(viewModel: ChatViewModel, twoPane: Boolean, onBack: (() -> Un
                     key == SettingsPage.APPEARANCE -> AppearancePane(viewModel, showBack, close, paneModifier)
                     key == SettingsPage.TEXT -> TextPane(viewModel, showBack, close, paneModifier)
                     key == SettingsPage.DIAGRAMS -> DiagramsPane(viewModel, showBack, close, paneModifier)
+                    key == SettingsPage.VOICE -> VoicePane(viewModel, showBack, close, paneModifier)
                 }
             }
         },
@@ -141,6 +150,7 @@ internal object SettingsPage {
     const val APPEARANCE = "page:appearance"
     const val TEXT = "page:text"
     const val DIAGRAMS = "page:diagrams"
+    const val VOICE = "page:voice"
 }
 
 /** Settings, first level: what can be set, grouped, each with where it stands now. */
@@ -179,6 +189,18 @@ private fun SettingsHome(viewModel: ChatViewModel, highlighted: String?, onOpen:
             item {
                 val size = stringResource(when (appearance.textSize) { TextSize.SMALL -> R.string.text_small; TextSize.DEFAULT -> R.string.text_default; TextSize.LARGE -> R.string.text_large; TextSize.EXTRA_LARGE -> R.string.text_extra_large })
                 HomeRow(SettingsPage.TEXT, DemoIcons.TextFields, R.string.settings_text_language, "${currentLanguageLabel()} · $size", highlighted, onOpen)
+            }
+            item {
+                val context = LocalContext.current
+                val recognizer = remember(appearance.speechRecognizer) {
+                    appearance.speechRecognizer?.let { id -> recognitionServices(context).firstOrNull { it.component.flattenToString() == id }?.label }
+                }
+                val summary = when {
+                    appearance.onDeviceRecognition -> stringResource(R.string.on_device_recognition)
+                    recognizer != null -> recognizer
+                    else -> stringResource(R.string.system_default)
+                }
+                HomeRow(SettingsPage.VOICE, DemoIcons.RecordVoiceOver, R.string.settings_voice, summary, highlighted, onOpen)
             }
             item {
                 val size = stringResource(when (appearance.diagramSize) { DiagramSize.SMALL -> R.string.size_small; DiagramSize.MEDIUM -> R.string.size_medium; DiagramSize.LARGE -> R.string.size_large })
@@ -329,6 +351,103 @@ private fun TextPane(viewModel: ChatViewModel, showBack: Boolean, onClose: () ->
             }
         }
     }
+}
+
+/** The device's speech engines: recognition, reading aloud, voice and rate (the voice elements use them). */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun VoicePane(viewModel: ChatViewModel, showBack: Boolean, onClose: () -> Unit, modifier: Modifier) {
+    val appearance by viewModel.settings.appearance.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val services = remember { recognitionServices(context) }
+    val onDeviceAvailable = remember { isOnDeviceRecognitionAvailable(context) }
+    val speech = rememberSpeechOutputState(appearance.speech)
+    val language = LocalConfiguration.current.locales[0].language
+    var voiceMenu by remember { mutableStateOf(false) }
+    val sample = stringResource(R.string.voice_sample)
+    fun update(transform: (dev.ai.elements.demo.data.Appearance) -> dev.ai.elements.demo.data.Appearance) = viewModel.settings.update(transform(appearance))
+
+    PaneScaffold(stringResource(R.string.settings_voice), showBack, onClose, modifier) {
+        item { SectionHeader(stringResource(R.string.voice_recognition)) }
+        item {
+            ChoiceRow(stringResource(R.string.system_default), null, appearance.speechRecognizer == null && !appearance.onDeviceRecognition, "recognizer-default") {
+                update { it.copy(speechRecognizer = null, onDeviceRecognition = false) }
+            }
+        }
+        items(services, key = { it.component.flattenToString() }) { service ->
+            val id = service.component.flattenToString()
+            ChoiceRow(service.label, service.component.packageName, appearance.speechRecognizer == id && !appearance.onDeviceRecognition, "recognizer-$id") {
+                update { it.copy(speechRecognizer = id, onDeviceRecognition = false) }
+            }
+        }
+        if (onDeviceAvailable) item {
+            ChoiceRow(stringResource(R.string.on_device_recognition), stringResource(R.string.on_device_recognition_desc), appearance.onDeviceRecognition, "recognizer-on-device") {
+                update { it.copy(onDeviceRecognition = true) }
+            }
+        }
+        item { SectionHeader(stringResource(R.string.voice_output)) }
+        item {
+            ChoiceRow(stringResource(R.string.system_default), null, appearance.ttsEngine == null, "tts-default") {
+                update { it.copy(ttsEngine = null, ttsVoice = null) }
+            }
+        }
+        items(speech.engines, key = { it.name }) { engine ->
+            ChoiceRow(engine.label, engine.name, appearance.ttsEngine == engine.name, "tts-${engine.name}") {
+                update { it.copy(ttsEngine = engine.name, ttsVoice = null) }
+            }
+        }
+        item {
+            val voices = speech.voices.filter { it.locale.language == language }.ifEmpty { speech.voices }
+            Box {
+                ListItem(
+                    onClick = { voiceMenu = true },
+                    supportingContent = { Text(appearance.ttsVoice ?: stringResource(R.string.system_default), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    leadingContent = { Icon(DemoIcons.RecordVoiceOver, null) },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag("tts-voice"),
+                ) { Text(stringResource(R.string.voice_voice)) }
+                DropdownMenu(expanded = voiceMenu, onDismissRequest = { voiceMenu = false }, offset = DpOffset(24.dp, 0.dp)) {
+                    DropdownMenuItem(text = { Text(stringResource(R.string.system_default)) }, onClick = { voiceMenu = false; update { it.copy(ttsVoice = null) } })
+                    voices.forEach { voice ->
+                        DropdownMenuItem(
+                            text = { Text(voice.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                            trailingIcon = if (voice.name == appearance.ttsVoice) ({ Icon(DemoIcons.Check, null) }) else null,
+                            onClick = { voiceMenu = false; update { it.copy(ttsVoice = voice.name) } },
+                        )
+                    }
+                }
+            }
+        }
+        item {
+            SettingLabel(stringResource(R.string.voice_rate), "%.1f×".format(appearance.speechRate))
+            Slider(
+                value = appearance.speechRate,
+                onValueChange = { rate -> update { it.copy(speechRate = (rate * 10).toInt() / 10f) } },
+                valueRange = 0.5f..2f,
+                steps = 14,
+                modifier = Modifier.padding(horizontal = 28.dp).testTag("speech-rate"),
+            )
+        }
+        item {
+            TextButton(
+                onClick = { if (speech.speakingId == "preview") speech.stop() else speech.speak("preview", sample) },
+                enabled = speech.isAvailable,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).testTag("voice-preview"),
+            ) {
+                Icon(if (speech.speakingId == "preview") DemoIcons.Stop else DemoIcons.PlayArrow, null, Modifier.size(ButtonDefaults.IconSize))
+                Text(stringResource(R.string.voice_preview), Modifier.padding(start = ButtonDefaults.IconSpacing))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChoiceRow(title: String, description: String?, selected: Boolean, tag: String, onSelect: () -> Unit) {
+    ListItem(
+        onClick = onSelect,
+        leadingContent = { RadioButton(selected = selected, onClick = null) },
+        supportingContent = description?.let { { Text(it, maxLines = 1, overflow = TextOverflow.Ellipsis) } },
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp).testTag(tag),
+    ) { Text(title) }
 }
 
 /** How Mermaid diagrams render. */
