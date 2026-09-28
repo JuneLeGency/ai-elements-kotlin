@@ -451,6 +451,10 @@ class ElementsTest {
         compose.onNodeWithTag("run-step-counter").assertTextContains("1", substring = true)
         compose.onNodeWithTag("run-next").performClick()
         compose.onNodeWithTag("run-step-counter").assertTextContains("2", substring = true)
+        // A screenshot opens full screen to zoom (desktop pages are small on a phone).
+        compose.onNodeWithTag("run-shot").performClick()
+        compose.onNodeWithTag("image-viewer").assertExists()
+        compose.onNodeWithTag("image-close").performClick()
         compose.onNodeWithTag("run-playback-close").performClick()
         compose.waitUntil(5_000) { compose.onAllNodesWithTag("agent-computer").fetchSemanticsNodes().isEmpty() }
     }

@@ -388,7 +388,19 @@ fun StepView(step: AgentStep, modifier: Modifier = Modifier) {
     when {
         shot != null -> Column(modifier) {
             tool.location?.takeIf(::isWebUrl)?.let { AddressBar(it) }
-            FileImage(shot, Modifier.fillMaxWidth().weight(1f), contentScale = ContentScale.Fit, maxDecodePx = 2048)
+            // A desktop page is small on a phone: tap for the full-screen viewer (zoom, pan).
+            var zoomed by remember(shot.id) { mutableStateOf(false) }
+            FileImage(
+                shot,
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .clickable(onClickLabel = stringResource(R.string.ai_view_image)) { zoomed = true }
+                    .testTag("run-shot"),
+                contentScale = ContentScale.Fit,
+                maxDecodePx = 2048,
+            )
+            if (zoomed) ImageViewer(shot, onDismiss = { zoomed = false })
         }
         tool.category == ToolCategory.EXECUTE -> Terminal(
             // A terminal keeps the end of its output (its scrollback), not the beginning.

@@ -56,11 +56,17 @@ class WebBrowser(
     val maxContentTokens: Int = 4_000,
     val actionTimeoutMs: Long = 5_000,
     val navigationTimeoutMs: Long = 60_000,
-    private val viewportWidth: Int = 1080,
-    private val viewportHeight: Int = 1920,
+    /** The page size the browser presents, in CSS pixels; screenshots have this size. */
+    val viewport: BrowserViewport = BrowserViewport.Desktop,
     val screenshots: Boolean = true,
     val screenshotOnNavigate: Boolean = false,
 ) : Capability {
+    private val pixelsPerCss = context.resources.displayMetrics.density
+
+    /** The off-screen view's size in device pixels, so pages see [viewport] in CSS pixels. */
+    private val viewportWidth = (viewport.width * pixelsPerCss).toInt()
+    private val viewportHeight = (viewport.height * pixelsPerCss).toInt()
+
     private val lock = Mutex()
     private var webView: WebView? = null
     private var pageLoad: CompletableDeferred<Unit>? = null
@@ -188,7 +194,7 @@ class WebBrowser(
         withContext(Dispatchers.Main) {
             val view = webView ?: return@withContext null
             val height = if (!fullPage) viewportHeight else {
-                val content = (view.contentHeight * view.resources.displayMetrics.density).toInt()
+                val content = (view.contentHeight * pixelsPerCss).toInt()
                 content.coerceIn(viewportHeight, viewportHeight * MAX_FULL_PAGE_SCREENS)
             }
             val scrollY = view.scrollY
@@ -198,7 +204,10 @@ class WebBrowser(
                 view.scrollTo(0, 0)
             }
             try {
-                Bitmap.createBitmap(viewportWidth, height, Bitmap.Config.ARGB_8888).also { Canvas(it).drawPage(view) }
+                // At CSS-pixel resolution, as Playwright's default: `x,y` in the image are the page's coordinates.
+                Bitmap.createBitmap(viewport.width, (height / pixelsPerCss).toInt(), Bitmap.Config.ARGB_8888).also {
+                    Canvas(it).apply { scale(1 / pixelsPerCss, 1 / pixelsPerCss); drawPage(view) }
+                }
             } finally {
                 if (height != viewportHeight) {
                     view.measure(View.MeasureSpec.makeMeasureSpec(viewportWidth, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(viewportHeight, View.MeasureSpec.EXACTLY))
@@ -270,6 +279,12 @@ class WebBrowser(
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun view(): WebView = webView ?: WebView(context.applicationContext).apply {
+        if (viewport.desktop) {
+            // Sites serve their desktop layout, as Chrome's "Desktop site" asks for it; `device-width` is the viewport.
+            settings.userAgentString = desktopUserAgent(settings.userAgentString)
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = false
+        }
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
         settings.allowFileAccess = false
@@ -322,8 +337,8 @@ class WebBrowser(
             val outline = target.also { target = null }
             withContext(Dispatchers.Main) {
                 val view = webView ?: return@withContext null
-                val scale = SCREENSHOT_WIDTH.toFloat() / viewportWidth
-                val bitmap = Bitmap.createBitmap(SCREENSHOT_WIDTH, (viewportHeight * scale).toInt(), Bitmap.Config.ARGB_8888)
+                val scale = viewport.width.coerceAtMost(SCREENSHOT_WIDTH).toFloat() / viewportWidth
+                val bitmap = Bitmap.createBitmap((viewportWidth * scale).toInt(), (viewportHeight * scale).toInt(), Bitmap.Config.ARGB_8888)
                 Canvas(bitmap).apply {
                     scale(scale, scale)
                     drawPage(view)
@@ -356,8 +371,18 @@ class WebBrowser(
         drawRoundRect(rect, radius, radius, android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = TARGET_COLOR; style = android.graphics.Paint.Style.STROKE; strokeWidth = 4 * px })
     }
 
-    private companion object {
-        const val SCREENSHOT_WIDTH = 720
+    internal companion object {
+        /**
+         * The user agent of Chrome's "Desktop site" mode (Linux desktop Chrome, reduced UA format) with
+         * this WebView's Chrome major version.
+         */
+        fun desktopUserAgent(mobile: String): String {
+            val major = Regex("Chrome/(\\d+)").find(mobile)?.groupValues?.get(1) ?: "130"
+            return "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/$major.0.0.0 Safari/537.36"
+        }
+
+        /** Widest screenshot for the steps view (they are shown small, and opened full screen). */
+        const val SCREENSHOT_WIDTH = 960
         const val TARGET_COLOR = 0xFFFF5722.toInt()
         const val VISUAL_STATE_TIMEOUT_MS = 2_000L
 
@@ -413,5 +438,17 @@ document.querySelectorAll('h1,h2,h3,a[href],button,input,textarea,select,[role=b
 });
 return out.join('\n');
 """
+    }
+}
+
+/**
+ * The page size a [WebBrowser] presents, in CSS pixels, and whether it asks sites for their desktop
+ * layout. [Desktop] is Playwright's default viewport (as the Pydantic AI Harness browser uses);
+ * [Mobile] a typical phone.
+ */
+data class BrowserViewport(val width: Int, val height: Int, val desktop: Boolean) {
+    companion object {
+        val Desktop = BrowserViewport(1280, 720, desktop = true)
+        val Mobile = BrowserViewport(412, 915, desktop = false)
     }
 }

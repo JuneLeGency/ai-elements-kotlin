@@ -55,6 +55,15 @@ Harness browser: `navigate`, `snapshot` (interactive elements with `aria-ref` ha
 `type_text`, `press_key`, `select_option`, `hover`, `wait_for`, `get_text`, `scroll`, `go_back`,
 `go_forward` and `screenshot`. Only `http(s)` pages load.
 
+The browser presents a desktop page by default (`BrowserViewport.Desktop`: 1280 × 720 CSS pixels,
+Playwright's default viewport, which the Harness browser uses). Desktop pages give agents more per
+screen, and sites serve their full layout. The browser asks for it the way Chrome's "Desktop site"
+does, with Chrome's desktop user agent at the WebView's version. Pass `BrowserViewport.Mobile` for
+the phone layout.
+
+Screenshots are taken at CSS-pixel resolution, so an `x,y` the model reads off an image is where
+`click("x,y")` lands. The step view opens a screenshot full screen to zoom on a phone.
+
 Screenshots go to two places:
 
 - **To the model.** `screenshot(full_page?)` returns the viewport, or the whole page, as a PNG for

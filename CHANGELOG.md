@@ -187,6 +187,9 @@
   (`runToolWithContent`, `ToolResult`). The steps view's screenshots outline the element an action
   targeted, and are drawn at the page's scroll position. The demo's offline agent runs a scripted
   browser session ("Browse a web page").
+- `WebBrowser(viewport = BrowserViewport.Desktop)` by default: 1280 × 720 CSS pixels (Playwright's
+  default) with Chrome's "Desktop site" user agent; screenshots at CSS-pixel resolution, so image
+  coordinates are click coordinates. The step view opens screenshots full screen.
 
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,

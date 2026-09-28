@@ -83,7 +83,8 @@ class BrowserTest {
         assertTrue(png.mediaType == "image/png")
         val bytes = android.util.Base64.decode(png.url.substringAfter("base64,"), android.util.Base64.DEFAULT)
         val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-        assertTrue("${bitmap.width}", bitmap.width == 1080)
+        // The desktop viewport at CSS pixels (Playwright's default): image coordinates are page coordinates.
+        assertTrue("${bitmap.width}x${bitmap.height}", bitmap.width == 1280 && bitmap.height == 720)
         assertTrue("screenshot looks blank", (0 until bitmap.height step 32).flatMap { y -> (0 until bitmap.width step 32).map { x -> bitmap.getPixel(x, y) } }.toSet().size > 3)
         // Shown with the call as well.
         assertTrue(events.any { it is dev.ai.elements.core.chat.ChatEvent.File && it.id.startsWith("c2-") })
