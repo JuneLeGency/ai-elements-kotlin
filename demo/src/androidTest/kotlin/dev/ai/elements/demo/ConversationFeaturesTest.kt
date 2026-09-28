@@ -110,8 +110,17 @@ class ConversationFeaturesTest {
         compose.mainClock.advanceTimeBy(500)
         compose.onAllNodesWithTag("queue-item").fetchSemanticsNodes().let { check(it.size == 1) { "queued: ${it.size}" } }
         screenshot("01-queue")
+        // Frame by frame until the queued prompt has run: with the clock auto-advancing, a slow
+        // device's streaming keeps Compose busy longer than the idling timeout.
+        val deadline = System.currentTimeMillis() + 120_000
+        while (compose.onAllNodesWithTag("queue").fetchSemanticsNodes().isNotEmpty() ||
+            compose.onAllNodesWithTag("stop-button").fetchSemanticsNodes().isNotEmpty()
+        ) {
+            check(System.currentTimeMillis() < deadline) { "the queued prompt never ran" }
+            Thread.sleep(16)
+            compose.mainClock.advanceTimeByFrame()
+        }
         compose.mainClock.autoAdvance = true
-        compose.waitUntil(60_000) { compose.onAllNodesWithTag("queue").fetchSemanticsNodes().isEmpty() }
         awaitIdleTurn()
         hideKeyboard()
         compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("tool-calculate"))

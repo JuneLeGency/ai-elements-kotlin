@@ -77,6 +77,15 @@ class StreamingScrollTest {
 
     private fun density() = context.resources.displayMetrics.density
 
+    private fun pumpUntil(timeoutMs: Long, condition: () -> Boolean) {
+        var waited = 0L
+        while (!condition()) {
+            pump(200)
+            waited += 200
+            check(waited < timeoutMs) { "condition not met after $timeoutMs ms" }
+        }
+    }
+
     private fun streaming() = compose.onAllNodesWithTag("stop-button").fetchSemanticsNodes().isNotEmpty()
 
     private fun viewport(): Rect = compose.onNodeWithTag("conversation").getBoundsInRoot().let {
@@ -136,8 +145,10 @@ class StreamingScrollTest {
         compose.onNodeWithContentDescription(s(UiR.string.ai_scroll_to_latest)).performClick()
         pump(800)
         if (streaming()) assertFollowing("C")
+        // Frame by frame to the end: with the clock auto-advancing, a slow device's stream keeps
+        // Compose busy longer than the idling timeout.
+        pumpUntil(120_000) { compose.onAllNodesWithTag("regenerate").fetchSemanticsNodes().size == 1 }
         compose.mainClock.autoAdvance = true
-        compose.waitUntilExactlyOneExists(hasTestTag("regenerate"), 60_000)
         assertFollowing("C (end)", slackDp = 140f)
     }
 

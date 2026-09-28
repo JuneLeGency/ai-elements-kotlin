@@ -96,7 +96,7 @@ class SharedFoldersTest {
             compose.onNodeWithTag("folder-add").performClick()
 
             // DocumentsUI: roots drawer → internal storage → Documents → name → Use this folder → Allow.
-            device.wait(Until.findObject(By.desc(Pattern.compile("(?i)show roots"))), 15_000)?.click()
+            clickWhenShown(By.desc(Pattern.compile("(?i)show roots")), 15_000, required = false)
             clickText(Pattern.compile(Pattern.quote(Build.MODEL) + "|(?i)internal storage"))
             clickText(Pattern.compile("Documents"))
             clickText(Pattern.compile(Pattern.quote(name)))
@@ -111,10 +111,23 @@ class SharedFoldersTest {
         }
     }
 
-    private fun clickText(text: Pattern) {
-        val node = device.wait(Until.findObject(By.text(text)), 10_000)
-        assertNotNull("Not found in the picker: $text", node)
-        node.click()
-        device.waitForIdle()
+    private fun clickText(text: Pattern) = clickWhenShown(By.text(text), 10_000, required = true)
+
+    /** Finds and clicks; the picker re-lays out while it loads, so a found node can go stale: find it again. */
+    private fun clickWhenShown(selector: androidx.test.uiautomator.BySelector, timeoutMs: Long, required: Boolean) {
+        repeat(3) {
+            val node = device.wait(Until.findObject(selector), timeoutMs)
+            if (node == null) {
+                if (required) assertNotNull("Not found in the picker: $selector", node)
+                return
+            }
+            try {
+                node.click()
+                device.waitForIdle()
+                return
+            } catch (_: androidx.test.uiautomator.StaleObjectException) {
+            }
+        }
+        throw AssertionError("Kept going stale in the picker: $selector")
     }
 }
