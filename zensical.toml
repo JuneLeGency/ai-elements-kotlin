@@ -40,6 +40,7 @@ nav = [
     "guides/elements.md",
     "guides/human-in-the-loop.md",
     "guides/steps-and-replay.md",
+    "guides/notifications.md",
     "guides/generative-ui.md",
     "guides/customizing.md",
     "guides/custom-backend.md",

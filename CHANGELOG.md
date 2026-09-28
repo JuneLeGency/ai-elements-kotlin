@@ -209,6 +209,15 @@
 - A2UI Row: containers without a `weight` (Card, Column, List) share the row instead of the first
   taking it all.
 
+- Run notifications (new artifact `ai-elements-notifications`, optional since it brings the
+  notification permissions; `AgentProgress` itself is in `ai-elements-ui`): `AgentProgress.of(chatState)` (thinking, working, writing, waiting for approval
+  or input, done, failed; plan, steps, reply) and `AgentRunNotifications`: an Android 16 Live Update
+  while the agent runs (`ProgressStyle` with the plan as segments, promoted to the status bar chip
+  with a short text, elapsed time, Stop; a plain progress notification before Android 16), "waiting
+  for you" with Review (approvals stay in the chat), and "reply ready" / "stopped" at the end. The
+  demo keeps runs going in the background with a `dataSync` foreground service and asks for
+  notifications in context.
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

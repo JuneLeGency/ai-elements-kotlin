@@ -58,6 +58,11 @@ for a terminal: ECMA-48 / xterm escape codes, `\r` redraws and OSC 8 links.
 - **Long runs stay navigable.** Steps are a lazy list. The timeline marks each step with a tick up
   to 20 steps and scrubs continuously beyond that. Screenshots are a lazy row.
 
+### Notifications
+
+Long runs follow the user out of the app as an Android 16 Live Update (status bar chip, lock
+screen) and end with "reply ready"; see [Run notifications](../guides/notifications.md).
+
 ## 4. Storing, compacting, replaying and reconnecting
 
 The library provides the mechanisms for these standards; your app decides the policy (where to

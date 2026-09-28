@@ -310,7 +310,20 @@ private fun ChatPane(
     // Context used by the conversation so far ≈ the last turn's input + output.
     val lastUsage = state.messages.lastOrNull { it.usage != null }?.usage
 
+    // Notifications follow the agent's run (a Live Update while it works, "reply ready" after):
+    // asked for once, in context, the first time the user starts a run.
+    val askNotifications = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    fun maybeAskForNotifications() {
+        if (android.os.Build.VERSION.SDK_INT < 33) return
+        if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED) return
+        val prefs = context.getSharedPreferences("demo-permissions", android.content.Context.MODE_PRIVATE)
+        if (prefs.getBoolean("asked-notifications", false)) return
+        prefs.edit().putBoolean("asked-notifications", true).apply()
+        askNotifications.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+    }
+
     fun submit(text: String) {
+        maybeAskForNotifications()
         if (viewModel.send(text, attachments)) {
             input = ""
             attachments = emptyList()

@@ -60,7 +60,8 @@ networking, no Compose) ← `ai-elements-core` (protocols, providers, agent, MCP
 (`ai-elements-a2a`, `ai-elements-acp`, `ai-elements-koog`, `harness/*`). A new protocol is a `ChatBackend` in core or in
 its own artifact; it never needs a UI change. UI formats that need more than the chat model sit on
 top of `ai-elements-ui`: `ai-elements-genui` (A2UI, JSX; ui only) and `ai-elements-mcp-apps` (ui +
-core, since a view talks to its MCP server). They plug in through `AiElementsRenderers`.
+core, since a view talks to its MCP server). They plug in through `AiElementsRenderers`. `ai-elements-notifications` (ui) turns a run's progress
+into Android notifications; it is optional because it brings the notification permissions.
 
 ### Package layering (ai-elements-core)
 

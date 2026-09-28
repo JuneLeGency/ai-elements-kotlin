@@ -34,6 +34,7 @@ dependencies {
 | `ai-elements-ui` | The Compose elements and `AiElementsTheme`. It depends on `ai-elements-chat` only, so it renders any backend, including your own. | 24 |
 | `ai-elements-genui` | Generative UI: A2UI v1.0 surfaces rendered natively (Basic Catalog, extensible), `JsxPreview`. | 26 |
 | `ai-elements-mcp-apps` | An MCP Apps host: `ui://` views of MCP tools in a sandboxed WebView, bridged to their server. | 24 |
+| `ai-elements-notifications` | Agent run notifications: an Android 16 Live Update while the agent works, "reply ready" when it ends. Optional, as it brings the notification permissions. | 24 |
 | `ai-elements-a2a` | A2A 1.0 on the official Java SDK: remote agents as providers or sub-agents. Needs core library desugaring. | 26 |
 | `ai-elements-acp` | Agent Client Protocol on the official Kotlin SDK: coding agents as providers. | 24 |
 | `ai-elements-koog` | A JetBrains Koog agent as a `ChatBackend` or harness model binding. | 26 |

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ai_notif_channel">Agent runs</string>
+    <string name="ai_notif_channel_description">What the agent is doing while it works, and when its reply is ready.</string>
+    <string name="ai_notif_thinking">Thinking…</string>
+    <string name="ai_notif_writing">Writing the reply</string>
+    <string name="ai_notif_approval">Waiting for your approval · %1$s</string>
+    <string name="ai_notif_input">The agent has a question for you</string>
+    <string name="ai_notif_done">Reply ready</string>
+    <string name="ai_notif_failed">The run stopped</string>
+    <string name="ai_notif_chip_waiting">Review</string>
+    <string name="ai_notif_chip_step">Step %1$d</string>
+    <string name="ai_notif_review">Review</string>
+    <string name="ai_notif_stop">Stop</string>
+</resources>

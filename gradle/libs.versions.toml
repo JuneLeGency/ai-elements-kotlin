@@ -1,4 +1,5 @@
 [versions]
+androidxCore = "1.18.0"
 agp = "9.4.0"
 kotlin = "2.4.20"
 # Material 3 Expressive (MaterialExpressiveTheme, LoadingIndicator, MaterialShapes,
@@ -91,6 +92,7 @@ highlights = { group = "dev.snipme", name = "highlights", version.ref = "highlig
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 junit-ext = { group = "androidx.test.ext", name = "junit", version.ref = "junitExt" }
+androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
 androidx-test-core = { group = "androidx.test", name = "core-ktx", version.ref = "androidxTest" }
 snakeyaml = { group = "org.yaml", name = "snakeyaml", version.ref = "snakeyaml" }
 androidx-test-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }

@@ -1,11 +1,11 @@
 package dev.ai.elements.demo
 
-import dev.ai.elements.core.mcp.McpApps
 import android.app.Application
 import dev.ai.elements.core.chat.ChatBackend
 import dev.ai.elements.core.chat.ToolApprover
 import dev.ai.elements.core.config.McpServerStore
 import dev.ai.elements.core.config.ProviderStore
+import dev.ai.elements.core.mcp.McpApps
 import dev.ai.elements.demo.data.AgentsStore
 import dev.ai.elements.demo.data.SkillsRepository
 import dev.ai.elements.demo.tools.ClipboardTool
@@ -20,6 +20,8 @@ class DemoApplication : Application(), ScheduledAgentHost {
     val mcpServers by lazy { McpServerStore(this, providers.secrets, clientCapabilities = McpApps.CLIENT_CAPABILITIES) }
     val agents by lazy { AgentsStore(this) }
     val skills by lazy { SkillsRepository(this) }
+    /** The chat's run, followed by [AgentRunService]'s notification. */
+    val agentRuns = AgentRunTracker()
     val runtime by lazy { AgentRuntime(this, providers, mcpServers, agents, skills, appTools = listOf(ClipboardTool(this))) }
 
     override fun scheduledBackend(approver: ToolApprover): ChatBackend = runtime.backend(approver)

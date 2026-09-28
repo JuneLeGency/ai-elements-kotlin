@@ -98,7 +98,7 @@ private val BUILT_IN = setOf("plan", "task", "chain-of-thought")
 
 private fun JsonObject.string(key: String): String? = (this[key] as? JsonPrimitive)?.contentOrNull
 
-private fun JsonObject.steps(key: String): List<WorkflowStep> =
+internal fun JsonObject.steps(key: String): List<WorkflowStep> =
     (this[key] as? JsonArray).orEmpty().mapNotNull { element ->
         when (element) {
             is JsonPrimitive -> element.contentOrNull?.let { WorkflowStep(it) }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ai_notif_channel">エージェントの実行</string>
+    <string name="ai_notif_channel_description">エージェントの作業の進み具合と、返信の準備ができたこと。</string>
+    <string name="ai_notif_thinking">考えています…</string>
+    <string name="ai_notif_writing">返信を書いています</string>
+    <string name="ai_notif_approval">承認待ち · %1$s</string>
+    <string name="ai_notif_input">エージェントから質問があります</string>
+    <string name="ai_notif_done">返信の準備ができました</string>
+    <string name="ai_notif_failed">実行が止まりました</string>
+    <string name="ai_notif_chip_waiting">確認</string>
+    <string name="ai_notif_chip_step">ステップ %1$d</string>
+    <string name="ai_notif_review">確認する</string>
+    <string name="ai_notif_stop">停止</string>
+</resources>

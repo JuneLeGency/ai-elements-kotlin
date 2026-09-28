@@ -13,6 +13,8 @@ import java.io.File
 fun resetDemoApp(profile: ProviderProfile? = null): DemoApplication {
     val app = ApplicationProvider.getApplicationContext<DemoApplication>()
     File(app.filesDir, "conversations.json").delete()
+    // Tests do not answer the system's permission dialogs: count notifications as already asked.
+    app.getSharedPreferences("demo-permissions", android.content.Context.MODE_PRIVATE).edit().putBoolean("asked-notifications", true).commit()
     app.providers.profiles.value.forEach { if (it.builtIn) app.providers.reset(it.id) else app.providers.remove(it.id) }
     app.agents.update { CapabilitySettings() }
     app.mcpServers.servers.value.forEach { app.mcpServers.remove(it.id) }

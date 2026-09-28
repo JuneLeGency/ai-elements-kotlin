@@ -61,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -499,7 +500,11 @@ internal fun AgentComputerCard(message: Message, modifier: Modifier = Modifier) 
 
 /** What a step is doing, for people: "Running command · ls -la", "Reading · src/App.kt". */
 @Composable
-private fun activity(tool: ToolPart): String {
+private fun activity(tool: ToolPart): String = tool.activityLabel(LocalResources.current)
+
+/** What this call is doing, for people ("Running command · ls -la"), for surfaces outside composition (notifications, widgets). */
+fun ToolPart.activityLabel(resources: android.content.res.Resources): String {
+    val tool = this
     val verb = when (tool.category) {
         ToolCategory.READ -> R.string.ai_activity_read
         ToolCategory.EDIT -> R.string.ai_activity_edit
@@ -513,7 +518,7 @@ private fun activity(tool: ToolPart): String {
         ToolCategory.OTHER, null -> null
     }
     val what = tool.location ?: tool.displayName
-    return if (verb == null) what else stringResource(verb) + " · " + what
+    return if (verb == null) what else resources.getString(verb) + " · " + what
 }
 
 @Composable

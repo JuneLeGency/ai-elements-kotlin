@@ -62,9 +62,14 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { skills.refresh() }
         viewModelScope.launch {
             repository.load()
-            // Persist every settled turn (not each streamed delta).
+            // Persist every settled turn (not each streamed delta), and let the run notification follow.
+            var wasBusy = false
+            demo.agentRuns.stop = { viewModelScope.launch { chat.stop() } }
             chat.state.collect { state ->
                 if (!state.isBusy && state.messages.isNotEmpty()) persist(state)
+                demo.agentRuns.update(state, ConversationRepository.titleFor(state.messages).ifBlank { demo.getString(R.string.app_name) })
+                if (state.isBusy && !wasBusy) AgentRunService.start(demo)
+                wasBusy = state.isBusy
             }
         }
     }

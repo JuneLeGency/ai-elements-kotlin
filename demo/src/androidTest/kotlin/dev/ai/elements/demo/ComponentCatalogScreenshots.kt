@@ -56,8 +56,8 @@ class ComponentCatalogScreenshots {
         compose.setContent {
             // In English, like the docs site, whatever the device's language.
             val base = LocalContext.current
-            val current = LocalConfiguration.current
-            val english = remember(current) { Configuration(current).apply { setLocale(Locale.ENGLISH) } }
+            val deviceConfiguration = LocalConfiguration.current
+            val english = remember(deviceConfiguration) { Configuration(deviceConfiguration).apply { setLocale(Locale.ENGLISH) } }
             // Wraps the activity (launchers find it through the wrapper chain), with English resources.
             val context = remember(base, english) {
                 val resources = base.createConfigurationContext(english).resources
