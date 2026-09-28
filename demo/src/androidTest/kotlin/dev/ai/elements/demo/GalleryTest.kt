@@ -38,6 +38,8 @@ class GalleryTest {
         compose.onNodeWithTag("gallery").performScrollToKey("jsx-form")
         compose.onNodeWithText("Subscribe").performClick()
         compose.waitUntil(3_000) { compose.onAllNodes(hasText("Action → subscribe", substring = true)).fetchSemanticsNodes().isNotEmpty() }
+        // On a phone the chip row has scrolled "All" out of view.
+        compose.onNodeWithTag("gallery-filters").performScrollToKey("all")
         compose.onNodeWithTag("gallery-filter-all").performClick()
         compose.onNodeWithTag("gallery-section-conversation").assertIsDisplayed()
     }

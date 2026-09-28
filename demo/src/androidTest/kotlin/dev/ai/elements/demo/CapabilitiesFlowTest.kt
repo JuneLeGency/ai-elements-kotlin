@@ -196,15 +196,12 @@ class CapabilitiesFlowTest {
         send("please note")
         scenario!!.hideKeyboard()
         compose.waitUntil(60_000) { compose.onAllNodesWithTag("approve").fetchSemanticsNodes().isNotEmpty() }
-        // ACP answers are allow / reject (once or always): no edited arguments, no reason.
-        if (compose.onAllNodesWithTag("approval-more").fetchSemanticsNodes().isNotEmpty()) {
-            compose.onNodeWithTag("approval-more").performClick()
-            assertTrue(compose.onAllNodesWithTag("edit-and-approve", useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
-            assertTrue(compose.onAllNodesWithTag("deny-with-reason", useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
-            androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().uiAutomation.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK)
-            compose.waitForIdle()
-        }
-        compose.onNodeWithTag("approve").performClick()
+        // ACP answers are allow / reject (once or always): the menu offers always allow only (the
+        // agent's allow_always option), no edited arguments and no reason.
+        compose.onNodeWithTag("approval-more").performClick()
+        assertTrue(compose.onAllNodesWithTag("edit-and-approve", useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
+        assertTrue(compose.onAllNodesWithTag("deny-with-reason", useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
+        compose.onNodeWithTag("approve-always", useUnmergedTree = true).performClick()
         compose.waitUntil(60_000) {
             runCatching { compose.onNodeWithTag("conversation").performScrollToNode(hasText("Saved note", substring = true)) }.isSuccess
         }

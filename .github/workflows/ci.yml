@@ -96,7 +96,10 @@ jobs:
           disk-size: 6000M
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -no-metrics
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest
+          # The check fails the job when a module's test process died before reporting (0 tests).
+          script: |
+            ./gradlew connectedDebugAndroidTest
+            python3 tools/check-android-test-results.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
