@@ -135,6 +135,11 @@
   Android 9+, `ExifInterface` before), and tapping one opens `ImageViewer`: pinch zoom, pan,
   double-tap zoom and quarter-turn rotation.
 
+- Video and audio in messages: `VideoAttachment` shows the first frame at the recording's upright
+  aspect with its duration and plays full screen (`VideoPlayerDialog`, platform player and
+  controls); audio files get the `AudioPlayer`. `data:` media is cached to a file
+  (`playableUri`). No new dependencies.
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

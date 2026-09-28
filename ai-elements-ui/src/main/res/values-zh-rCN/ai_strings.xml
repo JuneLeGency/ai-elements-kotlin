@@ -196,4 +196,5 @@
     <string name="ai_invalid_json">不是 JSON 对象</string>
     <string name="ai_view_image">查看图片</string>
     <string name="ai_rotate">旋转</string>
+    <string name="ai_play_video">播放视频</string>
 </resources>

@@ -370,6 +370,21 @@ class ElementsTest {
         compose.onNodeWithTag("image-viewer").assertDoesNotExist()
     }
 
+    /** A video shows its first frame at the recording's upright aspect, and plays full screen. */
+    @Test fun video_showsPosterUpright_andPlaysFullScreen() {
+        val bytes = InstrumentationRegistry.getInstrumentation().context.assets.open("portrait.mp4").readBytes()  // 320x180, rotate 90
+        val part = dev.ai.elements.core.model.FilePart("v1", "video/mp4", "data:video/mp4;base64," + android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP))
+        compose.setContent { AiElementsTheme(dynamicColor = false) { dev.ai.elements.ui.chat.FileAttachment(part) } }
+        compose.waitUntil(10_000) {
+            val size = compose.onNodeWithTag("file-video").fetchSemanticsNode().size
+            size.height > size.width   // the poster loaded and the portrait ratio applied
+        }
+        compose.onNodeWithTag("file-video").performClick()
+        compose.onNodeWithTag("video-player").assertExists()
+        compose.onNodeWithTag("video-close").performClick()
+        compose.onNodeWithTag("video-player").assertDoesNotExist()
+    }
+
     @Test fun checkpoint_restoresOnlyAfterConfirming() {
         var restored = 0
         compose.setContent { AiElementsTheme(dynamicColor = false) { Checkpoint(onRestore = { restored++ }) } }

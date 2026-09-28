@@ -196,4 +196,5 @@
     <string name="ai_invalid_json">JSON オブジェクトではありません</string>
     <string name="ai_view_image">画像を表示</string>
     <string name="ai_rotate">回転</string>
+    <string name="ai_play_video">動画を再生</string>
 </resources>

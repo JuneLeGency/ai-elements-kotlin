@@ -88,7 +88,7 @@ fun FileImage(
     }
 }
 
-/** A file part inside a message: images inline, other files as a chip. */
+/** A file part inside a message: images, videos and audio inline, other files as a chip. */
 @Composable
 fun FileAttachment(file: FilePart, modifier: Modifier = Modifier, imageHeight: Dp = 220.dp) {
     if (file.isImage) {
@@ -104,6 +104,12 @@ fun FileAttachment(file: FilePart, modifier: Modifier = Modifier, imageHeight: D
             fitToImage = true,
         )
         if (viewing) ImageViewer(file, onDismiss = { viewing = false })
+    } else if (file.isVideo) {
+        VideoAttachment(file, modifier)
+    } else if (file.isAudio) {
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val source by produceState<String?>(null, file.url) { value = runCatching { playableUri(context, file).toString() }.getOrNull() }
+        source?.let { dev.ai.elements.ui.voice.AudioPlayer(dev.ai.elements.ui.voice.rememberAudioPlayerState(it), modifier, title = file.filename) }
     } else {
         Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium, modifier = modifier) {
             Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
