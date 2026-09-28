@@ -131,6 +131,10 @@
   nothing to the APK) and a separate code font with previews: match the UI, system monospace, Geist
   Mono, JetBrains Mono, Fira Code (SIL OFL 1.1, bundled variable fonts).
 
+- Images show upright: decoding applies the EXIF orientation of camera photos (`ImageDecoder` on
+  Android 9+, `ExifInterface` before), and tapping one opens `ImageViewer`: pinch zoom, pan,
+  double-tap zoom and quarter-turn rotation.
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

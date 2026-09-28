@@ -194,4 +194,6 @@
     <string name="ai_edit_and_approve">修改後允許</string>
     <string name="ai_edit_arguments">參數（JSON）</string>
     <string name="ai_invalid_json">不是 JSON 物件</string>
+    <string name="ai_view_image">查看圖片</string>
+    <string name="ai_rotate">旋轉</string>
 </resources>

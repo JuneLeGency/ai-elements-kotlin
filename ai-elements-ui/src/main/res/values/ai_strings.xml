@@ -200,4 +200,6 @@
     <string name="ai_edit_and_approve">Edit and approve</string>
     <string name="ai_edit_arguments">Arguments (JSON)</string>
     <string name="ai_invalid_json">Not a JSON object</string>
+    <string name="ai_view_image">View image</string>
+    <string name="ai_rotate">Rotate</string>
 </resources>

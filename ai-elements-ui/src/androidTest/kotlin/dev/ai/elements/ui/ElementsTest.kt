@@ -347,6 +347,29 @@ class ElementsTest {
         assertEquals(listOf(ToolDecision(true, remember = true)), decisions)
     }
 
+    /** Camera photos store their rotation in EXIF: they must show upright, and open full screen. */
+    @Test fun image_exifRotation_isUpright_andOpensFullScreen() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val file = java.io.File(context.cacheDir, "exif.jpg")
+        android.graphics.Bitmap.createBitmap(200, 100, android.graphics.Bitmap.Config.ARGB_8888).apply { eraseColor(android.graphics.Color.RED) }
+            .compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, file.outputStream())
+        android.media.ExifInterface(file.path).apply {
+            setAttribute(android.media.ExifInterface.TAG_ORIENTATION, android.media.ExifInterface.ORIENTATION_ROTATE_90.toString())
+            saveAttributes()
+        }
+        val bytes = file.readBytes()
+        val bitmap = dev.ai.elements.ui.chat.decode(bytes, 1600)!!
+        assertEquals(100 to 200, bitmap.width to bitmap.height)
+
+        val part = dev.ai.elements.core.model.FilePart("f1", "image/jpeg", "data:image/jpeg;base64," + android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP))
+        compose.setContent { AiElementsTheme(dynamicColor = false) { dev.ai.elements.ui.chat.FileAttachment(part) } }
+        compose.onNodeWithTag("file-image").performClick()
+        compose.onNodeWithTag("image-viewer").assertExists()
+        compose.onNodeWithTag("image-rotate").performClick()
+        compose.onNodeWithTag("image-close").performClick()
+        compose.onNodeWithTag("image-viewer").assertDoesNotExist()
+    }
+
     @Test fun checkpoint_restoresOnlyAfterConfirming() {
         var restored = 0
         compose.setContent { AiElementsTheme(dynamicColor = false) { Checkpoint(onRestore = { restored++ }) } }

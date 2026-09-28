@@ -39,7 +39,7 @@ Where the names differ:
 | `ReasoningPart` | `Reasoning`: one quiet line ("Thought for 2s") that expands |
 | `ToolPart` | `ToolCall`, `Subagent` for delegations, a skill badge for skill loads, `Confirmation` while it waits for approval |
 | `SourcePart` | `Sources`, and `InlineCitation` for `[n]` markers |
-| `FilePart` | image and file attachments |
+| `FilePart` | images (upright by EXIF; tap for `ImageViewer`: zoom, pan, rotate) and file attachments |
 | `DataPart` | `Plan`, `Task`, A2UI surfaces, MCP Apps views, or your own renderer |
 
 Long conversations stay at the bottom while they stream, unless the user scrolls up.

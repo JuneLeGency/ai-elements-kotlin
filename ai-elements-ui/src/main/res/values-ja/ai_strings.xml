@@ -194,4 +194,6 @@
     <string name="ai_edit_and_approve">編集して許可</string>
     <string name="ai_edit_arguments">引数（JSON）</string>
     <string name="ai_invalid_json">JSON オブジェクトではありません</string>
+    <string name="ai_view_image">画像を表示</string>
+    <string name="ai_rotate">回転</string>
 </resources>

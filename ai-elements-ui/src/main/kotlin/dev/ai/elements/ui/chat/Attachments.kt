@@ -1,7 +1,16 @@
 package dev.ai.elements.ui.chat
 
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.mutableStateOf
 import dev.ai.elements.ui.icons.AiIcons
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
+import android.graphics.Matrix
+import android.media.ExifInterface
+import android.os.Build
+import java.nio.ByteBuffer
 import android.util.Base64
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -83,15 +92,18 @@ fun FileImage(
 @Composable
 fun FileAttachment(file: FilePart, modifier: Modifier = Modifier, imageHeight: Dp = 220.dp) {
     if (file.isImage) {
+        var viewing by rememberSaveable { mutableStateOf(false) }
         FileImage(
             file,
             modifier = modifier
                 .heightIn(max = imageHeight)
                 .clip(MaterialTheme.shapes.large)
+                .clickable(onClickLabel = stringResource(R.string.ai_view_image)) { viewing = true }
                 .testTag("file-image"),
             contentScale = ContentScale.Fit,
             fitToImage = true,
         )
+        if (viewing) ImageViewer(file, onDismiss = { viewing = false })
     } else {
         Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium, modifier = modifier) {
             Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -140,11 +152,42 @@ fun AttachmentStrip(
     }
 }
 
-private fun decode(bytes: ByteArray, maxPx: Int): ImageBitmap? {
-    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-    BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
-    var sample = 1
-    while (bounds.outWidth / sample > maxPx || bounds.outHeight / sample > maxPx) sample *= 2
-    val options = BitmapFactory.Options().apply { inSampleSize = sample }
-    return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)?.asImageBitmap()
+/**
+ * Decodes [bytes] upright (camera photos store their rotation in EXIF) and downsampled so the
+ * longer side is at most [maxPx]. Android 9+ decodes with `ImageDecoder`, which applies EXIF;
+ * older versions rotate by the EXIF orientation themselves.
+ */
+internal fun decode(bytes: ByteArray, maxPx: Int): ImageBitmap? = runCatching {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        ImageDecoder.decodeBitmap(ImageDecoder.createSource(ByteBuffer.wrap(bytes))) { decoder, info, _ ->
+            val scale = maxPx.toFloat() / maxOf(info.size.width, info.size.height)
+            if (scale < 1f) decoder.setTargetSize((info.size.width * scale).toInt().coerceAtLeast(1), (info.size.height * scale).toInt().coerceAtLeast(1))
+            decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+        }.asImageBitmap()
+    } else {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+        var sample = 1
+        while (bounds.outWidth / sample > maxPx || bounds.outHeight / sample > maxPx) sample *= 2
+        val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
+        bitmap?.let { upright(it, bytes) }?.asImageBitmap()
+    }
+}.getOrNull()
+
+private fun upright(bitmap: Bitmap, bytes: ByteArray): Bitmap {
+    val orientation = runCatching {
+        ExifInterface(bytes.inputStream()).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+    }.getOrDefault(ExifInterface.ORIENTATION_NORMAL)
+    val matrix = Matrix()
+    when (orientation) {
+        ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+        ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+        ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+        ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.postScale(-1f, 1f)
+        ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.postScale(1f, -1f)
+        ExifInterface.ORIENTATION_TRANSPOSE -> { matrix.postRotate(90f); matrix.postScale(-1f, 1f) }
+        ExifInterface.ORIENTATION_TRANSVERSE -> { matrix.postRotate(270f); matrix.postScale(-1f, 1f) }
+        else -> return bitmap
+    }
+    return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
 }
