@@ -21,6 +21,8 @@ class SandboxTest {
 
     @Test
     fun alpineSandbox_runsCommands_andSharesTheWorkspace() = runBlocking<Unit> {
+        // The bundled PRoot and root filesystem are arm64 (phones, tablets, Apple-silicon emulators).
+        org.junit.Assume.assumeTrue("The Alpine sandbox needs an arm64 device", "arm64-v8a" in android.os.Build.SUPPORTED_ABIS)
         val workspace = File(context.filesDir, "sandbox-test-workspace").apply { deleteRecursively(); mkdirs() }
         val sandbox = AlpineSandbox(context, workspace)
         val shell = Shell(sandbox, defaultTimeoutSeconds = 120.0)
