@@ -52,4 +52,10 @@ class MockBrowseTest {
             assertTrue(events.last() is ChatEvent.Finish)
         }
     }
+
+    @Test fun jsxPrompt_answersWithAJsxFence() {
+        val text = run("生成一个酒店预订界面（JSX）").filterIsInstance<ChatEvent.TextDelta>().joinToString("") { it.delta }
+        assertTrue(text, text.contains("```jsx\n<Card>") && text.contains("<select name=\"room\"") && text.contains("onClick={book}"))
+        assertTrue(calls.isEmpty())
+    }
 }

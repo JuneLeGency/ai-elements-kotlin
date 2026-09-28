@@ -79,6 +79,17 @@ class AgentFlowTest {
 
     private fun awaitTurnEnd(timeoutMs: Long) = compose.awaitTurnEnd(timeoutMs)
 
+    /** The offline agent's answer with interface: a ```jsx fence rendered as a native form in the chat. */
+    @Test
+    fun offlineAgent_answersWithAJsxForm() {
+        launchWith(ProviderProfile.Presets.first { it.kind == ProviderKind.MOCK })
+        send(s(R.string.sugg_jsx_prompt))
+        awaitTurnEnd(60_000)
+        scrollTo(hasTestTag("jsx-preview"))
+        compose.onNodeWithTag("jsx-preview").assertExists()
+        compose.onNodeWithText("Book").assertExists()
+    }
+
     /** The offline agent's scripted browser run: each step on the agent's computer, with screenshots. */
     @Test
     fun offlineAgent_browsesAndShowsTheAgentComputer() {

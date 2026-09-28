@@ -1,7 +1,9 @@
 # Elements
 
 The elements are Compose counterparts of [Vercel AI Elements](https://elements.ai-sdk.dev): every one
-of its 49 components has one. The demo app's **Components** screen shows each.
+of its 49 components has one. The [component catalog](../components/index.md) shows each with a
+picture, what it is for and its main API. The demo app's **Components** screen shows them live,
+grouped the same way, with a filter per group.
 
 Where the names differ:
 

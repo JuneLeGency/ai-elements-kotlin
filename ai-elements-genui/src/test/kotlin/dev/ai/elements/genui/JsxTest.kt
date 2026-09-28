@@ -110,4 +110,33 @@ class JsxTest {
         assertTrue(c.any { (it["text"] as? JsonPrimitive)?.content == "kept" })
         assertEquals("Column", c.single { it["id"]!!.jsonPrimitive.content == "root" }["component"]!!.jsonPrimitive.content)
     }
+
+    @Test fun selectWithOptions_isAChoicePicker() {
+        val components = compiler.components(
+            """<select name="room" label="Room"><option value="std">Standard</option><option value="suite">Suite</option></select>""",
+        )
+        val picker = components.single { it["component"]!!.jsonPrimitive.content == "ChoicePicker" }
+        assertEquals("""[{"label":"Standard","value":"std"},{"label":"Suite","value":"suite"}]""", picker["options"].toString())
+        assertEquals("""{"path":"/room"}""", picker["value"].toString())
+        assertEquals("mutuallyExclusive", picker["variant"]!!.jsonPrimitive.content)
+        assertEquals("Room", picker["label"]!!.jsonPrimitive.content)
+        // A valid A2UI surface.
+        render("""<select name="room" multiple><option>A</option></select>""", Json.parseToJsonElement("""{"room":[]}""").jsonObject)
+    }
+
+    @Test fun tabsWithTab_areTabs() {
+        val components = compiler.components("""<Tabs><Tab title="Overview"><p>First</p></Tab><Tab title="Specs"><p>Second</p></Tab></Tabs>""")
+        val tabs = components.single { it["component"]!!.jsonPrimitive.content == "Tabs" }["tabs"].toString()
+        assertTrue(tabs, tabs.contains(""""title":"Overview"""") && tabs.contains(""""title":"Specs""""))
+    }
+
+    @Test fun jsonLiteralAttributes_areData_codeIsNot() {
+        val components = compiler.components(
+            """<ChoicePicker label="Size" value={size} options={[{"label":"S","value":"s"},{"label":"L","value":"l"}]} /><Text text={alert(1)} />""",
+        )
+        val picker = components.single { it["component"]!!.jsonPrimitive.content == "ChoicePicker" }
+        assertEquals("""[{"label":"S","value":"s"},{"label":"L","value":"l"}]""", picker["options"].toString())
+        // Code is never evaluated: an expression that is neither a literal nor a path is dropped.
+        assertTrue(components.none { it.toString().contains("alert") })
+    }
 }

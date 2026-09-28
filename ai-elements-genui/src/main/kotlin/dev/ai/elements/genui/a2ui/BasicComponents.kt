@@ -1,6 +1,5 @@
 package dev.ai.elements.genui.a2ui
 
-import dev.ai.elements.genui.icons.GenUiIcons
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -56,9 +55,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.PathParser
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontStyle
@@ -67,6 +66,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ai.elements.core.model.FilePart
+import dev.ai.elements.genui.icons.GenUiIcons
 import dev.ai.elements.ui.chat.FileImage
 import dev.ai.elements.ui.markdown.MarkdownContent
 import dev.ai.elements.ui.voice.AudioPlayer
@@ -139,6 +139,9 @@ private val LeafMargin: Dp get() = BasicComponents.LeafMargin
 
 /** True inside a Row: nested containers size to their content instead of filling the width. */
 private val LocalInRow = androidx.compose.runtime.staticCompositionLocalOf { false }
+
+/** Components that share a Row's width when they have no `weight`. */
+private val RowSharing = setOf("Card", "Column", "List")
 
 /** Fill the width, except inside a Row, where siblings share it (a filling child would starve them). */
 @Composable
@@ -252,7 +255,12 @@ private fun RowComponent(s: ComponentScope, m: Modifier) {
         },
     ) {
         androidx.compose.runtime.CompositionLocalProvider(LocalInRow provides true) {
-            s.children().forEach { child -> s.Render(child, child.weight?.let { Modifier.weight(it) } ?: Modifier) }
+            s.children().forEach { child ->
+                // Containers without a weight share the row (their content fills its width, and one
+                // would otherwise take the whole row); leaves keep their own width.
+                val weight = child.weight ?: 1f.takeIf { (child.component["component"] as? kotlinx.serialization.json.JsonPrimitive)?.content in RowSharing }
+                s.Render(child, weight?.let { Modifier.weight(it) } ?: Modifier)
+            }
         }
     }
 }

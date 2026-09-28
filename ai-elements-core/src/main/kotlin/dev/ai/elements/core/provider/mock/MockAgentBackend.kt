@@ -37,6 +37,10 @@ class MockAgentBackend(
         val prompt = history.lastOrNull { it.role == Role.USER }?.text.orEmpty()
         val math = extractExpression(prompt)
         val named = tools.filter { prompt.contains(it.name) }.maxByOrNull { it.name.length }
+        if (JSX_WORDS.any { prompt.contains(it, ignoreCase = true) }) {
+            generativeUi()
+            return@flow
+        }
         if (tools.any { it.name == "navigate" } && BROWSE_WORDS.any { prompt.contains(it, ignoreCase = true) }) {
             browse(prompt)
             return@flow
@@ -159,6 +163,20 @@ class MockAgentBackend(
         emit(ChatEvent.Finish)
     }
 
+    /**
+     * An answer with interface: a ```jsx fence (the AI Elements `JSXPreview` input) that apps
+     * rendering JSX show as a live, native form while it streams.
+     */
+    private suspend fun FlowCollector<ChatEvent>.generativeUi() {
+        val id = "text-${UUID.randomUUID()}"
+        streamText(
+            "Here is a booking form you can fill in right here:\n\n```jsx\n" + BOOKING_JSX + "\n```\n\n" +
+                "It is JSX rendered natively: the fields write into its data model, and **Book** sends them back as an action.",
+        ) { emit(ChatEvent.TextDelta(id, it)) }
+        emit(ChatEvent.TextEnd(id))
+        emit(ChatEvent.Finish)
+    }
+
     private suspend fun streamText(text: String, emitChunk: suspend (String) -> Unit) {
         text.chunked(6).forEach {
             emitChunk(it)
@@ -214,6 +232,23 @@ class MockAgentBackend(
     }
 
     companion object {
+        /** Prompts that get an answer with interface (JSX). */
+        private val JSX_WORDS = listOf("jsx", "generative ui", "画面を作")
+
+        private val BOOKING_JSX = """
+            <Card>
+              <h3>Stay in Kyoto</h3>
+              <small>Hotel Lumen · from ${'$'}180 / night</small>
+              <input name="guest" placeholder="Guest name" />
+              <DateTimeInput label="Check-in" value={checkin} enableDate={true} />
+              <select name="room" label="Room"><option value="standard">Standard</option><option value="deluxe">Deluxe</option><option value="suite">Suite</option></select>
+              <Slider label="Nights" min={1} max={14} value={nights} />
+              <div className="flex justify-end">
+                <Button variant="primary" onClick={book}>Book</Button>
+              </div>
+            </Card>
+        """.trimIndent()
+
         /** Prompts that start the scripted browser run (with the browser's tools available). */
         private val BROWSE_WORDS = listOf("browse", "browser", "浏览", "网页", "瀏覽", "網頁", "ブラウズ", "ブラウザ")
 

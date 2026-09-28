@@ -9,11 +9,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
@@ -23,14 +28,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -48,10 +56,7 @@ import dev.ai.elements.core.model.ToolPart
 import dev.ai.elements.core.model.ToolState
 import dev.ai.elements.core.model.Usage
 import dev.ai.elements.demo.R
-import dev.ai.elements.ui.code.Artifact
 import dev.ai.elements.ui.chat.BranchSelector
-import dev.ai.elements.ui.workflow.CanvasEdge
-import dev.ai.elements.ui.workflow.CanvasNode
 import dev.ai.elements.ui.chat.ChainOfThought
 import dev.ai.elements.ui.chat.Checkpoint
 import dev.ai.elements.ui.chat.ContextUsage
@@ -59,7 +64,6 @@ import dev.ai.elements.ui.chat.DataPartView
 import dev.ai.elements.ui.chat.FileAttachment
 import dev.ai.elements.ui.chat.InlineCitation
 import dev.ai.elements.ui.chat.MessageItem
-import dev.ai.elements.ui.workflow.NodeTone
 import dev.ai.elements.ui.chat.OpenInChat
 import dev.ai.elements.ui.chat.Plan
 import dev.ai.elements.ui.chat.PromptInput
@@ -71,42 +75,76 @@ import dev.ai.elements.ui.chat.Suggestions
 import dev.ai.elements.ui.chat.Task
 import dev.ai.elements.ui.chat.ToolCall
 import dev.ai.elements.ui.chat.ToolPartView
-import dev.ai.elements.ui.code.WebPreview
-import dev.ai.elements.ui.workflow.WorkflowCanvas
 import dev.ai.elements.ui.chat.WorkflowStep
+import dev.ai.elements.ui.code.Artifact
+import dev.ai.elements.ui.code.WebPreview
 import dev.ai.elements.ui.markdown.CodeBlock
 import dev.ai.elements.ui.markdown.MarkdownContent
 import dev.ai.elements.ui.markdown.MermaidDiagram
+import dev.ai.elements.ui.workflow.CanvasEdge
+import dev.ai.elements.ui.workflow.CanvasNode
+import dev.ai.elements.ui.workflow.NodeTone
+import dev.ai.elements.ui.workflow.WorkflowCanvas
 import kotlinx.serialization.json.Json
 
-/** Every AI Elements component with sample data; a 1–3 column staggered grid by width. */
+/**
+ * Every AI Elements component with sample data, grouped by category ([GalleryCatalog]): filter
+ * chips pick a category, a 1–3 column staggered grid by width shows its samples under headings.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GalleryScreen(onBack: (() -> Unit)? = null) {
+    var category by rememberSaveable { mutableStateOf<GalleryCategory?>(null) }
+    val grid = rememberLazyStaggeredGridState()
+    LaunchedEffect(category) { grid.scrollToItem(0) }
     Scaffold(containerColor = Color.Transparent, topBar = {
-        TopAppBar(
-            title = { Text(stringResource(R.string.nav_components)) },
-            navigationIcon = { onBack?.let { BackArrow(it) } },
-            colors = transparentAppBarColors(),
-        )
+        Column {
+            TopAppBar(
+                title = { Text(stringResource(R.string.nav_components)) },
+                navigationIcon = { onBack?.let { BackArrow(it) } },
+                colors = transparentAppBarColors(),
+            )
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                modifier = Modifier.testTag("gallery-filters"),
+            ) {
+                item(key = "all") {
+                    FilterChip(selected = category == null, onClick = { category = null }, label = { Text(stringResource(R.string.gallery_all)) }, modifier = Modifier.testTag("gallery-filter-all"))
+                }
+                items(GalleryCategory.entries, key = { it.slug }) { c ->
+                    FilterChip(selected = category == c, onClick = { category = c }, label = { Text(stringResource(c.label)) }, modifier = Modifier.testTag("gallery-filter-${c.slug}"))
+                }
+            }
+        }
     }) { padding ->
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Adaptive(360.dp),
+            state = grid,
             contentPadding = PaddingValues(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalItemSpacing = 16.dp,
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier.fillMaxSize().padding(padding).testTag("gallery"),
         ) {
-            GallerySamples.forEach { (title, content) ->
-                item(key = title) { GalleryCard(title) { content() } }
+            GalleryCatalog.filter { category == null || it.category == category }.groupBy { it.category }.forEach { (group, samples) ->
+                item(key = "section-${group.slug}", span = StaggeredGridItemSpan.FullLine) {
+                    Text(
+                        stringResource(group.label),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(top = 8.dp).testTag("gallery-section-${group.slug}"),
+                    )
+                }
+                samples.forEach { sample ->
+                    item(key = sample.id) { GalleryCard(sample.title, Modifier.testTag("gallery-card-${sample.id}")) { sample.content() } }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun GalleryCard(title: String, content: @Composable () -> Unit) {
-    Surface(color = MaterialTheme.colorScheme.surfaceContainerLowest, shape = MaterialTheme.shapes.extraLarge, tonalElevation = 1.dp) {
+internal fun GalleryCard(title: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    Surface(color = MaterialTheme.colorScheme.surfaceContainerLowest, shape = MaterialTheme.shapes.extraLarge, tonalElevation = 1.dp, modifier = modifier) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
             content()
@@ -211,7 +249,7 @@ private fun sampleDelegation(running: Boolean): ToolPart {
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-private val GallerySamples: List<Pair<String, @Composable () -> Unit>> = listOf<Pair<String, @Composable () -> Unit>>(
+internal val BaseSamples: Map<String, @Composable () -> Unit> = listOf<Pair<String, @Composable () -> Unit>>(
     "Messages" to {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             MessageItem(Message("gallery-u", Role.USER, listOf(TextPart("u", "Summarise AI Elements in one line"))))
@@ -409,7 +447,7 @@ private val GallerySamples: List<Pair<String, @Composable () -> Unit>> = listOf<
             ContainedLoadingIndicator(Modifier.size(48.dp))
         }
     },
-) + NewGallerySamples
+).toMap() + NewGallerySamples.toMap()
 
 /** A tiny generated gradient PNG, as a model-returned image would arrive. */
 private val SampleImageDataUrl: String by lazy {

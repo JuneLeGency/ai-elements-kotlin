@@ -17,6 +17,8 @@
     <string name="sugg_long">長篇串流回答</string>
     <string name="sugg_browse_prompt">用瀏覽器打開 https://example.com，點進其中的連結並截圖</string>
     <string name="sugg_browse">瀏覽網頁（智慧體的電腦）</string>
+    <string name="sugg_jsx_prompt">生成一個飯店預訂介面（JSX）</string>
+    <string name="sugg_jsx">生成式介面（JSX 表單）</string>
     <string name="conversations">對話</string>
     <string name="new_chat">新對話</string>
     <string name="empty_title">今天想聊點什麼？</string>
@@ -239,4 +241,15 @@
     <string name="code_font_desc">採用 SIL Open Font License 的等寬字型；中文使用系統字型</string>
     <string name="code_font_follow">跟隨介面字型</string>
     <string name="code_font_system">系統等寬</string>
+    <string name="gallery_all">全部</string>
+    <string name="gallery_cat_conversation">對話</string>
+    <string name="gallery_cat_content">訊息內容</string>
+    <string name="gallery_cat_tools">工具與智慧體的電腦</string>
+    <string name="gallery_cat_hitl">人在迴路</string>
+    <string name="gallery_cat_structure">智慧體結構</string>
+    <string name="gallery_cat_genui">生成式 UI</string>
+    <string name="gallery_cat_media">附件與媒體</string>
+    <string name="gallery_cat_voice">語音</string>
+    <string name="gallery_cat_devtools">開發者工具</string>
+    <string name="gallery_cat_workflow">工作流程</string>
 </resources>

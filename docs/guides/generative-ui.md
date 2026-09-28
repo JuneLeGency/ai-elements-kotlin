@@ -34,6 +34,54 @@ A2UI booking form on AG-UI, AI SDK and A2A.
 
 ## JSX
 
-`JsxPreview` renders a JSX subset (the AI Elements `JSXPreview`) with the same native components. It
-evaluates bindings only, never code, and keeps its state while the JSX streams. `jsxCodeBlocks`
-renders ```` ```jsx ```` fences in answers as live previews.
+`JsxPreview` renders JSX (the AI Elements `JSXPreview`) natively: the JSX compiles onto A2UI
+components and renders with the same catalog as A2UI surfaces, so it looks like the rest of the app.
+It evaluates data only, never code, and renders while the JSX streams in.
+
+```kotlin
+JsxPreview(
+    jsx = source,                                            // what the model wrote
+    bindings = buildJsonObject { put("email", "") },         // the data model {name} reads
+    onAction = { action -> controller.send(action) },        // onClick={subscribe} → "subscribe"
+)
+```
+
+In a chat, `jsxCodeBlocks` renders ```` ```jsx ```` (and ```` ```tsx ````) fences in answers as live
+previews, with a toggle to show the source. Register it with
+`AiElementsRenderers(codeBlocks = mapOf("jsx" to jsxCodeBlocks(), "tsx" to jsxCodeBlocks()))`.
+
+### What it understands
+
+| JSX | Renders as |
+|---|---|
+| `h1`–`h6`, `p`, `span`, `b` / `strong`, `i` / `em`, `code`, `small` | Text (headings and inline styles as Markdown) |
+| `div`, `section`, `main`, … (`className="flex …"` or `flex-row` makes a Row) | Column / Row |
+| `ul` / `ol` with `li` | a bulleted or numbered Column |
+| `hr` | Divider |
+| `img src alt` | Image |
+| `a href` | a link button (opens the URL) |
+| `button` / `<Button variant>` | Button, with `onClick` as its action |
+| `input` (`type` text, `email`, `password`, `number`), `textarea` | TextField; `name="x"` binds it to `/x` |
+| `input type="checkbox" checked={x}` | CheckBox |
+| `select name` with `option value` | ChoicePicker (`multiple` for several) |
+| `<Tabs>` with `<Tab title>` | Tabs |
+| Any Basic Catalog component by name: `Card`, `Row`, `Column`, `List`, `Text`, `Image`, `Icon`, `Video`, `AudioPlayer`, `Slider`, `CheckBox`, `ChoicePicker`, `DateTimeInput`, `TextField`, `Modal`, … | that component, with its properties |
+| Unknown tags (`<Fragment>`, `<section>`, …) | their children |
+
+### Values
+
+- **Bindings.** `{name}` or `{a.b}` read the data model (`bindings`). Inputs bound to a path write
+  back into it, locally, and an action carries the current data model.
+- **Literals.** Strings, numbers, `true` / `false`, and JSON arrays and objects (`options={[{"label": "S", "value": "s"}]}`).
+- **Nothing else runs.** `{alert(1)}`, arrow functions and other code are dropped, never evaluated:
+  model output cannot execute in the app.
+- **Actions.** `onClick={save}` or `onClick="save"` sends the action `save` to `onAction`.
+
+### While it streams
+
+Half-written tags wait until they close, and unclosed tags close at the end. The preview keeps one
+surface for the whole stream, so what the user typed stays while more JSX arrives.
+
+See every JSX sample, with its source, under [Generative UI](../components/generative-ui.md) in the
+component catalog. In the demo app, tap **Generative UI (JSX form)**: the offline agent answers
+with a JSX booking form.

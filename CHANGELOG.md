@@ -197,6 +197,18 @@
   run after their script returns and every script call is time-limited (a page that unloads never
   answers `evaluateJavascript`).
 
+- Component catalog: the demo's Components screen groups every element in ten categories with a
+  filter per group, and adds samples for the agent's computer, step views, input-request forms, JSX
+  (layout, forms with bindings and actions, choices / slider / date / tabs, data-driven cards,
+  streaming), A2UI, attachments, video, PDF, voice mode, the conversation and its empty state.
+  `ComponentCatalogScreenshots` renders each sample and `tools/build-component-docs.py` builds the
+  docs site's **Components** section from them (picture, purpose, main API, AI Elements name).
+- JSX: `<select>` / `<option>` → ChoicePicker, `<Tabs>` / `<Tab title>` → Tabs, JSON array and object
+  literals as property values; the Generative UI guide documents every tag, bindings, actions and
+  streaming. The offline agent answers "Generative UI (JSX form)" with a JSX booking form.
+- A2UI Row: containers without a `weight` (Card, Column, List) share the row instead of the first
+  taking it all.
+
 ### Changed — agents
 - `ai-elements-core` packages by concern: `chat`, `model`, `protocol.aisdk`, `protocol.agui`,
   `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config` (was one `backend` package).

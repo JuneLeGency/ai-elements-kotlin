@@ -1,6 +1,7 @@
 package dev.ai.elements.genui.jsx
 
 import dev.ai.elements.genui.a2ui.A2ui
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -17,7 +18,9 @@ import kotlinx.serialization.json.put
  *   common HTML tags map onto them (`div` → Column, `p`/`span`/`h1…h6` → Text, `button` → Button,
  *   `img` → Image, `a` → a link button, `ul`/`li` → a bulleted Column, `hr` → Divider, `input` →
  *   TextField / CheckBox). Tags neither known nor in [knownComponents] render their children.
- * - `{name}` / `{a.b}` read from the bindings (the surface's data model); nothing is executed.
+ * - `{name}` / `{a.b}` read from the bindings (the surface's data model); `{[…]}` / `{{"k": …}}` are
+ *   JSON data; nothing is executed.
+ * - `<select>` with `<option>`s is a ChoicePicker; `<Tabs>` with `<Tab title="…">`s is Tabs.
  * - `onClick={save}` / `onClick="save"` dispatch the action `save` to the host.
  * - Streaming-tolerant: unclosed tags close at the end, a half-written tag is left out.
  */
@@ -139,6 +142,34 @@ class JsxCompiler(private val knownComponents: Set<String> = BasicTags) {
                         props["placeholder"]?.let { put("placeholder", it) }
                         put("value", props["value"] ?: props["name"]?.let { n -> JsonObject(mapOf("path" to JsonPrimitive("/" + (n as JsonPrimitive).content))) } ?: JsonPrimitive(""))
                         put("variant", when { tag == "textarea" -> "longText"; type == "password" -> "obscured"; type == "number" -> "number"; else -> "shortText" })
+                    }
+                }
+                // `<select>` / `<ChoicePicker>` with `<option>`s, as in HTML: a ChoicePicker.
+                tag == "select" || (tag == "ChoicePicker" && node.children.any { it is JsxNode.Element && it.tag == "option" }) -> {
+                    val options = node.children.filterIsInstance<JsxNode.Element>().filter { it.tag == "option" }.map { o ->
+                        val label = inline(o.children)
+                        buildJsonObject { put("label", label); put("value", o.props["value"] ?: label) }
+                    }
+                    val multiple = (props["multiple"] as? JsonPrimitive)?.let { it.content != "false" } ?: false
+                    out += buildJsonObject {
+                        put("id", id); put("component", "ChoicePicker")
+                        put("options", JsonArray(options))
+                        put("variant", props.string("variant") ?: if (multiple) "multipleSelection" else "mutuallyExclusive")
+                        (props["value"] ?: props["name"]?.let { n -> JsonObject(mapOf("path" to JsonPrimitive("/" + (n as JsonPrimitive).content))) })?.let { put("value", it) }
+                        props.without("className", "style", "value", "name", "multiple", "variant", "options").forEach { (k, v) -> put(k, v) }
+                    }
+                }
+                // `<Tabs>` with `<Tab title="…">` children: A2UI Tabs, one tab per child.
+                tag == "Tabs" && node.children.any { it is JsxNode.Element && it.tag == "Tab" } -> {
+                    val tabs = node.children.filterIsInstance<JsxNode.Element>().filter { it.tag == "Tab" }.map { t ->
+                        buildJsonObject {
+                            put("title", t.props["title"] ?: t.props["label"] ?: JsonPrimitive(""))
+                            put("child", wrap("Column", children(t.children), id(), out))
+                        }
+                    }
+                    out += buildJsonObject {
+                        put("id", id); put("component", "Tabs"); put("tabs", JsonArray(tabs))
+                        props.without("className", "style", "tabs").forEach { (k, v) -> put(k, v) }
                     }
                 }
                 tag == "Card" -> {
@@ -411,6 +442,8 @@ internal class JsxParser(private val src: String) {
         e.toDoubleOrNull() != null -> JsonPrimitive(e.toDouble().let { if (it % 1.0 == 0.0 && '.' !in e) it.toLong() else it })
         (e.startsWith("\"") && e.endsWith("\"")) || (e.startsWith("'") && e.endsWith("'")) || (e.startsWith("`") && e.endsWith("`") && "\${" !in e) ->
             JsonPrimitive(e.substring(1, e.length - 1))
+        // JSON literals (arrays, objects with quoted keys) are data, as in A2UI: options, tabs…
+        e.startsWith("[") || e.startsWith("{") -> runCatching { Json.parseToJsonElement(e) }.getOrNull()
         Regex("""^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[\d+])*$""").matches(e) ->
             JsonObject(mapOf("path" to JsonPrimitive("/" + e.replace(Regex("""\[(\d+)]"""), ".$1").replace('.', '/'))))
         else -> null

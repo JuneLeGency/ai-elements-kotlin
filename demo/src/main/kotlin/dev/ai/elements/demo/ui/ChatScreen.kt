@@ -116,6 +116,7 @@ private fun demoSuggestions(): List<Suggestion> {
         listOf(
             R.string.sugg_agent_loop_prompt to R.string.sugg_agent_loop,
             R.string.sugg_browse_prompt to R.string.sugg_browse,
+            R.string.sugg_jsx_prompt to R.string.sugg_jsx,
             R.string.sugg_time_prompt to R.string.sugg_time,
             R.string.sugg_calc_prompt to R.string.sugg_calc,
             R.string.sugg_kotlin_prompt to R.string.sugg_kotlin,

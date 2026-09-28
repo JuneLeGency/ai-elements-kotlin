@@ -17,6 +17,8 @@
     <string name="sugg_long">長いストリーミング回答</string>
     <string name="sugg_browse_prompt">ブラウザで https://example.com を開き、リンクをたどってスクリーンショットを撮って</string>
     <string name="sugg_browse">ウェブを閲覧（エージェントのコンピューター）</string>
+    <string name="sugg_jsx_prompt">ホテル予約の画面を作って（JSX）</string>
+    <string name="sugg_jsx">生成 UI（JSX フォーム）</string>
     <string name="conversations">会話</string>
     <string name="new_chat">新しいチャット</string>
     <string name="empty_title">何について話しましょう？</string>
@@ -239,4 +241,15 @@
     <string name="code_font_desc">SIL Open Font License の等幅フォント。日本語はシステムのフォント</string>
     <string name="code_font_follow">UI フォントに合わせる</string>
     <string name="code_font_system">システムの等幅</string>
+    <string name="gallery_all">すべて</string>
+    <string name="gallery_cat_conversation">会話</string>
+    <string name="gallery_cat_content">メッセージの内容</string>
+    <string name="gallery_cat_tools">ツールとエージェントのコンピューター</string>
+    <string name="gallery_cat_hitl">ヒューマン・イン・ザ・ループ</string>
+    <string name="gallery_cat_structure">エージェントの構造</string>
+    <string name="gallery_cat_genui">生成 UI</string>
+    <string name="gallery_cat_media">添付ファイルとメディア</string>
+    <string name="gallery_cat_voice">音声</string>
+    <string name="gallery_cat_devtools">開発者ツール</string>
+    <string name="gallery_cat_workflow">ワークフロー</string>
 </resources>

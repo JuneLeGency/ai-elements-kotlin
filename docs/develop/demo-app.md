@@ -17,7 +17,11 @@ scripted provider) and connects to the [reference server](reference-server.md) o
 - **Agent capabilities**: MCP servers (with OAuth and MCP Apps), skills (bundled from the
   repository's `skills/` folder, or imported as `.zip`), sub-agents and remote A2A agents, the
   workspace, the Linux sandbox, memory, planning, the browser, device tools and scheduled tasks.
-- **Components**: every element with sample data.
+- **Components**: every element with sample data, grouped in ten categories with a filter per
+  group. The same samples make the [component catalog](../components/index.md): regenerate it with
+  `ComponentCatalogScreenshots` and `tools/build-component-docs.py`.
+- **Offline demos**: the offline provider's suggestions include a scripted browser run on the
+  agent's computer (**Browse a web page**) and an answer with interface (**Generative UI (JSX form)**).
 - **Settings**, two levels deep: a grouped home (Agent: providers, MCP servers, skills,
   sub-agents, the on-device agent; App: appearance, text and language, diagrams), each entry with
   where it stands now, opening its page. Editors (a provider, an MCP server, a sub-agent) open as
@@ -31,6 +35,7 @@ scripted provider) and connects to the [reference server](reference-server.md) o
 | `ChatViewModel.kt` | the `ChatController`, conversation persistence, model lists |
 | `ui/ChatScreen.kt` | the chat screen: top bar with the provider picker, drawer, composer |
 | `ui/SettingsScreen.kt` | providers, sign-in, MCP servers, capabilities, appearance |
+| `ui/GalleryCatalog.kt` | the Components screen's samples by category, with what the docs catalog says about each |
 | `samples/DocsSamples.kt` | the code on this site, compiled with the demo |
 
 `samples/pure-client` and `samples/in-app-agent` are minimal single-screen apps for each mode.

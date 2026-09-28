@@ -18,6 +18,8 @@
     <string name="sugg_long">Long streaming answer</string>
     <string name="sugg_browse_prompt">Use the browser: open https://example.com, follow its link and take a screenshot</string>
     <string name="sugg_browse">Browse a web page (agent computer)</string>
+    <string name="sugg_jsx_prompt">Build me a hotel booking form as UI (JSX)</string>
+    <string name="sugg_jsx">Generative UI (JSX form)</string>
     <string name="conversations">Conversations</string>
     <string name="new_chat">New chat</string>
     <string name="empty_title">What shall we explore?</string>
@@ -241,4 +243,15 @@
     <string name="code_font_desc">Monospace fonts under the SIL Open Font License; Chinese falls back to the system font</string>
     <string name="code_font_follow">Match the UI font</string>
     <string name="code_font_system">System monospace</string>
+    <string name="gallery_all">All</string>
+    <string name="gallery_cat_conversation">Conversation</string>
+    <string name="gallery_cat_content">Message content</string>
+    <string name="gallery_cat_tools">Tools &amp; agent computer</string>
+    <string name="gallery_cat_hitl">Human in the loop</string>
+    <string name="gallery_cat_structure">Agent structure</string>
+    <string name="gallery_cat_genui">Generative UI</string>
+    <string name="gallery_cat_media">Attachments &amp; media</string>
+    <string name="gallery_cat_voice">Voice</string>
+    <string name="gallery_cat_devtools">Developer tools</string>
+    <string name="gallery_cat_workflow">Workflow</string>
 </resources>
