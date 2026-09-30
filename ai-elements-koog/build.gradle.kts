@@ -7,7 +7,6 @@ plugins {
 // brings its own prompt executors, serialization layer and Ktor.
 android {
     namespace = "dev.ai.elements.koog"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 26

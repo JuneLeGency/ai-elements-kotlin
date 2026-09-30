@@ -8,7 +8,6 @@ plugins {
 // WebView, bridged to the MCP client (core) and rendered in the chat (ui).
 android {
     namespace = "dev.ai.elements.mcpapps"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 24

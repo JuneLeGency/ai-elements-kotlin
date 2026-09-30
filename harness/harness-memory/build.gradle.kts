@@ -6,7 +6,6 @@ plugins {
 // Persistent notebook memory with the Pydantic AI Harness Memory contract.
 android {
     namespace = "dev.ai.elements.harness.memory"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 26

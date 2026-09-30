@@ -6,7 +6,6 @@ plugins {
 // Task plans with the Pydantic AI Harness Planning contract.
 android {
     namespace = "dev.ai.elements.harness.planning"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 26

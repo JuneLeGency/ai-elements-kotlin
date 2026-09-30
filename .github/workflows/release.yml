@@ -25,18 +25,18 @@ jobs:
       ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
       ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Version from the tag
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           grep -q "^## $VERSION" CHANGELOG.md || { echo "CHANGELOG.md has no '## $VERSION' section"; exit 1; }
           [ -n "$ORG_GRADLE_PROJECT_mavenCentralUsername" ] && [ -n "$ORG_GRADLE_PROJECT_signingInMemoryKey" ] || { echo "Maven Central / signing secrets are not set"; exit 1; }
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
       - name: Test
         run: ./gradlew testDebugUnitTest lintDebug -PVERSION_NAME=$VERSION
       - name: Publish to Maven Central

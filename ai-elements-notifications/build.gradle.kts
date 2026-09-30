@@ -7,7 +7,6 @@ plugins {
 // Optional (it brings the notification permissions): apps opt in by adding it.
 android {
     namespace = "dev.ai.elements.notifications"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 24

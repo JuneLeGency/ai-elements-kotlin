@@ -7,7 +7,6 @@ plugins {
 // upstream termux/proot by native/build-proot.sh; the Kotlin code here is Apache-2.0 (see NOTICE).
 android {
     namespace = "dev.ai.elements.harness.sandbox"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 26

@@ -7,7 +7,6 @@ plugins {
 // :ai-elements-core because the SDK brings Ktor, kotlinx-io and kotlin-logging.
 android {
     namespace = "dev.ai.elements.acp"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 24

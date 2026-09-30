@@ -6,7 +6,6 @@ plugins {
 // Shell commands with the Pydantic AI Harness Shell contract.
 android {
     namespace = "dev.ai.elements.harness.shell"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 26

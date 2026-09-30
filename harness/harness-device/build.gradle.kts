@@ -6,7 +6,6 @@ plugins {
 // Device integrations (calendar, contacts, location, clipboard, alarms, notifications) as agent tools.
 android {
     namespace = "dev.ai.elements.harness.device"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 26

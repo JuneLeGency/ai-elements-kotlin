@@ -8,7 +8,6 @@ plugins {
 // JsxPreview compiles onto). Protocol-transport free: transports hand it A2UI messages.
 android {
     namespace = "dev.ai.elements.genui"
-    compileSdk = 37
 
     defaultConfig {
         // 26: A2UI date and time functions use java.time.

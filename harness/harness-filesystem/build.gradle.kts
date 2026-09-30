@@ -6,7 +6,6 @@ plugins {
 // Workspace file tools with the Pydantic AI Harness FileSystem contract.
 android {
     namespace = "dev.ai.elements.harness.filesystem"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 26

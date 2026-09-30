@@ -7,7 +7,6 @@ plugins {
 // SDK brings protobuf, Gson and Java 17 library APIs (consumers enable core library desugaring).
 android {
     namespace = "dev.ai.elements.a2a"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 26

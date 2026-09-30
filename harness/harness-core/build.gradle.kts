@@ -7,7 +7,6 @@ plugins {
 // and capabilities into a ChatBackend. Capability artifacts (filesystem, shell, memory…) build on it.
 android {
     namespace = "dev.ai.elements.harness"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 24

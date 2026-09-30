@@ -9,7 +9,6 @@ plugins {
 //   ./gradlew :demo:generateReleaseBaselineProfile                # regenerates the shipped profile
 android {
     namespace = "dev.ai.elements.benchmark"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 28

@@ -8,7 +8,6 @@ plugins {
 // Kept out of :ai-elements-ui because it is experimental and bundles ~4 MB of fonts.
 android {
     namespace = "dev.ai.elements.mermaid"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 24

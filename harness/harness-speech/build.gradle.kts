@@ -6,7 +6,6 @@ plugins {
 // Text to speech as agent tools.
 android {
     namespace = "dev.ai.elements.harness.speech"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 26

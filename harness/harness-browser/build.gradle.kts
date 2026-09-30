@@ -6,7 +6,6 @@ plugins {
 // Web browsing with the Pydantic AI Harness browser tool contract, on WebView.
 android {
     namespace = "dev.ai.elements.harness.browser"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 26

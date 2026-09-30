@@ -12,7 +12,7 @@ dependencies = [
     "openai>=3.13.0",
     "pydantic-ai>=2.51.0",
     "pydantic-ai-harness[acp,skills]>=0.36.0",
-    "uvicorn[standard]>=0.52.4",
+    "uvicorn[standard]>=0.54.0",
 ]
 
 [dependency-groups]
@@ -22,3 +22,10 @@ dev = [
 
 [tool.uv.sources]
 a2ui-core = { git = "https://github.com/google/A2UI", subdirectory = "python/a2ui_core" }
+
+# The lock file records where packages come from: pin the public index so it stays portable
+# (a machine's own mirror in uv.toml would otherwise end up in uv.lock).
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true

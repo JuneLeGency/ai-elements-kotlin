@@ -6,7 +6,6 @@ plugins {
 // Minimal sample: see README.md next to this file.
 android {
     namespace = "dev.ai.elements.samples.inappagent"
-    compileSdk = 37
 
     defaultConfig {
         applicationId = "dev.ai.elements.samples.inappagent"

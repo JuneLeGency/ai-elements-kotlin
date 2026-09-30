@@ -14,7 +14,7 @@ plugins {
 
 /** Every published library (the BOM lists the same). */
 val publishedModules = listOf(
-    ":ai-elements-chat", ":ai-elements-core", ":ai-elements-ui", ":ai-elements-genui", ":ai-elements-mcp-apps", ":ai-elements-a2a", ":ai-elements-acp", ":ai-elements-koog", ":ai-elements-mermaid-native",
+    ":ai-elements-chat", ":ai-elements-core", ":ai-elements-ui", ":ai-elements-genui", ":ai-elements-mcp-apps", ":ai-elements-notifications", ":ai-elements-a2a", ":ai-elements-acp", ":ai-elements-koog", ":ai-elements-mermaid-native",
     ":harness:harness-core", ":harness:harness-filesystem", ":harness:harness-memory", ":harness:harness-planning",
     ":harness:harness-shell", ":harness:harness-sandbox-proot", ":harness:harness-browser", ":harness:harness-device",
     ":harness:harness-speech", ":harness:harness-scheduler",
@@ -22,6 +22,16 @@ val publishedModules = listOf(
 
 subprojects {
     if (path in publishedModules) apply(plugin = "org.jetbrains.dokka")
+    // One compile SDK for every Android module: `compileSdk` / `compileSdkMinor` in the version catalog.
+    val sdk = rootProject.libs.versions.compileSdk.get().toInt()
+    val minor = rootProject.libs.versions.compileSdkMinor.get().toInt()
+    listOf("com.android.application", "com.android.library", "com.android.test").forEach { id ->
+        pluginManager.withPlugin(id) {
+            extensions.configure<com.android.build.api.dsl.CommonExtension>("android") {
+                compileSdk { version = release(sdk) { minorApiLevel = minor } }
+            }
+        }
+    }
 }
 
 dependencies {

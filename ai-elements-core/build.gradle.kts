@@ -6,7 +6,6 @@ plugins {
 
 android {
     namespace = "dev.ai.elements.core"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 24

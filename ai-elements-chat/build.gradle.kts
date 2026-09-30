@@ -8,7 +8,6 @@ plugins {
 // ChatController. ai-elements-ui depends on this alone; protocols and providers live in ai-elements-core.
 android {
     namespace = "dev.ai.elements.chat"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 24

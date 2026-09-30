@@ -7,7 +7,6 @@ plugins {
 // Scheduled agent runs on WorkManager.
 android {
     namespace = "dev.ai.elements.harness.scheduler"
-    compileSdk = 37
 
     defaultConfig {
         minSdk = 26

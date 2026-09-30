@@ -14,26 +14,26 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
       - name: Unit tests, lint, publish to Maven Local
         run: ./gradlew testDebugUnitTest lintDebug :demo:assembleRelease publishToMavenLocal --continue
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v7
       - name: Documentation site (Zensical + Dokka API reference)
         run: tools/build-docs.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: site
           path: site/
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         if: github.event_name == 'push' && vars.PAGES_ENABLED == 'true'
         with:
           path: site/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: reports
@@ -55,27 +55,27 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   ui-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # The emulator's userdata partition needs ~7 GB; the runner image leaves less. Drop toolchains
       # this job does not use (before setup-java, which installs into the tool cache).
       - name: Free disk space
         run: |
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/share/boost /usr/local/lib/node_modules "$AGENT_TOOLSDIRECTORY"
           df -h /
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
       # The reference server (Pydantic AI + Harness, scripted model: no keys) for the live E2E tests;
       # the emulator reaches it at 10.0.2.2:8788.
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v7
       - name: Start the reference agent server
         working-directory: server
         run: |
@@ -109,7 +109,7 @@ jobs:
           script: |
             ./gradlew connectedDebugAndroidTest --max-workers=2
             python3 tools/check-android-test-results.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ui-test-reports

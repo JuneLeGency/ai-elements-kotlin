@@ -8,7 +8,6 @@ plugins {
 
 android {
     namespace = "dev.ai.elements.demo"
-    compileSdk = 37
 
     defaultConfig {
         applicationId = "dev.ai.elements.demo"
