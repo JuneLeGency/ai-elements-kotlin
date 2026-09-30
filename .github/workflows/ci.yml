@@ -2,8 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # deps/**: dependency updates are verified on a branch before they reach main.
+    branches: [main, "deps/**"]
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
