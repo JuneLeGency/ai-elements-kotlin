@@ -26,6 +26,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
@@ -681,6 +682,29 @@ class ElementsTest {
         } finally {
             instrumentation.removeMonitor(monitor)
         }
+    }
+
+    /** Opening another conversation shows its end in the very first frame, without scrolling to it. */
+    @Test
+    fun openingAConversation_startsAtItsEnd() {
+        fun chat(name: String, turns: Int) = ChatState(
+            messages = (0 until turns).flatMap { i ->
+                listOf(
+                    Message("$name-u$i", Role.USER, listOf(TextPart("t", "$name question $i"))),
+                    Message("$name-a$i", Role.ASSISTANT, listOf(TextPart("t", "$name answer $i\n\nA paragraph long enough to take a few lines on a phone screen, so that the conversation is taller than the viewport."))),
+                )
+            },
+        )
+        var state by mutableStateOf(chat("short", 2))
+        compose.setContent { AiElementsTheme(dynamicColor = false) { Conversation(state) } }
+        compose.waitForIdle()
+        compose.mainClock.autoAdvance = false
+        state = chat("long", 30)
+        compose.mainClock.advanceTimeByFrame()
+        // The first frame after the switch: the last reply is laid out at the bottom, the first is not composed.
+        compose.onNodeWithText("long answer 29", substring = true).assertIsDisplayed()
+        compose.onAllNodesWithText("long question 0").fetchSemanticsNodes().let { assertTrue("the start is composed: ${it.size}", it.isEmpty()) }
+        compose.mainClock.autoAdvance = true
     }
 }
 

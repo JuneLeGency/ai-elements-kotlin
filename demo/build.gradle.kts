@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    // Baseline Profile from :benchmark (./gradlew :demo:generateReleaseBaselineProfile), shipped in release.
+    alias(libs.plugins.baselineprofile)
 }
 
 android {
@@ -102,6 +104,7 @@ dependencies {
     implementation(libs.activity.compose)
     // Installs the baseline profiles Compose & AndroidX ship, for faster startup and smoother scrolling.
     implementation(libs.profileinstaller)
+    baselineProfile(project(":benchmark"))
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.kotlinx.coroutines.android)

@@ -30,6 +30,7 @@ import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.markdownDimens
 import com.mikepenz.markdown.model.markdownPadding
+import com.mikepenz.markdown.model.rememberMarkdownState
 import dev.ai.elements.core.model.SourcePart
 import dev.ai.elements.ui.chat.CitationPreprocessor
 import dev.ai.elements.ui.chat.CitationSheet
@@ -68,7 +69,7 @@ fun MarkdownContent(
         Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(AiSpacing.m)) {
             blocks.forEachIndexed { index, block ->
                 val text = if (streaming && index == blocks.lastIndex) MarkdownStreaming.repairTail(block) else block
-                key(index) { MarkdownBlock(text) }
+                key(index) { MarkdownBlock(text, immediate = !(streaming && index == blocks.lastIndex)) }
             }
         }
     }
@@ -112,8 +113,13 @@ internal fun CitationLinks(citations: List<SourcePart>, content: @Composable () 
 }
 
 /** One top-level block. Takes only a String, so unchanged blocks are skipped. */
+/**
+ * One top-level Markdown block. [immediate] parses it in composition, so a settled reply is laid
+ * out in its first frame at its final height (opening a conversation shows it in place, no reflow);
+ * the block a stream is still writing parses in the background, off the frame.
+ */
 @Composable
-internal fun MarkdownBlock(content: String) {
+internal fun MarkdownBlock(content: String, immediate: Boolean = true) {
     val type = MaterialTheme.typography
     val scheme = MaterialTheme.colorScheme
     val body = AiType.body
@@ -139,8 +145,9 @@ internal fun MarkdownBlock(content: String) {
             checkbox = { MarkdownCheckBox(it.content, it.node, it.typography.text) },
         )
     }
+    val state = rememberMarkdownState(content, retainState = true, immediate = immediate)
     Markdown(
-        content = content,
+        markdownState = state,
         colors = markdownColor(
             text = scheme.onSurface,
             codeBackground = scheme.surfaceContainerHighest,
@@ -174,7 +181,6 @@ internal fun MarkdownBlock(content: String) {
         padding = markdownPadding(block = 0.dp, listIndent = 8.dp, listItemTop = 2.dp, listItemBottom = 2.dp),
         dimens = markdownDimens(codeBackgroundCornerSize = 12.dp, tableCornerSize = 12.dp, tableCellWidth = 160.dp, tableCellPadding = 8.dp),
         components = components,
-        retainState = true,
         modifier = Modifier.fillMaxWidth(),
     )
 }

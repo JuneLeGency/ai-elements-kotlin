@@ -256,6 +256,13 @@
 - A reply's action row shows copy, read aloud, regenerate and the agent's computer; the run graph
   and "open in / share" are in its "⋯" menu (`message-more`).
 - `ChatEmptyState(subtitle)` is optional (`null` hides it).
+- Opening a conversation shows its end in the first frame: the list is positioned before that
+  frame's layout, and settled Markdown blocks parse in composition (the block a stream is writing
+  still parses off the frame), so replies are laid out at their final height instead of filling in
+  over the next frames and pushing the list down.
+- Performance: `:benchmark` (Macrobenchmark: startup, scrolling a long answer, streaming, switching
+  conversations; frame timing with and without the Baseline Profile) and the demo's Baseline
+  Profile (`BaselineProfileGenerator`). History rows are announced as selected.
 - Demo: one tap opens a conversation from the history drawer. The drawer slid with the expressive
   spring, which settles for ~0.8 s after it looks still, and a tap in that tail stopped the drawer
   instead of reaching the row; the drawer now uses the standard motion (its content keeps the

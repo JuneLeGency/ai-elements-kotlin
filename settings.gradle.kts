@@ -44,6 +44,7 @@ include(":harness:harness-speech")
 include(":harness:harness-scheduler")
 include(":harness:harness-sandbox-proot")
 include(":demo")
+include(":benchmark")
 
 include(":samples:pure-client")
 include(":samples:in-app-agent")

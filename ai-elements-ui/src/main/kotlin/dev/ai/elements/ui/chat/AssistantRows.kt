@@ -66,6 +66,8 @@ internal sealed interface AssistantRow {
         val citations: List<SourcePart>,
         override val first: Boolean,
         override val streaming: Boolean,
+        /** The block a stream is still writing (parsed off the frame; the others parse in place). */
+        val writing: Boolean = false,
     ) : AssistantRow {
         override val key = "$messageId/$partId/$index"
         override val contentType = "markdown"
@@ -120,7 +122,8 @@ internal fun assistantRows(message: Message): List<AssistantRow> {
                 blocks.forEachIndexed { i, block ->
                     val text = if (part.isStreaming && i == blocks.lastIndex) MarkdownStreaming.repairTail(block) else block
                     val first = rows.isEmpty()
-                    rows += AssistantRow.BlockRow(message.id, part.id, i, text, sources, first, first && message.isStreaming)
+                    val writing = part.isStreaming && i == blocks.lastIndex
+                    rows += AssistantRow.BlockRow(message.id, part.id, i, text, sources, first, first && message.isStreaming, writing)
                 }
             }
             is SourcePart -> Unit
@@ -153,7 +156,7 @@ internal fun AssistantRowItem(
     Row(modifier.fillMaxWidth().testTag("assistant-row")) {
         Box(Modifier.weight(1f)) {
             when (row) {
-                is AssistantRow.BlockRow -> CitationLinks(row.citations) { MarkdownBlock(row.text) }
+                is AssistantRow.BlockRow -> CitationLinks(row.citations) { MarkdownBlock(row.text, immediate = !row.writing) }
                 is AssistantRow.PartRow -> when (val part = row.part) {
                     is ReasoningPart -> Reasoning(part)
                     is ToolPart -> ToolPartView(part, onToolApproval = onToolApproval)

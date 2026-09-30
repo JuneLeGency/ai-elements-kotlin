@@ -109,10 +109,20 @@ fun Conversation(
         val rowsFor: (Message) -> List<AssistantRow> = { m -> rowCache.getOrPut(m) { assistantRows(m) } }
         SideEffect { rowCache.keys.retainAll(state.messages.toSet()) }
 
-        // Sending a message, or opening another conversation, starts at the bottom and follows.
-        val userCount = state.messages.count { it.role == Role.USER }
+        // Opening a conversation shows its end in the very first frame: the scroll is requested
+        // before that frame's layout (no frame at the top, no visible scroll down).
         val conversationKey = state.messages.firstOrNull()?.id
-        LaunchedEffect(userCount, conversationKey) { if (userCount > 0) stick.jumpToLatest() }
+        val shownConversation = remember { arrayOfNulls<String>(1) }
+        SideEffect {
+            if (conversationKey != null && conversationKey != shownConversation[0]) {
+                shownConversation[0] = conversationKey
+                val lastIndex = state.messages.sumOf { if (it.role == Role.USER) 1 else rowsFor(it).size } - 1
+                stick.startAtBottom(lastIndex)
+            }
+        }
+        // Sending a message starts at the bottom and follows.
+        val userCount = state.messages.count { it.role == Role.USER }
+        LaunchedEffect(userCount) { if (userCount > 0) stick.jumpToLatest() }
 
         MaybeComputerScaffold(if (outer == null) computer else null, state.messages, modifier) {
             Box(Modifier.fillMaxSize().nestedScroll(stick.connection)) {

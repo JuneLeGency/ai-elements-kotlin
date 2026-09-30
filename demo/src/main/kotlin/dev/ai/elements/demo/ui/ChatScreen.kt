@@ -81,6 +81,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -349,7 +351,7 @@ private fun ChatPane(
         topBar = {
             if (!hideTopBar) TopAppBar(
                 navigationIcon = {
-                    if (showMenu) IconButton(onClick = onMenu, shapes = IconButtonDefaults.shapes()) {
+                    if (showMenu) IconButton(onClick = onMenu, shapes = IconButtonDefaults.shapes(), modifier = Modifier.testTag("history-open")) {
                         Icon(DemoIcons.Menu, stringResource(R.string.conversations))
                     }
                 },
@@ -484,7 +486,12 @@ private fun ProviderSheet(
     onManage: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberBottomSheetState(SheetValue.Hidden, setOf(SheetValue.Hidden, SheetValue.Expanded))) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberBottomSheetState(SheetValue.Hidden, setOf(SheetValue.Hidden, SheetValue.Expanded)),
+        // A sheet is its own window: expose its test tags to UI Automator (benchmarks) here too.
+        modifier = Modifier.semantics { testTagsAsResourceId = true },
+    ) {
         Text(
             stringResource(R.string.agent_provider),
             style = MaterialTheme.typography.titleLarge,

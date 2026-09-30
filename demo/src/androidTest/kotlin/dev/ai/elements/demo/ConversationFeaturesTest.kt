@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasAnySibling
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
@@ -144,14 +145,11 @@ class ConversationFeaturesTest {
         compose.onNodeWithText("1 / 2").assertExists()
         screenshot("02-branch")
 
-        // Canvas: the agent run as a node graph.
-        compose.onNodeWithTag("conversation").performScrollToNode(hasTestTag("regenerate"))
-        // Several replies each have an overflow menu with the run graph; open the one on screen.
-        val viewport = compose.onNodeWithTag("conversation").fetchSemanticsNode().boundsInRoot
-        val visible = compose.onAllNodesWithTag("message-more").fetchSemanticsNodes()
-            .indexOfFirst { it.boundsInRoot.top >= viewport.top && it.boundsInRoot.bottom <= viewport.bottom }
-        check(visible >= 0) { "no reply menu on screen" }
-        compose.onAllNodesWithTag("message-more")[visible].performSemanticsAction(SemanticsActions.OnClick)
+        // Canvas: the agent run as a node graph, from the last reply's overflow menu (the one in the
+        // row with "regenerate"; the row wraps on phones, so scroll to the menu itself).
+        val lastReplyMenu = hasTestTag("message-more") and hasAnySibling(hasTestTag("regenerate"))
+        compose.onNodeWithTag("conversation").performScrollToNode(lastReplyMenu)
+        compose.onNode(lastReplyMenu).performClick()
         compose.onNodeWithTag("run-graph").performClick()
         runCatching { compose.waitUntilAtLeastOneExists(hasTestTag("workflow-canvas"), 5_000) }.onFailure {
             val shot = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()

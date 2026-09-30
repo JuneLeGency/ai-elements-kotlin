@@ -57,6 +57,20 @@ class StickToBottomState internal constructor(private val listState: LazyListSta
         scrollOwn { if (animated) listState.animateScrollToItem(last, BOTTOM) else listState.scrollToItem(last, BOTTOM) }
     }
 
+    /**
+     * Shows [lastIndex] (the list's end) from the next measure pass and follows: call it from
+     * composition's apply phase (`SideEffect`) and the frame being composed is already at the
+     * bottom, with no first frame at the top and no visible scroll.
+     */
+    internal fun startAtBottom(lastIndex: Int) {
+        following = true
+        if (lastIndex < 0) return
+        listState.requestScrollToItem(lastIndex, BOTTOM)
+        // `ownPosition` stays: when the landing moves the list, pinning sees it at the bottom and
+        // records it; when it does not (the same shape as before), no update comes to record it,
+        // and a cleared position would mistake the next reader's scroll for ours to undo.
+    }
+
     /** Scroll position after our own last scroll; any other change is someone else's. */
     private var ownPosition: Pair<Int, Int>? = null
     private var selfScrolling = false

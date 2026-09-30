@@ -51,6 +51,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -185,6 +186,8 @@ private fun HistoryRow(row: ChatSummary, selected: Boolean, time: String, onOpen
                 .fillMaxWidth()
                 .heightIn(min = AiSize.touchTarget)
                 .semantics {
+                    // The open conversation is announced as selected (TalkBack; UI Automator's `selected`).
+                    this.selected = selected
                     customActions = listOf(CustomAccessibilityAction(deleteLabel) { onDelete(); true })
                 }
                 .testTag("history-row"),
