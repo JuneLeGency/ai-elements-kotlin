@@ -57,8 +57,9 @@ Harness」两种形态，真实链路全部跑通，并在模拟器、手机和�
 
 | 组 | Artifact | 职责 | 依赖 |
 |---|---|---|---|
-| `io.github.junelegency` | `ai-elements-core` | 消息模型、`ChatController`、`ChatBackend`/事件、协议客户端（AI SDK、AG-UI、MCP）、模型 API（OpenAI/Anthropic/Gemini/Ollama）、Agent 契约（`AgentTool`、`Capability`、`SubAgents`、`Skills`）、OAuth、配置存储 | kotlinx、OkHttp、AG-UI `kotlin-core`、`kotlin-json-patch` |
-| | `ai-elements-ui` | Compose 组件、主题 | core |
+| `io.github.junelegency` | `ai-elements-chat` | 消息模型、`ChatController`、`ChatBackend`/事件；无网络、无 Compose | kotlinx |
+| | `ai-elements-core` | 协议客户端（AI SDK、AG-UI、MCP）、模型 API（OpenAI/Anthropic/Gemini/Ollama）、Agent 契约（`AgentTool`、`Capability`、`SubAgents`、`Skills`）、OAuth、配置存储 | chat、kotlinx、OkHttp、AG-UI `kotlin-core`、`kotlin-json-patch` |
+| | `ai-elements-ui` | Compose 组件、主题 | chat |
 | | `ai-elements-a2a`（可选） | A2A 1.0：官方 `a2a-java-sdk`，provider 与子 Agent 两种用法 | core |
 | | `ai-elements-koog`（可选） | Koog Agent → `ChatBackend`；`Capability` → Koog tools | core |
 | | `ai-elements-mermaid-native`（可选） | Compose Canvas 渲染 Mermaid | ui |

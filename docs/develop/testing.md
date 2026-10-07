@@ -77,3 +77,22 @@ those paths is included.
 ```bash
 ./gradlew :dokkaGenerate      # build/dokka/html
 ```
+
+
+## First-release and upgrade checks
+
+```bash
+./gradlew apiCheck testDebugUnitTest lintDebug :demo:assembleRelease
+tools/check-published-consumer.sh
+tools/build-docs.sh
+python3 -m unittest discover -s tools -p 'test_*.py'
+```
+
+The consumer build uses a separate Gradle settings file and an exclusive file Maven repository.
+Its exported component examples are compiled with the exact imports printed on the site. The
+site checker verifies that Dokka emitted symbol pages for every library, not just an index page.
+See [API compatibility](api-compatibility.md) for reviewing intentional baseline changes.
+
+When several devices are connected, set `ANDROID_SERIAL=emulator-...` to target just the emulator.
+A successful Gradle task does not prove live tests ran: inspect skipped counts and start the
+reference server before protocol E2E. Hosted-model tests remain opt-in and require separate evidence.

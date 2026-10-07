@@ -50,6 +50,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import dev.ai.elements.core.chat.ToolDecision
 import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.FilePart
 import dev.ai.elements.core.model.Message
@@ -85,10 +86,11 @@ fun MessageItem(
     onRegenerate: (() -> Unit)? = null,
     onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)? = null,
     onSelectVersion: ((index: Int) -> Unit)? = null,
+    onToolDecision: ((toolCallId: String, decision: ToolDecision) -> Unit)? = null,
 ) {
     when (message.role) {
         Role.USER -> UserMessage(message, modifier)
-        Role.ASSISTANT -> AssistantMessage(message, modifier, prompt, onRegenerate, onToolApproval, onSelectVersion)
+        Role.ASSISTANT -> AssistantMessage(message, modifier, prompt, onRegenerate, onToolApproval, onSelectVersion, onToolDecision)
     }
 }
 
@@ -133,6 +135,7 @@ fun AssistantMessage(
     onRegenerate: (() -> Unit)? = null,
     onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)? = null,
     onSelectVersion: ((index: Int) -> Unit)? = null,
+    onToolDecision: ((toolCallId: String, decision: ToolDecision) -> Unit)? = null,
 ) {
     val streaming = message.isStreaming
     val sources = message.parts.filterIsInstance<SourcePart>()
@@ -143,7 +146,7 @@ fun AssistantMessage(
                 when (part) {
                     is TextPart -> if (part.text.isNotBlank()) MarkdownContent(part.text, citations = sources, streaming = part.isStreaming)
                     is ReasoningPart -> Reasoning(part)
-                    is ToolPart -> ToolCall(part, onApproval = onToolApproval?.let { cb -> { approved -> cb(part.id, approved) } })
+                    is ToolPart -> ToolPartView(part, onToolApproval = onToolApproval, onToolDecision = onToolDecision)
                     is FilePart -> FileAttachment(part)
                     is DataPart -> DataPartView(part)
                     is SourcePart -> Unit

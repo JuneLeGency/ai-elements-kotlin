@@ -5,7 +5,7 @@ import java.util.Locale
 /**
  * What the offline agent says, in the language of the prompt, as a real model answers in kind:
  * Japanese when the prompt has kana, Chinese (Traditional or Simplified, by its characters and
- * then by [locale]) when it has Han characters, English otherwise.
+ * then by `locale`) when it has Han characters, English otherwise.
  */
 internal class MockCopy private constructor(val language: Language) {
     enum class Language { EN, ZH_HANS, ZH_HANT, JA }

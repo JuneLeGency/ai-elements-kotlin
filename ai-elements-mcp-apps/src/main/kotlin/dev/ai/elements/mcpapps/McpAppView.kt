@@ -74,7 +74,7 @@ interface McpAppActions {
     /** `ui/update-model-context`: keep [context] for the model's next turn (replacing the view's previous one). */
     fun modelContext(context: McpAppModelContext) {}
 
-    /** `ui/open-link`: open an http(s) [url]; null opens it with the platform's `LocalUriHandler`. */
+    /** `ui/open-link`: open an http(s) `url`; null opens it with the platform's `LocalUriHandler`. */
     val openLink: ((String) -> Unit)? get() = null
 }
 

@@ -1,0 +1,2 @@
+# Preserve the official BCV dump format, including the final class separator.
+**/api/*.api text eol=lf whitespace=-blank-at-eof

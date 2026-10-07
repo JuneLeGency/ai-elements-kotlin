@@ -15,3 +15,6 @@ site/
 
 # Maintainer-local notes (devices, accounts, proxies)
 GOAL.local.md
+
+# Local documentation/release validation bytecode
+tools/__pycache__/

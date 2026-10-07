@@ -19,6 +19,15 @@ forking `Conversation`.
 | `data` | a data part, by name (`data-chart` → `"chart"`), including keys of the agent's shared state |
 | `codeBlocks` | a fenced code block, by language |
 
+Tool renderers receive the full `ToolDecision` callback, including reason, edited arguments and
+remember choice. A null callback means read-only rendering. Use `ToolCall` inside a renderer to
+keep the standard approval controls; do not call `ToolPartView` there, which would select the same
+renderer recursively.
+
+```kotlin
+--8<-- "demo/src/main/kotlin/dev/ai/elements/demo/samples/DocsSamples.kt:custom-tool-decisions"
+```
+
 `LocalFileLoader` loads attachment previews with your HTTP stack, cache or authentication.
 
 ## Theme
@@ -51,3 +60,13 @@ A tool's meaning is a model field, never guessed from its name: `ToolKind.Functi
 mappings in `ai-elements-core` set them for server tools.
 
 If an element needs more information, extend the model rather than matching a tool name in the UI.
+
+
+## Native Mermaid
+
+The default Mermaid renderer is bundled and offline. To select the optional native renderer,
+add `ai-elements-mermaid-native` and provide `NativeMermaidRenderer` through
+`LocalMermaidRenderer`. Annotate the composable that references it with
+`@OptIn(dev.ai.elements.mermaid.ExperimentalNativeMermaidApi::class)`.
+This opt-in is required because native layout and its interface remain experimental;
+the stable default renderer needs no such opt-in.

@@ -1,0 +1,9 @@
+public abstract interface annotation class dev/ai/elements/mermaid/ExperimentalNativeMermaidApi : java/lang/annotation/Annotation {
+}
+
+public final class dev/ai/elements/mermaid/NativeMermaidRenderer : dev/ai/elements/ui/markdown/MermaidRenderer {
+	public static final field $stable I
+	public static final field INSTANCE Ldev/ai/elements/mermaid/NativeMermaidRenderer;
+	public fun Diagram (Ljava/lang/String;ZLandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
+}
+

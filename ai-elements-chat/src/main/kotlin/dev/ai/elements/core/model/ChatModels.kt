@@ -208,7 +208,7 @@ enum class ToolCategory {
     @SerialName("other") OTHER,
 }
 
-/** A cited source (URL and title), shown by [dev.ai.elements.ui.chat.Sources] and inline citations. */
+/** A cited source (URL and title), shown by the UI Sources element and inline citations. */
 @Serializable
 @SerialName("source")
 data class SourcePart(

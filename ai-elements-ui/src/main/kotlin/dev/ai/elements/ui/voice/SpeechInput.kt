@@ -55,7 +55,7 @@ enum class SpeechInputPhase { IDLE, LISTENING, PROCESSING }
 
 /**
  * On-device speech recognition state (Android `SpeechRecognizer`), exposed so
- * a UI can show the live [level] (e.g. on a [dev.ai.elements.ui.chat.Persona]).
+ * a UI can show the live [level] (e.g. on a [Persona]).
  */
 @Stable
 class SpeechInputState internal constructor(private val context: Context, private val settings: SpeechSettings = SpeechSettings()) {

@@ -1,0 +1,74 @@
+public final class dev/ai/elements/harness/sandbox/AlpineSandbox : dev/ai/elements/harness/shell/ShellRuntime {
+	public fun <init> (Landroid/content/Context;Ljava/io/File;Ldev/ai/elements/harness/sandbox/RootfsImage;Ljava/io/File;)V
+	public synthetic fun <init> (Landroid/content/Context;Ljava/io/File;Ldev/ai/elements/harness/sandbox/RootfsImage;Ljava/io/File;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getDescription ()Ljava/lang/String;
+	public fun getIsolated ()Z
+	public final fun getState ()Lkotlinx/coroutines/flow/StateFlow;
+	public fun prepare (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun reset (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun start (Ljava/lang/String;)Ljava/lang/Process;
+}
+
+public abstract interface class dev/ai/elements/harness/sandbox/AlpineSandbox$State {
+}
+
+public final class dev/ai/elements/harness/sandbox/AlpineSandbox$State$Failed : dev/ai/elements/harness/sandbox/AlpineSandbox$State {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/ai/elements/harness/sandbox/AlpineSandbox$State$Failed;
+	public static synthetic fun copy$default (Ldev/ai/elements/harness/sandbox/AlpineSandbox$State$Failed;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/harness/sandbox/AlpineSandbox$State$Failed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/harness/sandbox/AlpineSandbox$State$Installing : dev/ai/elements/harness/sandbox/AlpineSandbox$State {
+	public fun <init> (Ljava/lang/Float;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/Float;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/Float;Ljava/lang/String;)Ldev/ai/elements/harness/sandbox/AlpineSandbox$State$Installing;
+	public static synthetic fun copy$default (Ldev/ai/elements/harness/sandbox/AlpineSandbox$State$Installing;Ljava/lang/Float;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/harness/sandbox/AlpineSandbox$State$Installing;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getProgress ()Ljava/lang/Float;
+	public final fun getStep ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/harness/sandbox/AlpineSandbox$State$NotInstalled : dev/ai/elements/harness/sandbox/AlpineSandbox$State {
+	public static final field INSTANCE Ldev/ai/elements/harness/sandbox/AlpineSandbox$State$NotInstalled;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/harness/sandbox/AlpineSandbox$State$Ready : dev/ai/elements/harness/sandbox/AlpineSandbox$State {
+	public static final field INSTANCE Ldev/ai/elements/harness/sandbox/AlpineSandbox$State$Ready;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/harness/sandbox/RootfsImage {
+	public static final field Companion Ldev/ai/elements/harness/sandbox/RootfsImage$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/harness/sandbox/RootfsImage;
+	public static synthetic fun copy$default (Ldev/ai/elements/harness/sandbox/RootfsImage;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/harness/sandbox/RootfsImage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getSha256 ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/harness/sandbox/RootfsImage$Companion {
+	public final fun forDevice ()Ldev/ai/elements/harness/sandbox/RootfsImage;
+	public final fun getALPINE_AARCH64 ()Ldev/ai/elements/harness/sandbox/RootfsImage;
+	public final fun getALPINE_X86_64 ()Ldev/ai/elements/harness/sandbox/RootfsImage;
+}
+

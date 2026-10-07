@@ -170,6 +170,51 @@ class ElementsTest {
         compose.onNodeWithText("Notes", useUnmergedTree = true).assertExists()
     }
 
+    @Test fun customRenderer_receivesFullDecisionWithoutBooleanCallback() {
+        var received: Pair<String, dev.ai.elements.core.chat.ToolDecision>? = null
+        val decision = dev.ai.elements.core.chat.ToolDecision(
+            approved = true,
+            reason = "Reviewed",
+            editedInput = kotlinx.serialization.json.Json.parseToJsonElement("""{"path":"safe.txt"}""") as kotlinx.serialization.json.JsonObject,
+            remember = true,
+        )
+        val tool = ToolPart("write-1", "write_file", ToolState.APPROVAL_REQUESTED)
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                androidx.compose.runtime.CompositionLocalProvider(
+                    dev.ai.elements.ui.chat.LocalAiElementsRenderers provides dev.ai.elements.ui.chat.AiElementsRenderers(
+                        tools = mapOf("write_file" to dev.ai.elements.ui.chat.ToolRenderer { part, respond ->
+                            androidx.compose.material3.Button(onClick = { respond?.invoke(part.id, decision) }) {
+                                androidx.compose.material3.Text("Approve edited input")
+                            }
+                        }),
+                    ),
+                ) {
+                    Conversation(
+                        ChatState(messages = listOf(Message("reply", Role.ASSISTANT, listOf(tool)))),
+                        onToolDecision = { id, answer -> received = id to answer },
+                    )
+                }
+            }
+        }
+        compose.onNodeWithText("Approve edited input").performClick()
+        compose.runOnIdle { assertEquals("write-1" to decision, received) }
+    }
+
+    @Test fun standaloneToolCall_acceptsFullDecisionCallback() {
+        var received: dev.ai.elements.core.chat.ToolDecision? = null
+        compose.setContent {
+            AiElementsTheme(dynamicColor = false) {
+                dev.ai.elements.ui.chat.ToolCall(
+                    ToolPart("write-2", "write_file", ToolState.APPROVAL_REQUESTED, "{}"),
+                    onDecision = { received = it },
+                )
+            }
+        }
+        compose.onNodeWithText("Approve", substring = false).performClick()
+        compose.runOnIdle { assertEquals(true, received?.approved) }
+    }
+
     @Test fun dataPart_agUiState_rendersPlanAndKeepsOtherKeysAsJson() {
         val state = kotlinx.serialization.json.Json.parseToJsonElement(
             """{"plan":{"title":"Release","steps":[{"label":"Write notes","status":"complete"},{"label":"Tag","status":"active"}]},"cursor":3}""",

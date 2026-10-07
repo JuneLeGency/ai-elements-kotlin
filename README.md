@@ -24,7 +24,7 @@ That is a complete chat: streaming Markdown, reasoning, tool calls with approval
 and sources, and a live view of the agent's computer (screenshots, terminal, diffs) with a timeline
 and replay. Swap the backend to talk to another protocol; the UI stays the same.
 
-**[Documentation](docs/index.md)**: [install](docs/getting-started/installation.md) ·
+**[Documentation](https://junelegency.github.io/ai-elements-kotlin/)** ([repository copy](docs/index.md)): [install](docs/getting-started/installation.md) ·
 [pure client](docs/getting-started/pure-client.md) · [in-app agent](docs/getting-started/in-app-agent.md) ·
 [protocols](docs/protocols/index.md) · [elements](docs/guides/elements.md) ·
 [human in the loop](docs/guides/human-in-the-loop.md) · [steps and replay](docs/guides/steps-and-replay.md) · [architecture](docs/concepts/architecture.md).
@@ -63,8 +63,8 @@ dependencies {
 ```
 
 `0.3.0` is not released yet: `./gradlew publishToMavenLocal` and add `mavenLocal()`. Every artifact
-and its minSdk is listed in [Installation](docs/getting-started/installation.md). Until 1.0, minor
-versions may change the API; the [CHANGELOG](CHANGELOG.md) lists every change.
+and its minSdk is listed in [Installation](docs/getting-started/installation.md). Stable public APIs are preserved from the first public release, including 0.x; see the
+[compatibility policy](docs/develop/api-compatibility.md). The [CHANGELOG](CHANGELOG.md) lists changes.
 
 ## Try it
 
@@ -88,7 +88,7 @@ Live tests, fixtures and device notes are in [Testing](docs/develop/testing.md).
 [AGENTS.md](AGENTS.md) and [Contributing](docs/develop/contributing.md) before changing code; the
 workstreams are in the [roadmap](docs/project/roadmap.md) and changes in the [CHANGELOG](CHANGELOG.md).
 
-Toolchain: AGP 9.4 (built-in Kotlin) · Gradle 9.7 · Kotlin 2.4 · Compose 1.13 · Material 3 1.5
+Toolchain: AGP 9.4 (built-in Kotlin) · Gradle 9.8 · Kotlin 2.4 · Compose 1.13 · Material 3 1.5
 (Expressive).
 
 ## Contributing

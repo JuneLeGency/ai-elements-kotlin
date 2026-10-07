@@ -23,8 +23,9 @@ UI = this library.
 
 | Module | Role | Depends on |
 |---|---|---|
-| `ai-elements-core` | Chat model, `ChatController`, protocol clients (AI SDK, AG-UI, MCP), model APIs, agent loop, capabilities (`SubAgents`, `Skills`), OAuth | kotlinx, OkHttp |
-| `ai-elements-ui` | Compose elements, theme | core |
+| `ai-elements-chat` | Chat models, controller, events and backend contracts; no networking or Compose | kotlinx |
+| `ai-elements-core` | Protocol clients (AI SDK, AG-UI, MCP), model APIs, agent loop, capabilities (`SubAgents`, `Skills`), OAuth | chat, kotlinx, OkHttp |
+| `ai-elements-ui` | Compose elements, theme | chat |
 | `ai-elements-a2a` | A2A through the official `a2a-java-sdk` (optional: protobuf, Gson, desugaring) | core |
 | `ai-elements-acp` | Agent Client Protocol through the official ACP Kotlin SDK (optional: Ktor, kotlinx-io) | core |
 | `harness/*` (group `io.github.junelegency.harness`) | The in-app agent harness, one artifact per capability (see W2b) | core |
@@ -157,7 +158,8 @@ The demo is a showcase of both modes, switchable per conversation:
 | Documentation site: Zensical (`zensical.toml`, `docs/`), code from compiled `DocsSamples.kt` sections, Dokka API under `/api`, screenshots from `ScreenshotMatrixTest`; built in CI | ✅ builds locally and in CI; ⬜ publishing (GitHub Pages) once the repository is public |
 | API reference and CI | ✅ Dokka 2.2 over every published module (`./gradlew :dokkaGenerate`); CI: unit tests, lint, publish, Dokka, emulator E2E (x86_64, now with a bundled x86_64 PRoot) |
 | Open-source readiness | ✅ CI green end to end (unit, lint, release build with R8, Maven Local, docs; emulator E2E with the reference server: demo 42, ui 30, genui 4, notifications 3 tests, and `tools/check-android-test-results.py` fails a run whose test process died with 0 tests — it had hidden a crashed demo run); release workflow on `vX.Y.Z` tags (Maven Central + GitHub release with the demo APK); Pages deploy behind `PAGES_ENABLED`; CODE_OF_CONDUCT, issue / PR templates, Dependabot, README badges, [releasing guide](../develop/releasing.md); demo-only provider presets out of the library. ⬜ maintainer: Central namespace + signing secrets, making the repository public, enabling Pages |
-| Public API tracking (API review, GOAL W6) | ⬜ blocked by tooling: Kotlin 2.4 `abiValidation()` finds no compiled classes under AGP 9 built-in Kotlin ("provider has no value"), and binary-compatibility-validator 0.18.2 needs the `kotlin-android` plugin AGP 9 no longer uses. Adopt the official one once it supports AGP 9 built-in Kotlin; no hand-rolled checker |
+| First release readiness (2026-10-07) | ✅ local validation: 20 BCV baselines + negative drift check; unit tests 237 (36 opt-in skips, no failures), lint and demo R8 release; isolated Maven consumers (UI-only, pure client, in-app agent, all integrations) debug + R8 release + lint; all 65 component examples compile against published AARs; 45 guide pages / 20 non-empty Dokka modules and links checked; emulator API 37 ElementsTest 33/33 and reference-server CapabilitiesFlowTest 10/10. Release validator 5/5 and actionlint pass. One transient Compose hierarchy failure passed both isolated and full reruns; recorded, not hidden by a skip. Remote CI, Central namespace/signing and Pages deployment still require maintainer release execution. |
+| Public API tracking (API review, GOAL W6) | ✅ Official BCV 0.18.2 tasks wired to AGP public release AAR artifacts (no custom ABI parser); all 20 library baselines generated. Negative check rejects a removed declaration. Compatibility policy freezes existing model signatures and sealed/enum branches. SSE events, JSX compiler and expression parser are internal; native Mermaid is explicit opt-in. |
 | One-line integration and samples | ✅ `Chat(controller)` / `rememberChat(backend)` (component test); `samples/pure-client` (verified on emulator against the AG-UI server) and `samples/in-app-agent` |
 | Protocol-independent UI layer and extension points | ✅ `ToolKind` / `source` in the model, conventions mapped in `core`; UI imports only `core.model` / `core.chat` (enforced by `LayeringTest`); `LocalAiElementsRenderers` + `LocalFileLoader` (component test); core 1 new test class, ElementsTest 13/13, demo E2E 20/20 on emulator |
 | Agent's computer (Manus-style) and replay | ✅ tool categories (ACP `ToolKind`) set upstream, fixtures recorded from the Harness ACP adapter and AI SDK server (`read_file`); `AgentComputerCard` / `AgentComputerPanel` / `AgentComputerScaffold` (side pane ≥ 720dp, bottom sheet below); AG-UI event log per the serialization spec with replay through the same parser (`RecordedProtocolTest`); ElementsTest 28/28 on the tablet |
@@ -169,6 +171,7 @@ The demo is a showcase of both modes, switchable per conversation:
 
 | Date | Decision | Why |
 |---|---|---|
+| 2026-10-07 | First public release preserves unmarked APIs even in 0.x; use official BCV tasks on release AARs to bridge AGP 9 discovery, retain current data-class and sealed model contracts | User requested library compatibility from first publication; no custom ABI parser |
 | 2026-09-27 | No private wire formats; recorded in AGENTS.md | User requirement |
 | 2026-09-27 | Server on Pydantic AI Harness capabilities, latest versions | Best practice, no hand-rolled agent features |
 | 2026-09-27 | JSON Patch: `io.github.reidsync:kotlin-json-patch` | Same library as the AG-UI Kotlin SDK |

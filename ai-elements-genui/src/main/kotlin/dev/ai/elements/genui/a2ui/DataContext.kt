@@ -74,7 +74,7 @@ class DataContext internal constructor(
     }
 
     /**
-     * `formatString`: the template's parts ([ExpressionParser]) evaluated in this scope. A part that
+     * `formatString`: the template's parsed parts evaluated in this scope. A part that
      * cannot be evaluated renders empty; a template that does not parse shows as written.
      */
     fun interpolate(template: String): String {

@@ -9,7 +9,7 @@ Thanks for helping! Read [AGENTS.md](AGENTS.md) first (open protocols only, no p
   `AiSpacing` / `AiType` tokens, content descriptions for icons, `@Immutable` models.
 - **Strings** are resources with an `ai_` prefix in `ai-elements-ui`, translated into all shipped
   languages (`values`, `values-zh-rCN`, `values-zh-rTW`, `values-ja`).
-- **Public API** changes need a CHANGELOG entry; keep defaults source-compatible where possible.
+- **Public API** changes need a CHANGELOG entry; follow [the compatibility policy](docs/develop/api-compatibility.md), run `./gradlew apiCheck`, and explicitly review baseline updates.
 - **Protocol changes** come with a fixture test recorded from a real implementation (`server/record_fixtures.py`), and a live test when the reference server can exercise them.
 - **Icons** are Material Symbols Rounded: use `AiIcons.X` and run `python3 tools/generate-icons.py`.
 - **Documentation** lives in `docs/` (the site, `uvx zensical serve`); its code comes from `demo/src/main/kotlin/…/samples/DocsSamples.kt` sections, compiled with the demo. Update the page that describes what you change.

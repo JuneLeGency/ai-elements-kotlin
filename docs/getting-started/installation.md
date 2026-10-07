@@ -3,6 +3,19 @@
 The libraries are Android libraries (AAR) for Jetpack Compose. Add the BOM so that every artifact
 resolves to the same version, then add the artifacts you use.
 
+Declare dependency repositories in your settings file:
+
+```kotlin title="settings.gradle.kts"
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        // Before the first public release only, after publishToMavenLocal:
+        mavenLocal()
+    }
+}
+```
+
 ```kotlin title="build.gradle.kts"
 dependencies {
     implementation(platform("io.github.junelegency:ai-elements-bom:0.3.0-SNAPSHOT"))
@@ -60,9 +73,48 @@ R8 rules ship with the libraries.
 
 ## Requirements
 
-- `compileSdk` 37 and Java 17 bytecode. `ai-elements-a2a` needs
+- The tested consumer baseline is JDK 21, Gradle 9.8.0, AGP 9.4.1 (built-in Kotlin 2.4.20),
+  `compileSdk` 37.2 and Java 17 bytecode. Older consumer toolchains have not been certified. `ai-elements-a2a` needs
   [core library desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring).
 - Compose with Material 3 1.5 (Expressive). The libraries are built with AGP 9.4, Kotlin 2.4 and
   Compose 1.13.
 - `harness-sandbox-proot` runs PRoot from the native library directory, so package native libraries
   extracted: `android { packaging { jniLibs.useLegacyPackaging = true } }`.
+
+
+Compose 1.13.0-alpha03 and Material 3 1.5.0-alpha29 are prerelease dependencies. Their transitive
+requirements apply to consumers too; the AI Elements BOM aligns our artifacts, not arbitrary
+versions of AndroidX chosen by an app. See [API stability](../develop/api-compatibility.md).
+
+For a new Compose app, enable the Compose compiler plugin and `buildFeatures.compose = true`,
+set Java source/target compatibility to 17, and add `androidx.activity:activity-compose:1.13.0`.
+The ViewModel example also uses `androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0` and
+`androidx.lifecycle:lifecycle-runtime-compose:2.11.0`.
+
+### A2A consumer configuration
+
+```kotlin
+android {
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
+    }
+    packaging.resources.excludes += listOf(
+        "META-INF/NOTICE.md", "META-INF/LICENSE.md", "META-INF/INDEX.LIST",
+        "META-INF/DEPENDENCIES", "META-INF/beans.xml",
+    )
+}
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.1.5")
+}
+```
+
+Keep the dependencies' license notices in your distribution when resolving duplicate metadata.
+See the repository NOTICE. These packaging exclusions alone do not replace license attribution.
+
+### Verify the packages
+
+The [published consumer build](https://github.com/JuneLeGency/ai-elements-kotlin/tree/main/samples/published-consumer)
+compiles UI-only, pure-client, in-app-agent and optional-integration apps from Maven coordinates,
+including release builds with R8. It is separate from the library build.

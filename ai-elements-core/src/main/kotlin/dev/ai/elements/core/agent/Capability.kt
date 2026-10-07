@@ -3,7 +3,7 @@ package dev.ai.elements.core.agent
 /**
  * A composable bundle of what an agent can do: [instructions] added to the
  * system prompt and [tools] it may call — the Kotlin counterpart of a
- * Pydantic AI capability. [SubAgents], [Skills] and MCP servers
+ * Pydantic AI capability. [SubAgents], [dev.ai.elements.core.skills.Skills] and MCP servers
  * ([dev.ai.elements.core.mcp.McpToolset]) are capabilities; so is any app
  * feature that pairs tools with guidance.
  *

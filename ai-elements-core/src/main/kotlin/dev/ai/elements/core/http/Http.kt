@@ -26,7 +26,7 @@ import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
 
 /** One Server-Sent Event. [data] joins multi-line `data:` fields with `\n`. */
-data class SseEvent(val event: String?, val data: String)
+internal data class SseEvent(val event: String?, val data: String)
 
 internal val BackendJson = Json {
     ignoreUnknownKeys = true

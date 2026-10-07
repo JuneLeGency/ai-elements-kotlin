@@ -3,16 +3,22 @@ package dev.ai.elements.ui.chat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
+import dev.ai.elements.core.chat.ToolDecision
 import dev.ai.elements.core.model.DataPart
 import dev.ai.elements.core.model.ToolPart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.URL
 
-/** Renders one tool call in place of the built-in [ToolCall] / [Subagent]. */
+/**
+ * Renders one tool call in place of the built-in [ToolCall] / [Subagent].
+ * The decision callback carries approval, denial reason, edited arguments and remember choice.
+ * A null callback means read-only rendering: do not show approval actions. Respect
+ * [ToolPart.approvalAnswers] when offering edits or a reason.
+ */
 fun interface ToolRenderer {
     @Composable
-    fun Render(part: ToolPart, onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)?)
+    fun Render(part: ToolPart, onToolDecision: ((toolCallId: String, decision: ToolDecision) -> Unit)?)
 }
 
 /** Renders a fenced code block of one language (```` ```lang ````) in place of the code view. */

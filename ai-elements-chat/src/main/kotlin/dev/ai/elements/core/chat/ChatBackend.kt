@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.emitAll
  * user pressed stop) must cancel the underlying request. Failures are reported
  * by throwing — the controller turns them into [dev.ai.elements.core.model.ChatStatus.ERROR].
  *
- * @param history the whole conversation so far, ending with the new user message.
+ * The history is the whole conversation so far, ending with the new user message.
  */
 fun interface ChatBackend {
     fun stream(history: List<Message>): Flow<ChatEvent>
@@ -48,7 +48,7 @@ sealed interface ChatEvent {
     data class ToolOutput(val id: String, val output: String, val preliminary: Boolean = false) : ChatEvent
     data class ToolError(val id: String, val error: String) : ChatEvent
 
-    /** Snapshot of a delegated agent's run inside tool call [id] (see [dev.ai.elements.core.agent.SubagentTool]). */
+    /** Snapshot of a delegated agent's run inside tool call [id] (populated by the backend). */
     data class SubagentUpdate(val id: String, val message: Message) : ChatEvent
 
     /**

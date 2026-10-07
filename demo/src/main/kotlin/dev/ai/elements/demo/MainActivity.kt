@@ -1,3 +1,5 @@
+@file:OptIn(dev.ai.elements.mermaid.ExperimentalNativeMermaidApi::class)
+
 package dev.ai.elements.demo
 
 import dev.ai.elements.ui.voice.LocalSpeechSettings

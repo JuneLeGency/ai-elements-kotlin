@@ -4,7 +4,37 @@ In this mode the agent runs elsewhere, on your server, a remote A2A agent, or a 
 ACP, and the app renders its conversation. You need `ai-elements-ui` and the backend for your
 protocol (`ai-elements-core` for AI SDK and AG-UI).
 
+## App setup
+
+Declare network access in `src/main/AndroidManifest.xml`:
+
+```xml
+<uses-permission android:name="android.permission.INTERNET" />
+```
+
+For the local reference server only, allow HTTP in the **debug** manifest
+(`src/debug/AndroidManifest.xml`):
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:usesCleartextTraffic="true" />
+</manifest>
+```
+
+Use HTTPS for a production endpoint. An Android emulator reaches your computer as `10.0.2.2`;
+`localhost` on the emulator refers to the emulator itself. If connecting fails, check the server's
+`/health`, bind address and firewall before changing your backend.
+
 ## One composable
+
+Use these imports inside a Compose activity's `setContent`:
+
+```kotlin
+import dev.ai.elements.ui.theme.AiElementsTheme
+import dev.ai.elements.ui.chat.Chat
+import dev.ai.elements.ui.chat.rememberChat
+import dev.ai.elements.core.protocol.agui.AgUiBackend
+```
 
 `Chat` wires the conversation, tools, approvals, sub-agents, plans and the prompt input to a
 `ChatController`:
@@ -53,3 +83,14 @@ Point a backend at `http://10.0.2.2:8788/api/agui` (the Android emulator's alias
 or use the LAN address of your computer on a device.
 
 The `samples/pure-client` app in the repository is a complete, minimal app for this mode.
+
+
+## Lifecycle and errors
+
+`rememberChat` is scoped to the composition and is suitable for a prototype. Use a ViewModel for
+configuration changes. A ViewModel does not survive process death: persist the messages in your
+app's store and supply them as `initialMessages` when creating a new controller.
+
+Call the controller from the main thread and use `viewModelScope`. Stop cancels the current turn;
+transport errors become `ChatState.error`. Retry requests a new turn; it does not reconnect to the
+middle of the previous stream. See [storage and replay](choose.md#4-storing-compacting-replaying-and-reconnecting).

@@ -1,0 +1,1317 @@
+public final class dev/ai/elements/core/agent/AgentLoopKt {
+	public static final fun runTool (Lkotlinx/coroutines/flow/FlowCollector;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun runToolWithContent (Lkotlinx/coroutines/flow/FlowCollector;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class dev/ai/elements/core/agent/AgentTool {
+	public fun categoryFor (Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/model/ToolCategory;
+	public abstract fun execute (Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getParameters ()Lkotlinx/serialization/json/JsonObject;
+	public fun getRequiresApproval ()Z
+	public fun getSource ()Ljava/lang/String;
+	public fun getTitle ()Ljava/lang/String;
+	public fun kindFor (Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/model/ToolKind;
+	public fun locationFor (Lkotlinx/serialization/json/JsonObject;)Ljava/lang/String;
+	public fun titleFor (Lkotlinx/serialization/json/JsonObject;)Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/agent/AgentTool$DefaultImpls {
+	public static fun categoryFor (Ldev/ai/elements/core/agent/AgentTool;Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/model/ToolCategory;
+	public static fun getRequiresApproval (Ldev/ai/elements/core/agent/AgentTool;)Z
+	public static fun getSource (Ldev/ai/elements/core/agent/AgentTool;)Ljava/lang/String;
+	public static fun getTitle (Ldev/ai/elements/core/agent/AgentTool;)Ljava/lang/String;
+	public static fun kindFor (Ldev/ai/elements/core/agent/AgentTool;Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/model/ToolKind;
+	public static fun locationFor (Ldev/ai/elements/core/agent/AgentTool;Lkotlinx/serialization/json/JsonObject;)Ljava/lang/String;
+	public static fun titleFor (Ldev/ai/elements/core/agent/AgentTool;Lkotlinx/serialization/json/JsonObject;)Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/agent/AgentToolsKt {
+	public static final fun getBuiltinTools ()Ljava/util/List;
+}
+
+public final class dev/ai/elements/core/agent/AskUser : dev/ai/elements/core/agent/Capability {
+	public static final field Companion Ldev/ai/elements/core/agent/AskUser$Companion;
+	public static final field DECLINED Ljava/lang/String;
+	public static final field INSTRUCTIONS Ljava/lang/String;
+	public static final field MAX_DESCRIPTION_LENGTH I
+	public static final field MAX_HEADER_LENGTH I
+	public static final field MAX_LABEL_LENGTH I
+	public static final field MAX_OPTIONS I
+	public static final field MAX_QUESTIONS I
+	public static final field MAX_QUESTION_LENGTH I
+	public static final field MIN_OPTIONS I
+	public static final field TOOL_NAME Ljava/lang/String;
+	public fun <init> ()V
+	public fun context (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getInstructions ()Ljava/lang/String;
+	public fun tools (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/agent/AskUser$Companion {
+	public final fun getTool ()Ldev/ai/elements/core/agent/AgentTool;
+}
+
+public final class dev/ai/elements/core/agent/AskUserKt {
+	public static final fun askUserAnswers (Ljava/util/List;Lkotlinx/serialization/json/JsonObject;)Lkotlinx/serialization/json/JsonObject;
+	public static final fun askUserQuestions (Lkotlinx/serialization/json/JsonObject;)Ljava/util/List;
+	public static final fun askUserSchema (Ljava/util/List;)Lkotlinx/serialization/json/JsonObject;
+}
+
+public final class dev/ai/elements/core/agent/AskUserQuestion {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Z)Ldev/ai/elements/core/agent/AskUserQuestion;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/agent/AskUserQuestion;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZILjava/lang/Object;)Ldev/ai/elements/core/agent/AskUserQuestion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeader ()Ljava/lang/String;
+	public final fun getMultiSelect ()Z
+	public final fun getOptions ()Ljava/util/List;
+	public final fun getQuestion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/agent/AskUserQuestion$Option {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/agent/AskUserQuestion$Option;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/agent/AskUserQuestion$Option;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/agent/AskUserQuestion$Option;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getLabel ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/agent/CalculatorTool : dev/ai/elements/core/agent/AgentTool {
+	public static final field INSTANCE Ldev/ai/elements/core/agent/CalculatorTool;
+	public fun categoryFor (Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/model/ToolCategory;
+	public final fun evaluate (Ljava/lang/String;)D
+	public fun execute (Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getDescription ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
+	public fun getParameters ()Lkotlinx/serialization/json/JsonObject;
+	public fun getRequiresApproval ()Z
+	public fun getSource ()Ljava/lang/String;
+	public fun getTitle ()Ljava/lang/String;
+	public fun kindFor (Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/model/ToolKind;
+	public fun locationFor (Lkotlinx/serialization/json/JsonObject;)Ljava/lang/String;
+	public fun titleFor (Lkotlinx/serialization/json/JsonObject;)Ljava/lang/String;
+}
+
+public abstract interface class dev/ai/elements/core/agent/Capability {
+	public fun context (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getInstructions ()Ljava/lang/String;
+	public fun tools (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/agent/Capability$DefaultImpls {
+	public static fun context (Ldev/ai/elements/core/agent/Capability;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun getInstructions (Ldev/ai/elements/core/agent/Capability;)Ljava/lang/String;
+	public static fun tools (Ldev/ai/elements/core/agent/Capability;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/agent/CapabilityKt {
+	public static final fun collectTools (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun composeInstructions (Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/agent/CurrentTimeTool : dev/ai/elements/core/agent/AgentTool {
+	public static final field INSTANCE Ldev/ai/elements/core/agent/CurrentTimeTool;
+	public fun categoryFor (Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/model/ToolCategory;
+	public fun execute (Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getDescription ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
+	public fun getParameters ()Lkotlinx/serialization/json/JsonObject;
+	public fun getRequiresApproval ()Z
+	public fun getSource ()Ljava/lang/String;
+	public fun getTitle ()Ljava/lang/String;
+	public fun kindFor (Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/model/ToolKind;
+	public fun locationFor (Lkotlinx/serialization/json/JsonObject;)Ljava/lang/String;
+	public fun titleFor (Lkotlinx/serialization/json/JsonObject;)Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/agent/StaticCapability : dev/ai/elements/core/agent/Capability {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun context (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getInstructions ()Ljava/lang/String;
+	public fun tools (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/agent/SubAgent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun getBackend ()Lkotlin/jvm/functions/Function1;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/agent/SubAgents : dev/ai/elements/core/agent/Capability {
+	public static final field Companion Ldev/ai/elements/core/agent/SubAgents$Companion;
+	public static final field DELEGATE_TASK Ljava/lang/String;
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun context (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getAgents ()Ljava/util/List;
+	public fun getInstructions ()Ljava/lang/String;
+	public final fun getToolName ()Ljava/lang/String;
+	public fun tools (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/agent/SubAgents$Companion {
+}
+
+public final class dev/ai/elements/core/agent/ToolCallContext : kotlin/coroutines/AbstractCoroutineContextElement {
+	public static final field Key Ldev/ai/elements/core/agent/ToolCallContext$Key;
+	public final fun content (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun data (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun file (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getApprover ()Ldev/ai/elements/core/chat/ToolApprover;
+	public final fun getToolCallId ()Ljava/lang/String;
+	public final fun progress (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun subagent (Ldev/ai/elements/core/model/Message;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/agent/ToolCallContext$Key : kotlin/coroutines/CoroutineContext$Key {
+	public final fun current (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class dev/ai/elements/core/agent/ToolCallContext$Update {
+}
+
+public final class dev/ai/elements/core/agent/ToolCallContext$Update$Data : dev/ai/elements/core/agent/ToolCallContext$Update {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)Ldev/ai/elements/core/agent/ToolCallContext$Update$Data;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/agent/ToolCallContext$Update$Data;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ILjava/lang/Object;)Ldev/ai/elements/core/agent/ToolCallContext$Update$Data;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Lkotlinx/serialization/json/JsonElement;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/agent/ToolCallContext$Update$File : dev/ai/elements/core/agent/ToolCallContext$Update {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Ldev/ai/elements/core/agent/ToolCallContext$Update$File;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/agent/ToolCallContext$Update$File;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Ldev/ai/elements/core/agent/ToolCallContext$Update$File;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getForModel ()Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMediaType ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/agent/ToolCallContext$Update$Preliminary : dev/ai/elements/core/agent/ToolCallContext$Update {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/ai/elements/core/agent/ToolCallContext$Update$Preliminary;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/agent/ToolCallContext$Update$Preliminary;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/agent/ToolCallContext$Update$Preliminary;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOutput ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/agent/ToolCallContext$Update$Subagent : dev/ai/elements/core/agent/ToolCallContext$Update {
+	public fun <init> (Ldev/ai/elements/core/model/Message;)V
+	public final fun component1 ()Ldev/ai/elements/core/model/Message;
+	public final fun copy (Ldev/ai/elements/core/model/Message;)Ldev/ai/elements/core/agent/ToolCallContext$Update$Subagent;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/agent/ToolCallContext$Update$Subagent;Ldev/ai/elements/core/model/Message;ILjava/lang/Object;)Ldev/ai/elements/core/agent/ToolCallContext$Update$Subagent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ldev/ai/elements/core/model/Message;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/agent/ToolResult {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Ldev/ai/elements/core/agent/ToolResult;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/agent/ToolResult;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Ldev/ai/elements/core/agent/ToolResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContent ()Ljava/util/List;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/auth/AuthorizationCodeFlow : dev/ai/elements/core/auth/SignInFlow {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/auth/LoopbackRedirect;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;ZZLjava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/auth/LoopbackRedirect;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;ZZLjava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Z
+	public final fun component11 ()Ljava/lang/String;
+	public final fun component12 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ldev/ai/elements/core/auth/LoopbackRedirect;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/util/Map;
+	public final fun component8 ()Ljava/util/Map;
+	public final fun component9 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/auth/LoopbackRedirect;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;ZZLjava/lang/String;Z)Ldev/ai/elements/core/auth/AuthorizationCodeFlow;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/auth/AuthorizationCodeFlow;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/auth/LoopbackRedirect;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;ZZLjava/lang/String;ZILjava/lang/Object;)Ldev/ai/elements/core/auth/AuthorizationCodeFlow;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAuthorizeUrl ()Ljava/lang/String;
+	public final fun getClientId ()Ljava/lang/String;
+	public final fun getClientSecret ()Ljava/lang/String;
+	public final fun getEchoChallengeOnExchange ()Z
+	public final fun getExtraAuthorizeParams ()Ljava/util/Map;
+	public final fun getExtraTokenParams ()Ljava/util/Map;
+	public final fun getNonce ()Z
+	public final fun getRedirect ()Ldev/ai/elements/core/auth/LoopbackRedirect;
+	public final fun getRedirectParam ()Ljava/lang/String;
+	public final fun getScopes ()Ljava/lang/String;
+	public final fun getTokenUrl ()Ljava/lang/String;
+	public final fun getUsesState ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/auth/DeviceAuthorization {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JJ)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()J
+	public final fun component6 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JJ)Ldev/ai/elements/core/auth/DeviceAuthorization;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/auth/DeviceAuthorization;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JJILjava/lang/Object;)Ldev/ai/elements/core/auth/DeviceAuthorization;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDeviceCode ()Ljava/lang/String;
+	public final fun getExpiresInSeconds ()J
+	public final fun getIntervalSeconds ()J
+	public final fun getOpenUrl ()Ljava/lang/String;
+	public final fun getUserCode ()Ljava/lang/String;
+	public final fun getVerificationUri ()Ljava/lang/String;
+	public final fun getVerificationUriComplete ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/auth/DeviceCodeFlow : dev/ai/elements/core/auth/SignInFlow {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/auth/DeviceCodeFlow;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/auth/DeviceCodeFlow;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/auth/DeviceCodeFlow;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClientId ()Ljava/lang/String;
+	public final fun getDeviceAuthorizationUrl ()Ljava/lang/String;
+	public final fun getScopes ()Ljava/lang/String;
+	public final fun getTokenUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/auth/LoopbackReceiver : java/io/Closeable {
+	public static final field Companion Ldev/ai/elements/core/auth/LoopbackReceiver$Companion;
+	public synthetic fun <init> (Ldev/ai/elements/core/auth/LoopbackRedirect;Ljava/net/ServerSocket;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun awaitCode (Ljava/lang/String;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun awaitCode$default (Ldev/ai/elements/core/auth/LoopbackReceiver;Ljava/lang/String;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun close ()V
+}
+
+public final class dev/ai/elements/core/auth/LoopbackReceiver$Companion {
+	public final fun open (Ldev/ai/elements/core/auth/LoopbackRedirect;)Ldev/ai/elements/core/auth/LoopbackReceiver;
+}
+
+public final class dev/ai/elements/core/auth/LoopbackRedirect {
+	public fun <init> (Ljava/lang/String;ILjava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;ILjava/lang/String;)Ldev/ai/elements/core/auth/LoopbackRedirect;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/auth/LoopbackRedirect;Ljava/lang/String;ILjava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/auth/LoopbackRedirect;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHost ()Ljava/lang/String;
+	public final fun getPath ()Ljava/lang/String;
+	public final fun getPort ()I
+	public final fun getUri ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/auth/OAuthBackend : dev/ai/elements/core/chat/ChatBackend {
+	public fun <init> (Ldev/ai/elements/core/auth/TokenSource;Lkotlin/jvm/functions/Function1;)V
+	public fun stream (Ljava/util/List;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/core/auth/OAuthClient {
+	public fun <init> ()V
+	public fun <init> (Lokhttp3/OkHttpClient;)V
+	public synthetic fun <init> (Lokhttp3/OkHttpClient;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun begin (Ldev/ai/elements/core/auth/AuthorizationCodeFlow;)Ldev/ai/elements/core/auth/OAuthClient$Attempt;
+	public final fun exchange (Ldev/ai/elements/core/auth/AuthorizationCodeFlow;Ldev/ai/elements/core/auth/OAuthClient$Attempt;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun openRouterKey (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/auth/OAuthClient$Attempt;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun pollDevice (Ldev/ai/elements/core/auth/DeviceCodeFlow;Ldev/ai/elements/core/auth/DeviceAuthorization;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun refresh (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/auth/OAuthTokens;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun refresh$default (Ldev/ai/elements/core/auth/OAuthClient;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/auth/OAuthTokens;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun startDevice (Ldev/ai/elements/core/auth/DeviceCodeFlow;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/auth/OAuthClient$Attempt {
+	public final fun getState ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/auth/OAuthException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class dev/ai/elements/core/auth/OAuthKt {
+	public static final fun jwtClaims (Ljava/lang/String;)Lkotlinx/serialization/json/JsonObject;
+}
+
+public final class dev/ai/elements/core/auth/OAuthProvider : java/lang/Enum {
+	public static final field CHATGPT Ldev/ai/elements/core/auth/OAuthProvider;
+	public static final field Companion Ldev/ai/elements/core/auth/OAuthProvider$Companion;
+	public static final field KIMI Ldev/ai/elements/core/auth/OAuthProvider;
+	public static final field OPENROUTER Ldev/ai/elements/core/auth/OAuthProvider;
+	public static final field OPENROUTER_KEYS_URL Ljava/lang/String;
+	public static final field XAI Ldev/ai/elements/core/auth/OAuthProvider;
+	public final fun apiHeaders (Ldev/ai/elements/core/auth/OAuthTokens;)Ljava/util/Map;
+	public final fun getBaseUrl ()Ljava/lang/String;
+	public final fun getDefaultModel ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getExperimental ()Z
+	public final fun getFlow ()Ldev/ai/elements/core/auth/SignInFlow;
+	public final fun getKind ()Ldev/ai/elements/core/config/ProviderKind;
+	public final fun getLabel ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/core/auth/OAuthProvider;
+	public static fun values ()[Ldev/ai/elements/core/auth/OAuthProvider;
+}
+
+public final class dev/ai/elements/core/auth/OAuthProvider$Companion {
+	public final fun getChatGptFlow ()Ldev/ai/elements/core/auth/AuthorizationCodeFlow;
+	public final fun getKimiFlow ()Ldev/ai/elements/core/auth/DeviceCodeFlow;
+	public final fun getOpenRouterFlow ()Ldev/ai/elements/core/auth/AuthorizationCodeFlow;
+	public final fun getXaiFlow ()Ldev/ai/elements/core/auth/AuthorizationCodeFlow;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/auth/OAuthTokens {
+	public static final field Companion Ldev/ai/elements/core/auth/OAuthTokens$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/Long;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/auth/OAuthTokens;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/auth/OAuthTokens;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/auth/OAuthTokens;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun expiresSoon (JJ)Z
+	public static synthetic fun expiresSoon$default (Ldev/ai/elements/core/auth/OAuthTokens;JJILjava/lang/Object;)Z
+	public final fun getAccessToken ()Ljava/lang/String;
+	public final fun getAccountId ()Ljava/lang/String;
+	public final fun getEmail ()Ljava/lang/String;
+	public final fun getExpiresAtMs ()Ljava/lang/Long;
+	public final fun getIdToken ()Ljava/lang/String;
+	public final fun getRefreshToken ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/auth/OAuthTokens$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/auth/OAuthTokens$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/auth/OAuthTokens;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/auth/OAuthTokens;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/auth/OAuthTokens$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/auth/Pkce {
+	public static final field INSTANCE Ldev/ai/elements/core/auth/Pkce;
+	public final fun challenge (Ljava/lang/String;)Ljava/lang/String;
+	public final fun randomToken (I)Ljava/lang/String;
+	public static synthetic fun randomToken$default (Ldev/ai/elements/core/auth/Pkce;IILjava/lang/Object;)Ljava/lang/String;
+	public final fun verifier ()Ljava/lang/String;
+}
+
+public abstract interface class dev/ai/elements/core/auth/SignInFlow {
+}
+
+public final class dev/ai/elements/core/auth/TokenSource {
+	public fun <init> (Ldev/ai/elements/core/auth/OAuthProvider;Ldev/ai/elements/core/auth/TokenStore;Ldev/ai/elements/core/auth/OAuthClient;Lkotlin/jvm/functions/Function0;Ljava/lang/String;)V
+	public synthetic fun <init> (Ldev/ai/elements/core/auth/OAuthProvider;Ldev/ai/elements/core/auth/TokenStore;Ldev/ai/elements/core/auth/OAuthClient;Lkotlin/jvm/functions/Function0;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun fresh (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun fresh$default (Ldev/ai/elements/core/auth/TokenSource;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun getSignedIn ()Z
+}
+
+public abstract interface class dev/ai/elements/core/auth/TokenStore {
+	public abstract fun load ()Ldev/ai/elements/core/auth/OAuthTokens;
+	public abstract fun save (Ldev/ai/elements/core/auth/OAuthTokens;)V
+}
+
+public final class dev/ai/elements/core/config/McpServerStore {
+	public static final field BEARER Ljava/lang/String;
+	public static final field KEY Ljava/lang/String;
+	public static final field REGISTRATION Ljava/lang/String;
+	public static final field TOKENS Ljava/lang/String;
+	public fun <init> (Landroid/content/Context;Ldev/ai/elements/core/config/SecretStore;Lkotlinx/serialization/json/JsonObject;)V
+	public synthetic fun <init> (Landroid/content/Context;Ldev/ai/elements/core/config/SecretStore;Lkotlinx/serialization/json/JsonObject;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun bearerToken (Ljava/lang/String;)Ljava/lang/String;
+	public final fun client (Ldev/ai/elements/core/mcp/McpServerConfig;)Ldev/ai/elements/core/mcp/McpClient;
+	public final fun client (Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpClient;
+	public final fun getServers ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun registration (Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpOAuthRegistration;
+	public final fun remove (Ljava/lang/String;)V
+	public final fun setBearerToken (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun setRegistration (Ljava/lang/String;Ldev/ai/elements/core/mcp/McpOAuthRegistration;)V
+	public final fun tokenStore (Ljava/lang/String;)Ldev/ai/elements/core/auth/TokenStore;
+	public final fun toolset ()Ldev/ai/elements/core/mcp/McpToolset;
+	public final fun upsert (Ldev/ai/elements/core/mcp/McpServerConfig;)V
+}
+
+public final class dev/ai/elements/core/config/ProviderKind : java/lang/Enum {
+	public static final field A2A Ldev/ai/elements/core/config/ProviderKind;
+	public static final field ACP Ldev/ai/elements/core/config/ProviderKind;
+	public static final field AGENT_SERVER Ldev/ai/elements/core/config/ProviderKind;
+	public static final field AG_UI Ldev/ai/elements/core/config/ProviderKind;
+	public static final field ANTHROPIC Ldev/ai/elements/core/config/ProviderKind;
+	public static final field Companion Ldev/ai/elements/core/config/ProviderKind$Companion;
+	public static final field GEMINI Ldev/ai/elements/core/config/ProviderKind;
+	public static final field MOCK Ldev/ai/elements/core/config/ProviderKind;
+	public static final field OLLAMA Ldev/ai/elements/core/config/ProviderKind;
+	public static final field OPENAI Ldev/ai/elements/core/config/ProviderKind;
+	public static final field OPENAI_RESPONSES Ldev/ai/elements/core/config/ProviderKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getNeedsKey ()Z
+	public final fun getServerSideAgent ()Z
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/core/config/ProviderKind;
+	public static fun values ()[Ldev/ai/elements/core/config/ProviderKind;
+}
+
+public final class dev/ai/elements/core/config/ProviderKind$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/config/ProviderProfile {
+	public static final field Companion Ldev/ai/elements/core/config/ProviderProfile$Companion;
+	public static final field DEFAULT_SYSTEM_PROMPT Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/config/ProviderKind;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;ZLdev/ai/elements/core/auth/OAuthProvider;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/config/ProviderKind;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;ZLdev/ai/elements/core/auth/OAuthProvider;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ldev/ai/elements/core/config/ProviderKind;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Z
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Z
+	public final fun component9 ()Ldev/ai/elements/core/auth/OAuthProvider;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/config/ProviderKind;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;ZLdev/ai/elements/core/auth/OAuthProvider;)Ldev/ai/elements/core/config/ProviderProfile;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/config/ProviderProfile;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/config/ProviderKind;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;ZLdev/ai/elements/core/auth/OAuthProvider;ILjava/lang/Object;)Ldev/ai/elements/core/config/ProviderProfile;
+	public final fun createBackend (Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;Ljava/util/Map;Ljava/lang/String;Ldev/ai/elements/core/protocol/agui/AgUiEventLog;)Ldev/ai/elements/core/chat/ChatBackend;
+	public static synthetic fun createBackend$default (Ldev/ai/elements/core/config/ProviderProfile;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;Ljava/util/Map;Ljava/lang/String;Ldev/ai/elements/core/protocol/agui/AgUiEventLog;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatBackend;
+	public final fun createOAuthBackend (Ldev/ai/elements/core/auth/TokenSource;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;Ljava/lang/String;)Ldev/ai/elements/core/chat/ChatBackend;
+	public static synthetic fun createOAuthBackend$default (Ldev/ai/elements/core/config/ProviderProfile;Ldev/ai/elements/core/auth/TokenSource;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatBackend;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBaseUrl ()Ljava/lang/String;
+	public final fun getBuiltIn ()Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getKind ()Ldev/ai/elements/core/config/ProviderKind;
+	public final fun getModel ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getOauth ()Ldev/ai/elements/core/auth/OAuthProvider;
+	public final fun getSystemPrompt ()Ljava/lang/String;
+	public final fun getUseTools ()Z
+	public final fun getUsesTokens ()Z
+	public fun hashCode ()I
+	public final fun listModels (Ljava/lang/String;Lokhttp3/OkHttpClient;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun listModels$default (Ldev/ai/elements/core/config/ProviderProfile;Ljava/lang/String;Lokhttp3/OkHttpClient;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/config/ProviderProfile$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/config/ProviderProfile$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/config/ProviderProfile;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/config/ProviderProfile;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/config/ProviderProfile$Companion {
+	public final fun getPresets ()Ljava/util/List;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/config/ProviderStore {
+	public static final field KEY_PROFILES Ljava/lang/String;
+	public static final field KEY_SELECTED Ljava/lang/String;
+	public fun <init> (Landroid/content/Context;Ljava/util/List;)V
+	public synthetic fun <init> (Landroid/content/Context;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun apiKey (Ljava/lang/String;)Ljava/lang/String;
+	public final fun getPresets ()Ljava/util/List;
+	public final fun getProfiles ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getSecrets ()Ldev/ai/elements/core/config/SecretStore;
+	public final fun getSelected ()Ldev/ai/elements/core/config/ProviderProfile;
+	public final fun getSelectedId ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getTokenVersion ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun remove (Ljava/lang/String;)V
+	public final fun reset (Ljava/lang/String;)V
+	public final fun select (Ljava/lang/String;)V
+	public final fun setApiKey (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun tokenSource (Ldev/ai/elements/core/config/ProviderProfile;)Ldev/ai/elements/core/auth/TokenSource;
+	public final fun tokenStore (Ljava/lang/String;)Ldev/ai/elements/core/auth/TokenStore;
+	public final fun upsert (Ldev/ai/elements/core/config/ProviderProfile;)V
+}
+
+public final class dev/ai/elements/core/config/SecretStore {
+	public static final field ALIAS Ljava/lang/String;
+	public static final field IV_SIZE I
+	public static final field KEYSTORE Ljava/lang/String;
+	public static final field TRANSFORMATION Ljava/lang/String;
+	public fun <init> (Landroid/content/Context;)V
+	public final fun get (Ljava/lang/String;)Ljava/lang/String;
+	public final fun put (Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class dev/ai/elements/core/http/HttpKt {
+	public static final fun getDefaultHttpClient ()Lokhttp3/OkHttpClient;
+	public static final fun getJson (Lokhttp3/OkHttpClient;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun getJson$default (Lokhttp3/OkHttpClient;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/mcp/McpAgentTool : dev/ai/elements/core/agent/AgentTool {
+	public static final field Companion Ldev/ai/elements/core/mcp/McpAgentTool$Companion;
+	public fun <init> (Ldev/ai/elements/core/mcp/McpClient;Ldev/ai/elements/core/mcp/McpTool;Ldev/ai/elements/core/mcp/McpServerConfig;)V
+	public fun categoryFor (Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/model/ToolCategory;
+	public fun execute (Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getDescription ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
+	public fun getParameters ()Lkotlinx/serialization/json/JsonObject;
+	public fun getRequiresApproval ()Z
+	public final fun getServer ()Ldev/ai/elements/core/mcp/McpServerConfig;
+	public fun getSource ()Ljava/lang/String;
+	public fun getTitle ()Ljava/lang/String;
+	public final fun getTool ()Ldev/ai/elements/core/mcp/McpTool;
+	public fun kindFor (Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/model/ToolKind;
+	public fun locationFor (Lkotlinx/serialization/json/JsonObject;)Ljava/lang/String;
+	public fun titleFor (Lkotlinx/serialization/json/JsonObject;)Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpAgentTool$Companion {
+	public final fun qualifiedName (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpApproval : java/lang/Enum {
+	public static final field ALWAYS Ldev/ai/elements/core/mcp/McpApproval;
+	public static final field Companion Ldev/ai/elements/core/mcp/McpApproval$Companion;
+	public static final field NEVER Ldev/ai/elements/core/mcp/McpApproval;
+	public static final field UNLESS_READ_ONLY Ldev/ai/elements/core/mcp/McpApproval;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpApproval;
+	public static fun values ()[Ldev/ai/elements/core/mcp/McpApproval;
+}
+
+public final class dev/ai/elements/core/mcp/McpApproval$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/mcp/McpApps {
+	public static final field EXTENSION Ljava/lang/String;
+	public static final field INSTANCE Ldev/ai/elements/core/mcp/McpApps;
+	public static final field MIME_TYPE Ljava/lang/String;
+	public static final field PROTOCOL_VERSION Ljava/lang/String;
+	public final fun getCLIENT_CAPABILITIES ()Lkotlinx/serialization/json/JsonObject;
+}
+
+public abstract interface class dev/ai/elements/core/mcp/McpAuth {
+	public static final field Companion Ldev/ai/elements/core/mcp/McpAuth$Companion;
+	public fun refresh (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun token (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/mcp/McpAuth$Companion {
+	public final fun bearer (Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpAuth;
+}
+
+public final class dev/ai/elements/core/mcp/McpAuth$DefaultImpls {
+	public static fun refresh (Ldev/ai/elements/core/mcp/McpAuth;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/mcp/McpAuthRequiredException : dev/ai/elements/core/mcp/McpException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getResourceMetadataUrl ()Ljava/lang/String;
+	public final fun getScope ()Ljava/lang/String;
+	public final fun getServerUrl ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpClient {
+	public static final field Companion Ldev/ai/elements/core/mcp/McpClient$Companion;
+	public static final field MAX_INPUT_ROUNDS I
+	public static final field MODERN_VERSION Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ldev/ai/elements/core/mcp/McpAuth;Lokhttp3/OkHttpClient;Ldev/ai/elements/core/mcp/McpImplementation;Lkotlinx/serialization/json/JsonObject;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Ldev/ai/elements/core/mcp/McpAuth;Lokhttp3/OkHttpClient;Ldev/ai/elements/core/mcp/McpImplementation;Lkotlinx/serialization/json/JsonObject;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun callTool (Ldev/ai/elements/core/mcp/McpTool;Lkotlinx/serialization/json/JsonObject;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun callTool (Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun callTool$default (Ldev/ai/elements/core/mcp/McpClient;Ldev/ai/elements/core/mcp/McpTool;Lkotlinx/serialization/json/JsonObject;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun callTool$default (Ldev/ai/elements/core/mcp/McpClient;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getInstructions ()Ljava/lang/String;
+	public final fun getPrompt (Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun getPrompt$default (Ldev/ai/elements/core/mcp/McpClient;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun getProtocolVersion ()Ljava/lang/String;
+	public final fun getServerInfo ()Ldev/ai/elements/core/mcp/McpImplementation;
+	public final fun getUrl ()Ljava/lang/String;
+	public final fun listPrompts (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun listResources (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun listTools (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun readResource (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/mcp/McpClient$Companion {
+	public final fun getLEGACY_VERSIONS ()Ljava/util/List;
+}
+
+public abstract interface class dev/ai/elements/core/mcp/McpContent {
+}
+
+public final class dev/ai/elements/core/mcp/McpContent$Audio : dev/ai/elements/core/mcp/McpContent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpContent$Audio;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpContent$Audio;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpContent$Audio;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Ljava/lang/String;
+	public final fun getMimeType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpContent$Image : dev/ai/elements/core/mcp/McpContent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpContent$Image;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpContent$Image;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpContent$Image;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Ljava/lang/String;
+	public final fun getMimeType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpContent$Resource : dev/ai/elements/core/mcp/McpContent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/mcp/McpContent$Resource;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpContent$Resource;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpContent$Resource;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBlob ()Ljava/lang/String;
+	public final fun getMeta ()Lkotlinx/serialization/json/JsonObject;
+	public final fun getMimeType ()Ljava/lang/String;
+	public final fun getText ()Ljava/lang/String;
+	public final fun getUri ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpContent$ResourceLink : dev/ai/elements/core/mcp/McpContent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpContent$ResourceLink;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpContent$ResourceLink;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpContent$ResourceLink;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMimeType ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getUri ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpContent$Text : dev/ai/elements/core/mcp/McpContent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpContent$Text;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpContent$Text;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpContent$Text;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public class dev/ai/elements/core/mcp/McpException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Integer;Lkotlinx/serialization/json/JsonElement;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Integer;Lkotlinx/serialization/json/JsonElement;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getCode ()Ljava/lang/Integer;
+	public final fun getData ()Lkotlinx/serialization/json/JsonElement;
+}
+
+public final class dev/ai/elements/core/mcp/McpImplementation {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpImplementation;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpImplementation;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpImplementation;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpModelsKt {
+	public static final fun toJson (Ldev/ai/elements/core/mcp/McpTool;)Lkotlinx/serialization/json/JsonObject;
+}
+
+public final class dev/ai/elements/core/mcp/McpOAuth {
+	public static final field Companion Ldev/ai/elements/core/mcp/McpOAuth$Companion;
+	public fun <init> ()V
+	public fun <init> (Lokhttp3/OkHttpClient;)V
+	public synthetic fun <init> (Lokhttp3/OkHttpClient;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun discover (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/auth/LoopbackRedirect;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun discover$default (Ldev/ai/elements/core/mcp/McpOAuth;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/auth/LoopbackRedirect;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/mcp/McpOAuth$Companion {
+	public final fun canonicalResource (Lokhttp3/HttpUrl;)Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpOAuthRegistration {
+	public static final field Companion Ldev/ai/elements/core/mcp/McpOAuthRegistration$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpOAuthRegistration;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpOAuthRegistration;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpOAuthRegistration;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun flow ()Ldev/ai/elements/core/auth/AuthorizationCodeFlow;
+	public final fun getAuthorizationEndpoint ()Ljava/lang/String;
+	public final fun getClientId ()Ljava/lang/String;
+	public final fun getClientSecret ()Ljava/lang/String;
+	public final fun getRedirectUri ()Ljava/lang/String;
+	public final fun getResource ()Ljava/lang/String;
+	public final fun getScope ()Ljava/lang/String;
+	public final fun getTokenEndpoint ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/mcp/McpOAuthRegistration$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/mcp/McpOAuthRegistration$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/mcp/McpOAuthRegistration;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/mcp/McpOAuthRegistration;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/mcp/McpOAuthRegistration$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/mcp/McpOAuthTokens : dev/ai/elements/core/mcp/McpAuth {
+	public fun <init> (Ldev/ai/elements/core/mcp/McpOAuthRegistration;Ldev/ai/elements/core/auth/TokenStore;Ldev/ai/elements/core/auth/OAuthClient;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Ldev/ai/elements/core/mcp/McpOAuthRegistration;Ldev/ai/elements/core/auth/TokenStore;Ldev/ai/elements/core/auth/OAuthClient;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getSignedIn ()Z
+	public fun refresh (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun token (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/mcp/McpProgress {
+	public fun <init> (DLjava/lang/Double;Ljava/lang/String;)V
+	public synthetic fun <init> (DLjava/lang/Double;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()D
+	public final fun component2 ()Ljava/lang/Double;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (DLjava/lang/Double;Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpProgress;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpProgress;DLjava/lang/Double;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpProgress;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFraction ()Ljava/lang/Double;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getProgress ()D
+	public final fun getTotal ()Ljava/lang/Double;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpPrompt {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ldev/ai/elements/core/mcp/McpPrompt;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpPrompt;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpPrompt;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArguments ()Ljava/util/List;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpPromptArgument {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Z)Ldev/ai/elements/core/mcp/McpPromptArgument;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpPromptArgument;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpPromptArgument;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getRequired ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpResource {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpResource;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpResource;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpResource;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getMimeType ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun getUri ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpServerConfig {
+	public static final field Companion Ldev/ai/elements/core/mcp/McpServerConfig$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLdev/ai/elements/core/mcp/McpServerConfig$Auth;Ldev/ai/elements/core/mcp/McpApproval;Ljava/util/Set;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLdev/ai/elements/core/mcp/McpServerConfig$Auth;Ldev/ai/elements/core/mcp/McpApproval;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun component5 ()Ldev/ai/elements/core/mcp/McpServerConfig$Auth;
+	public final fun component6 ()Ldev/ai/elements/core/mcp/McpApproval;
+	public final fun component7 ()Ljava/util/Set;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLdev/ai/elements/core/mcp/McpServerConfig$Auth;Ldev/ai/elements/core/mcp/McpApproval;Ljava/util/Set;)Ldev/ai/elements/core/mcp/McpServerConfig;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpServerConfig;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLdev/ai/elements/core/mcp/McpServerConfig$Auth;Ldev/ai/elements/core/mcp/McpApproval;Ljava/util/Set;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpServerConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApproval ()Ldev/ai/elements/core/mcp/McpApproval;
+	public final fun getAuth ()Ldev/ai/elements/core/mcp/McpServerConfig$Auth;
+	public final fun getDisabledTools ()Ljava/util/Set;
+	public final fun getEnabled ()Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getToolPrefix ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/mcp/McpServerConfig$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/mcp/McpServerConfig$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/mcp/McpServerConfig;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/mcp/McpServerConfig;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/mcp/McpServerConfig$Auth : java/lang/Enum {
+	public static final field BEARER Ldev/ai/elements/core/mcp/McpServerConfig$Auth;
+	public static final field Companion Ldev/ai/elements/core/mcp/McpServerConfig$Auth$Companion;
+	public static final field NONE Ldev/ai/elements/core/mcp/McpServerConfig$Auth;
+	public static final field OAUTH Ldev/ai/elements/core/mcp/McpServerConfig$Auth;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpServerConfig$Auth;
+	public static fun values ()[Ldev/ai/elements/core/mcp/McpServerConfig$Auth;
+}
+
+public final class dev/ai/elements/core/mcp/McpServerConfig$Auth$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/mcp/McpServerConfig$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract interface class dev/ai/elements/core/mcp/McpServerStatus {
+}
+
+public final class dev/ai/elements/core/mcp/McpServerStatus$Connected : dev/ai/elements/core/mcp/McpServerStatus {
+	public fun <init> (Ljava/util/List;Ldev/ai/elements/core/mcp/McpImplementation;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ldev/ai/elements/core/mcp/McpImplementation;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ldev/ai/elements/core/mcp/McpImplementation;Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpServerStatus$Connected;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpServerStatus$Connected;Ljava/util/List;Ldev/ai/elements/core/mcp/McpImplementation;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpServerStatus$Connected;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getProtocolVersion ()Ljava/lang/String;
+	public final fun getServer ()Ldev/ai/elements/core/mcp/McpImplementation;
+	public final fun getTools ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpServerStatus$Failed : dev/ai/elements/core/mcp/McpServerStatus {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/ai/elements/core/mcp/McpServerStatus$Failed;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpServerStatus$Failed;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpServerStatus$Failed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpServerStatus$NeedsSignIn : dev/ai/elements/core/mcp/McpServerStatus {
+	public fun <init> (Ldev/ai/elements/core/mcp/McpAuthRequiredException;)V
+	public final fun component1 ()Ldev/ai/elements/core/mcp/McpAuthRequiredException;
+	public final fun copy (Ldev/ai/elements/core/mcp/McpAuthRequiredException;)Ldev/ai/elements/core/mcp/McpServerStatus$NeedsSignIn;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpServerStatus$NeedsSignIn;Ldev/ai/elements/core/mcp/McpAuthRequiredException;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpServerStatus$NeedsSignIn;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ldev/ai/elements/core/mcp/McpAuthRequiredException;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpTool {
+	public static final field Companion Ldev/ai/elements/core/mcp/McpTool$Companion;
+	public static final field VISIBLE_TO_APP Ljava/lang/String;
+	public static final field VISIBLE_TO_MODEL Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Lkotlinx/serialization/json/JsonObject;Ldev/ai/elements/core/mcp/McpToolAnnotations;Lkotlinx/serialization/json/JsonObject;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Lkotlinx/serialization/json/JsonObject;Ldev/ai/elements/core/mcp/McpToolAnnotations;Lkotlinx/serialization/json/JsonObject;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun component5 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun component6 ()Ldev/ai/elements/core/mcp/McpToolAnnotations;
+	public final fun component7 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Lkotlinx/serialization/json/JsonObject;Ldev/ai/elements/core/mcp/McpToolAnnotations;Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/mcp/McpTool;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpTool;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Lkotlinx/serialization/json/JsonObject;Ldev/ai/elements/core/mcp/McpToolAnnotations;Lkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpTool;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnnotations ()Ldev/ai/elements/core/mcp/McpToolAnnotations;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getDisplayName ()Ljava/lang/String;
+	public final fun getInputSchema ()Lkotlinx/serialization/json/JsonObject;
+	public final fun getMeta ()Lkotlinx/serialization/json/JsonObject;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getOutputSchema ()Lkotlinx/serialization/json/JsonObject;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun getUiResourceUri ()Ljava/lang/String;
+	public final fun getVisibility ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpTool$Companion {
+}
+
+public final class dev/ai/elements/core/mcp/McpToolAnnotations {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Boolean;
+	public final fun component3 ()Ljava/lang/Boolean;
+	public final fun component4 ()Ljava/lang/Boolean;
+	public final fun component5 ()Ljava/lang/Boolean;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)Ldev/ai/elements/core/mcp/McpToolAnnotations;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpToolAnnotations;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpToolAnnotations;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDestructiveHint ()Ljava/lang/Boolean;
+	public final fun getIdempotentHint ()Ljava/lang/Boolean;
+	public final fun getOpenWorldHint ()Ljava/lang/Boolean;
+	public final fun getReadOnlyHint ()Ljava/lang/Boolean;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpToolResult {
+	public fun <init> (Ljava/util/List;Lkotlinx/serialization/json/JsonElement;ZLkotlinx/serialization/json/JsonObject;)V
+	public synthetic fun <init> (Ljava/util/List;Lkotlinx/serialization/json/JsonElement;ZLkotlinx/serialization/json/JsonObject;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component3 ()Z
+	public final fun component4 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun copy (Ljava/util/List;Lkotlinx/serialization/json/JsonElement;ZLkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/mcp/McpToolResult;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/mcp/McpToolResult;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;ZLkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Ldev/ai/elements/core/mcp/McpToolResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContent ()Ljava/util/List;
+	public final fun getRaw ()Lkotlinx/serialization/json/JsonObject;
+	public final fun getStructuredContent ()Lkotlinx/serialization/json/JsonElement;
+	public fun hashCode ()I
+	public final fun isError ()Z
+	public fun toString ()Ljava/lang/String;
+	public final fun toText ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/mcp/McpToolset : dev/ai/elements/core/agent/Capability {
+	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function1;JJLkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function1;JJLkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun context (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getInstructions ()Ljava/lang/String;
+	public final fun getStatus ()Ljava/util/Map;
+	public final fun invalidate ()V
+	public fun tools (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/protocol/ToolConventions {
+	public static final field INSTANCE Ldev/ai/elements/core/protocol/ToolConventions;
+	public final fun categoryOf (Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/model/ToolCategory;
+	public final fun kindOf (Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/model/ToolKind;
+	public final fun locationOf (Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;)Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/protocol/agui/AgUiBackend : dev/ai/elements/core/chat/ChatBackend {
+	public static final field Companion Ldev/ai/elements/core/protocol/agui/AgUiBackend$Companion;
+	public static final field PROTOCOL_VERSION Ljava/lang/String;
+	public static final field STATE_PART Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;Ljava/util/List;Ljava/lang/String;Lokhttp3/OkHttpClient;ILdev/ai/elements/core/protocol/agui/AgUiEventLog;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;Ljava/util/List;Ljava/lang/String;Lokhttp3/OkHttpClient;ILdev/ai/elements/core/protocol/agui/AgUiEventLog;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun stream (Ljava/util/List;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/core/protocol/agui/AgUiBackend$Companion {
+}
+
+public abstract interface class dev/ai/elements/core/protocol/agui/AgUiEventLog {
+	public static final field Companion Ldev/ai/elements/core/protocol/agui/AgUiEventLog$Companion;
+	public static final field METADATA_KEY Ljava/lang/String;
+	public abstract fun append (Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun delete (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun load (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun replayOf (Ldev/ai/elements/core/model/Message;F)Lkotlinx/coroutines/flow/Flow;
+	public static synthetic fun replayOf$default (Ldev/ai/elements/core/protocol/agui/AgUiEventLog;Ldev/ai/elements/core/model/Message;FILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/core/protocol/agui/AgUiEventLog$Companion {
+	public static final field METADATA_KEY Ljava/lang/String;
+	public final fun compact (Ljava/util/List;)Ljava/util/List;
+	public final fun eventsOf (Ljava/util/List;Ljava/util/Collection;)Ljava/util/List;
+	public final fun replay (Ljava/util/List;FJ)Lkotlinx/coroutines/flow/Flow;
+	public static synthetic fun replay$default (Ldev/ai/elements/core/protocol/agui/AgUiEventLog$Companion;Ljava/util/List;FJILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
+	public final fun runsOf (Ldev/ai/elements/core/model/Message;)Lkotlin/Pair;
+}
+
+public final class dev/ai/elements/core/protocol/agui/AgUiEventLog$DefaultImpls {
+	public static fun replayOf (Ldev/ai/elements/core/protocol/agui/AgUiEventLog;Ldev/ai/elements/core/model/Message;F)Lkotlinx/coroutines/flow/Flow;
+	public static synthetic fun replayOf$default (Ldev/ai/elements/core/protocol/agui/AgUiEventLog;Ldev/ai/elements/core/model/Message;FILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/core/protocol/agui/AgUiEventLog$Files : dev/ai/elements/core/protocol/agui/AgUiEventLog {
+	public fun <init> (Ljava/io/File;)V
+	public fun append (Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun delete (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun load (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun replayOf (Ldev/ai/elements/core/model/Message;F)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/core/protocol/agui/AgUiEventLog$InMemory : dev/ai/elements/core/protocol/agui/AgUiEventLog {
+	public fun <init> ()V
+	public fun append (Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun delete (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun load (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun replayOf (Ldev/ai/elements/core/model/Message;F)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/core/protocol/aisdk/UiMessageStreamBackend : dev/ai/elements/core/chat/ChatBackend {
+	public static final field Companion Ldev/ai/elements/core/protocol/aisdk/UiMessageStreamBackend$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;Lokhttp3/OkHttpClient;I)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;Lokhttp3/OkHttpClient;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun stream (Ljava/util/List;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/core/protocol/aisdk/UiMessageStreamBackend$Companion {
+	public final fun parseChunk (Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/chat/ChatEvent;
+	public final fun parseChunks (Lkotlinx/serialization/json/JsonObject;)Ljava/util/List;
+}
+
+public final class dev/ai/elements/core/provider/anthropic/AnthropicBackend : dev/ai/elements/core/chat/ChatBackend {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;IILokhttp3/OkHttpClient;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;IILokhttp3/OkHttpClient;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun stream (Ljava/util/List;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/core/provider/gemini/GeminiBackend : dev/ai/elements/core/chat/ChatBackend {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;ILokhttp3/OkHttpClient;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;ILokhttp3/OkHttpClient;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun stream (Ljava/util/List;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/core/provider/mock/MockAgentBackend : dev/ai/elements/core/chat/ChatBackend {
+	public static final field Companion Ldev/ai/elements/core/provider/mock/MockAgentBackend$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;J)V
+	public synthetic fun <init> (Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun stream (Ljava/util/List;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/core/provider/mock/MockAgentBackend$Companion {
+}
+
+public final class dev/ai/elements/core/provider/ollama/OllamaBackend : dev/ai/elements/core/chat/ChatBackend {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;ZILokhttp3/OkHttpClient;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;ZILokhttp3/OkHttpClient;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun stream (Ljava/util/List;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/core/provider/openai/OpenAiChatBackend : dev/ai/elements/core/chat/ChatBackend {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;ILokhttp3/OkHttpClient;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;ILokhttp3/OkHttpClient;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun stream (Ljava/util/List;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/core/provider/openai/OpenAiResponsesBackend : dev/ai/elements/core/chat/ChatBackend {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;ILokhttp3/OkHttpClient;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ldev/ai/elements/core/chat/ToolApprover;ILokhttp3/OkHttpClient;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun stream (Ljava/util/List;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/core/skills/Skill {
+	public static final field Companion Ldev/ai/elements/core/skills/Skill$Companion;
+	public static final field MAX_DESCRIPTION I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/util/Map;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;)Ldev/ai/elements/core/skills/Skill;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/skills/Skill;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/skills/Skill;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCompatibility ()Ljava/lang/String;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getFrontmatter ()Ljava/util/Map;
+	public final fun getInstructions ()Ljava/lang/String;
+	public final fun getLicense ()Ljava/lang/String;
+	public final fun getLocation ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/skills/Skill$Companion {
+	public final fun isValidName (Ljava/lang/String;)Z
+	public final fun normalizeName (Ljava/lang/String;)Ljava/lang/String;
+	public final fun parse (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/skills/Skill;
+	public static synthetic fun parse$default (Ldev/ai/elements/core/skills/Skill$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/skills/Skill;
+}
+
+public final class dev/ai/elements/core/skills/SkillFormatException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class dev/ai/elements/core/skills/SkillInstaller {
+	public static final field INSTANCE Ldev/ai/elements/core/skills/SkillInstaller;
+	public final fun installZip (Ljava/io/InputStream;Ljava/io/File;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun installZip$default (Ldev/ai/elements/core/skills/SkillInstaller;Ljava/io/InputStream;Ljava/io/File;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class dev/ai/elements/core/skills/SkillLibrary {
+	public static final field Companion Ldev/ai/elements/core/skills/SkillLibrary$Companion;
+	public static final field SKILL_FILE Ljava/lang/String;
+	public abstract fun load (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/skills/SkillLibrary$Companion {
+	public static final field SKILL_FILE Ljava/lang/String;
+	public final fun assets (Landroid/content/res/AssetManager;Ljava/lang/String;)Ldev/ai/elements/core/skills/SkillLibrary;
+	public final fun directory (Ljava/io/File;)Ldev/ai/elements/core/skills/SkillLibrary;
+}
+
+public final class dev/ai/elements/core/skills/SkillScan {
+	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;Ljava/util/List;)Ldev/ai/elements/core/skills/SkillScan;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/skills/SkillScan;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Ldev/ai/elements/core/skills/SkillScan;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getErrors ()Ljava/util/List;
+	public final fun getSkills ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/skills/Skills : dev/ai/elements/core/agent/Capability {
+	public static final field Companion Ldev/ai/elements/core/skills/Skills$Companion;
+	public static final field LOAD_CAPABILITY Ljava/lang/String;
+	public fun <init> (Ljava/util/List;)V
+	public fun context (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getInstructions ()Ljava/lang/String;
+	public final fun getSkills ()Ljava/util/List;
+	public fun tools (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/skills/Skills$Companion {
+	public final fun from ([Ldev/ai/elements/core/skills/SkillLibrary;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

@@ -1,0 +1,27 @@
+public final class dev/ai/elements/harness/device/DeviceFeature : java/lang/Enum {
+	public static final field ALARMS Ldev/ai/elements/harness/device/DeviceFeature;
+	public static final field CALENDAR Ldev/ai/elements/harness/device/DeviceFeature;
+	public static final field CLIPBOARD Ldev/ai/elements/harness/device/DeviceFeature;
+	public static final field CONTACTS Ldev/ai/elements/harness/device/DeviceFeature;
+	public static final field INFO Ldev/ai/elements/harness/device/DeviceFeature;
+	public static final field LOCATION Ldev/ai/elements/harness/device/DeviceFeature;
+	public static final field NOTIFICATIONS Ldev/ai/elements/harness/device/DeviceFeature;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/harness/device/DeviceFeature;
+	public static fun values ()[Ldev/ai/elements/harness/device/DeviceFeature;
+}
+
+public final class dev/ai/elements/harness/device/DeviceTools : dev/ai/elements/core/agent/Capability {
+	public static final field CHANNEL Ljava/lang/String;
+	public fun <init> (Landroid/content/Context;Ldev/ai/elements/harness/device/PermissionGate;Ljava/util/Set;)V
+	public synthetic fun <init> (Landroid/content/Context;Ldev/ai/elements/harness/device/PermissionGate;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun context (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getFeatures ()Ljava/util/Set;
+	public fun getInstructions ()Ljava/lang/String;
+	public fun tools (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class dev/ai/elements/harness/device/PermissionGate {
+	public abstract fun request (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

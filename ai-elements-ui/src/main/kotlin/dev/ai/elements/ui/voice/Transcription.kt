@@ -28,7 +28,7 @@ data class TranscriptSegment(val text: String, val startMs: Long, val endMs: Lon
  * A transcript that follows playback (AI Elements `<Transcription>`): the
  * segment at [currentTimeMs] is highlighted, what's already been said stays
  * full-strength, what's ahead is dimmed, and tapping a segment calls
- * [onSeek] with its start. Consecutive segments from the same [speaker]
+ * [onSeek] with its start. Consecutive segments from the same [TranscriptSegment.speaker]
  * form one paragraph.
  */
 @Composable

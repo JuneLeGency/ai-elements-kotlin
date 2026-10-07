@@ -14,7 +14,7 @@ class A2uiParseError(message: String) : RuntimeException(message)
  * (adjacent literals joined), JSON literals, data bindings `{"path": …}` and function calls
  * `{"call": …, "args": {…}, "returnType": "any"}`. `\${` is a literal `${`.
  */
-object ExpressionParser {
+internal object ExpressionParser {
     private const val MAX_DEPTH = 32
 
     fun parse(template: String): List<JsonElement> = Parser(template).template()

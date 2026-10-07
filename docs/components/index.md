@@ -2,7 +2,13 @@
 
 Every element with the sample the demo app's **Components** screen shows, grouped as there.
 The pictures are rendered from that code by a test, so they show what the library draws.
-Each entry names its main API; the [API reference](../api/index.html) has every parameter.
+Each entry includes an example compiled with the demo, its artifact/imports, interaction notes,
+and a direct API reference. Wrap the examples in `AiElementsTheme` inside your activity's
+`setContent`; function parameters are the state or callbacks your app supplies.
+See [Installation](../getting-started/installation.md) for Gradle and manifest setup.
+
+These 65 entries are usage scenarios (some share an API), not the complete public symbol list.
+State factories, standalone forms and other supporting APIs are in [Supporting APIs](supporting.md).
 
 | Group | Components |
 |---|---|

@@ -13,7 +13,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 /**
  * Which of the device's speech engines the voice elements use, and how they speak. Every field
  * defaults to the system's choice, so an app only sets what its user picked (e.g. from
- * [recognitionServices] and [ttsEngines] in a settings screen).
+ * [recognitionServices] and [SpeechOutputState.engines] in a settings screen).
  *
  * @property recognizer a speech recognition service (`android.speech.RecognitionService`), e.g.
  *   the vendor's or Google's; null uses the system default.

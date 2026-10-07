@@ -1,0 +1,26 @@
+public final class dev/ai/elements/koog/KoogBackend : dev/ai/elements/core/chat/ChatBackend {
+	public fun <init> (Lai/koog/prompt/executor/model/PromptExecutor;Lai/koog/prompt/llm/LLModel;Ljava/util/List;Ljava/lang/String;Ldev/ai/elements/core/chat/ToolApprover;ILai/koog/agents/core/agent/entity/AIAgentGraphStrategy;)V
+	public synthetic fun <init> (Lai/koog/prompt/executor/model/PromptExecutor;Lai/koog/prompt/llm/LLModel;Ljava/util/List;Ljava/lang/String;Ldev/ai/elements/core/chat/ToolApprover;ILai/koog/agents/core/agent/entity/AIAgentGraphStrategy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun stream (Ljava/util/List;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/koog/KoogTool : ai/koog/agents/core/tools/Tool {
+	public fun <init> (Ldev/ai/elements/core/agent/AgentTool;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Ldev/ai/elements/core/agent/AgentTool;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun decodeArgs (Lai/koog/serialization/JSONObject;Lai/koog/serialization/JSONSerializer;)Ljava/lang/Object;
+	public fun decodeArgs (Lai/koog/serialization/JSONObject;Lai/koog/serialization/JSONSerializer;)Lkotlinx/serialization/json/JsonObject;
+	public synthetic fun decodeResult (Lai/koog/serialization/JSONElement;Lai/koog/serialization/JSONSerializer;)Ljava/lang/Object;
+	public fun decodeResult (Lai/koog/serialization/JSONElement;Lai/koog/serialization/JSONSerializer;)Ljava/lang/String;
+	public synthetic fun encodeResult (Ljava/lang/Object;Lai/koog/serialization/JSONSerializer;)Lai/koog/serialization/JSONElement;
+	public fun encodeResult (Ljava/lang/String;Lai/koog/serialization/JSONSerializer;)Lai/koog/serialization/JSONElement;
+	public synthetic fun encodeResultToString (Ljava/lang/Object;Lai/koog/serialization/JSONSerializer;)Ljava/lang/String;
+	public fun encodeResultToString (Ljava/lang/String;Lai/koog/serialization/JSONSerializer;)Ljava/lang/String;
+	public synthetic fun execute (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun execute (Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getTool ()Ldev/ai/elements/core/agent/AgentTool;
+}
+
+public final class dev/ai/elements/koog/KoogToolsKt {
+	public static final fun koogDescriptor (Ldev/ai/elements/core/agent/AgentTool;)Lai/koog/agents/core/tools/ToolDescriptor;
+}
+

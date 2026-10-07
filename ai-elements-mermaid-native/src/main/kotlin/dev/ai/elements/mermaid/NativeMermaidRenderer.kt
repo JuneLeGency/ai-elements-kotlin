@@ -44,6 +44,7 @@ import dev.ai.elements.ui.theme.isDark
  *
  * Experimental: `cmp-mermaid` is young, and bundles fonts (~4 MB).
  */
+@ExperimentalNativeMermaidApi
 object NativeMermaidRenderer : MermaidRenderer {
     @Composable
     override fun Diagram(code: String, fullScreen: Boolean, modifier: Modifier, onClick: (() -> Unit)?) =
@@ -58,9 +59,9 @@ object NativeMermaidRenderer : MermaidRenderer {
 
 
 /**
- * A [MermaidRenderer.Native] diagram. Inline ([fill] = false) it takes its
+ * A [NativeMermaidRenderer] diagram. Inline ([fill] = false) it takes its
  * natural size scaled by [LocalMermaidSizing], capped at the available width
- * and [MermaidSizing.maxInlineHeight]; with [fill] it fills the given space, pinch to zoom.
+ * and [dev.ai.elements.ui.markdown.MermaidSizing.maxInlineHeight]; with [fill] it fills the given space, pinch to zoom.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

@@ -1,0 +1,42 @@
+public final class dev/ai/elements/harness/shell/AndroidShellRuntime : dev/ai/elements/harness/shell/ShellRuntime {
+	public fun <init> (Ljava/io/File;)V
+	public fun getDescription ()Ljava/lang/String;
+	public fun getIsolated ()Z
+	public fun prepare (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun start (Ljava/lang/String;)Ljava/lang/Process;
+}
+
+public final class dev/ai/elements/harness/shell/Shell : dev/ai/elements/core/agent/Capability {
+	public static final field Companion Ldev/ai/elements/harness/shell/Shell$Companion;
+	public fun <init> (Ldev/ai/elements/harness/shell/ShellRuntime;DIZ)V
+	public synthetic fun <init> (Ldev/ai/elements/harness/shell/ShellRuntime;DIZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun checkCommand (Ljava/lang/String;)Ljava/lang/String;
+	public final fun close ()V
+	public fun context (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getApproveCommands ()Z
+	public final fun getDefaultTimeoutSeconds ()D
+	public fun getInstructions ()Ljava/lang/String;
+	public final fun getMaxOutputChars ()I
+	public final fun runCommand (Ljava/lang/String;Ljava/lang/Double;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun runCommand$default (Ldev/ai/elements/harness/shell/Shell;Ljava/lang/String;Ljava/lang/Double;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun startCommand (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun stopCommand (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun tools (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/harness/shell/Shell$Companion {
+	public final fun screen (Ljava/lang/String;)Ljava/lang/String;
+	public final fun truncateTail (Ljava/lang/String;I)Ljava/lang/String;
+}
+
+public abstract interface class dev/ai/elements/harness/shell/ShellRuntime {
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun getIsolated ()Z
+	public fun prepare (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun start (Ljava/lang/String;)Ljava/lang/Process;
+}
+
+public final class dev/ai/elements/harness/shell/ShellRuntime$DefaultImpls {
+	public static fun prepare (Ldev/ai/elements/harness/shell/ShellRuntime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

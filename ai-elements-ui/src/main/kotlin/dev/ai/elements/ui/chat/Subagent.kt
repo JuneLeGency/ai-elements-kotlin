@@ -28,6 +28,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import dev.ai.elements.core.chat.ToolDecision
 import dev.ai.elements.ui.theme.AiType
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.heightIn
@@ -138,11 +140,25 @@ val ToolPart.isDelegation: Boolean get() = subagent != null || kind is ToolKind.
 
 /** A tool call rendered by the element that fits it: [Subagent] for delegations, [ToolCall] otherwise. */
 @Composable
-fun ToolPartView(part: ToolPart, modifier: Modifier = Modifier, onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)? = null) {
-    val custom = LocalAiElementsRenderers.current.toolRenderer(part)
-    if (custom != null) custom.Render(part, onToolApproval)
-    else if (part.isDelegation) Subagent(part, modifier, onToolApproval)
-    else ToolCall(part, modifier, onApproval = onToolApproval?.let { cb -> { approved -> cb(part.id, approved) } })
+fun ToolPartView(
+    part: ToolPart,
+    modifier: Modifier = Modifier,
+    onToolApproval: ((toolCallId: String, approved: Boolean) -> Unit)? = null,
+    onToolDecision: ((toolCallId: String, decision: ToolDecision) -> Unit)? = LocalToolDecision.current,
+) {
+    // Legacy yes/no hosts remain usable. Rich hosts need not also supply a Boolean callback.
+    val decide = onToolDecision ?: onToolApproval?.let { cb -> { id: String, decision: ToolDecision -> cb(id, decision.approved) } }
+    val approve = onToolApproval ?: decide?.let { cb -> { id: String, approved: Boolean -> cb(id, ToolDecision(approved)) } }
+    CompositionLocalProvider(LocalToolDecision provides onToolDecision) {
+        val custom = LocalAiElementsRenderers.current.toolRenderer(part)
+        if (custom != null) custom.Render(part, decide)
+        else if (part.isDelegation) Subagent(part, modifier, approve)
+        else ToolCall(
+            part, modifier,
+            onApproval = approve?.let { cb -> { approved -> cb(part.id, approved) } },
+            onDecision = onToolDecision?.let { cb -> { decision -> cb(part.id, decision) } },
+        )
+    }
 }
 
 @Composable

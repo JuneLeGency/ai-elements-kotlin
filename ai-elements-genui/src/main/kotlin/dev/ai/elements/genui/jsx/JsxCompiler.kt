@@ -24,7 +24,7 @@ import kotlinx.serialization.json.put
  * - `onClick={save}` / `onClick="save"` dispatch the action `save` to the host.
  * - Streaming-tolerant: unclosed tags close at the end, a half-written tag is left out.
  */
-class JsxCompiler(private val knownComponents: Set<String> = BasicTags) {
+internal class JsxCompiler(private val knownComponents: Set<String> = BasicTags) {
 
     /** The component list for [jsx]: `root` plus its descendants, as A2UI component objects. */
     fun components(jsx: String): List<JsonObject> {

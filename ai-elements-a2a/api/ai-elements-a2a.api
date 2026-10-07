@@ -1,0 +1,27 @@
+public final class dev/ai/elements/a2a/A2aAgent {
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;Lorg/a2aproject/sdk/client/http/A2AHttpClient;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Lorg/a2aproject/sdk/client/http/A2AHttpClient;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun cancel (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun card (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun cardOrNull (JJLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun cardOrNull$default (Ldev/ai/elements/a2a/A2aAgent;JJLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun getAgentUrl ()Ljava/lang/String;
+	public final fun send (Lorg/a2aproject/sdk/spec/Message;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/a2a/A2aBackend : dev/ai/elements/core/chat/ChatBackend {
+	public static final field Companion Ldev/ai/elements/a2a/A2aBackend$Companion;
+	public static final field METADATA_KEY Ljava/lang/String;
+	public fun <init> (Ldev/ai/elements/a2a/A2aAgent;)V
+	public fun stream (Ljava/util/List;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/a2a/A2aBackend$Companion {
+}
+
+public final class dev/ai/elements/a2a/A2aBackendKt {
+	public static final fun asSubAgent (Ldev/ai/elements/a2a/A2aAgent;Lorg/a2aproject/sdk/spec/AgentCard;Ljava/lang/String;)Ldev/ai/elements/core/agent/SubAgent;
+	public static synthetic fun asSubAgent$default (Ldev/ai/elements/a2a/A2aAgent;Lorg/a2aproject/sdk/spec/AgentCard;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/agent/SubAgent;
+	public static final fun subAgentName (Ljava/lang/String;)Ljava/lang/String;
+}
+

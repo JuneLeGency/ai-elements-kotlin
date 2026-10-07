@@ -2,6 +2,29 @@
 
 ## 0.3.0 (unreleased)
 
+### Release readiness
+- Stable public APIs are preserved starting with the first public release, including 0.x;
+  deprecated entry points remain callable. Native Mermaid is explicitly opt-in with
+  `ExperimentalNativeMermaidApi`. The SSE event, JSX compiler and A2UI expression parser implementation types are now internal before publication.
+- Official Kotlin Binary Compatibility Validator baselines for all 20 libraries, wired to AGP 9
+  release AARs; `apiCheck` fails on unreviewed changes. The model compatibility policy freezes data
+  class constructors/copy and sealed/enum branches and requires behavioral/source review too.
+- **Before first publication:** `ToolRenderer` now receives `(String, ToolDecision) -> Unit`
+  instead of a Boolean-only callback. Custom renderers can forward edited arguments, denial reasons
+  and remembered decisions. `ToolCall`, `ToolPartView` and standalone message rendering accept rich
+  decision callbacks; existing Boolean callbacks on the elements remain available.
+- Component documentation: compiled examples, imports, artifact requirements, interaction notes and
+  symbol links for all 65 catalog entries, plus a supporting-composable index. The isolated Maven
+  consumer build compiles those exported examples against the published AARs.
+- Dokka now explicitly discovers AGP 9 Kotlin sources and dependency classpaths; its successful
+  build previously produced an empty API reference. Site checks reject empty module documentation,
+  missing images, broken guide links and anchors.
+- Installation and quick starts include network/debug HTTP setup, the tested consumer toolchain,
+  prerelease AndroidX versions, A2A desugaring, lifecycle and credentials guidance.
+- Releases validate the exact tag/version/final CHANGELOG section and installation coordinates, and run the full reusable CI
+  (API, unit/lint, R8, Maven consumers, docs and emulator E2E) before publication. Pages deploys
+  only from `main`.
+
 ### Added — agents
 - **Protocols**: AI SDK 6 (full `UIMessage` history, tool approval, client-side tools, preliminary
   output, `UIMessage` sub-agent output); AG-UI 1.0 on the official `kotlin-core` types (frontend

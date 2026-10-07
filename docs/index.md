@@ -8,6 +8,15 @@ description: Jetpack Compose components and agent tooling for AI apps on Android
 Compose counterpart of [Vercel AI Elements](https://elements.ai-sdk.dev). It connects only through
 open protocols: AI SDK, AG-UI, MCP, MCP Apps, A2A, Agent Client Protocol, A2UI and Agent Skills.
 
+## Start here
+
+1. [Choose your setup](getting-started/choose.md): UI only, a server agent, or an agent on the device.
+2. [Install](getting-started/installation.md) the artifacts and configure your Android app.
+3. Run a [pure client](getting-started/pure-client.md) or an [in-app agent](getting-started/in-app-agent.md).
+
+Looking for one element? Browse the [component examples](components/index.md).
+Read [API stability](develop/api-compatibility.md) before adopting experimental features.
+
 <div class="grid" markdown>
 
 ![A conversation with a plan, a tool call, Markdown and a Mermaid diagram, light theme](assets/screenshots/phone-light-en.webp){ loading=lazy width="280" }

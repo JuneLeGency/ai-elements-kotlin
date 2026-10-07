@@ -1,0 +1,169 @@
+public final class dev/ai/elements/mcpapps/ComposableSingletons$McpAppViewKt {
+	public static final field INSTANCE Ldev/ai/elements/mcpapps/ComposableSingletons$McpAppViewKt;
+	public fun <init> ()V
+	public final fun getLambda$-126264830$ai_elements_mcp_apps ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1395646283$ai_elements_mcp_apps ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$485004228$ai_elements_mcp_apps ()Lkotlin/jvm/functions/Function3;
+}
+
+public abstract interface class dev/ai/elements/mcpapps/McpAppActions {
+	public fun getOpenLink ()Lkotlin/jvm/functions/Function1;
+	public fun message (Ljava/lang/String;)Z
+	public fun modelContext (Ldev/ai/elements/mcpapps/McpAppModelContext;)V
+}
+
+public final class dev/ai/elements/mcpapps/McpAppActions$DefaultImpls {
+	public static fun getOpenLink (Ldev/ai/elements/mcpapps/McpAppActions;)Lkotlin/jvm/functions/Function1;
+	public static fun message (Ldev/ai/elements/mcpapps/McpAppActions;Ljava/lang/String;)Z
+	public static fun modelContext (Ldev/ai/elements/mcpapps/McpAppActions;Ldev/ai/elements/mcpapps/McpAppModelContext;)V
+}
+
+public final class dev/ai/elements/mcpapps/McpAppBridge {
+	public static final field $stable I
+	public static final field Companion Ldev/ai/elements/mcpapps/McpAppBridge$Companion;
+	public fun <init> (Ldev/ai/elements/core/mcp/McpClient;Ldev/ai/elements/mcpapps/McpAppResource;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Ldev/ai/elements/mcpapps/McpAppHost;Lkotlinx/serialization/json/JsonObject;Ldev/ai/elements/core/mcp/McpImplementation;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Ldev/ai/elements/core/mcp/McpClient;Ldev/ai/elements/mcpapps/McpAppResource;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Ldev/ai/elements/mcpapps/McpAppHost;Lkotlinx/serialization/json/JsonObject;Ldev/ai/elements/core/mcp/McpImplementation;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getAppCapabilities ()Lkotlinx/serialization/json/JsonObject;
+	public final fun getAppInfo ()Lkotlinx/serialization/json/JsonObject;
+	public final fun getDisplayMode ()Ljava/lang/String;
+	public final fun receive (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun receive (Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun setHostContext (Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun teardown (Ljava/lang/String;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun teardown$default (Ldev/ai/elements/mcpapps/McpAppBridge;Ljava/lang/String;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun toolCancelled (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun toolInput (Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun toolResult (Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/mcpapps/McpAppBridge$Companion {
+	public final fun getSUPPORTED_VERSIONS ()Ljava/util/Set;
+}
+
+public final class dev/ai/elements/mcpapps/McpAppCsp {
+	public static final field $stable I
+	public static final field Companion Ldev/ai/elements/mcpapps/McpAppCsp$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)Ldev/ai/elements/mcpapps/McpAppCsp;
+	public static synthetic fun copy$default (Ldev/ai/elements/mcpapps/McpAppCsp;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Ldev/ai/elements/mcpapps/McpAppCsp;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBaseUriDomains ()Ljava/util/List;
+	public final fun getConnectDomains ()Ljava/util/List;
+	public final fun getFrameDomains ()Ljava/util/List;
+	public final fun getResourceDomains ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun header ()Ljava/lang/String;
+	public final fun toJson ()Lkotlinx/serialization/json/JsonObject;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/mcpapps/McpAppCsp$Companion {
+	public final fun isOrigin (Ljava/lang/String;)Z
+}
+
+public final class dev/ai/elements/mcpapps/McpAppException : java/lang/Exception {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public abstract interface class dev/ai/elements/mcpapps/McpAppHost {
+	public fun approveToolCall (Ldev/ai/elements/core/mcp/McpTool;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun audit (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)V
+	public fun log (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)V
+	public fun message (Ljava/lang/String;Lkotlinx/serialization/json/JsonArray;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun openLink (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun requestDisplayMode (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun requestTeardown ()V
+	public fun sizeChanged (Ljava/lang/Double;Ljava/lang/Double;)V
+	public fun updateModelContext (Lkotlinx/serialization/json/JsonArray;Lkotlinx/serialization/json/JsonElement;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/mcpapps/McpAppHost$DefaultImpls {
+	public static fun approveToolCall (Ldev/ai/elements/mcpapps/McpAppHost;Ldev/ai/elements/core/mcp/McpTool;Lkotlinx/serialization/json/JsonObject;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun audit (Ldev/ai/elements/mcpapps/McpAppHost;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)V
+	public static fun log (Ldev/ai/elements/mcpapps/McpAppHost;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)V
+	public static fun message (Ldev/ai/elements/mcpapps/McpAppHost;Ljava/lang/String;Lkotlinx/serialization/json/JsonArray;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun openLink (Ldev/ai/elements/mcpapps/McpAppHost;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun requestDisplayMode (Ldev/ai/elements/mcpapps/McpAppHost;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun requestTeardown (Ldev/ai/elements/mcpapps/McpAppHost;)V
+	public static fun sizeChanged (Ldev/ai/elements/mcpapps/McpAppHost;Ljava/lang/Double;Ljava/lang/Double;)V
+	public static fun updateModelContext (Ldev/ai/elements/mcpapps/McpAppHost;Lkotlinx/serialization/json/JsonArray;Lkotlinx/serialization/json/JsonElement;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/mcpapps/McpAppModelContext {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonArray;Lkotlinx/serialization/json/JsonElement;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonArray;
+	public final fun component4 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonArray;Lkotlinx/serialization/json/JsonElement;)Ldev/ai/elements/mcpapps/McpAppModelContext;
+	public static synthetic fun copy$default (Ldev/ai/elements/mcpapps/McpAppModelContext;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonArray;Lkotlinx/serialization/json/JsonElement;ILjava/lang/Object;)Ldev/ai/elements/mcpapps/McpAppModelContext;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApp ()Ljava/lang/String;
+	public final fun getContent ()Lkotlinx/serialization/json/JsonArray;
+	public final fun getStructuredContent ()Lkotlinx/serialization/json/JsonElement;
+	public final fun getText ()Ljava/lang/String;
+	public final fun getToolCallId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun toDataPart ()Ldev/ai/elements/core/model/DataPart;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/mcpapps/McpAppRendererKt {
+	public static final fun McpAppsHost (Lkotlin/jvm/functions/Function1;Ldev/ai/elements/mcpapps/McpAppActions;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;I)V
+	public static final fun mcpAppRenderer (Lkotlin/jvm/functions/Function1;Ldev/ai/elements/mcpapps/McpAppActions;Ldev/ai/elements/mcpapps/McpAppSessions;)Ldev/ai/elements/ui/chat/DataRenderer;
+}
+
+public final class dev/ai/elements/mcpapps/McpAppResource {
+	public static final field $stable I
+	public static final field Companion Ldev/ai/elements/mcpapps/McpAppResource$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/mcpapps/McpAppCsp;Ljava/util/Set;Ljava/lang/Boolean;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/mcpapps/McpAppCsp;Ljava/util/Set;Ljava/lang/Boolean;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ldev/ai/elements/mcpapps/McpAppCsp;
+	public final fun component4 ()Ljava/util/Set;
+	public final fun component5 ()Ljava/lang/Boolean;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/mcpapps/McpAppCsp;Ljava/util/Set;Ljava/lang/Boolean;Ljava/lang/String;)Ldev/ai/elements/mcpapps/McpAppResource;
+	public static synthetic fun copy$default (Ldev/ai/elements/mcpapps/McpAppResource;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/mcpapps/McpAppCsp;Ljava/util/Set;Ljava/lang/Boolean;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/mcpapps/McpAppResource;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCsp ()Ldev/ai/elements/mcpapps/McpAppCsp;
+	public final fun getDomain ()Ljava/lang/String;
+	public final fun getHtml ()Ljava/lang/String;
+	public final fun getPermissions ()Ljava/util/Set;
+	public final fun getPrefersBorder ()Ljava/lang/Boolean;
+	public final fun getUri ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/mcpapps/McpAppResource$Companion {
+	public final fun from (Ljava/lang/String;Ljava/util/List;)Ldev/ai/elements/mcpapps/McpAppResource;
+}
+
+public final class dev/ai/elements/mcpapps/McpAppResourceKt {
+	public static final fun readMcpApp (Ldev/ai/elements/core/mcp/McpClient;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/mcpapps/McpAppSessions {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (I)V
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun Dialogs (Landroidx/compose/runtime/Composer;I)V
+	public final fun close ()V
+}
+
+public final class dev/ai/elements/mcpapps/McpAppViewKt {
+	public static final fun McpAppView-J1qPv4o (Ldev/ai/elements/core/mcp/McpClient;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Lkotlinx/serialization/json/JsonObject;Lkotlinx/serialization/json/JsonObject;Ldev/ai/elements/mcpapps/McpAppActions;Landroidx/compose/ui/Modifier;Ldev/ai/elements/mcpapps/McpAppSessions;FLjava/lang/String;Landroidx/compose/runtime/Composer;III)V
+	public static final fun rememberMcpAppSessions (ILandroidx/compose/runtime/Composer;II)Ldev/ai/elements/mcpapps/McpAppSessions;
+}
+

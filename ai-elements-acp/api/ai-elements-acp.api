@@ -1,0 +1,49 @@
+public final class dev/ai/elements/acp/AcpAgent : java/io/Closeable {
+	public static final field Companion Ldev/ai/elements/acp/AcpAgent$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/acp/AcpFileSystem;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/acp/AcpFileSystem;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun close ()V
+	public final fun displayName (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getName ()Ljava/lang/String;
+	public final fun info (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/acp/AcpAgent$Companion {
+	public final fun process (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/acp/AcpFileSystem;Ljava/util/Map;)Ldev/ai/elements/acp/AcpAgent;
+	public static synthetic fun process$default (Ldev/ai/elements/acp/AcpAgent$Companion;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/acp/AcpFileSystem;Ljava/util/Map;ILjava/lang/Object;)Ldev/ai/elements/acp/AcpAgent;
+	public final fun webSocket (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/acp/AcpFileSystem;Lokhttp3/OkHttpClient;)Ldev/ai/elements/acp/AcpAgent;
+	public static synthetic fun webSocket$default (Ldev/ai/elements/acp/AcpAgent$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/acp/AcpFileSystem;Lokhttp3/OkHttpClient;ILjava/lang/Object;)Ldev/ai/elements/acp/AcpAgent;
+}
+
+public final class dev/ai/elements/acp/AcpBackend : dev/ai/elements/core/chat/ChatBackend {
+	public static final field Companion Ldev/ai/elements/acp/AcpBackend$Companion;
+	public static final field METADATA_KEY Ljava/lang/String;
+	public fun <init> (Ldev/ai/elements/acp/AcpAgent;Ldev/ai/elements/core/chat/ToolApprover;)V
+	public synthetic fun <init> (Ldev/ai/elements/acp/AcpAgent;Ldev/ai/elements/core/chat/ToolApprover;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun replayOf (Ldev/ai/elements/core/model/Message;F)Lkotlinx/coroutines/flow/Flow;
+	public static synthetic fun replayOf$default (Ldev/ai/elements/acp/AcpBackend;Ldev/ai/elements/core/model/Message;FILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
+	public fun stream (Ljava/util/List;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/acp/AcpBackend$Companion {
+}
+
+public abstract interface class dev/ai/elements/acp/AcpFileSystem {
+	public fun getReadOnly ()Z
+	public abstract fun read (Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun write (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/acp/AcpFileSystem$DefaultImpls {
+	public static fun getReadOnly (Ldev/ai/elements/acp/AcpFileSystem;)Z
+	public static fun write (Ldev/ai/elements/acp/AcpFileSystem;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/acp/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public static final field VERSION Ljava/lang/String;
+	public fun <init> ()V
+}
+

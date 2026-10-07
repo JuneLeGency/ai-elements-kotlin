@@ -15,6 +15,9 @@ Without an argument it regenerates the pages from the committed `docs/assets/com
 """
 from __future__ import annotations
 
+import argparse
+import re
+import textwrap
 import json
 import shutil
 import subprocess
@@ -40,7 +43,18 @@ INTROS = {
 
 
 def main() -> None:
-    source = Path(sys.argv[1]) if len(sys.argv) > 1 else None
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("source", nargs="?", type=Path)
+    parser.add_argument("--check", action="store_true", help="Fail if committed pages differ; never rewrite them")
+    parser.add_argument("--export-samples", type=Path, help="Export standalone Kotlin examples for the Maven consumer build")
+    args = parser.parse_args()
+    source = args.source
+    def write(path: Path, text: str) -> None:
+        if args.check:
+            if not path.exists() or path.read_text() != text:
+                raise SystemExit(f"Regenerate component docs: {path.relative_to(ROOT)}")
+        else:
+            path.write_text(text)
     ASSETS.mkdir(parents=True, exist_ok=True)
     if source:
         shutil.copy(source / "catalog.json", ASSETS / "catalog.json")
@@ -49,6 +63,13 @@ def main() -> None:
             # Half the device resolution is sharp on the site and keeps the repository small.
             subprocess.run(["cwebp", "-quiet", "-q", "82", "-resize", "600", "0", str(png), "-o", str(webp)], check=True)
     catalog = json.loads((ASSETS / "catalog.json").read_text())
+
+    usage = json.loads((ROOT / "tools/component-usage.json").read_text())
+    if set(usage) != {item["id"] for item in catalog}:
+        raise SystemExit("Every catalog entry must have component usage metadata")
+    sample_path = "demo/src/main/kotlin/dev/ai/elements/demo/samples/DocsSamples.kt"
+    sample_source = (ROOT / sample_path).read_text()
+    imports = component_imports()
 
     categories: dict[str, list[dict]] = {}
     for item in catalog:
@@ -60,7 +81,13 @@ def main() -> None:
         "",
         "Every element with the sample the demo app's **Components** screen shows, grouped as there.",
         "The pictures are rendered from that code by a test, so they show what the library draws.",
-        "Each entry names its main API; the [API reference](../api/index.html) has every parameter.",
+        "Each entry includes an example compiled with the demo, its artifact/imports, interaction notes,",
+        "and a direct API reference. Wrap the examples in `AiElementsTheme` inside your activity's",
+        "`setContent`; function parameters are the state or callbacks your app supplies.",
+        "See [Installation](../getting-started/installation.md) for Gradle and manifest setup.",
+        "",
+        "These 65 entries are usage scenarios (some share an API), not the complete public symbol list.",
+        "State factories, standalone forms and other supporting APIs are in [Supporting APIs](supporting.md).",
         "",
         "| Group | Components |",
         "|---|---|",
@@ -80,7 +107,7 @@ def main() -> None:
         "    reference server.",
         "",
     ]
-    (PAGES / "index.md").write_text("\n".join(index))
+    write(PAGES / "index.md", "\n".join(index))
 
     for slug, items in categories.items():
         title = items[0]["categoryTitle"]
@@ -99,9 +126,88 @@ def main() -> None:
             ]
             if item.get("elements"):
                 page.append(f"| AI Elements | `{item['elements']}` |")
-            page.append("")
-        (PAGES / f"{slug}.md").write_text("\n".join(page))
+            entry = usage[item["id"]]
+            symbol = entry["symbol"]
+            filename = re.sub(r"([A-Z])", lambda m: "-" + m[1].lower(), symbol) + ".html"
+            reference = entry.get("reference", f"../api/{entry['artifact']}/{entry['package']}/{filename}")
+            marker = "component-" + item["id"]
+            pattern = rf"// --8<-- \[start:{re.escape(marker)}\]\n(.*?)\s*// --8<-- \[end:{re.escape(marker)}\]"
+            match = re.search(pattern, sample_source, re.S)
+            if not match:
+                raise SystemExit(f"Missing compiled snippet: {marker}")
+            example = textwrap.dedent(match[1]).strip()
+            used = set(re.findall(r"\b[A-Za-z_][A-Za-z_0-9]*\b", example))
+            selected = sorted({imports[token] for token in used if token in imports})
+            if " by " in example:
+                selected += ["androidx.compose.runtime.getValue", "androidx.compose.runtime.setValue"]
+            if args.export_samples:
+                args.export_samples.mkdir(parents=True, exist_ok=True)
+                (args.export_samples / (item["id"] + ".kt")).write_text(
+                    "package dev.ai.elements.publishedsamples\n\n" +
+                    "\n".join("import " + imp for imp in sorted(set(selected))) + "\n\n" + example + "\n"
+                )
+            page += [
+                f"| Artifact | `{entry['artifact']}` |",
+                f"| Reference | [{symbol}]({reference}) |",
+                "", entry["note"], "",
+                "```kotlin", *("import " + imp for imp in sorted(set(selected))), "```", "",
+                "```kotlin", f'--8<-- "{sample_path}:{marker}"', "```", "",
+            ]
+        write(PAGES / f"{slug}.md", "\n".join(page))
+    supporting = [
+        "# Supporting APIs", "",
+        "The catalog groups common scenarios. These public composables and state factories also",
+        "have direct references below; click a name for its full parameter and lifecycle contract.",
+        "Use `rememberAudioPlayerState`, `rememberSpeechInputState` and `rememberSpeechOutputState`",
+        "inside composition so native resources are released when the screen leaves. A ViewModel",
+        "owns the ChatController; Compose state factories own the visual/player state.", "",
+        "`SchemaForm` renders a standalone JSON Schema form; pass onSubmit and onDecline.",
+        "`Confirmation` can be used outside chat with onApprove/onDeny and optional onDecide.",
+        "`ImageViewer`, `PdfViewerDialog` and `VideoPlayerDialog` require an onDismiss handler",
+        "that removes the dialog from composition. File access goes through the documented loader",
+        "or platform media APIs; requesting the file is the app's responsibility.", "",
+        "| API | Artifact |", "|---|---|",
+    ]
+    for module in ("ai-elements-ui", "ai-elements-genui", "ai-elements-mcp-apps"):
+        for path in sorted((ROOT / module / "src/main/kotlin").rglob("*.kt")):
+            text = path.read_text()
+            package = re.search(r"^package (.+)$", text, re.M)[1]
+            for match in re.finditer(r"^fun (\w+)\(", text, re.M):
+                # Annotations precede a top-level function; exclude ordinary utility functions.
+                prefix = text[:match.start()].rsplit("}", 1)[-1]
+                if "@Composable" not in prefix:
+                    continue
+                name = match[1]
+                file = re.sub(r"([A-Z])", lambda m: "-" + m[1].lower(), name) + ".html"
+                supporting.append(f"| [{name}](../api/{module}/{package}/{file}) | `{module}` |")
+    write(PAGES / "supporting.md", "\n".join(supporting) + "\n")
     print(f"{len(catalog)} components in {len(categories)} groups → {PAGES.relative_to(ROOT)}")
+
+
+def component_imports() -> dict[str, str]:
+    """Resolve example types and functions to public source packages plus AndroidX imports."""
+    imports = {}
+    for module in ("ai-elements-chat", "ai-elements-ui", "ai-elements-genui"):
+        for path in sorted((ROOT / module / "src/main/kotlin").rglob("*.kt")):
+            source = path.read_text()
+            package = re.search(r"^package (.+)$", source, re.M)[1]
+            for match in re.finditer(r"^(?:(?:data|enum|sealed|fun) )?(?:class|interface|object|fun) (\w+)(?=[\s(<:{])", source, re.M):
+                imports[match[1]] = package + "." + match[1]
+    imports.update({
+        "Composable": "androidx.compose.runtime.Composable",
+        "remember": "androidx.compose.runtime.remember",
+        "mutableStateOf": "androidx.compose.runtime.mutableStateOf",
+        "rememberSaveable": "androidx.compose.runtime.saveable.rememberSaveable",
+        "collectAsStateWithLifecycle": "androidx.lifecycle.compose.collectAsStateWithLifecycle",
+        "Column": "androidx.compose.foundation.layout.Column",
+        "height": "androidx.compose.foundation.layout.height",
+        "Modifier": "androidx.compose.ui.Modifier",
+        "dp": "androidx.compose.ui.unit.dp",
+        "Text": "androidx.compose.material3.Text",
+        "buildJsonObject": "kotlinx.serialization.json.buildJsonObject",
+        "put": "kotlinx.serialization.json.put",
+    })
+    return imports
 
 
 def anchor(title: str) -> str:

@@ -1,0 +1,393 @@
+{
+  "conversation": {
+    "note": "Keep the controller in a ViewModel. Conversation only renders the list; add PromptInput yourself or use Chat. Forward both approvals and forms.",
+    "symbol": "Conversation",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "messages": {
+    "note": "Use for one message or a non-lazy layout. For long histories use Conversation, which virtualizes reply blocks.",
+    "symbol": "MessageItem",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "prompt-input": {
+    "note": "The caller owns text and attachments. Clear text only after send accepts it. Set allowQueue when the controller can queue prompts.",
+    "symbol": "PromptInput",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "suggestions": {
+    "note": "Selecting a suggestion only invokes onSelect; the caller decides whether to fill the composer or send immediately.",
+    "symbol": "Suggestions",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "empty-state": {
+    "note": "Show while history is empty. Set showHero=false in a short container.",
+    "symbol": "ChatEmptyState",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "branch": {
+    "note": "index is zero-based. The app must update the selected message; this control does not edit history.",
+    "symbol": "BranchSelector",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "checkpoint": {
+    "note": "The element confirms before calling onRestore. Restoring the controller changes conversation history, not files changed by past tools.",
+    "symbol": "Checkpoint",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "queue": {
+    "note": "The controller owns queue order. Stop or error pauses automatic sending; wire Send now to resume explicitly.",
+    "symbol": "Queue",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "open-in-chat": {
+    "note": "Opens the chosen external chat with the prompt in its URL. Let the user choose; do not pass hidden context or credentials.",
+    "symbol": "OpenInChat",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "model-selector": {
+    "note": "The selection is UI state only. Your backend factory must read it on the next turn; preserve the current controller/history.",
+    "symbol": "ModelSelector",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "context": {
+    "note": "Pass measured token usage and the chosen model limit. This indicator does not tokenize messages or truncate history.",
+    "symbol": "ContextUsage",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "loading": {
+    "note": "These are Material 3 components, exposed by the Material dependency. Use while waiting for initial output; opt in to ExperimentalMaterial3ExpressiveApi.",
+    "symbol": "LoadingIndicator",
+    "artifact": "ai-elements-ui",
+    "package": "androidx.compose.material3",
+    "reference": "https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary"
+  },
+  "shimmer": {
+    "note": "Set active=false when work ends. Prefer a plain status label for long messages.",
+    "symbol": "ShimmerText",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "markdown": {
+    "note": "Pass the accumulated text, not just the latest token. streaming defers expensive rendering of incomplete content.",
+    "symbol": "MarkdownContent",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.markdown"
+  },
+  "code-block": {
+    "note": "language controls syntax highlighting. The element provides copy; it does not execute code.",
+    "symbol": "CodeBlock",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.markdown"
+  },
+  "math": {
+    "note": "Pass TeX without Markdown fences. For mixed prose use MarkdownContent with dollar delimiters. KaTeX assets are bundled offline.",
+    "symbol": "MathBlock",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.markdown"
+  },
+  "mermaid-flowchart": {
+    "note": "Pass complete Mermaid source. The default WebView renderer works offline; the native renderer requires its optional artifact and experimental opt-in.",
+    "symbol": "MermaidDiagram",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.markdown"
+  },
+  "mermaid-sequence": {
+    "note": "Pass complete Mermaid source. The default WebView renderer works offline; the native renderer requires its optional artifact and experimental opt-in.",
+    "symbol": "MermaidDiagram",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.markdown"
+  },
+  "mermaid-class": {
+    "note": "Pass complete Mermaid source. The default WebView renderer works offline; the native renderer requires its optional artifact and experimental opt-in.",
+    "symbol": "MermaidDiagram",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.markdown"
+  },
+  "mermaid-pie": {
+    "note": "Pass complete Mermaid source. The default WebView renderer works offline; the native renderer requires its optional artifact and experimental opt-in.",
+    "symbol": "MermaidDiagram",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.markdown"
+  },
+  "mermaid-streaming": {
+    "note": "Keep complete=false until the diagram closes; partial source is shown instead of repeatedly parsing an unfinished diagram.",
+    "symbol": "MermaidDiagram",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.markdown"
+  },
+  "reasoning": {
+    "note": "Use a stable part id. Set isStreaming while reasoning arrives; durationMs is elapsed time in milliseconds.",
+    "symbol": "Reasoning",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "sources": {
+    "note": "Source ids must remain stable. URLs open through LocalUriHandler; override it to route links in your app.",
+    "symbol": "Sources",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "inline-citation": {
+    "note": "Use the same source list for the answer and its citations. Citation markers are linked to source entries; this does not verify generated claims.",
+    "symbol": "MarkdownContent",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.markdown"
+  },
+  "tool-calls": {
+    "note": "Update the same part as input/progress/output arrives. onDecision carries reason, editedInput and remember; a card without callbacks is read-only.",
+    "symbol": "ToolCall",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "sub-agents": {
+    "note": "Set kind=ToolKind.Delegation and subagent upstream. ToolPartView selects delegation rendering and applies custom renderers; nested approvals share the callback.",
+    "symbol": "ToolPartView",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "agent-computer": {
+    "note": "Keep computer state with the screen. Auto chooses a side pane or bottom sheet from container width; use Hosted with your own adaptive layout.",
+    "symbol": "AgentComputerPanel",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "agent-computer-reply": {
+    "note": "Chat includes the panel and preview cards. Tool category/location and file parts must be set upstream; ordinary function names alone are not UI semantics.",
+    "symbol": "Chat",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "step-views": {
+    "note": "Pass screenshots as the AgentStep files. Tool category selects terminal, diff or browser presentation; give the view a bounded area.",
+    "symbol": "StepView",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "agent": {
+    "note": "This is a descriptive card, not an agent runtime. Populate capabilities from your backend or agent card.",
+    "symbol": "Agent",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "confirmation": {
+    "note": "Respect approvalAnswers: only offer reasons/edited input supported by the backend. Approval must resume the waiting tool, not create a new user turn.",
+    "symbol": "ToolCall",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "question": {
+    "note": "Store the returned selected ids/text and forward them to your agent. answered prevents resubmitting a completed question.",
+    "symbol": "Question",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "input-request": {
+    "note": "Use the exact request id when responding. Forms validate the supported JSON Schema fields; URL requests require the user to complete the external flow.",
+    "symbol": "InputRequestCard",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "plan": {
+    "note": "The caller owns step progress. Use COMPLETE/ACTIVE/PENDING; rendering a plan does not schedule or execute tasks.",
+    "symbol": "Plan",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "task": {
+    "note": "items describe task progress and badges; the component does not change files.",
+    "symbol": "Task",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "chain-of-thought": {
+    "note": "Render available step summaries and sources. This component does not request or reveal reasoning from the model.",
+    "symbol": "ChainOfThought",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "data-parts": {
+    "note": "Known plan/task shapes render as elements; custom names can be registered in AiElementsRenderers.data. Unknown data remains visible as structured data.",
+    "symbol": "DataPartView",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "jsx-typography": {
+    "note": "Requires ai-elements-genui (minSdk 26). Supported JSX compiles to native A2UI components; arbitrary JavaScript is not executed.",
+    "symbol": "JsxPreview",
+    "artifact": "ai-elements-genui",
+    "package": "dev.ai.elements.genui.jsx"
+  },
+  "jsx-controls": {
+    "note": "Requires ai-elements-genui (minSdk 26). Supported JSX compiles to native A2UI components; arbitrary JavaScript is not executed.",
+    "symbol": "JsxPreview",
+    "artifact": "ai-elements-genui",
+    "package": "dev.ai.elements.genui.jsx"
+  },
+  "jsx-cards": {
+    "note": "Requires ai-elements-genui (minSdk 26). Supported JSX compiles to native A2UI components; arbitrary JavaScript is not executed.",
+    "symbol": "JsxPreview",
+    "artifact": "ai-elements-genui",
+    "package": "dev.ai.elements.genui.jsx"
+  },
+  "jsx-form": {
+    "note": "onAction receives the action name and current model. Validate and route it in your app; the renderer does not perform server writes.",
+    "symbol": "JsxPreview",
+    "artifact": "ai-elements-genui",
+    "package": "dev.ai.elements.genui.jsx"
+  },
+  "jsx-streaming": {
+    "note": "Pass accumulated JSX and keep the composable at a stable position while streaming. Incomplete tags wait; keep initial bindings stable to retain edits.",
+    "symbol": "JsxPreview",
+    "artifact": "ai-elements-genui",
+    "package": "dev.ai.elements.genui.jsx"
+  },
+  "a2ui": {
+    "note": "Get a surface from A2uiState after processing standard A2UI events. For chat integration use a2uiRenderer and route actions through the transport binding.",
+    "symbol": "A2uiSurfaceView",
+    "artifact": "ai-elements-genui",
+    "package": "dev.ai.elements.genui.a2ui"
+  },
+  "artifact": {
+    "note": "Supply action buttons through the actions slot. The app owns save/share operations and associated permissions.",
+    "symbol": "Artifact",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.code"
+  },
+  "web-preview": {
+    "note": "Shows HTML or a URL in a sandboxed WebView. Do not treat preview content as trusted app UI; use MCP Apps for its standard server bridge.",
+    "symbol": "WebPreview",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.code"
+  },
+  "image": {
+    "note": "Set mediaType and url, optionally filename. LocalFileLoader customizes byte loading and authentication; image taps open the built-in viewer.",
+    "symbol": "FileAttachment",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "attachments": {
+    "note": "The app owns the list and file picker. Removal changes the list only; it does not delete the underlying file.",
+    "symbol": "AttachmentStrip",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "video": {
+    "note": "Use mediaType=video/mp4 (or the actual type). The platform codec must support the file; preview and playback need a readable source.",
+    "symbol": "VideoAttachment",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "document": {
+    "note": "PDF previews use PdfRenderer. Other formats need an installed viewer; files are shared through the library FileProvider.",
+    "symbol": "DocumentAttachment",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.chat"
+  },
+  "audio": {
+    "note": "rememberAudioPlayerState creates and releases the player with composition. Keep the source stable. Transcript times and seek positions are milliseconds.",
+    "symbol": "AudioPlayer",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.voice"
+  },
+  "voice-mode": {
+    "note": "Declare RECORD_AUDIO and let the permission flow complete. Requires installed recognition/TTS services. onClose should dismiss the hosting dialog or screen.",
+    "symbol": "VoiceMode",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.voice"
+  },
+  "persona": {
+    "note": "Visual state only; this does not listen or speak. Feed level from your audio state when showing LISTENING or SPEAKING.",
+    "symbol": "Persona",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.voice"
+  },
+  "speech-input": {
+    "note": "Declare RECORD_AUDIO. State owns the recognizer lifecycle; show speech.error on failure and distinguish interim/final transcripts in onTranscript.",
+    "symbol": "SpeechInput",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.voice"
+  },
+  "voice-selectors": {
+    "note": "Selectors report choices; configure your audio engine or SpeechSettings separately. Available microphones and voices depend on the device.",
+    "symbol": "MicSelector",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.voice"
+  },
+  "terminal": {
+    "note": "Pass accumulated command output. ANSI styling is supported, with bounded scrollback; this is an output view, not an interactive shell.",
+    "symbol": "Terminal",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.code"
+  },
+  "stack-trace": {
+    "note": "Takes raw trace text. App frames and dependency frames can be folded; this view does not upload crash reports.",
+    "symbol": "StackTrace",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.code"
+  },
+  "test-results": {
+    "note": "Supply actual test results and durations in milliseconds; the component does not run tests.",
+    "symbol": "TestResults",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.code"
+  },
+  "file-tree": {
+    "note": "The caller provides file nodes; selecting a node does not read it. Pass expanded paths when you need initial folder expansion.",
+    "symbol": "FileTree",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.code"
+  },
+  "commit": {
+    "note": "Metadata display only. Hash/message/files come from your source control tool; no git operation is performed.",
+    "symbol": "Commit",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.code"
+  },
+  "schema-display": {
+    "note": "Displays a schema summary; it does not validate or invoke the endpoint. requestBody/responseBody are example text.",
+    "symbol": "SchemaDisplay",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.code"
+  },
+  "package-info": {
+    "note": "The app supplies the change classification and size metadata. No dependency resolution or update is performed.",
+    "symbol": "PackageInfo",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.code"
+  },
+  "environment-variables": {
+    "note": "Values marked secret are visually masked, not encrypted. Do not put real credentials in examples or screenshots.",
+    "symbol": "EnvironmentVariables",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.code"
+  },
+  "sandbox": {
+    "note": "This is a tabbed presentation of code and results. Execution is supplied separately by harness-shell or your backend.",
+    "symbol": "Sandbox",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.code"
+  },
+  "snippet": {
+    "note": "Displays a copyable command; clicking copy does not execute it.",
+    "symbol": "Snippet",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.code"
+  },
+  "workflow-canvas": {
+    "note": "Use stable node ids and edges referring to them; positions are dp. Give the canvas a bounded size. Use nodeContent/nodeToolbar/panel slots to customize.",
+    "symbol": "WorkflowCanvas",
+    "artifact": "ai-elements-ui",
+    "package": "dev.ai.elements.ui.workflow"
+  }
+}

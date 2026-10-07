@@ -42,7 +42,7 @@ import java.util.UUID
  * The **Anthropic Messages API** (`POST /v1/messages`, streaming), usable with
  * api.anthropic.com or any Anthropic-compatible proxy.
  *
- * Like [OpenAiChatBackend] it runs the tool loop on-device. Thinking blocks
+ * Like [dev.ai.elements.core.provider.openai.OpenAiChatBackend] it runs the tool loop on-device. Thinking blocks
  * (when the model emits them) are shown as reasoning and echoed back verbatim,
  * with their signatures, on the next step as the API requires.
  */

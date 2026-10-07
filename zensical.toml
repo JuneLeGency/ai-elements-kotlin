@@ -58,6 +58,7 @@ nav = [
     "components/voice.md",
     "components/developer-tools.md",
     "components/workflow.md",
+    "components/supporting.md",
   ] },
   { "Concepts" = [
     "concepts/architecture.md",
@@ -69,6 +70,7 @@ nav = [
     "develop/testing.md",
     "develop/contributing.md",
     "develop/releasing.md",
+    "develop/api-compatibility.md",
   ] },
   { "Project" = [
     "project/roadmap.md",

@@ -1,0 +1,17 @@
+public final class dev/ai/elements/notifications/AgentRunNotifications {
+	public static final field CHANNEL Ljava/lang/String;
+	public static final field Companion Ldev/ai/elements/notifications/AgentRunNotifications$Companion;
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;I)V
+	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun cancel (I)V
+	public final fun ensureChannel ()V
+	public final fun finished (Ldev/ai/elements/ui/chat/AgentProgress;Ljava/lang/String;Landroid/app/PendingIntent;)Landroid/app/Notification;
+	public final fun getChannelId ()Ljava/lang/String;
+	public final fun post (ILandroid/app/Notification;)Z
+	public final fun running (Ldev/ai/elements/ui/chat/AgentProgress;Ljava/lang/String;Landroid/app/PendingIntent;Landroid/app/PendingIntent;J)Landroid/app/Notification;
+	public static synthetic fun running$default (Ldev/ai/elements/notifications/AgentRunNotifications;Ldev/ai/elements/ui/chat/AgentProgress;Ljava/lang/String;Landroid/app/PendingIntent;Landroid/app/PendingIntent;JILjava/lang/Object;)Landroid/app/Notification;
+}
+
+public final class dev/ai/elements/notifications/AgentRunNotifications$Companion {
+}
+

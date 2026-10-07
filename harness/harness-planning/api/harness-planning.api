@@ -1,0 +1,70 @@
+public final class dev/ai/elements/harness/planning/InMemoryPlanStore : dev/ai/elements/harness/planning/PlanStore {
+	public fun <init> ()V
+	public fun get (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun set (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/harness/planning/PlanItem {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/harness/planning/TaskStatus;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/harness/planning/TaskStatus;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ldev/ai/elements/harness/planning/TaskStatus;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/harness/planning/TaskStatus;Ljava/lang/String;)Ldev/ai/elements/harness/planning/PlanItem;
+	public static synthetic fun copy$default (Ldev/ai/elements/harness/planning/PlanItem;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/harness/planning/TaskStatus;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/harness/planning/PlanItem;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getActiveForm ()Ljava/lang/String;
+	public final fun getContent ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getStatus ()Ldev/ai/elements/harness/planning/TaskStatus;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class dev/ai/elements/harness/planning/PlanStore {
+	public abstract fun get (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun set (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/harness/planning/Planning : dev/ai/elements/core/agent/Capability {
+	public static final field ADD_TASK Ljava/lang/String;
+	public static final field Companion Ldev/ai/elements/harness/planning/Planning$Companion;
+	public static final field GRANULAR_GUIDANCE Ljava/lang/String;
+	public static final field PLAN_PART Ljava/lang/String;
+	public static final field READ_PLAN Ljava/lang/String;
+	public static final field REMOVE_TASK Ljava/lang/String;
+	public static final field UPDATE_TASK_STATUS Ljava/lang/String;
+	public static final field UPDATE_TASK_STATUSES Ljava/lang/String;
+	public static final field WRITE_PLAN Ljava/lang/String;
+	public static final field WRITE_PLAN_GUIDANCE Ljava/lang/String;
+	public fun <init> ()V
+	public fun <init> (Ldev/ai/elements/harness/planning/PlanStore;Ljava/lang/String;)V
+	public synthetic fun <init> (Ldev/ai/elements/harness/planning/PlanStore;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun context (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getInstructions ()Ljava/lang/String;
+	public final fun planData (Ljava/util/List;)Lkotlinx/serialization/json/JsonObject;
+	public fun tools (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/harness/planning/Planning$Companion {
+	public final fun render (Ljava/util/List;)Ljava/lang/String;
+}
+
+public final class dev/ai/elements/harness/planning/TaskStatus : java/lang/Enum {
+	public static final field CANCELLED Ldev/ai/elements/harness/planning/TaskStatus;
+	public static final field COMPLETED Ldev/ai/elements/harness/planning/TaskStatus;
+	public static final field Companion Ldev/ai/elements/harness/planning/TaskStatus$Companion;
+	public static final field IN_PROGRESS Ldev/ai/elements/harness/planning/TaskStatus;
+	public static final field PENDING Ldev/ai/elements/harness/planning/TaskStatus;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getIcon ()Ljava/lang/String;
+	public final fun getWire ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/harness/planning/TaskStatus;
+	public static fun values ()[Ldev/ai/elements/harness/planning/TaskStatus;
+}
+
+public final class dev/ai/elements/harness/planning/TaskStatus$Companion {
+	public final fun parse (Ljava/lang/String;)Ldev/ai/elements/harness/planning/TaskStatus;
+}
+

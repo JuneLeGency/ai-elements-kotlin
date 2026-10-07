@@ -1,0 +1,1307 @@
+public final class dev/ai/elements/ui/chat/AgentComputerKt {
+	public static final fun AgentComputerPanel (Ldev/ai/elements/ui/chat/AgentComputerState;Ldev/ai/elements/core/model/Message;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun AgentComputerScaffold (Ldev/ai/elements/ui/chat/AgentComputerState;Ljava/util/List;Landroidx/compose/ui/Modifier;Ldev/ai/elements/ui/chat/AgentComputerLayout;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun StepView (Ldev/ai/elements/ui/chat/AgentStep;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun activityLabel (Ldev/ai/elements/core/model/ToolPart;Landroid/content/res/Resources;)Ljava/lang/String;
+	public static final fun agentSteps (Ldev/ai/elements/core/model/Message;)Ljava/util/List;
+	public static final fun getLocalAgentComputer ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun rememberAgentComputerState (Ldev/ai/elements/ui/chat/RunReplay;Landroidx/compose/runtime/Composer;II)Ldev/ai/elements/ui/chat/AgentComputerState;
+}
+
+public final class dev/ai/elements/ui/chat/AgentComputerLayout : java/lang/Enum {
+	public static final field Auto Ldev/ai/elements/ui/chat/AgentComputerLayout;
+	public static final field BottomSheet Ldev/ai/elements/ui/chat/AgentComputerLayout;
+	public static final field Hosted Ldev/ai/elements/ui/chat/AgentComputerLayout;
+	public static final field SidePane Ldev/ai/elements/ui/chat/AgentComputerLayout;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/ui/chat/AgentComputerLayout;
+	public static fun values ()[Ldev/ai/elements/ui/chat/AgentComputerLayout;
+}
+
+public final class dev/ai/elements/ui/chat/AgentComputerState {
+	public static final field $stable I
+	public final fun close ()V
+	public final fun exitReplay ()V
+	public final fun getFollow ()Z
+	public final fun getMessageId ()Ljava/lang/String;
+	public final fun getReplayed ()Ldev/ai/elements/core/model/Message;
+	public final fun getReplaying ()Z
+	public final fun getStep ()I
+	public final fun isOpen ()Z
+	public final fun open (Ljava/lang/String;Ljava/lang/Integer;)V
+	public static synthetic fun open$default (Ldev/ai/elements/ui/chat/AgentComputerState;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)V
+	public final fun replay ()V
+	public final fun setFollow (Z)V
+	public final fun setStep (I)V
+}
+
+public final class dev/ai/elements/ui/chat/AgentKt {
+	public static final fun Agent (Ljava/lang/String;Landroidx/compose/ui/Modifier;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/chat/AgentProgress {
+	public static final field $stable I
+	public static final field Companion Ldev/ai/elements/ui/chat/AgentProgress$Companion;
+	public fun <init> (Ldev/ai/elements/ui/chat/AgentProgress$Phase;Ldev/ai/elements/core/model/ToolPart;ILjava/util/List;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ldev/ai/elements/ui/chat/AgentProgress$Phase;Ldev/ai/elements/core/model/ToolPart;ILjava/util/List;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ldev/ai/elements/ui/chat/AgentProgress$Phase;
+	public final fun component2 ()Ldev/ai/elements/core/model/ToolPart;
+	public final fun component3 ()I
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ldev/ai/elements/ui/chat/AgentProgress$Phase;Ldev/ai/elements/core/model/ToolPart;ILjava/util/List;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/ui/chat/AgentProgress;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/chat/AgentProgress;Ldev/ai/elements/ui/chat/AgentProgress$Phase;Ldev/ai/elements/core/model/ToolPart;ILjava/util/List;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/ui/chat/AgentProgress;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/String;
+	public final fun getPhase ()Ldev/ai/elements/ui/chat/AgentProgress$Phase;
+	public final fun getPlan ()Ljava/util/List;
+	public final fun getPlanDone ()I
+	public final fun getReply ()Ljava/lang/String;
+	public final fun getSteps ()I
+	public final fun getTool ()Ldev/ai/elements/core/model/ToolPart;
+	public fun hashCode ()I
+	public final fun isActive ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/chat/AgentProgress$Companion {
+	public final fun of (Ldev/ai/elements/core/chat/ChatState;)Ldev/ai/elements/ui/chat/AgentProgress;
+}
+
+public final class dev/ai/elements/ui/chat/AgentProgress$Phase : java/lang/Enum {
+	public static final field DONE Ldev/ai/elements/ui/chat/AgentProgress$Phase;
+	public static final field FAILED Ldev/ai/elements/ui/chat/AgentProgress$Phase;
+	public static final field NEEDS_APPROVAL Ldev/ai/elements/ui/chat/AgentProgress$Phase;
+	public static final field NEEDS_INPUT Ldev/ai/elements/ui/chat/AgentProgress$Phase;
+	public static final field THINKING Ldev/ai/elements/ui/chat/AgentProgress$Phase;
+	public static final field WORKING Ldev/ai/elements/ui/chat/AgentProgress$Phase;
+	public static final field WRITING Ldev/ai/elements/ui/chat/AgentProgress$Phase;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/ui/chat/AgentProgress$Phase;
+	public static fun values ()[Ldev/ai/elements/ui/chat/AgentProgress$Phase;
+}
+
+public final class dev/ai/elements/ui/chat/AgentStep {
+	public static final field $stable I
+	public fun <init> (Ldev/ai/elements/core/model/ToolPart;Ljava/util/List;)V
+	public final fun component1 ()Ldev/ai/elements/core/model/ToolPart;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ldev/ai/elements/core/model/ToolPart;Ljava/util/List;)Ldev/ai/elements/ui/chat/AgentStep;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/chat/AgentStep;Ldev/ai/elements/core/model/ToolPart;Ljava/util/List;ILjava/lang/Object;)Ldev/ai/elements/ui/chat/AgentStep;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFiles ()Ljava/util/List;
+	public final fun getTool ()Ldev/ai/elements/core/model/ToolPart;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/chat/AgentToolSpec {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/ui/chat/AgentToolSpec;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/chat/AgentToolSpec;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/ui/chat/AgentToolSpec;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getSchema ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/chat/AiElementsFileProvider : androidx/core/content/FileProvider {
+	public static final field $stable I
+	public fun <init> ()V
+}
+
+public final class dev/ai/elements/ui/chat/AiElementsRenderers {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;Ljava/util/Map;Lkotlin/jvm/functions/Function1;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/Map;Ljava/util/Map;Lkotlin/jvm/functions/Function1;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getCodeBlocks ()Ljava/util/Map;
+	public final fun getData ()Ljava/util/Map;
+	public final fun getTool ()Lkotlin/jvm/functions/Function1;
+	public final fun getTools ()Ljava/util/Map;
+}
+
+public final class dev/ai/elements/ui/chat/AttachmentsKt {
+	public static final fun AttachmentStrip--jt2gSs (Ljava/util/List;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;FLandroidx/compose/runtime/Composer;II)V
+	public static final fun FileAttachment-6a0pyJM (Ldev/ai/elements/core/model/FilePart;Landroidx/compose/ui/Modifier;FLandroidx/compose/runtime/Composer;II)V
+	public static final fun FileImage (Ldev/ai/elements/core/model/FilePart;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/layout/ContentScale;ZILandroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/chat/ChatKt {
+	public static final fun Chat (Ldev/ai/elements/core/chat/ChatController;Landroidx/compose/ui/Modifier;Ljava/lang/String;ZLkotlin/jvm/functions/Function3;Ldev/ai/elements/ui/chat/RunReplay;Landroidx/compose/runtime/Composer;II)V
+	public static final fun rememberChat (Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Ldev/ai/elements/core/chat/ChatController;
+}
+
+public abstract interface class dev/ai/elements/ui/chat/CodeBlockRenderer {
+	public abstract fun Render (Ljava/lang/String;ZLandroidx/compose/runtime/Composer;I)V
+}
+
+public final class dev/ai/elements/ui/chat/ComposableSingletons$AgentComputerKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/chat/ComposableSingletons$AgentComputerKt;
+	public fun <init> ()V
+	public final fun getLambda$-1764623949$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-2111679533$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1123758553$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1134885289$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$583846780$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$9714986$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/ai/elements/ui/chat/ComposableSingletons$ChatKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/chat/ComposableSingletons$ChatKt;
+	public fun <init> ()V
+	public final fun getLambda$-1610147551$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class dev/ai/elements/ui/chat/ComposableSingletons$ConfirmationKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/chat/ComposableSingletons$ConfirmationKt;
+	public fun <init> ()V
+	public final fun getLambda$-1190473961$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1575500421$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1785019576$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-194225147$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-2009464102$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-365472989$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1039990048$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1473953729$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1595087013$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1621455209$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1961786208$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$2075984039$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$806427356$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/ai/elements/ui/chat/ComposableSingletons$ConversationControlsKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/chat/ComposableSingletons$ConversationControlsKt;
+	public fun <init> ()V
+	public final fun getLambda$-1099742647$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1131148439$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1141162173$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-554870073$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-596289599$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-633970296$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-827306360$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1478122020$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$2080655526$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$337890793$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$420817842$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$55863158$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$861754955$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/ai/elements/ui/chat/ComposableSingletons$ConversationKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/chat/ComposableSingletons$ConversationKt;
+	public fun <init> ()V
+	public final fun getLambda$142320959$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1580607223$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$731888918$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class dev/ai/elements/ui/chat/ComposableSingletons$DocumentsKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/chat/ComposableSingletons$DocumentsKt;
+	public fun <init> ()V
+	public final fun getLambda$-1531596655$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-2042855921$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$154814040$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/ai/elements/ui/chat/ComposableSingletons$ImageViewerKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/chat/ComposableSingletons$ImageViewerKt;
+	public fun <init> ()V
+	public final fun getLambda$-489203813$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1577885220$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/ai/elements/ui/chat/ComposableSingletons$InputRequestKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/chat/ComposableSingletons$InputRequestKt;
+	public fun <init> ()V
+	public final fun getLambda$1969425337$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1984802054$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$618688908$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$642272793$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class dev/ai/elements/ui/chat/ComposableSingletons$MediaKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/chat/ComposableSingletons$MediaKt;
+	public fun <init> ()V
+	public final fun getLambda$-2018020323$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-488355424$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/ai/elements/ui/chat/ComposableSingletons$MessageKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/chat/ComposableSingletons$MessageKt;
+	public fun <init> ()V
+	public final fun getLambda$-1027292412$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-152452147$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1736315015$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1806301019$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$2042776719$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$703844847$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$897417068$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/ai/elements/ui/chat/ComposableSingletons$ModelSelectorKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/chat/ComposableSingletons$ModelSelectorKt;
+	public fun <init> ()V
+	public final fun getLambda$-2135858188$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-759198537$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1632308664$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$492059390$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$99060445$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/ai/elements/ui/chat/ComposableSingletons$PromptInputKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/chat/ComposableSingletons$PromptInputKt;
+	public fun <init> ()V
+	public final fun getLambda$-1336164590$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$155012371$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/ai/elements/ui/chat/ComposableSingletons$QuestionKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/chat/ComposableSingletons$QuestionKt;
+	public fun <init> ()V
+	public final fun getLambda$-1881809625$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1896432761$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class dev/ai/elements/ui/chat/ConfirmationKt {
+	public static final fun Confirmation (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ZLandroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/chat/ContextKt {
+	public static final fun ContextUsage (Ldev/ai/elements/core/model/Usage;Landroidx/compose/ui/Modifier;Ljava/lang/Integer;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/chat/ConversationControlsKt {
+	public static final fun BranchSelector (IILkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;ZLandroidx/compose/runtime/Composer;II)V
+	public static final fun Checkpoint (Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)V
+	public static final fun OpenInChat (Ljava/lang/String;Landroidx/compose/ui/Modifier;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
+	public static final fun Queue (Ljava/util/List;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun getDefaultOpenInTargets ()Ljava/util/List;
+}
+
+public final class dev/ai/elements/ui/chat/ConversationKt {
+	public static final fun Conversation-qmNWa6M (Ldev/ai/elements/core/chat/ChatState;Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/lazy/LazyListState;FLandroidx/compose/foundation/layout/PaddingValues;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;III)V
+}
+
+public final class dev/ai/elements/ui/chat/DataPartsKt {
+	public static final fun DataPartView (Ldev/ai/elements/core/model/DataPart;Landroidx/compose/ui/Modifier;Ljava/util/Map;Landroidx/compose/runtime/Composer;II)V
+}
+
+public abstract interface class dev/ai/elements/ui/chat/DataRenderer {
+	public abstract fun Render (Ldev/ai/elements/core/model/DataPart;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class dev/ai/elements/ui/chat/DocumentsKt {
+	public static final fun DocumentAttachment (Ldev/ai/elements/core/model/FilePart;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun PdfViewerDialog (Ldev/ai/elements/core/model/FilePart;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
+	public static final fun isPdf (Ldev/ai/elements/core/model/FilePart;)Z
+	public static final fun localFile (Landroid/content/Context;Ldev/ai/elements/core/model/FilePart;Ldev/ai/elements/ui/chat/FileLoader;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun openExternally (Landroid/content/Context;Ldev/ai/elements/core/model/FilePart;Ldev/ai/elements/ui/chat/FileLoader;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class dev/ai/elements/ui/chat/FileLoader {
+	public abstract fun load (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/ui/chat/ImageViewerKt {
+	public static final fun ImageViewer (Ldev/ai/elements/core/model/FilePart;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class dev/ai/elements/ui/chat/InlineCitationKt {
+	public static final fun CitationSheet (Ljava/util/List;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
+	public static final fun InlineCitation (Ljava/util/List;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/chat/InputRequestKt {
+	public static final fun InputRequestCard (Ldev/ai/elements/core/chat/InputRequest;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun SchemaForm (Lkotlinx/serialization/json/JsonObject;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/chat/MediaKt {
+	public static final fun VideoAttachment (Ldev/ai/elements/core/model/FilePart;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun VideoPlayerDialog (Ldev/ai/elements/core/model/FilePart;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
+	public static final fun isAudio (Ldev/ai/elements/core/model/FilePart;)Z
+	public static final fun isVideo (Ldev/ai/elements/core/model/FilePart;)Z
+	public static final fun playableUri (Landroid/content/Context;Ldev/ai/elements/core/model/FilePart;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/ui/chat/MessageKt {
+	public static final fun AgentRunDialog (Ldev/ai/elements/core/model/Message;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
+	public static final fun AssistantAvatar (ZLandroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun AssistantMessage (Ldev/ai/elements/core/model/Message;Landroidx/compose/ui/Modifier;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun MessageItem (Ldev/ai/elements/core/model/Message;Landroidx/compose/ui/Modifier;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun UserMessage (Ldev/ai/elements/core/model/Message;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/chat/ModelCapability : java/lang/Enum {
+	public static final field AUDIO Ldev/ai/elements/ui/chat/ModelCapability;
+	public static final field FAST Ldev/ai/elements/ui/chat/ModelCapability;
+	public static final field REASONING Ldev/ai/elements/ui/chat/ModelCapability;
+	public static final field TOOLS Ldev/ai/elements/ui/chat/ModelCapability;
+	public static final field VISION Ldev/ai/elements/ui/chat/ModelCapability;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/ui/chat/ModelCapability;
+	public static fun values ()[Ldev/ai/elements/ui/chat/ModelCapability;
+}
+
+public final class dev/ai/elements/ui/chat/ModelOption {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/util/Set;
+	public final fun component6 ()Ljava/lang/Integer;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/lang/Integer;)Ldev/ai/elements/ui/chat/ModelOption;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/chat/ModelOption;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/lang/Integer;ILjava/lang/Object;)Ldev/ai/elements/ui/chat/ModelOption;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCapabilities ()Ljava/util/Set;
+	public final fun getContextWindow ()Ljava/lang/Integer;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getProvider ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/chat/ModelSelectorKt {
+	public static final fun ModelSelector (Ljava/util/List;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/chat/OpenInTarget {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/ui/chat/OpenInTarget;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/chat/OpenInTarget;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/ui/chat/OpenInTarget;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getUrlTemplate ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/chat/PromptInputKt {
+	public static final fun PromptInput (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ZLandroidx/compose/ui/Modifier;Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;ZLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
+}
+
+public final class dev/ai/elements/ui/chat/QuestionAnswer {
+	public static final field $stable I
+	public fun <init> (Ljava/util/List;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;)Ldev/ai/elements/ui/chat/QuestionAnswer;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/chat/QuestionAnswer;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/ui/chat/QuestionAnswer;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSelected ()Ljava/util/List;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/chat/QuestionKt {
+	public static final fun Question (Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;Ljava/lang/String;ZZLdev/ai/elements/ui/chat/QuestionAnswer;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/chat/QuestionOption {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/ui/chat/QuestionOption;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/chat/QuestionOption;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/ui/chat/QuestionOption;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getLabel ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/chat/ReasoningKt {
+	public static final fun Reasoning (Ldev/ai/elements/core/model/ReasoningPart;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/chat/RenderersKt {
+	public static final fun getLocalAiElementsRenderers ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun getLocalFileLoader ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+}
+
+public abstract interface class dev/ai/elements/ui/chat/RunReplay {
+	public abstract fun replay (Ldev/ai/elements/core/model/Message;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/ui/chat/ShimmerKt {
+	public static final fun ShimmerText (Ljava/lang/String;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/text/TextStyle;ZLandroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/chat/SourcesKt {
+	public static final fun Sources (Ljava/util/List;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/chat/StepStatus : java/lang/Enum {
+	public static final field ACTIVE Ldev/ai/elements/ui/chat/StepStatus;
+	public static final field COMPLETE Ldev/ai/elements/ui/chat/StepStatus;
+	public static final field PENDING Ldev/ai/elements/ui/chat/StepStatus;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/ui/chat/StepStatus;
+	public static fun values ()[Ldev/ai/elements/ui/chat/StepStatus;
+}
+
+public final class dev/ai/elements/ui/chat/StickToBottomKt {
+	public static final fun rememberStickToBottomState (Landroidx/compose/foundation/lazy/LazyListState;Landroidx/compose/runtime/Composer;I)Ldev/ai/elements/ui/chat/StickToBottomState;
+}
+
+public final class dev/ai/elements/ui/chat/StickToBottomState {
+	public static final field $stable I
+	public static final field BOTTOM I
+	public final fun getConnection ()Landroidx/compose/ui/input/nestedscroll/NestedScrollConnection;
+	public final fun getFollowing ()Z
+	public final fun getShowJumpToLatest ()Z
+	public final fun jumpToLatest (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun jumpToLatest$default (Ldev/ai/elements/ui/chat/StickToBottomState;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/ui/chat/SubagentKt {
+	public static final fun Subagent (Ldev/ai/elements/core/model/ToolPart;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ToolPartView (Ldev/ai/elements/core/model/ToolPart;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun isDelegation (Ldev/ai/elements/core/model/ToolPart;)Z
+}
+
+public final class dev/ai/elements/ui/chat/SuggestionsKt {
+	public static final fun ChatEmptyState (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;ZLandroidx/compose/runtime/Composer;II)V
+	public static final fun Suggestions (Ljava/util/List;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/chat/ToolCallKt {
+	public static final fun ToolCall (Ldev/ai/elements/core/model/ToolPart;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public abstract interface class dev/ai/elements/ui/chat/ToolRenderer {
+	public abstract fun Render (Ldev/ai/elements/core/model/ToolPart;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class dev/ai/elements/ui/chat/WorkflowKt {
+	public static final fun ChainOfThought (Ljava/util/List;Landroidx/compose/ui/Modifier;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)V
+	public static final fun Plan (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Landroidx/compose/ui/Modifier;ZLandroidx/compose/runtime/Composer;II)V
+	public static final fun Task (Ljava/lang/String;Ljava/util/List;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/chat/WorkflowStep {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/ui/chat/StepStatus;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/ui/chat/StepStatus;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ldev/ai/elements/ui/chat/StepStatus;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/ui/chat/StepStatus;Ljava/util/List;)Ldev/ai/elements/ui/chat/WorkflowStep;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/chat/WorkflowStep;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/ui/chat/StepStatus;Ljava/util/List;ILjava/lang/Object;)Ldev/ai/elements/ui/chat/WorkflowStep;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBadges ()Ljava/util/List;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getStatus ()Ldev/ai/elements/ui/chat/StepStatus;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/code/ArtifactKt {
+	public static final fun Artifact (Ljava/lang/String;Landroidx/compose/ui/Modifier;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun WebPreview--jt2gSs (Ljava/lang/String;Landroidx/compose/ui/Modifier;Ljava/lang/String;FLandroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/code/CommitFile {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ldev/ai/elements/ui/code/FileChange;II)V
+	public synthetic fun <init> (Ljava/lang/String;Ldev/ai/elements/ui/code/FileChange;IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ldev/ai/elements/ui/code/FileChange;
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun copy (Ljava/lang/String;Ldev/ai/elements/ui/code/FileChange;II)Ldev/ai/elements/ui/code/CommitFile;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/code/CommitFile;Ljava/lang/String;Ldev/ai/elements/ui/code/FileChange;IIILjava/lang/Object;)Ldev/ai/elements/ui/code/CommitFile;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAdditions ()I
+	public final fun getChange ()Ldev/ai/elements/ui/code/FileChange;
+	public final fun getDeletions ()I
+	public final fun getPath ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/code/ComposableSingletons$ArtifactKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/code/ComposableSingletons$ArtifactKt;
+	public fun <init> ()V
+	public final fun getLambda$-1863101052$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-793618284$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-946872627$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$300201157$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/ai/elements/ui/code/ComposableSingletons$CommonKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/code/ComposableSingletons$CommonKt;
+	public fun <init> ()V
+	public final fun getLambda$454047962$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class dev/ai/elements/ui/code/DevCardsKt {
+	public static final fun Commit (Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/Modifier;Ljava/lang/String;Ljava/lang/Long;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
+	public static final fun EnvironmentVariables (Ljava/util/List;Landroidx/compose/ui/Modifier;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)V
+	public static final fun PackageInfo (Ljava/lang/String;Landroidx/compose/ui/Modifier;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/ui/code/PackageChange;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)V
+	public static final fun Sandbox (Ljava/lang/String;Ljava/util/List;Landroidx/compose/ui/Modifier;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)V
+	public static final fun SchemaDisplay (Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/Modifier;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)V
+	public static final fun Snippet (Ljava/lang/String;Landroidx/compose/ui/Modifier;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/code/EnvironmentVariable {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Z)Ldev/ai/elements/ui/code/EnvironmentVariable;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/code/EnvironmentVariable;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Ldev/ai/elements/ui/code/EnvironmentVariable;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getSecret ()Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/code/FileChange : java/lang/Enum {
+	public static final field ADDED Ldev/ai/elements/ui/code/FileChange;
+	public static final field DELETED Ldev/ai/elements/ui/code/FileChange;
+	public static final field MODIFIED Ldev/ai/elements/ui/code/FileChange;
+	public static final field RENAMED Ldev/ai/elements/ui/code/FileChange;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getLetter ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/ui/code/FileChange;
+	public static fun values ()[Ldev/ai/elements/ui/code/FileChange;
+}
+
+public final class dev/ai/elements/ui/code/FileNode {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)Ldev/ai/elements/ui/code/FileNode;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/code/FileNode;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/ui/code/FileNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBadge ()Ljava/lang/String;
+	public final fun getChildren ()Ljava/util/List;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPath ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isFolder ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/code/FileTreeKt {
+	public static final fun FileTree (Ljava/util/List;Landroidx/compose/ui/Modifier;Ljava/lang/String;Ljava/util/Set;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/code/PackageChange : java/lang/Enum {
+	public static final field ADDED Ldev/ai/elements/ui/code/PackageChange;
+	public static final field MAJOR Ldev/ai/elements/ui/code/PackageChange;
+	public static final field MINOR Ldev/ai/elements/ui/code/PackageChange;
+	public static final field PATCH Ldev/ai/elements/ui/code/PackageChange;
+	public static final field REMOVED Ldev/ai/elements/ui/code/PackageChange;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/ui/code/PackageChange;
+	public static fun values ()[Ldev/ai/elements/ui/code/PackageChange;
+}
+
+public final class dev/ai/elements/ui/code/SandboxTab {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function2;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lkotlin/jvm/functions/Function2;
+	public final fun copy (Ljava/lang/String;Lkotlin/jvm/functions/Function2;)Ldev/ai/elements/ui/code/SandboxTab;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/code/SandboxTab;Ljava/lang/String;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Ldev/ai/elements/ui/code/SandboxTab;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContent ()Lkotlin/jvm/functions/Function2;
+	public final fun getLabel ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/code/SchemaParameter {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;)Ldev/ai/elements/ui/code/SchemaParameter;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/code/SchemaParameter;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/ui/code/SchemaParameter;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getLocation ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getRequired ()Z
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/code/StackTraceKt {
+	public static final fun StackTrace (Ljava/lang/String;Landroidx/compose/ui/Modifier;ILandroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/code/TerminalKt {
+	public static final fun Terminal-eHTjO5g (Ljava/lang/String;Landroidx/compose/ui/Modifier;Ljava/lang/String;Ldev/ai/elements/ui/code/TerminalStatus;Ljava/lang/Integer;FLkotlin/jvm/functions/Function0;ILandroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/code/TerminalStatus : java/lang/Enum {
+	public static final field ERROR Ldev/ai/elements/ui/code/TerminalStatus;
+	public static final field RUNNING Ldev/ai/elements/ui/code/TerminalStatus;
+	public static final field SUCCESS Ldev/ai/elements/ui/code/TerminalStatus;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/ui/code/TerminalStatus;
+	public static fun values ()[Ldev/ai/elements/ui/code/TerminalStatus;
+}
+
+public final class dev/ai/elements/ui/code/TestCaseResult {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ldev/ai/elements/ui/code/TestStatus;Ljava/lang/Long;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ldev/ai/elements/ui/code/TestStatus;Ljava/lang/Long;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ldev/ai/elements/ui/code/TestStatus;
+	public final fun component3 ()Ljava/lang/Long;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ldev/ai/elements/ui/code/TestStatus;Ljava/lang/Long;Ljava/lang/String;)Ldev/ai/elements/ui/code/TestCaseResult;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/code/TestCaseResult;Ljava/lang/String;Ldev/ai/elements/ui/code/TestStatus;Ljava/lang/Long;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/ui/code/TestCaseResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDurationMs ()Ljava/lang/Long;
+	public final fun getError ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getStatus ()Ldev/ai/elements/ui/code/TestStatus;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/code/TestResultsKt {
+	public static final fun TestResults (Ljava/util/List;Landroidx/compose/ui/Modifier;Ljava/lang/Long;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/code/TestStatus : java/lang/Enum {
+	public static final field FAILED Ldev/ai/elements/ui/code/TestStatus;
+	public static final field PASSED Ldev/ai/elements/ui/code/TestStatus;
+	public static final field RUNNING Ldev/ai/elements/ui/code/TestStatus;
+	public static final field SKIPPED Ldev/ai/elements/ui/code/TestStatus;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/ui/code/TestStatus;
+	public static fun values ()[Ldev/ai/elements/ui/code/TestStatus;
+}
+
+public final class dev/ai/elements/ui/code/TestSuiteResult {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Ldev/ai/elements/ui/code/TestSuiteResult;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/code/TestSuiteResult;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Ldev/ai/elements/ui/code/TestSuiteResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getTests ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/icons/AiIcons {
+	public static final field $stable I
+	public static final field INSTANCE Ldev/ai/elements/ui/icons/AiIcons;
+	public final fun getAccountTree ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getAdd ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getAddPhotoAlternate ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getApi ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getArrowBack ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getArrowDropDown ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getArrowUpward ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getAutoAwesome ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getBlock ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getBluetooth ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getBookmarkBorder ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getBrokenImage ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getBugReport ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getCancel ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getCheck ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getCheckCircle ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getChecklist ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getChevronLeft ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getChevronRight ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getClose ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getCode ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getCommit ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getComputer ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getContentCopy ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getDataObject ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getDataUsage ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getDelete ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getDeleteSweep ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getDescription ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getDriveFileMove ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getEdit ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getErrorOutline ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getExpandMore ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getExtension ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getFitScreen ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getFolder ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getFolderOpen ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getForward10 ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getFunction ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getGraphicEq ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getHeadset ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getHelpOutline ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getImage ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getInsertDriveFile ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getInventory2 ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getKey ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getKeyboardArrowDown ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getLanguage ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getLink ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getMemory ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getMenuBook ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getMic ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getMicOff ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getMoreHoriz ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getNeurology ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getOpenInFull ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getOpenInNew ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getPanTool ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getPause ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getPerson ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getPictureAsPdf ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getPlayArrow ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getPlayCircle ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getPlaylistAdd ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getPsychology ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getRadioButtonUnchecked ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getRecordVoiceOver ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getRefresh ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getRemove ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getReplay ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getReplay10 ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getRotateRight ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getRoute ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getSchedule ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getScience ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getSearch ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getSend ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getSettings ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getShare ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getSkipNext ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getSkipPrevious ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getSlideshow ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getSmartToy ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getStop ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getStopCircle ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getSubject ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getSwapHoriz ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getTerminal ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getUsb ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getVisibility ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getVisibilityOff ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getVolumeUp ()Landroidx/compose/ui/graphics/vector/ImageVector;
+}
+
+public final class dev/ai/elements/ui/link/CustomTabsUriHandler : androidx/compose/ui/platform/UriHandler {
+	public static final field $stable I
+	public fun <init> (Landroid/content/Context;Ljava/lang/Integer;Ljava/lang/Boolean;Z)V
+	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/Integer;Ljava/lang/Boolean;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun openUri (Ljava/lang/String;)V
+}
+
+public final class dev/ai/elements/ui/link/CustomTabsUriHandlerKt {
+	public static final fun rememberCustomTabsUriHandler (ZLandroidx/compose/runtime/Composer;II)Landroidx/compose/ui/platform/UriHandler;
+}
+
+public final class dev/ai/elements/ui/markdown/CodeBlockKt {
+	public static final fun CodeBlock (Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/markdown/ComposableSingletons$MarkdownContentKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/markdown/ComposableSingletons$MarkdownContentKt;
+	public fun <init> ()V
+	public final fun getLambda$166624068$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$403241893$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$526650003$ai_elements_ui ()Lkotlin/jvm/functions/Function5;
+	public final fun getLambda$578176859$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class dev/ai/elements/ui/markdown/ComposableSingletons$MermaidDiagramKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/markdown/ComposableSingletons$MermaidDiagramKt;
+	public fun <init> ()V
+	public final fun getLambda$555800650$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$772675420$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/ai/elements/ui/markdown/MarkdownContentKt {
+	public static final fun MarkdownContent (Ljava/lang/String;Landroidx/compose/ui/Modifier;Ljava/util/List;ZLandroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/markdown/MathKt {
+	public static final fun MathBlock (Ljava/lang/String;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/markdown/MermaidDiagramKt {
+	public static final fun MermaidDiagram (Ljava/lang/String;Landroidx/compose/ui/Modifier;ZLandroidx/compose/runtime/Composer;II)V
+}
+
+public abstract interface class dev/ai/elements/ui/markdown/MermaidRenderer {
+	public static final field Companion Ldev/ai/elements/ui/markdown/MermaidRenderer$Companion;
+	public abstract fun Diagram (Ljava/lang/String;ZLandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class dev/ai/elements/ui/markdown/MermaidRenderer$Companion {
+	public final fun getWebView ()Ldev/ai/elements/ui/markdown/MermaidRenderer;
+}
+
+public final class dev/ai/elements/ui/markdown/MermaidRendererKt {
+	public static final fun getLocalMermaidRenderer ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun getLocalMermaidSizing ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+}
+
+public final class dev/ai/elements/ui/markdown/MermaidSizing {
+	public static final field $stable I
+	public static final field Companion Ldev/ai/elements/ui/markdown/MermaidSizing$Companion;
+	public fun <init> ()V
+	public synthetic fun <init> (FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FFLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()F
+	public final fun component2-D9Ej5fM ()F
+	public final fun copy-3ABfNKs (FF)Ldev/ai/elements/ui/markdown/MermaidSizing;
+	public static synthetic fun copy-3ABfNKs$default (Ldev/ai/elements/ui/markdown/MermaidSizing;FFILjava/lang/Object;)Ldev/ai/elements/ui/markdown/MermaidSizing;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMaxInlineHeight-D9Ej5fM ()F
+	public final fun getScale ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/markdown/MermaidSizing$Companion {
+	public final fun getLarge ()Ldev/ai/elements/ui/markdown/MermaidSizing;
+	public final fun getMedium ()Ldev/ai/elements/ui/markdown/MermaidSizing;
+	public final fun getSmall ()Ldev/ai/elements/ui/markdown/MermaidSizing;
+}
+
+public final class dev/ai/elements/ui/theme/AiContrast : java/lang/Enum {
+	public static final field HIGH Ldev/ai/elements/ui/theme/AiContrast;
+	public static final field MEDIUM Ldev/ai/elements/ui/theme/AiContrast;
+	public static final field STANDARD Ldev/ai/elements/ui/theme/AiContrast;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/ui/theme/AiContrast;
+	public static fun values ()[Ldev/ai/elements/ui/theme/AiContrast;
+}
+
+public final class dev/ai/elements/ui/theme/AiElementsThemeKt {
+	public static final fun AiElementsTheme (ZZLdev/ai/elements/ui/theme/AiPalette;Ldev/ai/elements/ui/theme/AiContrast;Landroidx/compose/ui/text/font/FontFamily;Landroidx/compose/ui/text/font/FontFamily;Landroidx/compose/material3/ColorScheme;Landroidx/compose/material3/Typography;Landroidx/compose/material3/Shapes;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;III)V
+	public static final fun getLocalCodeFontFamily ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun isDark (Landroidx/compose/material3/MaterialTheme;Landroidx/compose/runtime/Composer;I)Z
+}
+
+public final class dev/ai/elements/ui/theme/AiPalette : java/lang/Enum {
+	public static final field FOREST Ldev/ai/elements/ui/theme/AiPalette;
+	public static final field GRAPHITE Ldev/ai/elements/ui/theme/AiPalette;
+	public static final field JADE Ldev/ai/elements/ui/theme/AiPalette;
+	public static final field OCEAN Ldev/ai/elements/ui/theme/AiPalette;
+	public static final field SAKURA Ldev/ai/elements/ui/theme/AiPalette;
+	public static final field SUNSET Ldev/ai/elements/ui/theme/AiPalette;
+	public static final field VIOLET Ldev/ai/elements/ui/theme/AiPalette;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getSeed-0d7_KjU ()J
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/ui/theme/AiPalette;
+	public static fun values ()[Ldev/ai/elements/ui/theme/AiPalette;
+}
+
+public final class dev/ai/elements/ui/theme/AiPaletteKt {
+	public static final fun aiColorScheme (Ldev/ai/elements/ui/theme/AiPalette;ZLdev/ai/elements/ui/theme/AiContrast;)Landroidx/compose/material3/ColorScheme;
+	public static synthetic fun aiColorScheme$default (Ldev/ai/elements/ui/theme/AiPalette;ZLdev/ai/elements/ui/theme/AiContrast;ILjava/lang/Object;)Landroidx/compose/material3/ColorScheme;
+}
+
+public final class dev/ai/elements/ui/theme/AiSize {
+	public static final field $stable I
+	public static final field INSTANCE Ldev/ai/elements/ui/theme/AiSize;
+	public final fun getAvatar-D9Ej5fM ()F
+	public final fun getBadgeIcon-D9Ej5fM ()F
+	public final fun getCompactIcon-D9Ej5fM ()F
+	public final fun getTouchTarget-D9Ej5fM ()F
+}
+
+public final class dev/ai/elements/ui/theme/AiSpacing {
+	public static final field $stable I
+	public static final field INSTANCE Ldev/ai/elements/ui/theme/AiSpacing;
+	public final fun getL-D9Ej5fM ()F
+	public final fun getM-D9Ej5fM ()F
+	public final fun getS-D9Ej5fM ()F
+	public final fun getTurn-D9Ej5fM ()F
+	public final fun getXl-D9Ej5fM ()F
+	public final fun getXs-D9Ej5fM ()F
+	public final fun getXxl-D9Ej5fM ()F
+}
+
+public final class dev/ai/elements/ui/theme/AiTokensKt {
+	public static final fun compactIconButton (Landroidx/compose/ui/Modifier;)Landroidx/compose/ui/Modifier;
+}
+
+public final class dev/ai/elements/ui/theme/AiType {
+	public static final field $stable I
+	public static final field INSTANCE Ldev/ai/elements/ui/theme/AiType;
+	public final fun getBody (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/text/TextStyle;
+	public final fun getCode (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/text/TextStyle;
+	public final fun getH1 (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/text/TextStyle;
+	public final fun getH2 (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/text/TextStyle;
+	public final fun getH3 (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/text/TextStyle;
+	public final fun getH4 (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/text/TextStyle;
+	public final fun getSmall (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/text/TextStyle;
+}
+
+public final class dev/ai/elements/ui/voice/AudioPlayerKt {
+	public static final fun AudioPlayer (Ldev/ai/elements/ui/voice/AudioPlayerState;Landroidx/compose/ui/Modifier;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)V
+	public static final fun rememberAudioPlayerState (Ljava/lang/String;Landroidx/compose/runtime/Composer;I)Ldev/ai/elements/ui/voice/AudioPlayerState;
+}
+
+public final class dev/ai/elements/ui/voice/AudioPlayerState {
+	public static final field $stable I
+	public final fun cycleSpeed ()V
+	public final fun getDurationMs ()J
+	public final fun getError ()Ljava/lang/String;
+	public final fun getPositionMs ()J
+	public final fun getSource ()Ljava/lang/String;
+	public final fun getSpeed ()F
+	public final fun isPlaying ()Z
+	public final fun isReady ()Z
+	public final fun pause ()V
+	public final fun play ()V
+	public final fun seekBy (J)V
+	public final fun seekTo (J)V
+	public final fun toggle ()V
+}
+
+public final class dev/ai/elements/ui/voice/ComposableSingletons$AudioPlayerKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/voice/ComposableSingletons$AudioPlayerKt;
+	public fun <init> ()V
+	public final fun getLambda$-2040582793$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$938166702$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/ai/elements/ui/voice/ComposableSingletons$SelectorsKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/voice/ComposableSingletons$SelectorsKt;
+	public fun <init> ()V
+	public final fun getLambda$-1337689313$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1555702583$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-826688727$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1004170340$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1310160043$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1731032192$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1737277532$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$553485566$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$834918755$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/ai/elements/ui/voice/ComposableSingletons$SpeechInputKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/voice/ComposableSingletons$SpeechInputKt;
+	public fun <init> ()V
+	public final fun getLambda$-489731285$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-679633939$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/ai/elements/ui/voice/ComposableSingletons$VoiceModeKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/voice/ComposableSingletons$VoiceModeKt;
+	public fun <init> ()V
+	public final fun getLambda$-1439407879$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$528583826$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class dev/ai/elements/ui/voice/PersonaKt {
+	public static final fun Persona-942rkJo (Ldev/ai/elements/ui/voice/PersonaState;Landroidx/compose/ui/Modifier;FLkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/voice/PersonaState : java/lang/Enum {
+	public static final field ASLEEP Ldev/ai/elements/ui/voice/PersonaState;
+	public static final field IDLE Ldev/ai/elements/ui/voice/PersonaState;
+	public static final field LISTENING Ldev/ai/elements/ui/voice/PersonaState;
+	public static final field SPEAKING Ldev/ai/elements/ui/voice/PersonaState;
+	public static final field THINKING Ldev/ai/elements/ui/voice/PersonaState;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/ui/voice/PersonaState;
+	public static fun values ()[Ldev/ai/elements/ui/voice/PersonaState;
+}
+
+public final class dev/ai/elements/ui/voice/RecognitionServiceInfo {
+	public static final field $stable I
+	public fun <init> (Landroid/content/ComponentName;Ljava/lang/String;)V
+	public final fun component1 ()Landroid/content/ComponentName;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Landroid/content/ComponentName;Ljava/lang/String;)Ldev/ai/elements/ui/voice/RecognitionServiceInfo;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/voice/RecognitionServiceInfo;Landroid/content/ComponentName;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/ui/voice/RecognitionServiceInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getComponent ()Landroid/content/ComponentName;
+	public final fun getLabel ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/voice/SelectorsKt {
+	public static final fun MicSelector (Landroid/media/AudioDeviceInfo;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun VoiceSelector (Ljava/util/List;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/voice/SpeechInputKt {
+	public static final fun SpeechInput (Lkotlin/jvm/functions/Function2;Landroidx/compose/ui/Modifier;Ldev/ai/elements/ui/voice/SpeechInputState;Ljava/util/Locale;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
+	public static final fun rememberSpeechInputState (Ldev/ai/elements/ui/voice/SpeechSettings;Landroidx/compose/runtime/Composer;II)Ldev/ai/elements/ui/voice/SpeechInputState;
+}
+
+public final class dev/ai/elements/ui/voice/SpeechInputPhase : java/lang/Enum {
+	public static final field IDLE Ldev/ai/elements/ui/voice/SpeechInputPhase;
+	public static final field LISTENING Ldev/ai/elements/ui/voice/SpeechInputPhase;
+	public static final field PROCESSING Ldev/ai/elements/ui/voice/SpeechInputPhase;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/ui/voice/SpeechInputPhase;
+	public static fun values ()[Ldev/ai/elements/ui/voice/SpeechInputPhase;
+}
+
+public final class dev/ai/elements/ui/voice/SpeechInputState {
+	public static final field $stable I
+	public final fun cancel ()V
+	public final fun getError ()Ljava/lang/String;
+	public final fun getLevel ()F
+	public final fun getPhase ()Ldev/ai/elements/ui/voice/SpeechInputPhase;
+	public final fun isAvailable ()Z
+	public final fun stop ()V
+}
+
+public final class dev/ai/elements/ui/voice/SpeechOutputKt {
+	public static final fun getLocalSpeechOutput ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun rememberSpeechOutputState (Ldev/ai/elements/ui/voice/SpeechSettings;Landroidx/compose/runtime/Composer;II)Ldev/ai/elements/ui/voice/SpeechOutputState;
+	public static final fun speakableText (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/voice/SpeechOutputState {
+	public static final field $stable I
+	public final fun enqueue (Ljava/lang/String;Ljava/lang/String;Ljava/util/Locale;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun enqueue$default (Ldev/ai/elements/ui/voice/SpeechOutputState;Ljava/lang/String;Ljava/lang/String;Ljava/util/Locale;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public final fun getEngines ()Ljava/util/List;
+	public final fun getSpeakingId ()Ljava/lang/String;
+	public final fun getVoices ()Ljava/util/List;
+	public final fun isAvailable ()Z
+	public final fun isSpeaking (Ljava/lang/String;)Z
+	public final fun speak (Ljava/lang/String;Ljava/lang/String;Ljava/util/Locale;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun speak$default (Ldev/ai/elements/ui/voice/SpeechOutputState;Ljava/lang/String;Ljava/lang/String;Ljava/util/Locale;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public final fun stop ()V
+}
+
+public final class dev/ai/elements/ui/voice/SpeechSettings {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Landroid/content/ComponentName;ZLjava/lang/String;Ljava/lang/String;FF)V
+	public synthetic fun <init> (Landroid/content/ComponentName;ZLjava/lang/String;Ljava/lang/String;FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Landroid/content/ComponentName;
+	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()F
+	public final fun component6 ()F
+	public final fun copy (Landroid/content/ComponentName;ZLjava/lang/String;Ljava/lang/String;FF)Ldev/ai/elements/ui/voice/SpeechSettings;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/voice/SpeechSettings;Landroid/content/ComponentName;ZLjava/lang/String;Ljava/lang/String;FFILjava/lang/Object;)Ldev/ai/elements/ui/voice/SpeechSettings;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOnDeviceRecognition ()Z
+	public final fun getPitch ()F
+	public final fun getRate ()F
+	public final fun getRecognizer ()Landroid/content/ComponentName;
+	public final fun getTtsEngine ()Ljava/lang/String;
+	public final fun getVoice ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/voice/SpeechSettingsKt {
+	public static final fun getLocalSpeechSettings ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun isOnDeviceRecognitionAvailable (Landroid/content/Context;)Z
+	public static final fun recognitionServices (Landroid/content/Context;)Ljava/util/List;
+}
+
+public final class dev/ai/elements/ui/voice/TranscriptSegment {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;JJLjava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;JJLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()J
+	public final fun component3 ()J
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;JJLjava/lang/String;)Ldev/ai/elements/ui/voice/TranscriptSegment;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/voice/TranscriptSegment;Ljava/lang/String;JJLjava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/ui/voice/TranscriptSegment;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEndMs ()J
+	public final fun getSpeaker ()Ljava/lang/String;
+	public final fun getStartMs ()J
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/voice/TranscriptionKt {
+	public static final fun Transcription (Ljava/util/List;Landroidx/compose/ui/Modifier;JLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/voice/VoiceModeKt {
+	public static final fun VoiceMode (Ldev/ai/elements/core/chat/ChatController;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Ljava/util/Locale;Ldev/ai/elements/ui/voice/SpeechOutputState;Ldev/ai/elements/ui/voice/SpeechInputState;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class dev/ai/elements/ui/voice/VoiceOption {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/ui/voice/VoiceOption;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/voice/VoiceOption;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/ui/voice/VoiceOption;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getLanguage ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPreviewUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/voice/VoicePhase : java/lang/Enum {
+	public static final field LISTENING Ldev/ai/elements/ui/voice/VoicePhase;
+	public static final field MUTED Ldev/ai/elements/ui/voice/VoicePhase;
+	public static final field NEEDS_YOU Ldev/ai/elements/ui/voice/VoicePhase;
+	public static final field SPEAKING Ldev/ai/elements/ui/voice/VoicePhase;
+	public static final field THINKING Ldev/ai/elements/ui/voice/VoicePhase;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/ui/voice/VoicePhase;
+	public static fun values ()[Ldev/ai/elements/ui/voice/VoicePhase;
+}
+
+public final class dev/ai/elements/ui/workflow/AgentRunLabels {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ldev/ai/elements/ui/workflow/AgentRunLabels;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/workflow/AgentRunLabels;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ldev/ai/elements/ui/workflow/AgentRunLabels;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnswer ()Ljava/lang/String;
+	public final fun getEmpty ()Ljava/lang/String;
+	public final fun getFile ()Ljava/lang/String;
+	public final fun getPrompt ()Ljava/lang/String;
+	public final fun getSources ()Lkotlin/jvm/functions/Function1;
+	public final fun getThinking ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/workflow/CanvasEdge {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun component5 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)Ldev/ai/elements/ui/workflow/CanvasEdge;
+	public static synthetic fun copy$default (Ldev/ai/elements/ui/workflow/CanvasEdge;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZILjava/lang/Object;)Ldev/ai/elements/ui/workflow/CanvasEdge;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnimated ()Z
+	public final fun getFrom ()Ljava/lang/String;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getTemporary ()Z
+	public final fun getTo ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/workflow/CanvasNode {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLandroidx/compose/ui/graphics/vector/ImageVector;Ldev/ai/elements/ui/workflow/NodeTone;Ldev/ai/elements/ui/chat/StepStatus;Landroidx/compose/ui/unit/DpSize;Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLandroidx/compose/ui/graphics/vector/ImageVector;Ldev/ai/elements/ui/workflow/NodeTone;Ldev/ai/elements/ui/chat/StepStatus;Landroidx/compose/ui/unit/DpSize;Ljava/lang/Object;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4-RKDOV3M ()J
+	public final fun component5 ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun component6 ()Ldev/ai/elements/ui/workflow/NodeTone;
+	public final fun component7 ()Ldev/ai/elements/ui/chat/StepStatus;
+	public final fun component8-rqqXlrw ()Landroidx/compose/ui/unit/DpSize;
+	public final fun component9 ()Ljava/lang/Object;
+	public final fun copy-16Yp42w (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLandroidx/compose/ui/graphics/vector/ImageVector;Ldev/ai/elements/ui/workflow/NodeTone;Ldev/ai/elements/ui/chat/StepStatus;Landroidx/compose/ui/unit/DpSize;Ljava/lang/Object;)Ldev/ai/elements/ui/workflow/CanvasNode;
+	public static synthetic fun copy-16Yp42w$default (Ldev/ai/elements/ui/workflow/CanvasNode;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLandroidx/compose/ui/graphics/vector/ImageVector;Ldev/ai/elements/ui/workflow/NodeTone;Ldev/ai/elements/ui/chat/StepStatus;Landroidx/compose/ui/unit/DpSize;Ljava/lang/Object;ILjava/lang/Object;)Ldev/ai/elements/ui/workflow/CanvasNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Ljava/lang/Object;
+	public final fun getIcon ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getPosition-RKDOV3M ()J
+	public final fun getSize-rqqXlrw ()Landroidx/compose/ui/unit/DpSize;
+	public final fun getStatus ()Ldev/ai/elements/ui/chat/StepStatus;
+	public final fun getSubtitle ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun getTone ()Ldev/ai/elements/ui/workflow/NodeTone;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/ui/workflow/ComposableSingletons$WorkflowCanvasKt {
+	public static final field INSTANCE Ldev/ai/elements/ui/workflow/ComposableSingletons$WorkflowCanvasKt;
+	public fun <init> ()V
+	public final fun getLambda$-288485627$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1345742254$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$2077917709$ai_elements_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$620863563$ai_elements_ui ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class dev/ai/elements/ui/workflow/NodeTone : java/lang/Enum {
+	public static final field ERROR Ldev/ai/elements/ui/workflow/NodeTone;
+	public static final field NEUTRAL Ldev/ai/elements/ui/workflow/NodeTone;
+	public static final field PRIMARY Ldev/ai/elements/ui/workflow/NodeTone;
+	public static final field SECONDARY Ldev/ai/elements/ui/workflow/NodeTone;
+	public static final field TERTIARY Ldev/ai/elements/ui/workflow/NodeTone;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/ui/workflow/NodeTone;
+	public static fun values ()[Ldev/ai/elements/ui/workflow/NodeTone;
+}
+
+public final class dev/ai/elements/ui/workflow/WorkflowCanvasKt {
+	public static final fun WorkflowCanvas-IXBvtMA (Ljava/util/List;Ljava/util/List;Landroidx/compose/ui/Modifier;JZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun agentRunGraph-W0ZRtMU (Ldev/ai/elements/core/model/Message;Ljava/lang/String;JLdev/ai/elements/ui/workflow/AgentRunLabels;)Lkotlin/Pair;
+	public static synthetic fun agentRunGraph-W0ZRtMU$default (Ldev/ai/elements/core/model/Message;Ljava/lang/String;JLdev/ai/elements/ui/workflow/AgentRunLabels;ILjava/lang/Object;)Lkotlin/Pair;
+	public static final fun rememberAgentRunLabels (Landroidx/compose/runtime/Composer;I)Ldev/ai/elements/ui/workflow/AgentRunLabels;
+}
+

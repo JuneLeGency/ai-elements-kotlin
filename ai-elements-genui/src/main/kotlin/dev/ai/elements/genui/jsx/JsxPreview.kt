@@ -32,7 +32,7 @@ import kotlinx.serialization.json.put
 
 /**
  * Renders model-written JSX natively (AI Elements `jsx-preview`): the JSX compiles onto A2UI
- * components ([JsxCompiler]) and renders with [catalog], while it streams. [bindings] are the
+ * components and renders with [catalog], while it streams. [bindings] are the
  * values `{name}` can read; inputs write back into them locally, and handlers such as
  * `onClick={save}` arrive in [onAction] (name `save`, with the current data model).
  */

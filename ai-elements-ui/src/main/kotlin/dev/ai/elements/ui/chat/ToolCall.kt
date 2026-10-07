@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.ai.elements.core.chat.ToolDecision
 import dev.ai.elements.core.model.ToolCategory
 import dev.ai.elements.core.model.ToolKind
 import dev.ai.elements.core.model.ToolPart
@@ -65,11 +66,19 @@ import kotlinx.serialization.json.JsonElement
  * an expandable section with the JSON input and the output / error. While the
  * call awaits approval it shows a [Confirmation] with approve / deny actions.
  *
- * @param onApproval answers an approval request; null hides the actions.
+ * @param onApproval legacy yes/no callback.
+ * @param onDecision full decision callback; takes precedence over [onApproval].
+ * Both callbacks null makes the card read-only.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolean) -> Unit)? = null) {
+fun ToolCall(
+    part: ToolPart,
+    modifier: Modifier = Modifier,
+    onApproval: ((Boolean) -> Unit)? = null,
+    onDecision: ((ToolDecision) -> Unit)? = LocalToolDecision.current?.let { cb -> { decision -> cb(part.id, decision) } },
+) {
+    val decide = onDecision ?: onApproval?.let { cb -> { decision: ToolDecision -> cb(decision.approved) } }
     var open by rememberSaveable(part.id) { mutableStateOf(false) }
     val scheme = MaterialTheme.colorScheme
 
@@ -107,12 +116,12 @@ fun ToolCall(part: ToolPart, modifier: Modifier = Modifier, onApproval: ((Boolea
                 ConfirmationContent(
                     title = stringResource(R.string.ai_allow_tool, part.displayName),
                     description = part.input.compactJson().ifBlank { stringResource(R.string.ai_no_arguments) },
-                    onApprove = onApproval?.let { { it(true) } },
-                    onDeny = onApproval?.let { { it(false) } },
+                    onApprove = decide?.let { { it(ToolDecision(true)) } },
+                    onDeny = decide?.let { { it(ToolDecision(false)) } },
                     modifier = Modifier.padding(top = 8.dp),
                     input = part.input.takeIf { part.approvalAnswers.editInput },
                     withReason = part.approvalAnswers.reason,
-                    onDecide = onApproval?.let { LocalToolDecision.current }?.let { cb -> { decision -> cb(part.id, decision) } },
+                    onDecide = onDecision,
                 )
             }
             AnimatedVisibility(

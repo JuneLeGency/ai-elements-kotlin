@@ -1,0 +1,1038 @@
+public abstract interface class dev/ai/elements/core/chat/ChatBackend {
+	public abstract fun stream (Ljava/util/List;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/ai/elements/core/chat/ChatBackendException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getStatusCode ()Ljava/lang/Integer;
+}
+
+public final class dev/ai/elements/core/chat/ChatBackendKt {
+	public static final fun deferredBackend (Lkotlin/jvm/functions/Function1;)Ldev/ai/elements/core/chat/ChatBackend;
+}
+
+public final class dev/ai/elements/core/chat/ChatController {
+	public fun <init> (Lkotlin/jvm/functions/Function1;Lkotlinx/coroutines/CoroutineScope;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;J)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;Lkotlinx/coroutines/CoroutineScope;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun dismissError ()V
+	public final fun getState ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun load (Ljava/util/List;)V
+	public final fun regenerate ()V
+	public final fun removeQueued (Ljava/lang/String;)V
+	public final fun respondToApproval (Ljava/lang/String;Ldev/ai/elements/core/chat/ToolDecision;)V
+	public final fun respondToApproval (Ljava/lang/String;Z)V
+	public final fun respondToInput (Ljava/lang/String;Ldev/ai/elements/core/chat/InputResponse;)V
+	public final fun restoreCheckpoint (Ljava/lang/String;)V
+	public final fun selectVersion (Ljava/lang/String;I)V
+	public final fun send (Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Z
+	public static synthetic fun send$default (Ldev/ai/elements/core/chat/ChatController;Ljava/lang/String;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Z
+	public final fun sendQueuedNow (Ljava/lang/String;)V
+	public final fun stop ()V
+}
+
+public abstract interface class dev/ai/elements/core/chat/ChatEvent {
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$Data : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)Ldev/ai/elements/core/chat/ChatEvent$Data;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$Data;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$Data;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Lkotlinx/serialization/json/JsonElement;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$Error : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/ai/elements/core/chat/ChatEvent$Error;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$Error;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$Error;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$File : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/chat/ChatEvent$File;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$File;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$File;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMediaType ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$Finish : dev/ai/elements/core/chat/ChatEvent {
+	public static final field INSTANCE Ldev/ai/elements/core/chat/ChatEvent$Finish;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$Metadata : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Lkotlinx/serialization/json/JsonObject;)V
+	public final fun component1 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun copy (Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/chat/ChatEvent$Metadata;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$Metadata;Lkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$Metadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMetadata ()Lkotlinx/serialization/json/JsonObject;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$ReasoningDelta : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/chat/ChatEvent$ReasoningDelta;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$ReasoningDelta;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$ReasoningDelta;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDelta ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$ReasoningEnd : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/ai/elements/core/chat/ChatEvent$ReasoningEnd;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$ReasoningEnd;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$ReasoningEnd;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$SourceUrl : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/chat/ChatEvent$SourceUrl;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$SourceUrl;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$SourceUrl;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$SubagentUpdate : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;Ldev/ai/elements/core/model/Message;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ldev/ai/elements/core/model/Message;
+	public final fun copy (Ljava/lang/String;Ldev/ai/elements/core/model/Message;)Ldev/ai/elements/core/chat/ChatEvent$SubagentUpdate;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$SubagentUpdate;Ljava/lang/String;Ldev/ai/elements/core/model/Message;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$SubagentUpdate;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMessage ()Ldev/ai/elements/core/model/Message;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$TextDelta : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/chat/ChatEvent$TextDelta;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$TextDelta;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$TextDelta;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDelta ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$TextEnd : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/ai/elements/core/chat/ChatEvent$TextEnd;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$TextEnd;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$TextEnd;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$ToolApprovalRequest : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;Ldev/ai/elements/core/model/ApprovalAnswers;)V
+	public synthetic fun <init> (Ljava/lang/String;Ldev/ai/elements/core/model/ApprovalAnswers;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ldev/ai/elements/core/model/ApprovalAnswers;
+	public final fun copy (Ljava/lang/String;Ldev/ai/elements/core/model/ApprovalAnswers;)Ldev/ai/elements/core/chat/ChatEvent$ToolApprovalRequest;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$ToolApprovalRequest;Ljava/lang/String;Ldev/ai/elements/core/model/ApprovalAnswers;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$ToolApprovalRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnswers ()Ldev/ai/elements/core/model/ApprovalAnswers;
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$ToolApproved : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/ai/elements/core/chat/ChatEvent$ToolApproved;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$ToolApproved;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$ToolApproved;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$ToolDenied : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/chat/ChatEvent$ToolDenied;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$ToolDenied;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$ToolDenied;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$ToolError : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/chat/ChatEvent$ToolError;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$ToolError;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$ToolError;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$ToolInputAvailable : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/model/ToolKind;Ljava/lang/String;Ldev/ai/elements/core/model/ToolCategory;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/model/ToolKind;Ljava/lang/String;Ldev/ai/elements/core/model/ToolCategory;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ldev/ai/elements/core/model/ToolKind;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ldev/ai/elements/core/model/ToolCategory;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/model/ToolKind;Ljava/lang/String;Ldev/ai/elements/core/model/ToolCategory;Ljava/lang/String;)Ldev/ai/elements/core/chat/ChatEvent$ToolInputAvailable;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$ToolInputAvailable;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/model/ToolKind;Ljava/lang/String;Ldev/ai/elements/core/model/ToolCategory;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$ToolInputAvailable;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCategory ()Ldev/ai/elements/core/model/ToolCategory;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getInput ()Ljava/lang/String;
+	public final fun getKind ()Ldev/ai/elements/core/model/ToolKind;
+	public final fun getLocation ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getSource ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$ToolInputDelta : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/chat/ChatEvent$ToolInputDelta;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$ToolInputDelta;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$ToolInputDelta;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDelta ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$ToolInputStart : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/chat/ChatEvent$ToolInputStart;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$ToolInputStart;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$ToolInputStart;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$ToolOutput : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Z)Ldev/ai/elements/core/chat/ChatEvent$ToolOutput;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$ToolOutput;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$ToolOutput;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getOutput ()Ljava/lang/String;
+	public final fun getPreliminary ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatEvent$Usage : dev/ai/elements/core/chat/ChatEvent {
+	public fun <init> (II)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Ldev/ai/elements/core/chat/ChatEvent$Usage;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatEvent$Usage;IIILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatEvent$Usage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInputTokens ()I
+	public final fun getOutputTokens ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/ChatState {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ldev/ai/elements/core/model/ChatStatus;Ljava/lang/String;Ljava/util/List;ZLjava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;Ldev/ai/elements/core/model/ChatStatus;Ljava/lang/String;Ljava/util/List;ZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ldev/ai/elements/core/model/ChatStatus;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Z
+	public final fun component6 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;Ldev/ai/elements/core/model/ChatStatus;Ljava/lang/String;Ljava/util/List;ZLjava/util/List;)Ldev/ai/elements/core/chat/ChatState;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ChatState;Ljava/util/List;Ldev/ai/elements/core/model/ChatStatus;Ljava/lang/String;Ljava/util/List;ZLjava/util/List;ILjava/lang/Object;)Ldev/ai/elements/core/chat/ChatState;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/String;
+	public final fun getInputRequests ()Ljava/util/List;
+	public final fun getMessages ()Ljava/util/List;
+	public final fun getQueue ()Ljava/util/List;
+	public final fun getQueuePaused ()Z
+	public final fun getStatus ()Ldev/ai/elements/core/model/ChatStatus;
+	public fun hashCode ()I
+	public final fun isBusy ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/InputRequest {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/chat/InputRequest;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/InputRequest;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/chat/InputRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getSchema ()Lkotlinx/serialization/json/JsonObject;
+	public final fun getSource ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class dev/ai/elements/core/chat/InputResponse {
+}
+
+public final class dev/ai/elements/core/chat/InputResponse$Accept : dev/ai/elements/core/chat/InputResponse {
+	public fun <init> ()V
+	public fun <init> (Lkotlinx/serialization/json/JsonObject;)V
+	public synthetic fun <init> (Lkotlinx/serialization/json/JsonObject;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun copy (Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/chat/InputResponse$Accept;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/InputResponse$Accept;Lkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Ldev/ai/elements/core/chat/InputResponse$Accept;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContent ()Lkotlinx/serialization/json/JsonObject;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/InputResponse$Cancel : dev/ai/elements/core/chat/InputResponse {
+	public static final field INSTANCE Ldev/ai/elements/core/chat/InputResponse$Cancel;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/InputResponse$Decline : dev/ai/elements/core/chat/InputResponse {
+	public static final field INSTANCE Ldev/ai/elements/core/chat/InputResponse$Decline;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/chat/MessageReducerKt {
+	public static final fun finishStreaming (Ldev/ai/elements/core/model/Message;J)Ldev/ai/elements/core/model/Message;
+	public static final fun reduce (Ldev/ai/elements/core/model/Message;Ldev/ai/elements/core/chat/ChatEvent;J)Ldev/ai/elements/core/model/Message;
+}
+
+public final class dev/ai/elements/core/chat/QueuedMessage {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Ldev/ai/elements/core/chat/QueuedMessage;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/QueuedMessage;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Ldev/ai/elements/core/chat/QueuedMessage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAttachments ()Ljava/util/List;
+	public final fun getData ()Ljava/util/List;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class dev/ai/elements/core/chat/ToolApprover {
+	public static final field Companion Ldev/ai/elements/core/chat/ToolApprover$Companion;
+	public abstract fun approve (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun decide (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun input (Ldev/ai/elements/core/chat/InputRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/chat/ToolApprover$Companion {
+	public final fun getAlwaysApprove ()Ldev/ai/elements/core/chat/ToolApprover;
+}
+
+public final class dev/ai/elements/core/chat/ToolApprover$DefaultImpls {
+	public static fun decide (Ldev/ai/elements/core/chat/ToolApprover;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun input (Ldev/ai/elements/core/chat/ToolApprover;Ldev/ai/elements/core/chat/InputRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/ai/elements/core/chat/ToolDecision {
+	public fun <init> (ZLjava/lang/String;Lkotlinx/serialization/json/JsonObject;Z)V
+	public synthetic fun <init> (ZLjava/lang/String;Lkotlinx/serialization/json/JsonObject;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun component4 ()Z
+	public final fun copy (ZLjava/lang/String;Lkotlinx/serialization/json/JsonObject;Z)Ldev/ai/elements/core/chat/ToolDecision;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/chat/ToolDecision;ZLjava/lang/String;Lkotlinx/serialization/json/JsonObject;ZILjava/lang/Object;)Ldev/ai/elements/core/chat/ToolDecision;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApproved ()Z
+	public final fun getEditedInput ()Lkotlinx/serialization/json/JsonObject;
+	public final fun getReason ()Ljava/lang/String;
+	public final fun getRemember ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/model/ApprovalAnswers {
+	public static final field Companion Ldev/ai/elements/core/model/ApprovalAnswers$Companion;
+	public fun <init> ()V
+	public fun <init> (ZZ)V
+	public synthetic fun <init> (ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Z
+	public final fun copy (ZZ)Ldev/ai/elements/core/model/ApprovalAnswers;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/ApprovalAnswers;ZZILjava/lang/Object;)Ldev/ai/elements/core/model/ApprovalAnswers;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEditInput ()Z
+	public final fun getReason ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/model/ApprovalAnswers$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/model/ApprovalAnswers$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/model/ApprovalAnswers;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/model/ApprovalAnswers;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/ApprovalAnswers$Companion {
+	public final fun getAll ()Ldev/ai/elements/core/model/ApprovalAnswers;
+	public final fun getYesNo ()Ldev/ai/elements/core/model/ApprovalAnswers;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/ChatStatus : java/lang/Enum {
+	public static final field ERROR Ldev/ai/elements/core/model/ChatStatus;
+	public static final field READY Ldev/ai/elements/core/model/ChatStatus;
+	public static final field STREAMING Ldev/ai/elements/core/model/ChatStatus;
+	public static final field SUBMITTED Ldev/ai/elements/core/model/ChatStatus;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/core/model/ChatStatus;
+	public static fun values ()[Ldev/ai/elements/core/model/ChatStatus;
+}
+
+public final class dev/ai/elements/core/model/DataPart : dev/ai/elements/core/model/Part {
+	public static final field A2UI Ljava/lang/String;
+	public static final field A2UI_DATA_MODEL Ljava/lang/String;
+	public static final field A2UI_MEDIA_TYPE Ljava/lang/String;
+	public static final field Companion Ldev/ai/elements/core/model/DataPart$Companion;
+	public static final field MCP_APP Ljava/lang/String;
+	public static final field MODEL_CONTEXT Ljava/lang/String;
+	public static final field STATE Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)Ldev/ai/elements/core/model/DataPart;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/DataPart;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ILjava/lang/Object;)Ldev/ai/elements/core/model/DataPart;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Lkotlinx/serialization/json/JsonElement;
+	public fun getId ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun isStreaming ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/model/DataPart$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/model/DataPart$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/model/DataPart;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/model/DataPart;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/DataPart$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/FilePart : dev/ai/elements/core/model/Part {
+	public static final field Companion Ldev/ai/elements/core/model/FilePart$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/model/FilePart;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/FilePart;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/model/FilePart;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBase64Data ()Ljava/lang/String;
+	public final fun getFilename ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
+	public final fun getMediaType ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isImage ()Z
+	public fun isStreaming ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/model/FilePart$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/model/FilePart$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/model/FilePart;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/model/FilePart;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/FilePart$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/Message {
+	public static final field Companion Ldev/ai/elements/core/model/Message$Companion;
+	public fun <init> (Ljava/lang/String;Ldev/ai/elements/core/model/Role;Ljava/util/List;JLdev/ai/elements/core/model/Usage;Ljava/util/List;Lkotlinx/serialization/json/JsonObject;)V
+	public synthetic fun <init> (Ljava/lang/String;Ldev/ai/elements/core/model/Role;Ljava/util/List;JLdev/ai/elements/core/model/Usage;Ljava/util/List;Lkotlinx/serialization/json/JsonObject;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ldev/ai/elements/core/model/Role;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()J
+	public final fun component5 ()Ldev/ai/elements/core/model/Usage;
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun copy (Ljava/lang/String;Ldev/ai/elements/core/model/Role;Ljava/util/List;JLdev/ai/elements/core/model/Usage;Ljava/util/List;Lkotlinx/serialization/json/JsonObject;)Ldev/ai/elements/core/model/Message;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/Message;Ljava/lang/String;Ldev/ai/elements/core/model/Role;Ljava/util/List;JLdev/ai/elements/core/model/Usage;Ljava/util/List;Lkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Ldev/ai/elements/core/model/Message;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlternatives ()Ljava/util/List;
+	public final fun getCreatedAt ()J
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMetadata ()Lkotlinx/serialization/json/JsonObject;
+	public final fun getParts ()Ljava/util/List;
+	public final fun getRole ()Ldev/ai/elements/core/model/Role;
+	public final fun getText ()Ljava/lang/String;
+	public final fun getUsage ()Ldev/ai/elements/core/model/Usage;
+	public final fun getVersionIndex ()I
+	public final fun getVersions ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun isStreaming ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/model/Message$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/model/Message$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/model/Message;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/model/Message;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/Message$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract interface class dev/ai/elements/core/model/Part {
+	public static final field Companion Ldev/ai/elements/core/model/Part$Companion;
+	public abstract fun getId ()Ljava/lang/String;
+	public fun isStreaming ()Z
+}
+
+public final class dev/ai/elements/core/model/Part$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/Part$DefaultImpls {
+	public static fun isStreaming (Ldev/ai/elements/core/model/Part;)Z
+}
+
+public final class dev/ai/elements/core/model/ReasoningPart : dev/ai/elements/core/model/Part {
+	public static final field Companion Ldev/ai/elements/core/model/ReasoningPart$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZJLjava/lang/Long;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZJLjava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun component4 ()J
+	public final fun component5 ()Ljava/lang/Long;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;ZJLjava/lang/Long;)Ldev/ai/elements/core/model/ReasoningPart;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/ReasoningPart;Ljava/lang/String;Ljava/lang/String;ZJLjava/lang/Long;ILjava/lang/Object;)Ldev/ai/elements/core/model/ReasoningPart;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDurationMs ()Ljava/lang/Long;
+	public fun getId ()Ljava/lang/String;
+	public final fun getStartedAt ()J
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun isStreaming ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/model/ReasoningPart$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/model/ReasoningPart$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/model/ReasoningPart;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/model/ReasoningPart;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/ReasoningPart$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/Role : java/lang/Enum {
+	public static final field ASSISTANT Ldev/ai/elements/core/model/Role;
+	public static final field Companion Ldev/ai/elements/core/model/Role$Companion;
+	public static final field USER Ldev/ai/elements/core/model/Role;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/core/model/Role;
+	public static fun values ()[Ldev/ai/elements/core/model/Role;
+}
+
+public final class dev/ai/elements/core/model/Role$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/SourcePart : dev/ai/elements/core/model/Part {
+	public static final field Companion Ldev/ai/elements/core/model/SourcePart$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/model/SourcePart;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/SourcePart;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/model/SourcePart;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getId ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun isStreaming ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/model/SourcePart$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/model/SourcePart$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/model/SourcePart;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/model/SourcePart;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/SourcePart$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/Suggestion {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/model/Suggestion;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/Suggestion;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/model/Suggestion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/model/TerminalText {
+	public static final field Companion Ldev/ai/elements/core/model/TerminalText$Companion;
+	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getDroppedLines ()I
+	public final fun getLines ()Ljava/util/List;
+	public final fun plain ()Ljava/lang/String;
+}
+
+public abstract interface class dev/ai/elements/core/model/TerminalText$Color {
+}
+
+public final class dev/ai/elements/core/model/TerminalText$Color$Indexed : dev/ai/elements/core/model/TerminalText$Color {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Ldev/ai/elements/core/model/TerminalText$Color$Indexed;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/TerminalText$Color$Indexed;IILjava/lang/Object;)Ldev/ai/elements/core/model/TerminalText$Color$Indexed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/model/TerminalText$Color$Rgb : dev/ai/elements/core/model/TerminalText$Color {
+	public fun <init> (III)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun copy (III)Ldev/ai/elements/core/model/TerminalText$Color$Rgb;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/TerminalText$Color$Rgb;IIIILjava/lang/Object;)Ldev/ai/elements/core/model/TerminalText$Color$Rgb;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBlue ()I
+	public final fun getGreen ()I
+	public final fun getRed ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/model/TerminalText$Companion {
+	public final fun indexedRgb (I)Ldev/ai/elements/core/model/TerminalText$Color$Rgb;
+	public final fun parse (Ljava/lang/String;I)Ldev/ai/elements/core/model/TerminalText;
+	public static synthetic fun parse$default (Ldev/ai/elements/core/model/TerminalText$Companion;Ljava/lang/String;IILjava/lang/Object;)Ldev/ai/elements/core/model/TerminalText;
+	public final fun plain (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/model/TerminalText$Span {
+	public fun <init> (Ljava/lang/String;Ldev/ai/elements/core/model/TerminalText$Style;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ldev/ai/elements/core/model/TerminalText$Style;
+	public final fun copy (Ljava/lang/String;Ldev/ai/elements/core/model/TerminalText$Style;)Ldev/ai/elements/core/model/TerminalText$Span;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/TerminalText$Span;Ljava/lang/String;Ldev/ai/elements/core/model/TerminalText$Style;ILjava/lang/Object;)Ldev/ai/elements/core/model/TerminalText$Span;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getStyle ()Ldev/ai/elements/core/model/TerminalText$Style;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/model/TerminalText$Style {
+	public static final field Companion Ldev/ai/elements/core/model/TerminalText$Style$Companion;
+	public fun <init> ()V
+	public fun <init> (Ldev/ai/elements/core/model/TerminalText$Color;Ldev/ai/elements/core/model/TerminalText$Color;ZZZZZZZLjava/lang/String;)V
+	public synthetic fun <init> (Ldev/ai/elements/core/model/TerminalText$Color;Ldev/ai/elements/core/model/TerminalText$Color;ZZZZZZZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ldev/ai/elements/core/model/TerminalText$Color;
+	public final fun component10 ()Ljava/lang/String;
+	public final fun component2 ()Ldev/ai/elements/core/model/TerminalText$Color;
+	public final fun component3 ()Z
+	public final fun component4 ()Z
+	public final fun component5 ()Z
+	public final fun component6 ()Z
+	public final fun component7 ()Z
+	public final fun component8 ()Z
+	public final fun component9 ()Z
+	public final fun copy (Ldev/ai/elements/core/model/TerminalText$Color;Ldev/ai/elements/core/model/TerminalText$Color;ZZZZZZZLjava/lang/String;)Ldev/ai/elements/core/model/TerminalText$Style;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/TerminalText$Style;Ldev/ai/elements/core/model/TerminalText$Color;Ldev/ai/elements/core/model/TerminalText$Color;ZZZZZZZLjava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/model/TerminalText$Style;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackground ()Ldev/ai/elements/core/model/TerminalText$Color;
+	public final fun getBold ()Z
+	public final fun getConceal ()Z
+	public final fun getDim ()Z
+	public final fun getForeground ()Ldev/ai/elements/core/model/TerminalText$Color;
+	public final fun getInverse ()Z
+	public final fun getItalic ()Z
+	public final fun getLink ()Ljava/lang/String;
+	public final fun getStrikethrough ()Z
+	public final fun getUnderline ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/model/TerminalText$Style$Companion {
+	public final fun getDefault ()Ldev/ai/elements/core/model/TerminalText$Style;
+}
+
+public final class dev/ai/elements/core/model/TextPart : dev/ai/elements/core/model/Part {
+	public static final field Companion Ldev/ai/elements/core/model/TextPart$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Z)Ldev/ai/elements/core/model/TextPart;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/TextPart;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Ldev/ai/elements/core/model/TextPart;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getId ()Ljava/lang/String;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun isStreaming ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/model/TextPart$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/model/TextPart$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/model/TextPart;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/model/TextPart;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/TextPart$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/ToolCategory : java/lang/Enum {
+	public static final field Companion Ldev/ai/elements/core/model/ToolCategory$Companion;
+	public static final field DELETE Ldev/ai/elements/core/model/ToolCategory;
+	public static final field EDIT Ldev/ai/elements/core/model/ToolCategory;
+	public static final field EXECUTE Ldev/ai/elements/core/model/ToolCategory;
+	public static final field FETCH Ldev/ai/elements/core/model/ToolCategory;
+	public static final field MOVE Ldev/ai/elements/core/model/ToolCategory;
+	public static final field OTHER Ldev/ai/elements/core/model/ToolCategory;
+	public static final field READ Ldev/ai/elements/core/model/ToolCategory;
+	public static final field SEARCH Ldev/ai/elements/core/model/ToolCategory;
+	public static final field SWITCH_MODE Ldev/ai/elements/core/model/ToolCategory;
+	public static final field THINK Ldev/ai/elements/core/model/ToolCategory;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/core/model/ToolCategory;
+	public static fun values ()[Ldev/ai/elements/core/model/ToolCategory;
+}
+
+public final class dev/ai/elements/core/model/ToolCategory$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract interface class dev/ai/elements/core/model/ToolKind {
+	public static final field Companion Ldev/ai/elements/core/model/ToolKind$Companion;
+}
+
+public final class dev/ai/elements/core/model/ToolKind$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/ToolKind$Delegation : dev/ai/elements/core/model/ToolKind {
+	public static final field Companion Ldev/ai/elements/core/model/ToolKind$Delegation$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ldev/ai/elements/core/model/ToolKind$Delegation;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/ToolKind$Delegation;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/model/ToolKind$Delegation;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAgent ()Ljava/lang/String;
+	public final fun getTask ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/model/ToolKind$Delegation$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/model/ToolKind$Delegation$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/model/ToolKind$Delegation;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/model/ToolKind$Delegation;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/ToolKind$Delegation$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/ToolKind$Function : dev/ai/elements/core/model/ToolKind {
+	public static final field INSTANCE Ldev/ai/elements/core/model/ToolKind$Function;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/ai/elements/core/model/ToolKind$Skill : dev/ai/elements/core/model/ToolKind {
+	public static final field Companion Ldev/ai/elements/core/model/ToolKind$Skill$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/ai/elements/core/model/ToolKind$Skill;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/ToolKind$Skill;Ljava/lang/String;ILjava/lang/Object;)Ldev/ai/elements/core/model/ToolKind$Skill;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSkill ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/model/ToolKind$Skill$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/model/ToolKind$Skill$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/model/ToolKind$Skill;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/model/ToolKind$Skill;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/ToolKind$Skill$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/ToolPart : dev/ai/elements/core/model/Part {
+	public static final field Companion Ldev/ai/elements/core/model/ToolPart$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/model/ToolState;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLdev/ai/elements/core/model/Message;Ldev/ai/elements/core/model/ToolKind;Ljava/lang/String;Ldev/ai/elements/core/model/ToolCategory;Ljava/lang/String;Ldev/ai/elements/core/model/ApprovalAnswers;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/model/ToolState;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLdev/ai/elements/core/model/Message;Ldev/ai/elements/core/model/ToolKind;Ljava/lang/String;Ldev/ai/elements/core/model/ToolCategory;Ljava/lang/String;Ldev/ai/elements/core/model/ApprovalAnswers;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ldev/ai/elements/core/model/ToolKind;
+	public final fun component11 ()Ljava/lang/String;
+	public final fun component12 ()Ldev/ai/elements/core/model/ToolCategory;
+	public final fun component13 ()Ljava/lang/String;
+	public final fun component14 ()Ldev/ai/elements/core/model/ApprovalAnswers;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ldev/ai/elements/core/model/ToolState;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Z
+	public final fun component9 ()Ldev/ai/elements/core/model/Message;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/model/ToolState;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLdev/ai/elements/core/model/Message;Ldev/ai/elements/core/model/ToolKind;Ljava/lang/String;Ldev/ai/elements/core/model/ToolCategory;Ljava/lang/String;Ldev/ai/elements/core/model/ApprovalAnswers;)Ldev/ai/elements/core/model/ToolPart;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/ToolPart;Ljava/lang/String;Ljava/lang/String;Ldev/ai/elements/core/model/ToolState;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLdev/ai/elements/core/model/Message;Ldev/ai/elements/core/model/ToolKind;Ljava/lang/String;Ldev/ai/elements/core/model/ToolCategory;Ljava/lang/String;Ldev/ai/elements/core/model/ApprovalAnswers;ILjava/lang/Object;)Ldev/ai/elements/core/model/ToolPart;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApprovalAnswers ()Ldev/ai/elements/core/model/ApprovalAnswers;
+	public final fun getCategory ()Ldev/ai/elements/core/model/ToolCategory;
+	public final fun getDisplayName ()Ljava/lang/String;
+	public final fun getErrorText ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
+	public final fun getInput ()Ljava/lang/String;
+	public final fun getKind ()Ldev/ai/elements/core/model/ToolKind;
+	public final fun getLocation ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getOutput ()Ljava/lang/String;
+	public final fun getPreliminary ()Z
+	public final fun getSource ()Ljava/lang/String;
+	public final fun getState ()Ldev/ai/elements/core/model/ToolState;
+	public final fun getSubagent ()Ldev/ai/elements/core/model/Message;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun isStreaming ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/model/ToolPart$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/model/ToolPart$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/model/ToolPart;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/model/ToolPart;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/ToolPart$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/ToolState : java/lang/Enum {
+	public static final field APPROVAL_REQUESTED Ldev/ai/elements/core/model/ToolState;
+	public static final field Companion Ldev/ai/elements/core/model/ToolState$Companion;
+	public static final field INPUT_AVAILABLE Ldev/ai/elements/core/model/ToolState;
+	public static final field INPUT_STREAMING Ldev/ai/elements/core/model/ToolState;
+	public static final field OUTPUT_AVAILABLE Ldev/ai/elements/core/model/ToolState;
+	public static final field OUTPUT_DENIED Ldev/ai/elements/core/model/ToolState;
+	public static final field OUTPUT_ERROR Ldev/ai/elements/core/model/ToolState;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/ai/elements/core/model/ToolState;
+	public static fun values ()[Ldev/ai/elements/core/model/ToolState;
+}
+
+public final class dev/ai/elements/core/model/ToolState$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/Usage {
+	public static final field Companion Ldev/ai/elements/core/model/Usage$Companion;
+	public fun <init> ()V
+	public fun <init> (II)V
+	public synthetic fun <init> (IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Ldev/ai/elements/core/model/Usage;
+	public static synthetic fun copy$default (Ldev/ai/elements/core/model/Usage;IIILjava/lang/Object;)Ldev/ai/elements/core/model/Usage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInputTokens ()I
+	public final fun getOutputTokens ()I
+	public final fun getTotalTokens ()I
+	public fun hashCode ()I
+	public final fun plus (Ldev/ai/elements/core/model/Usage;)Ldev/ai/elements/core/model/Usage;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/ai/elements/core/model/Usage$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/ai/elements/core/model/Usage$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/ai/elements/core/model/Usage;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/ai/elements/core/model/Usage;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/ai/elements/core/model/Usage$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
