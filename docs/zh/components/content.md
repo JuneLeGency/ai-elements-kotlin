@@ -6,7 +6,7 @@ Markdown、代码、数学公式、图表、思考摘要与引用。
 
 随着内容生成渲染 GitHub 风格的 Markdown。
 
-![流式 Markdown](../assets/components/markdown.webp){ loading=lazy width="400" }
+![流式 Markdown](../../assets/components/markdown.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -30,7 +30,7 @@ import dev.ai.elements.ui.markdown.MarkdownContent
 
 带语法高亮、语言标签与复制按钮的代码块。
 
-![代码块](../assets/components/code-block.webp){ loading=lazy width="400" }
+![代码块](../../assets/components/code-block.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -54,7 +54,7 @@ import dev.ai.elements.ui.markdown.CodeBlock
 
 使用离线 KaTeX 渲染公式。
 
-![数学公式](../assets/components/math.webp){ loading=lazy width="400" }
+![数学公式](../../assets/components/math.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -77,7 +77,7 @@ import dev.ai.elements.ui.markdown.MathBlock
 
 离线展示流程图和步骤关系。
 
-![Mermaid 流程图](../assets/components/mermaid-flowchart.webp){ loading=lazy width="400" }
+![Mermaid 流程图](../../assets/components/mermaid-flowchart.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -100,7 +100,7 @@ import dev.ai.elements.ui.markdown.MermaidDiagram
 
 展示参与方之间的请求与响应。
 
-![Mermaid 时序图](../assets/components/mermaid-sequence.webp){ loading=lazy width="400" }
+![Mermaid 时序图](../../assets/components/mermaid-sequence.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -124,7 +124,7 @@ import dev.ai.elements.ui.markdown.MermaidDiagram
 
 展示类及其关系。
 
-![Mermaid 类图](../assets/components/mermaid-class.webp){ loading=lazy width="400" }
+![Mermaid 类图](../../assets/components/mermaid-class.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -148,7 +148,7 @@ import dev.ai.elements.ui.markdown.MermaidDiagram
 
 展示分类占比。
 
-![Mermaid 饼图](../assets/components/mermaid-pie.webp){ loading=lazy width="400" }
+![Mermaid 饼图](../../assets/components/mermaid-pie.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -171,7 +171,7 @@ import dev.ai.elements.ui.markdown.MermaidDiagram
 
 图表尚未生成完毕时先展示源码。
 
-![流式 Mermaid](../assets/components/mermaid-streaming.webp){ loading=lazy width="400" }
+![流式 Mermaid](../../assets/components/mermaid-streaming.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -194,7 +194,7 @@ import dev.ai.elements.ui.markdown.MermaidDiagram
 
 用可展开的简洁条目展示模型返回的思考内容。
 
-![思考摘要](../assets/components/reasoning.webp){ loading=lazy width="400" }
+![思考摘要](../../assets/components/reasoning.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -219,7 +219,7 @@ import dev.ai.elements.ui.chat.Reasoning
 
 展示回复引用的来源与链接。
 
-![信息来源](../assets/components/sources.webp){ loading=lazy width="400" }
+![信息来源](../../assets/components/sources.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -244,7 +244,7 @@ import dev.ai.elements.ui.chat.Sources
 
 把正文中的引用编号关联到来源。
 
-![正文引用标记](../assets/components/inline-citation.webp){ loading=lazy width="400" }
+![正文引用标记](../../assets/components/inline-citation.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|

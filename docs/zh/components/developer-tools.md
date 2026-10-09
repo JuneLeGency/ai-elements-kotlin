@@ -6,7 +6,7 @@
 
 展示命令输出的颜色、进度重绘和链接。
 
-![终端输出](../assets/components/terminal.webp){ loading=lazy width="400" }
+![终端输出](../../assets/components/terminal.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -31,7 +31,7 @@ import dev.ai.elements.ui.code.TerminalStatus
 
 区分应用与依赖的堆栈帧，支持折叠。
 
-![异常堆栈](../assets/components/stack-trace.webp){ loading=lazy width="400" }
+![异常堆栈](../../assets/components/stack-trace.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -55,7 +55,7 @@ import dev.ai.elements.ui.code.StackTrace
 
 展示测试套件中的成功、失败与跳过项目。
 
-![测试结果](../assets/components/test-results.webp){ loading=lazy width="400" }
+![测试结果](../../assets/components/test-results.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -82,7 +82,7 @@ import dev.ai.elements.ui.code.TestSuiteResult
 
 展示项目目录、选中文件和变更标记。
 
-![文件树](../assets/components/file-tree.webp){ loading=lazy width="400" }
+![文件树](../../assets/components/file-tree.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -111,7 +111,7 @@ import dev.ai.elements.ui.code.FileTree
 
 展示 Git 提交说明和文件变更。
 
-![提交信息](../assets/components/commit.webp){ loading=lazy width="400" }
+![提交信息](../../assets/components/commit.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -137,7 +137,7 @@ import dev.ai.elements.ui.code.FileChange
 
 展示接口参数、请求体和响应示例。
 
-![接口结构](../assets/components/schema-display.webp){ loading=lazy width="400" }
+![接口结构](../../assets/components/schema-display.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -162,7 +162,7 @@ import dev.ai.elements.ui.code.SchemaParameter
 
 展示依赖版本变化与大小。
 
-![依赖信息](../assets/components/package-info.webp){ loading=lazy width="400" }
+![依赖信息](../../assets/components/package-info.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -187,7 +187,7 @@ import dev.ai.elements.ui.code.PackageInfo
 
 展示环境变量，并默认遮挡敏感值。
 
-![环境变量](../assets/components/environment-variables.webp){ loading=lazy width="400" }
+![环境变量](../../assets/components/environment-variables.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -212,7 +212,7 @@ import dev.ai.elements.ui.code.EnvironmentVariables
 
 通过标签页展示代码及其输出。
 
-![代码与运行结果](../assets/components/sandbox.webp){ loading=lazy width="400" }
+![代码与运行结果](../../assets/components/sandbox.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -239,7 +239,7 @@ import dev.ai.elements.ui.markdown.CodeBlock
 
 展示一行便于复制的命令。
 
-![可复制命令](../assets/components/snippet.webp){ loading=lazy width="400" }
+![可复制命令](../../assets/components/snippet.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|

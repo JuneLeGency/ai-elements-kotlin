@@ -6,7 +6,7 @@
 
 通过节点与连线展示 Agent 执行过程，支持平移与缩放。
 
-![工作流画布](../assets/components/workflow-canvas.webp){ loading=lazy width="400" }
+![工作流画布](../../assets/components/workflow-canvas.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|

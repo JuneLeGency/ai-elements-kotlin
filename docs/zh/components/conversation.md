@@ -6,7 +6,7 @@
 
 展示消息列表：流式生成时跟随底部，向上滚动后暂停跟随。
 
-![对话列表](../assets/components/conversation.webp){ loading=lazy width="400" }
+![对话列表](../../assets/components/conversation.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -34,7 +34,7 @@ import dev.ai.elements.ui.chat.Conversation
 
 渲染用户或助手消息，以及复制、朗读、重新生成等操作。
 
-![单条消息](../assets/components/messages.webp){ loading=lazy width="400" }
+![单条消息](../../assets/components/messages.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -60,7 +60,7 @@ import dev.ai.elements.ui.chat.MessageItem
 
 支持文本、附件、语音输入、发送、停止与排队。
 
-![消息输入框](../assets/components/prompt-input.webp){ loading=lazy width="400" }
+![消息输入框](../../assets/components/prompt-input.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -90,7 +90,7 @@ import dev.ai.elements.ui.chat.PromptInput
 
 让用户点击预设问题开始对话。
 
-![建议提问](../assets/components/suggestions.webp){ loading=lazy width="400" }
+![建议提问](../../assets/components/suggestions.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -116,7 +116,7 @@ import dev.ai.elements.ui.chat.Suggestions
 
 用欢迎语和建议问题引导第一次对话。
 
-![空对话欢迎页](../assets/components/empty-state.webp){ loading=lazy width="400" }
+![空对话欢迎页](../../assets/components/empty-state.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -141,7 +141,7 @@ import dev.ai.elements.ui.chat.ChatEmptyState
 
 在重新生成的多个回复版本之间切换。
 
-![回复版本切换](../assets/components/branch.webp){ loading=lazy width="400" }
+![回复版本切换](../../assets/components/branch.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -167,7 +167,7 @@ import dev.ai.elements.ui.chat.BranchSelector
 
 确认后恢复到之前的对话位置。
 
-![对话检查点](../assets/components/checkpoint.webp){ loading=lazy width="400" }
+![对话检查点](../../assets/components/checkpoint.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -192,7 +192,7 @@ import dev.ai.elements.ui.chat.Checkpoint
 
 展示 Agent 忙碌期间等待发送的消息。
 
-![待发送队列](../assets/components/queue.webp){ loading=lazy width="400" }
+![待发送队列](../../assets/components/queue.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -220,7 +220,7 @@ import dev.ai.elements.ui.chat.Queue
 
 把当前问题带到用户选择的聊天应用。
 
-![在其他聊天应用打开](../assets/components/open-in-chat.webp){ loading=lazy width="400" }
+![在其他聊天应用打开](../../assets/components/open-in-chat.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -244,7 +244,7 @@ import dev.ai.elements.ui.chat.OpenInChat
 
 按提供方、能力与上下文窗口选择模型。
 
-![模型选择器](../assets/components/model-selector.webp){ loading=lazy width="400" }
+![模型选择器](../../assets/components/model-selector.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -273,7 +273,7 @@ import dev.ai.elements.ui.chat.ModelSelector
 
 展示已用 token 与模型上下文窗口的关系。
 
-![Token 使用量](../assets/components/context.webp){ loading=lazy width="400" }
+![Token 使用量](../../assets/components/context.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -298,7 +298,7 @@ import dev.ai.elements.ui.chat.ContextUsage
 
 等待首段输出时显示 Material 3 Expressive 加载动画。
 
-![加载指示器](../assets/components/loading.webp){ loading=lazy width="400" }
+![加载指示器](../../assets/components/loading.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -321,7 +321,7 @@ import androidx.compose.runtime.Composable
 
 用流动高亮提示任务仍在进行。
 
-![流动高亮文字](../assets/components/shimmer.webp){ loading=lazy width="400" }
+![流动高亮文字](../../assets/components/shimmer.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|

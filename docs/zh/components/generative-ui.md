@@ -6,7 +6,7 @@
 
 把生成的 JSX 标题、段落与布局渲染为原生组件。
 
-![JSX 文本与布局](../assets/components/jsx-typography.webp){ loading=lazy width="400" }
+![JSX 文本与布局](../../assets/components/jsx-typography.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -32,7 +32,7 @@ import kotlinx.serialization.json.put
 
 用数据绑定和 action 连接表单输入与提交。
 
-![JSX 表单与操作](../assets/components/jsx-form.webp){ loading=lazy width="400" }
+![JSX 表单与操作](../../assets/components/jsx-form.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -59,7 +59,7 @@ import kotlinx.serialization.json.put
 
 展示选项、滑块、日期和标签页等控件。
 
-![JSX 选择控件](../assets/components/jsx-controls.webp){ loading=lazy width="400" }
+![JSX 选择控件](../../assets/components/jsx-controls.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -85,7 +85,7 @@ import kotlinx.serialization.json.put
 
 将绑定数据展示为一组卡片。
 
-![JSX 数据卡片](../assets/components/jsx-cards.webp){ loading=lazy width="400" }
+![JSX 数据卡片](../../assets/components/jsx-cards.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -111,7 +111,7 @@ import kotlinx.serialization.json.put
 
 边生成边渲染 JSX，并保留用户已填写的内容。
 
-![流式 JSX](../assets/components/jsx-streaming.webp){ loading=lazy width="400" }
+![流式 JSX](../../assets/components/jsx-streaming.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -135,7 +135,7 @@ import dev.ai.elements.genui.jsx.JsxPreview
 
 原生渲染符合 A2UI v1.0 的界面。
 
-![A2UI 界面](../assets/components/a2ui.webp){ loading=lazy width="400" }
+![A2UI 界面](../../assets/components/a2ui.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -160,7 +160,7 @@ import dev.ai.elements.genui.a2ui.A2uiSurfaceView
 
 展示文件或生成内容及相关操作。
 
-![生成产物](../assets/components/artifact.webp){ loading=lazy width="400" }
+![生成产物](../../assets/components/artifact.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -185,7 +185,7 @@ import dev.ai.elements.ui.markdown.CodeBlock
 
 在受限 WebView 中预览生成的 HTML 或 URL。
 
-![网页预览](../assets/components/web-preview.webp){ loading=lazy width="400" }
+![网页预览](../../assets/components/web-preview.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|

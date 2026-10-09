@@ -6,7 +6,7 @@
 
 展示工具输入、输出、错误、进度和来源。
 
-![工具调用](../assets/components/tool-calls.webp){ loading=lazy width="400" }
+![工具调用](../../assets/components/tool-calls.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -32,7 +32,7 @@ import dev.ai.elements.ui.chat.ToolCall
 
 展示委派任务及其嵌套执行过程。
 
-![子 Agent](../assets/components/sub-agents.webp){ loading=lazy width="400" }
+![子 Agent](../../assets/components/sub-agents.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -57,7 +57,7 @@ import dev.ai.elements.ui.chat.ToolPartView
 
 按步骤查看截图、终端、差异与文件，支持时间线和回放。
 
-![Agent 工作面板](../assets/components/agent-computer.webp){ loading=lazy width="400" }
+![Agent 工作面板](../../assets/components/agent-computer.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -83,7 +83,7 @@ import dev.ai.elements.ui.chat.rememberAgentComputerState
 
 在涉及电脑操作的回复下方自动展示工作预览。
 
-![回复中的工作预览](../assets/components/agent-computer-reply.webp){ loading=lazy width="400" }
+![回复中的工作预览](../../assets/components/agent-computer-reply.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -107,7 +107,7 @@ import dev.ai.elements.ui.chat.Chat
 
 按工具分类展示浏览器、终端或差异内容。
 
-![执行步骤视图](../assets/components/step-views.webp){ loading=lazy width="400" }
+![执行步骤视图](../../assets/components/step-views.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -132,7 +132,7 @@ import dev.ai.elements.ui.chat.StepView
 
 展示 Agent 的模型、指令、工具与输出结构。
 
-![Agent 信息卡](../assets/components/agent.webp){ loading=lazy width="400" }
+![Agent 信息卡](../../assets/components/agent.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|

@@ -4,6 +4,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 import json
+import os
 import re
 import sys
 
@@ -69,11 +70,19 @@ def check(root):
     for relative in english_sources:
         if not (Path("docs/zh") / relative).is_file():
             errors.append(f"Missing Chinese documentation counterpart: {relative}")
-    for name in ("README.md", "README.zh-CN.md"):
-        text = Path(name).read_text()
-        for image in re.findall(r'(?:src="|!\[[^\]]*\]\()(docs/[^"\s)]+)', text):
-            if not Path(image).is_file():
-                errors.append(f"{name}: missing screenshot {image}")
+    # GitHub's Markdown renderer cannot traverse an asset-directory symlink.
+    # Validate source image paths as well as the generated site's copied assets.
+    sources = [Path("README.md"), Path("README.zh-CN.md"), *Path("docs").rglob("*.md")]
+    for source in sources:
+        for image in re.findall(r'(?:src="|!\[[^\]]*\]\()([^"\s)]+)', source.read_text()):
+            url = urlsplit(image)
+            if url.scheme or url.netloc or url.path.startswith("/"):
+                continue
+            target = Path(os.path.normpath(source.parent / unquote(url.path)))
+            if not target.is_file():
+                errors.append(f"{source}: missing screenshot {image}")
+            elif any(path.is_symlink() for path in (target, *target.parents)):
+                errors.append(f"{source}: screenshot traverses a symlink unsupported by GitHub: {image}")
     # Baselines are the published library inventory, excluding the BOM (no API).
     modules = sorted([*Path(".").glob("ai-elements-*/api/*.api"), *Path("harness").glob("*/api/*.api")])
     if not modules:

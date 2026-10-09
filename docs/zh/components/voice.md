@@ -6,7 +6,7 @@
 
 通过同一个 controller 完成免手持语音对话。
 
-![语音对话模式](../assets/components/voice-mode.webp){ loading=lazy width="400" }
+![语音对话模式](../../assets/components/voice-mode.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -30,7 +30,7 @@ import dev.ai.elements.ui.voice.VoiceMode
 
 展示待机、倾听、思考与说话状态。
 
-![语音状态形象](../assets/components/persona.webp){ loading=lazy width="400" }
+![语音状态形象](../../assets/components/persona.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -55,7 +55,7 @@ import dev.ai.elements.ui.voice.PersonaState
 
 使用平台语音识别把讲话转为输入文本。
 
-![语音输入](../assets/components/speech-input.webp){ loading=lazy width="400" }
+![语音输入](../../assets/components/speech-input.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -86,7 +86,7 @@ import dev.ai.elements.ui.voice.rememberSpeechInputState
 
 选择输入设备和朗读音色。
 
-![麦克风与音色选择](../assets/components/voice-selectors.webp){ loading=lazy width="400" }
+![麦克风与音色选择](../../assets/components/voice-selectors.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|

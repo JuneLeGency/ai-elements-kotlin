@@ -9,13 +9,14 @@
 [English](README.md) · [简体中文](README.zh-CN.md)
 
 [![CI](https://github.com/JuneLeGency/ai-elements-kotlin/actions/workflows/ci.yml/badge.svg)](https://github.com/JuneLeGency/ai-elements-kotlin/actions/workflows/ci.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.junelegency/ai-elements-bom)](https://central.sonatype.com/artifact/io.github.junelegency/ai-elements-bom)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 ![Android](https://img.shields.io/badge/Android-minSdk%2024%20%2F%2026-3DDC84)
 ![UI](https://img.shields.io/badge/UI-Material%203%20Expressive-6750A4)
 
 [Documentation](https://junelegency.github.io/ai-elements-kotlin/) ·
 [Components](https://junelegency.github.io/ai-elements-kotlin/components/) ·
-[Quick start](docs/getting-started/pure-client.md) ·
+[Quick start](https://junelegency.github.io/ai-elements-kotlin/getting-started/pure-client/) ·
 [API reference](https://junelegency.github.io/ai-elements-kotlin/api/)
 
 <img src="docs/assets/screenshots/landing-light-en.webp" width="280" alt="Light theme: chat, a plan, code and tool approval">
@@ -28,7 +29,7 @@ tool approvals, sub-agents, plans, attachments and generated interfaces share on
 Connect your own backend, or run the agent loop inside the app.
 
 Screenshots are rendered from real Android components on an emulator with curated example data.
-The [catalog](docs/components/index.md) includes **65 illustrated scenarios**, compiled examples and API links.
+The [catalog](https://junelegency.github.io/ai-elements-kotlin/components/) includes **65 illustrated scenarios**, compiled examples and API links.
 This is the Compose counterpart of [Vercel AI Elements](https://elements.ai-sdk.dev), on public protocols.
 
 ## Start with a screen
@@ -41,16 +42,16 @@ AiElementsTheme {
 }
 ```
 
-Follow the [quick start](docs/getting-started/pure-client.md) for imports, Android permissions,
+Follow the [quick start](https://junelegency.github.io/ai-elements-kotlin/getting-started/pure-client/) for imports, Android permissions,
 a runnable reference server and ViewModel ownership. The reference server's scripted model needs no API key.
 
 ## Choose where the agent runs
 
 | Mode | Your app adds | Start here |
 |---|---|---|
-| Server agent | UI + an AI SDK, AG-UI, A2A or ACP backend | [Pure client](docs/getting-started/pure-client.md) |
-| In-app agent | UI + a model API and optional harness capabilities | [In-app agent](docs/getting-started/in-app-agent.md) |
-| Your own implementation | Individual elements, or a custom ChatBackend | [Custom backend](docs/guides/custom-backend.md) |
+| Server agent | UI + an AI SDK, AG-UI, A2A or ACP backend | [Pure client](https://junelegency.github.io/ai-elements-kotlin/getting-started/pure-client/) |
+| In-app agent | UI + a model API and optional harness capabilities | [In-app agent](https://junelegency.github.io/ai-elements-kotlin/getting-started/in-app-agent/) |
+| Your own implementation | Individual elements, or a custom ChatBackend | [Custom backend](https://junelegency.github.io/ai-elements-kotlin/guides/custom-backend/) |
 
 The UI depends only on `ai-elements-chat`, not the networking modules. Customize the theme, tool/data
 renderers and attachment loading without forking the components.
@@ -66,24 +67,24 @@ dependencies {
 ```
 
 Add `google()` and `mavenCentral()` to your dependency repositories.
-See [Installation](docs/getting-started/installation.md) for all artifacts, minSdk, desugaring and the
+See [Installation](https://junelegency.github.io/ai-elements-kotlin/getting-started/installation/) for all artifacts, minSdk, desugaring and the
 exact tested toolchain. Compose and Material 3 Expressive currently include alpha dependencies.
 Stable public APIs are preserved from the first public release, including 0.x; see the
-[compatibility policy](docs/develop/api-compatibility.md).
+[compatibility policy](https://junelegency.github.io/ai-elements-kotlin/develop/api-compatibility/).
 
 ## Explore the elements
 
 | Tools and approvals | Native generated UI | Developer tools |
 |:---:|:---:|:---:|
 | ![Tool calls](docs/assets/components/tool-calls.webp) | ![A2UI form](docs/assets/components/a2ui.webp) | ![Terminal](docs/assets/components/terminal.webp) |
-| [Tools](docs/components/tools.md) | [Generative UI](docs/components/generative-ui.md) | [Developer tools](docs/components/developer-tools.md) |
+| [Tools](https://junelegency.github.io/ai-elements-kotlin/components/tools/) | [Generative UI](https://junelegency.github.io/ai-elements-kotlin/components/generative-ui/) | [Developer tools](https://junelegency.github.io/ai-elements-kotlin/components/developer-tools/) |
 
-Also included: [conversation controls](docs/components/conversation.md), [Markdown and diagrams](docs/components/content.md),
-[media](docs/components/attachments-and-media.md), [voice](docs/components/voice.md) and [workflow canvas](docs/components/workflow.md).
+Also included: [conversation controls](https://junelegency.github.io/ai-elements-kotlin/components/conversation/), [Markdown and diagrams](https://junelegency.github.io/ai-elements-kotlin/components/content/),
+[media](https://junelegency.github.io/ai-elements-kotlin/components/attachments-and-media/), [voice](https://junelegency.github.io/ai-elements-kotlin/components/voice/) and [workflow canvas](https://junelegency.github.io/ai-elements-kotlin/components/workflow/).
 
 Protocols: AI SDK v5/v6 + v4 compatibility · AG-UI 1.x · MCP · MCP Apps · A2A · ACP · A2UI · Agent Skills.
 Optional capabilities include files, planning, memory, shell/sandbox, browser, device integration,
-speech and scheduled tasks. [Compare backends](docs/getting-started/choose.md).
+speech and scheduled tasks. [Compare backends](https://junelegency.github.io/ai-elements-kotlin/getting-started/choose/).
 
 ## Run and verify
 
@@ -95,8 +96,8 @@ tools/build-docs.sh
 ```
 
 The same repository contains the library, demo, samples and bilingual GitHub Pages site.
-See [Testing](docs/develop/testing.md), [Contributing](CONTRIBUTING.md), [Releasing](docs/develop/releasing.md),
-[CHANGELOG](CHANGELOG.md) and [Roadmap](docs/project/roadmap.md).
+See [Testing](https://junelegency.github.io/ai-elements-kotlin/develop/testing/), [Contributing](CONTRIBUTING.md), [Releasing](https://junelegency.github.io/ai-elements-kotlin/develop/releasing/),
+[CHANGELOG](CHANGELOG.md) and [Roadmap](https://junelegency.github.io/ai-elements-kotlin/project/roadmap/).
 
 ## License and security
 

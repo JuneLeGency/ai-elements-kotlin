@@ -220,6 +220,7 @@ def write_chinese(catalog, usage, rendered, write):
             page = page.replace(item["summary"], translated["summary"], 1)
             page = page.replace(usage[item["id"]]["note"], translated["note"], 1)
         page = page.replace("| Artifact |", "| 依赖模块 |").replace("| Reference |", "| API 文档 |")
+        page = page.replace("](../assets/", "](../../assets/")
         page = page.replace("](../api/", "](/ai-elements-kotlin/api/")
         page += f"\n[Read this page in English](/ai-elements-kotlin/components/{slug}/)\n"
         write(target / (slug + ".md"), page)

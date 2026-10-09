@@ -6,7 +6,7 @@
 
 按 EXIF 方向展示图片，点击后支持缩放、平移和旋转。
 
-![图片](../assets/components/image.webp){ loading=lazy width="400" }
+![图片](../../assets/components/image.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -31,7 +31,7 @@ import dev.ai.elements.ui.chat.FileAttachment
 
 展示输入中的附件，并允许移除或查看。
 
-![附件列表](../assets/components/attachments.webp){ loading=lazy width="400" }
+![附件列表](../../assets/components/attachments.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -60,7 +60,7 @@ import dev.ai.elements.ui.chat.AttachmentStrip
 
 展示首帧与时长，点击后全屏播放。
 
-![视频](../assets/components/video.webp){ loading=lazy width="400" }
+![视频](../../assets/components/video.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -84,7 +84,7 @@ import dev.ai.elements.ui.chat.VideoAttachment
 
 PDF 可预览首页并逐页查看，其他文档交给外部应用。
 
-![PDF 与文档](../assets/components/document.webp){ loading=lazy width="400" }
+![PDF 与文档](../../assets/components/document.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -108,7 +108,7 @@ import dev.ai.elements.ui.chat.DocumentAttachment
 
 播放音频，并让转写文本随时间高亮和定位。
 
-![音频播放器与转写](../assets/components/audio.webp){ loading=lazy width="400" }
+![音频播放器与转写](../../assets/components/audio.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|

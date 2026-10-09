@@ -23,8 +23,8 @@ hide:
 
 </div>
 <div class="aie-shots">
-<img src="assets/screenshots/landing-light-zh-CN.webp" alt="中文浅色主题：对话中的计划、代码与工具审批" width="280" height="620">
-<img src="assets/screenshots/landing-dark-zh-CN.webp" alt="中文深色主题下的同一组聊天组件" width="280" height="620">
+<img src="../assets/screenshots/landing-light-zh-CN.webp" alt="中文浅色主题：对话中的计划、代码与工具审批" width="280" height="620">
+<img src="../assets/screenshots/landing-dark-zh-CN.webp" alt="中文深色主题下的同一组聊天组件" width="280" height="620">
 </div>
 </div>
 
@@ -64,32 +64,32 @@ hide:
 <div class="aie-gallery" markdown>
 <figure markdown>
 
-[![工具调用的进度与结果](assets/components/tool-calls.webp){ loading=lazy }](components/tools.md#tool-calls)
+[![工具调用的进度与结果](../assets/components/tool-calls.webp){ loading=lazy }](components/tools.md#tool-calls)
 <figcaption>工具调用与审批</figcaption>
 </figure>
 <figure markdown>
 
-[![任务计划与步骤状态](assets/components/plan.webp){ loading=lazy }](components/agent-structure.md#plan)
+[![任务计划与步骤状态](../assets/components/plan.webp){ loading=lazy }](components/agent-structure.md#plan)
 <figcaption>计划与任务进度</figcaption>
 </figure>
 <figure markdown>
 
-[![原生生成式表单](assets/components/a2ui.webp){ loading=lazy }](components/generative-ui.md#a2ui-surface)
+[![原生生成式表单](../assets/components/a2ui.webp){ loading=lazy }](components/generative-ui.md#a2ui-surface)
 <figcaption>生成式界面</figcaption>
 </figure>
 <figure markdown>
 
-[![带颜色的终端输出](assets/components/terminal.webp){ loading=lazy }](components/developer-tools.md#terminal)
+[![带颜色的终端输出](../assets/components/terminal.webp){ loading=lazy }](components/developer-tools.md#terminal)
 <figcaption>开发者工具</figcaption>
 </figure>
 <figure markdown>
 
-[![Agent 工作面板和时间线](assets/components/agent-computer.webp){ loading=lazy }](components/tools.md#agents-computer)
+[![Agent 工作面板和时间线](../assets/components/agent-computer.webp){ loading=lazy }](components/tools.md#agents-computer)
 <figcaption>Agent 工作面板</figcaption>
 </figure>
 <figure markdown>
 
-[![对话中的图片附件](assets/components/image.webp){ loading=lazy }](components/attachments-and-media.md#image)
+[![对话中的图片附件](../assets/components/image.webp){ loading=lazy }](components/attachments-and-media.md#image)
 <figcaption>附件与媒体</figcaption>
 </figure>
 </div>

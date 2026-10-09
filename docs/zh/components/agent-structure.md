@@ -6,7 +6,7 @@
 
 展示 Agent 的计划与当前步骤。
 
-![任务计划](../assets/components/plan.webp){ loading=lazy width="400" }
+![任务计划](../../assets/components/plan.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -32,7 +32,7 @@ import dev.ai.elements.ui.chat.WorkflowStep
 
 展示任务步骤及涉及的文件。
 
-![任务条目](../assets/components/task.webp){ loading=lazy width="400" }
+![任务条目](../../assets/components/task.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -57,7 +57,7 @@ import dev.ai.elements.ui.chat.WorkflowStep
 
 展示步骤摘要及其来源。
 
-![推理步骤](../assets/components/chain-of-thought.webp){ loading=lazy width="400" }
+![推理步骤](../../assets/components/chain-of-thought.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -83,7 +83,7 @@ import dev.ai.elements.ui.chat.WorkflowStep
 
 把已知计划、任务或自定义数据渲染到对话中。
 
-![结构化数据片段](../assets/components/data-parts.webp){ loading=lazy width="400" }
+![结构化数据片段](../../assets/components/data-parts.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|

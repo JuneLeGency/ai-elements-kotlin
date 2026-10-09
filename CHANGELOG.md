@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 (unreleased)
+
+- Chinese documentation image paths work in GitHub Markdown previews as well as the hosted site;
+  documentation checks reject source image links that traverse a directory symlink.
+- README guide links use the published English/Chinese site and include the Maven Central version badge.
+
 ## 0.3.0
 
 ### Release readiness

@@ -6,7 +6,7 @@
 
 允许用户批准、拒绝、说明理由或编辑参数。
 
-![工具审批](../assets/components/confirmation.webp){ loading=lazy width="400" }
+![工具审批](../../assets/components/confirmation.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -33,7 +33,7 @@ import dev.ai.elements.ui.chat.ToolCall
 
 让 Agent 向用户提出单选或多选问题。
 
-![选择题](../assets/components/question.webp){ loading=lazy width="400" }
+![选择题](../../assets/components/question.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
@@ -62,7 +62,7 @@ import dev.ai.elements.ui.chat.QuestionOption
 
 根据 JSON Schema 展示 Agent 请求填写的表单或确认。
 
-![信息收集表单](../assets/components/input-request.webp){ loading=lazy width="400" }
+![信息收集表单](../../assets/components/input-request.webp){ loading=lazy width="400" }
 
 | | |
 |---|---|
