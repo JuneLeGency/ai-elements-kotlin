@@ -57,13 +57,13 @@ UI 只依赖 ai-elements-chat，不依赖网络模块。主题、工具/数据 r
 
 ```kotlin
 dependencies {
-    implementation(platform("io.github.junelegency:ai-elements-bom:0.3.0-SNAPSHOT"))
+    implementation(platform("io.github.junelegency:ai-elements-bom:0.3.0"))
     implementation("io.github.junelegency:ai-elements-ui")
     implementation("io.github.junelegency:ai-elements-core")
 }
 ```
 
-`0.3.0` 尚未公开发布。当前先运行 `./gradlew publishToMavenLocal`，并添加 `mavenLocal()`。
+依赖仓库中添加 `google()` 和 `mavenCentral()`。
 [安装指南](docs/zh/getting-started/installation.md)列出所有模块、minSdk、desugaring 和实际验证的工具链。
 当前 Compose / Material 3 Expressive 包含 alpha 依赖。
 从首个公开版本起保留稳定 public API，0.x 同样适用，详见[兼容性承诺](docs/zh/develop/api-compatibility.md)。

@@ -59,13 +59,13 @@ renderers and attachment loading without forking the components.
 
 ```kotlin
 dependencies {
-    implementation(platform("io.github.junelegency:ai-elements-bom:0.3.0-SNAPSHOT"))
+    implementation(platform("io.github.junelegency:ai-elements-bom:0.3.0"))
     implementation("io.github.junelegency:ai-elements-ui")
     implementation("io.github.junelegency:ai-elements-core")
 }
 ```
 
-`0.3.0` is not released yet. Build with `./gradlew publishToMavenLocal` and add `mavenLocal()`.
+Add `google()` and `mavenCentral()` to your dependency repositories.
 See [Installation](docs/getting-started/installation.md) for all artifacts, minSdk, desugaring and the
 exact tested toolchain. Compose and Material 3 Expressive currently include alpha dependencies.
 Stable public APIs are preserved from the first public release, including 0.x; see the

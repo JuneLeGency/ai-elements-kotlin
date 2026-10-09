@@ -14,8 +14,8 @@ android {
         // 26: the optional A2A module (official A2A Java SDK) needs it.
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = providers.gradleProperty("VERSION_NAME").get()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

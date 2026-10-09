@@ -10,15 +10,13 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // Before the first public release only, after publishToMavenLocal:
-        mavenLocal()
     }
 }
 ```
 
 ```kotlin title="build.gradle.kts"
 dependencies {
-    implementation(platform("io.github.junelegency:ai-elements-bom:0.3.0-SNAPSHOT"))
+    implementation(platform("io.github.junelegency:ai-elements-bom:0.3.0"))
     implementation("io.github.junelegency:ai-elements-ui")          // elements (protocol-independent)
     implementation("io.github.junelegency:ai-elements-core")        // AI SDK / AG-UI / model-API backends, agent loop, MCP
 
@@ -33,10 +31,6 @@ dependencies {
     implementation("io.github.junelegency.harness:harness-sandbox-proot") // + harness-shell
 }
 ```
-
-!!! note "Snapshot builds"
-    `0.3.0` is not released yet. Until it is, build the libraries yourself with
-    `./gradlew publishToMavenLocal` and add `mavenLocal()` to your repositories.
 
 ## Artifacts
 

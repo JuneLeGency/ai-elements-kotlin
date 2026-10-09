@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0 (unreleased)
+## 0.3.0
 
 ### Release readiness
 - English and Simplified Chinese documentation and READMEs, including all 65 component examples,

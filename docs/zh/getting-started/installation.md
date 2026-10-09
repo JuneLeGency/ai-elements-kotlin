@@ -7,23 +7,17 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // 首次公开发布前，在 publishToMavenLocal 后使用：
-        mavenLocal()
     }
 }
 ```
 
 ```kotlin title="build.gradle.kts"
 dependencies {
-    implementation(platform("io.github.junelegency:ai-elements-bom:0.3.0-SNAPSHOT"))
+    implementation(platform("io.github.junelegency:ai-elements-bom:0.3.0"))
     implementation("io.github.junelegency:ai-elements-ui")
     implementation("io.github.junelegency:ai-elements-core")
 }
 ```
-
-!!! note "当前仍为 Snapshot"
-    `0.3.0` 尚未公开发布。当前请先在仓库运行 `./gradlew publishToMavenLocal`，并使用 `mavenLocal()`。
-    正式发布后会同步更新这里的坐标与安装步骤。
 
 ## 环境要求
 
