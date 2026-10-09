@@ -113,4 +113,5 @@ jobs:
           name: ui-test-reports
           path: |
             **/build/reports/androidTests/
+            **/build/outputs/androidTest-results/
             server.log
