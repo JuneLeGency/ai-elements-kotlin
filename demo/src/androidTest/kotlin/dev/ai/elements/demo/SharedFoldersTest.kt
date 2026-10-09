@@ -27,6 +27,7 @@ import org.junit.Rule
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.regex.Pattern
 
@@ -128,7 +129,17 @@ class SharedFoldersTest {
         repeat(3) {
             val node = device.wait(Until.findObject(selector), timeoutMs)
             if (node == null) {
-                if (required) assertNotNull("Not found in the picker: $selector", node)
+                if (required) {
+                    val hierarchy = if (Build.HARDWARE.contains("ranchu")) {
+                        runCatching {
+                            ByteArrayOutputStream().use { output ->
+                                device.dumpWindowHierarchy(output)
+                                output.toString("UTF-8")
+                            }
+                        }.getOrElse { "Hierarchy unavailable: ${it.javaClass.simpleName}" }
+                    } else "Hierarchy collection is limited to emulators"
+                    assertNotNull("Not found in the picker: $selector\n[DEBUG-saf-picker] $hierarchy", node)
+                }
                 return
             }
             try {
