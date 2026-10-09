@@ -116,3 +116,7 @@ English lives in `docs/`, Chinese in `docs/zh/`. The two Zensical configurations
 and `site/zh/`, sharing component images, compiled Kotlin examples and the English Dokka reference.
 `tools/check-docs.py` verifies language tags, links, screenshots and Chinese counterparts for every
 English guide. Component translations belong in `tools/component-usage.zh.json`, not generated pages.
+
+`SharedFoldersTest` navigates the system picker from its current directory, including a direct
+storage-root view without a device-name entry. It still selects the folder through the app,
+reads and edits the real SAF files, and checks the resulting shared-storage bytes.

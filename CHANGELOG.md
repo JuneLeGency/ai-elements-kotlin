@@ -2,6 +2,9 @@
 
 ## 0.3.1 (unreleased)
 
+- Shared-folder E2E navigation handles the system picker opening directly in storage or restoring
+  a directory, while retaining the real SAF read/write assertions.
+
 - Chinese documentation image paths work in GitHub Markdown previews as well as the hosted site;
   documentation checks reject source image links that traverse a directory symlink.
 - README guide links use the published English/Chinese site and include the Maven Central version badge.

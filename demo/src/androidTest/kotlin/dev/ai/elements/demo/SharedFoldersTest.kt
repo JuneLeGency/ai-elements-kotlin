@@ -95,10 +95,20 @@ class SharedFoldersTest {
             compose.onNodeWithTag("settings-page").performScrollToNode(hasTestTag("folder-add"))
             compose.onNodeWithTag("folder-add").performClick()
 
-            // DocumentsUI: roots drawer → internal storage → Documents → name → Use this folder → Allow.
-            clickWhenShown(By.desc(Pattern.compile("(?i)show roots")), 15_000, required = false)
-            clickText(Pattern.compile(Pattern.quote(Build.MODEL) + "|(?i)internal storage"))
-            clickText(Pattern.compile("Documents"))
+            // DocumentsUI may start at the storage root or restore the last directory.
+            // A single-root picker can omit the roots button and the device-name label entirely.
+            // Navigate the visible directory first; opening the roots drawer is only a fallback.
+            val folder = By.text(Pattern.compile(Pattern.quote(name)))
+            val documents = By.text(Pattern.compile("Documents"))
+            if (!device.wait(Until.hasObject(folder), 3_000)) {
+                if (!device.wait(Until.hasObject(documents), 5_000)) {
+                    clickWhenShown(By.desc(Pattern.compile("(?i)show roots")), 15_000, required = false)
+                    if (!device.hasObject(documents)) {
+                        clickText(Pattern.compile(Pattern.quote(Build.MODEL) + "|(?i)internal storage"))
+                    }
+                }
+                clickText(Pattern.compile("Documents"))
+            }
             clickText(Pattern.compile(Pattern.quote(name)))
             clickText(Pattern.compile("(?i)use this folder"))
             clickText(Pattern.compile("(?i)allow"))

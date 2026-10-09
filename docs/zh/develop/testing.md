@@ -32,3 +32,6 @@ tools/capture-release-screenshots.sh emulator-5582
 ComponentCatalogScreenshots 接收 catalog=true，ReleaseScreenshotsTest 接收 releaseScreenshots=true。
 图片由实际组件渲染，检查布局后才更新到 docs/assets。
 详细基准测试、完整 fixture/live 参数和设备说明见[英文测试指南](/ai-elements-kotlin/develop/testing/)。
+
+`SharedFoldersTest` 根据系统文件选择器当前目录导航，支持直接打开存储根目录且不显示设备名的界面。
+测试仍通过 App 选择目录，使用 SAF 读取和修改真实文件，并核对共享存储中的最终内容。
