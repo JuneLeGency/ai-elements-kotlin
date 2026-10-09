@@ -49,7 +49,7 @@ JsxPreview(
 | `img src alt` | Image |
 | `a href` | 打开 URL 的链接按钮 |
 | `button` / `<Button variant>` | Button，`onClick` 为其 action |
-| `input`（text、`email`、`password`、`number`）、`textarea` | TextField，`name="x"` 绑定到 `/x` |
+| `input`（`type` 为 text、`email`、`password`、`number`）、`textarea` | TextField，`name="x"` 绑定到 `/x` |
 | `input type="checkbox" checked={x}` | CheckBox |
 | `select name` 与 `option value` | ChoicePicker；`multiple` 支持多选 |
 | `<Tabs>` 与 `<Tab title>` | Tabs |

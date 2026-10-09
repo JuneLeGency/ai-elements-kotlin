@@ -19,8 +19,8 @@
 | 模块 | 职责 | minSdk |
 |---|---|---|
 | `ai-elements-chat` | 与协议无关的聊天模型（类似 AI SDK `UIMessage`）、`ChatEvent`、`ChatBackend` 和 `ChatController`（类似 `useChat`）。无网络、无 Compose。 | 24 |
-| `ai-elements-core` | AI SDK、AG-UI 协议客户端、模型 API、Agent 循环、`SubAgents`、`Skills`、MCP 和 OAuth。作为 `ChatBackend` 或能力构建在 chat 之上，无 Compose。 | 24 |
-| `ai-elements-ui` | Compose 组件与 `AiElementsTheme`，只依赖 chat，因此也能渲染自定义 backend。 | 24 |
+| `ai-elements-core` | AI SDK、AG-UI 协议客户端、模型 API、Agent 循环、`SubAgents`、`Skills`、MCP 和 OAuth。作为 `ChatBackend` 或能力构建在 `ai-elements-chat` 之上，无 Compose。 | 24 |
+| `ai-elements-ui` | Compose 组件与 `AiElementsTheme`，只依赖 `ai-elements-chat`，因此也能渲染自定义 backend。 | 24 |
 | `ai-elements-genui` | 原生 A2UI v1.0 surface（Basic Catalog，可扩展）和 `JsxPreview`。 | 26 |
 | `ai-elements-mcp-apps` | MCP Apps 宿主：在沙箱 WebView 中显示 MCP 工具的 `ui://` 视图，并通过桥接与服务器通信。 | 24 |
 | `ai-elements-notifications` | Agent 运行时的 Android 16 Live Update 和运行结束时的回复通知。此模块会引入通知权限，因此为可选模块。 | 24 |

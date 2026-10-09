@@ -29,6 +29,15 @@ def check():
                 errors.append(f'{relative}: translated section structure differs')
             if sum(line.startswith('|') for line in en.splitlines()) != sum(line.startswith('|') for line in zh.splitlines()):
                 errors.append(f'{relative}: translated table row coverage differs')
+            rows = lambda text: [set(re.findall(r'`([^`]+)`', line)) for line in text.splitlines() if line.startswith('|')]
+            if rows(en) != rows(zh):
+                errors.append(f'{relative}: technical names in translated tables differ')
+            if relative.as_posix() == 'getting-started/installation.md':
+                cells = lambda text: [line.rsplit('|', 2)[-2].strip() for line in text.splitlines() if line.startswith('|')][2:]
+                # Both artifact tables list their runtime Android requirements.
+                numeric = lambda text: [cell for cell in cells(text) if re.fullmatch(r'\d+|—', cell)]
+                if numeric(en) != numeric(zh):
+                    errors.append(f'{relative}: minSdk values differ')
     if FENCE.findall(Path('README.md').read_text()) != FENCE.findall(Path('README.zh-CN.md').read_text()):
         errors.append('README: English/Chinese examples differ')
     if errors:

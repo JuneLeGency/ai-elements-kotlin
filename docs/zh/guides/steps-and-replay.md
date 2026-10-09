@@ -38,8 +38,7 @@
 | 步骤 | 视图 |
 |---|---|
 | 有截图 | 截图；URL location 时带地址栏 |
-| execute | `Terminal` 显示命令与输出：16 / 256 / 24-bit 色、粗体、斜体、下划线、反色、`
-` 重绘、光标移动与擦除、OSC 8 链接（ECMA-48 / xterm），保留 1 000 行 |
+| execute | `Terminal` 显示命令与输出：16 / 256 / 24-bit 色、粗体、斜体、下划线、反色、`\r` 重绘、光标移动与擦除、OSC 8 链接（ECMA-48 / xterm），保留 1 000 行 |
 | edit | 有 unified diff 时彩色显示增删行（ACP diff 是单条），否则 `CodeBlock` 显示文件 |
 | read、search、delete、move | 路径与 `CodeBlock` 输出 |
 | fetch | 地址栏和页面文本 |
