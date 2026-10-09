@@ -49,7 +49,10 @@ def main() -> None:
     parser.add_argument("--export-samples", type=Path, help="Export standalone Kotlin examples for the Maven consumer build")
     args = parser.parse_args()
     source = args.source
+    rendered = {}
     def write(path: Path, text: str) -> None:
+        if path.parent == PAGES:
+            rendered[path.name] = text
         if args.check:
             if not path.exists() or path.read_text() != text:
                 raise SystemExit(f"Regenerate component docs: {path.relative_to(ROOT)}")
@@ -181,7 +184,62 @@ def main() -> None:
                 file = re.sub(r"([A-Z])", lambda m: "-" + m[1].lower(), name) + ".html"
                 supporting.append(f"| [{name}](../api/{module}/{package}/{file}) | `{module}` |")
     write(PAGES / "supporting.md", "\n".join(supporting) + "\n")
+    write_chinese(catalog, usage, rendered, write)
     print(f"{len(catalog)} components in {len(categories)} groups → {PAGES.relative_to(ROOT)}")
+
+
+def write_chinese(catalog, usage, rendered, write):
+    translations = json.loads((ROOT / "tools/component-usage.zh.json").read_text())
+    items = translations["items"]
+    groups = translations["categories"]
+    if set(items) != {item["id"] for item in catalog}:
+        raise SystemExit("Chinese component coverage must match the English catalog")
+    target = ROOT / "docs/zh/components"
+    target.mkdir(parents=True, exist_ok=True)
+    index = [
+        "# 组件图册", "",
+        "这里有 65 个展示场景，分为 10 个类别。截图由 Demo 的组件测试实际渲染，",
+        "每项都包含依赖模块、imports、可编译示例、交互说明和 API 链接。",
+        "多个场景可能使用同一个 API；完整公开接口见 [API 参考（英文）](/ai-elements-kotlin/api/index.html)。", "",
+        "先完成[安装](../getting-started/installation.md)，再把示例放进 activity 的 `setContent`，",
+        "并由 `AiElementsTheme` 包裹。示例函数参数表示由应用提供的状态或回调。",
+        "状态工厂、独立表单及其他入口见[辅助 API](supporting.md)。", "",
+        "| 类别 | 组件 |", "|---|---|",
+    ]
+    for slug, (title, intro) in groups.items():
+        group = [item for item in catalog if item["category"] == slug]
+        links = "、".join(f"[{items[item['id']]['title']}]({slug}.md#{anchor(item['title'])})" for item in group)
+        index.append(f"| [{title}]({slug}.md) | {links} |")
+        page = rendered[slug + ".md"]
+        page = page.replace("# " + group[0]["categoryTitle"] + "\n", "# " + title + "\n", 1)
+        page = page.replace(INTROS[slug], intro, 1)
+        for item in group:
+            translated = items[item["id"]]
+            page = page.replace("## " + item["title"] + "\n", f"## {translated['title']} {{ #{anchor(item['title'])} }}\n", 1)
+            page = page.replace("![" + item["title"] + "]", "![" + translated["title"] + "]", 1)
+            page = page.replace(item["summary"], translated["summary"], 1)
+            page = page.replace(usage[item["id"]]["note"], translated["note"], 1)
+        page = page.replace("| Artifact |", "| 依赖模块 |").replace("| Reference |", "| API 文档 |")
+        page = page.replace("](../api/", "](/ai-elements-kotlin/api/")
+        page += f"\n[Read this page in English](/ai-elements-kotlin/components/{slug}/)\n"
+        write(target / (slug + ".md"), page)
+    index += ["", "MCP Apps 的交互视图需要连接 MCP 服务，未包含在静态图册中。",
+              "请看[生成式界面指南](../guides/generative-ui.md)。", ""]
+    write(target / "index.md", "\n".join(index))
+    supporting = [
+        "# 辅助 API", "",
+        "除图册中的主要场景，下表列出了公开的 composable 和状态工厂。点击名称可查看完整签名与 KDoc（英文）。", "",
+        "在 composition 中使用 `rememberAudioPlayerState`、`rememberSpeechInputState` 和",
+        "`rememberSpeechOutputState`，让播放器或语音服务随界面离开而释放。",
+        "`ChatController` 由 ViewModel 持有，界面或播放器状态由 Compose 状态工厂管理。", "",
+        "`SchemaForm` 可单独渲染 JSON Schema 表单，需要提供 onSubmit 和 onDecline。",
+        "`Confirmation` 可在聊天之外使用，支持普通批准/拒绝及完整 onDecide 回调。",
+        "图片、PDF 和视频对话框的 onDismiss 应负责从 composition 中移除对话框。", "",
+        "| API | 依赖模块 |", "|---|---|",
+    ]
+    supporting += [line.replace("](../api/", "](/ai-elements-kotlin/api/")
+                   for line in rendered["supporting.md"].splitlines() if line.startswith("| [")]
+    write(target / "supporting.md", "\n".join(supporting) + "\n")
 
 
 def component_imports() -> dict[str, str]:

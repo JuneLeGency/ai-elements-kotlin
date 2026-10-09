@@ -5,15 +5,15 @@
 # (demo/src/main/kotlin/dev/ai/elements/demo/samples/DocsSamples.kt), so it cannot rot.
 
 [project]
-site_name = "AI Elements for Kotlin"
-site_description = "Jetpack Compose components and agent tooling for AI apps on Android, on open protocols only."
-site_url = "https://junelegency.github.io/ai-elements-kotlin/"
+site_name = "AI Elements for Kotlin · 中文"
+site_description = "面向 Android AI 应用的 Jetpack Compose 组件与 Agent 工具。组件实图、中英文接入指南与公开协议支持。"
+site_url = "https://junelegency.github.io/ai-elements-kotlin/zh/"
 repo_url = "https://github.com/JuneLeGency/ai-elements-kotlin"
 repo_name = "ai-elements-kotlin"
-edit_uri = "edit/main/docs/"
+edit_uri = "edit/main/docs/zh/"
 copyright = "Apache License 2.0"
-docs_dir = "docs"
-site_dir = "site"
+docs_dir = "docs/zh"
+site_dir = "site/zh"
 extra_css = ["assets/stylesheets/landing.css"]
 exclude_docs = """
 GOAL.md
@@ -21,70 +21,35 @@ zh/**
 """
 
 nav = [
-  { "Home" = "index.md" },
-  { "Get started" = [
-    "getting-started/installation.md",
-    "getting-started/choose.md",
-    "getting-started/pure-client.md",
-    "getting-started/in-app-agent.md",
-    "getting-started/faq.md",
+  { "首页" = "index.md" },
+  { "快速开始" = [
+    { "选择接入方式" = "getting-started/choose.md" },
+    { "安装与环境" = "getting-started/installation.md" },
+    { "连接服务端 Agent" = "getting-started/pure-client.md" },
+    { "在 App 内运行 Agent" = "getting-started/in-app-agent.md" },
+    { "常见问题" = "getting-started/faq.md" },
   ] },
-  { "Protocols" = [
-    "protocols/index.md",
-    "protocols/ai-sdk.md",
-    "protocols/ag-ui.md",
-    "protocols/a2a.md",
-    "protocols/acp.md",
-    "protocols/mcp.md",
-    "protocols/mcp-apps.md",
-    "protocols/model-apis.md",
+  { "组件图册" = [
+    "components/index.md", "components/conversation.md", "components/content.md",
+    "components/tools.md", "components/human-in-the-loop.md", "components/agent-structure.md",
+    "components/generative-ui.md", "components/attachments-and-media.md", "components/voice.md",
+    "components/developer-tools.md", "components/workflow.md", "components/supporting.md",
   ] },
-  { "Guides" = [
-    "guides/elements.md",
-    "guides/human-in-the-loop.md",
-    "guides/steps-and-replay.md",
-    "guides/notifications.md",
-    "guides/generative-ui.md",
-    "guides/customizing.md",
+  { "使用指南" = [
+    "guides/elements.md", "guides/customizing.md", "guides/human-in-the-loop.md", "guides/harness.md",
+    "guides/generative-ui.md", "guides/steps-and-replay.md", "guides/notifications.md",
     "guides/custom-backend.md",
-    "guides/harness.md",
   ] },
-  { "Components" = [
-    "components/index.md",
-    "components/conversation.md",
-    "components/content.md",
-    "components/tools.md",
-    "components/human-in-the-loop.md",
-    "components/agent-structure.md",
-    "components/generative-ui.md",
-    "components/attachments-and-media.md",
-    "components/voice.md",
-    "components/developer-tools.md",
-    "components/workflow.md",
-    "components/supporting.md",
-  ] },
-  { "Concepts" = [
-    "concepts/architecture.md",
-    "concepts/open-protocols.md",
-  ] },
-  { "Develop" = [
-    "develop/reference-server.md",
-    "develop/demo-app.md",
-    "develop/testing.md",
-    "develop/contributing.md",
-    "develop/releasing.md",
-    "develop/api-compatibility.md",
-  ] },
-  { "Project" = [
-    "project/roadmap.md",
-    "project/changelog.md",
-    "project/security.md",
-  ] },
-  { "API reference" = "api/index.html" },
+  { "协议" = ["protocols/index.md", "protocols/ai-sdk.md", "protocols/ag-ui.md", "protocols/mcp.md", "protocols/mcp-apps.md", "protocols/a2a.md", "protocols/acp.md", "protocols/model-apis.md"] },
+  { "架构" = ["concepts/architecture.md", "concepts/open-protocols.md"] },
+  { "开发与发布" = ["develop/reference-server.md", "develop/demo-app.md", "develop/testing.md", "develop/contributing.md", "develop/releasing.md"] },
+  { "项目" = ["project/roadmap.md", "project/changelog.md", "project/security.md"] },
+  { "版本与兼容性" = "develop/api-compatibility.md" },
+  { "API 参考（英文）" = "/ai-elements-kotlin/api/index.html" },
 ]
 
 [project.theme]
-language = "en"
+language = "zh"
 logo = "assets/logo.svg"
 favicon = "assets/logo.svg"
 features = [
@@ -106,7 +71,7 @@ features = [
 [[project.theme.palette]]
 media = "(prefers-color-scheme)"
 toggle.icon = "lucide/sun-moon"
-toggle.name = "Switch to light mode"
+toggle.name = "切换到浅色模式"
 
 [[project.theme.palette]]
 media = "(prefers-color-scheme: light)"
@@ -114,7 +79,7 @@ scheme = "default"
 primary = "deep-purple"
 accent = "deep-purple"
 toggle.icon = "lucide/sun"
-toggle.name = "Switch to dark mode"
+toggle.name = "切换到深色模式"
 
 [[project.theme.palette]]
 media = "(prefers-color-scheme: dark)"
@@ -122,7 +87,7 @@ scheme = "slate"
 primary = "deep-purple"
 accent = "deep-purple"
 toggle.icon = "lucide/moon"
-toggle.name = "Switch to system preference"
+toggle.name = "跟随系统主题"
 
 [project.markdown_extensions]
 abbr = {}

@@ -3,6 +3,10 @@
 ## 0.3.0 (unreleased)
 
 ### Release readiness
+- English and Simplified Chinese documentation and READMEs, including all 65 component examples,
+  onboarding, protocol guides and a responsive landing page. Four new light/dark conversation
+  screenshots are captured from real Compose elements on the emulator. Site validation checks
+  both languages, local screenshots and cross-language links.
 - Stable public APIs are preserved starting with the first public release, including 0.x;
   deprecated entry points remain callable. Native Mermaid is explicitly opt-in with
   `ExperimentalNativeMermaidApi`. The SSE event, JSX compiler and A2UI expression parser implementation types are now internal before publication.

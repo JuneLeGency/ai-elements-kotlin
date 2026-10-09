@@ -4,18 +4,22 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 import json
+import re
 import sys
 
 
 class Page(HTMLParser):
     def __init__(self, path):
         super().__init__()
+        self.language = None
         self.ids = set()
         self.targets = []
         self.feed(path.read_text())
 
     def handle_starttag(self, tag, attributes):
         attrs = dict(attributes)
+        if tag == "html":
+            self.language = attrs.get("lang")
         if "id" in attrs:
             self.ids.add(attrs["id"])
         key = "href" if tag == "a" else "src" if tag == "img" else None
@@ -36,9 +40,14 @@ def check(root):
         errors.append("No documentation pages generated")
     for page in pages:
         parsed = parse(page)
+        expected_language = "zh" if page.relative_to(root).parts[0] == "zh" else "en"
+        if not (parsed.language or "").startswith(expected_language):
+            errors.append(f"{page.relative_to(root)}: expected {expected_language} HTML language")
         for target in parsed.targets:
             url = urlsplit(target)
-            if url.scheme or url.netloc:
+            if (url.scheme or url.netloc) and not (
+                url.netloc == "junelegency.github.io" and url.path.startswith("/ai-elements-kotlin/")
+            ):
                 continue
             path = unquote(url.path)
             if path.startswith("/ai-elements-kotlin/"):
@@ -55,6 +64,16 @@ def check(root):
                 other = parse(resolved)
                 if unquote(url.fragment) not in other.ids:
                     errors.append(f"{page.relative_to(root)}: missing anchor {target}")
+    english_sources = {p.relative_to(Path("docs")) for p in Path("docs").rglob("*.md")
+                       if "zh" not in p.relative_to(Path("docs")).parts and "assets" not in p.parts}
+    for relative in english_sources:
+        if not (Path("docs/zh") / relative).is_file():
+            errors.append(f"Missing Chinese documentation counterpart: {relative}")
+    for name in ("README.md", "README.zh-CN.md"):
+        text = Path(name).read_text()
+        for image in re.findall(r'(?:src="|!\[[^\]]*\]\()(docs/[^"\s)]+)', text):
+            if not Path(image).is_file():
+                errors.append(f"{name}: missing screenshot {image}")
     # Baselines are the published library inventory, excluding the BOM (no API).
     modules = sorted([*Path(".").glob("ai-elements-*/api/*.api"), *Path("harness").glob("*/api/*.api")])
     if not modules:

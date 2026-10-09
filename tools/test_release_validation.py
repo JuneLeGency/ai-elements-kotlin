@@ -11,6 +11,7 @@ class ReleaseValidationTest(unittest.TestCase):
             'platform("io.github.junelegency:ai-elements-bom:0.3.0-SNAPSHOT")',
             'platform("io.github.junelegency:ai-elements-bom:0.3.0")\n0.3.0 is not released yet',
             'platform("io.github.junelegency:ai-elements-bom:0.3.01")',
+            'platform("io.github.junelegency:ai-elements-bom:0.3.0")\n0.3.0 尚未公开发布',
         ):
             with self.subTest(text=text), self.assertRaises(ValueError):
                 validate_docs("0.3.0", {"README": text})

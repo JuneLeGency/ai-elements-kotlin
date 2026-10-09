@@ -96,3 +96,23 @@ See [API compatibility](api-compatibility.md) for reviewing intentional baseline
 When several devices are connected, set `ANDROID_SERIAL=emulator-...` to target just the emulator.
 A successful Gradle task does not prove live tests ran: inspect skipped counts and start the
 reference server before protocol E2E. Hosted-model tests remain opt-in and require separate evidence.
+
+
+## Bilingual landing screenshots
+
+```bash
+tools/capture-release-screenshots.sh emulator-5582
+```
+
+Use the emulator id from `adb devices`. The script runs `ReleaseScreenshotsTest` with curated
+message data and the real Compose components, captures light/dark in English/Simplified Chinese,
+and updates four WebP assets. It does not call a model or change system language/night settings.
+It uses direct instrumentation so Gradle's post-test app uninstall cannot delete the screenshots
+before collection. Inspect all four images before committing them.
+
+## Bilingual documentation
+
+English lives in `docs/`, Chinese in `docs/zh/`. The two Zensical configurations build into `site/`
+and `site/zh/`, sharing component images, compiled Kotlin examples and the English Dokka reference.
+`tools/check-docs.py` verifies language tags, links, screenshots and Chinese counterparts for every
+English guide. Component translations belong in `tools/component-usage.zh.json`, not generated pages.

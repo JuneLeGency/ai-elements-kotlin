@@ -151,6 +151,8 @@ The demo is a showcase of both modes, switchable per conversation:
 
 ### W6 · Library structure
 
+Public launch (2026-10-09): 🟡 keep the existing repository and GitHub Pages project site; add Chinese onboarding and all component examples alongside English. Prepare Central publication of the 20 libraries and BOM. Previous library/API/device checks remain the baseline; validate changed documentation and release automation. Local bilingual site validation passes for 92 guide pages and 20 API modules; the 65 translated component examples match the compiled English catalog. ReleaseScreenshotsTest passes on the emulator and supplies four English/Chinese light/dark screenshots. All 103 fetched Git commits pass the secret scan (one reviewed vendored-JavaScript false positive is narrowly excluded). GitHub browser management access works; CLI authentication remains invalid. Central login, namespace verification and signing configuration remain pending.
+
 | Item | Status |
 |---|---|
 | Review module and package layering: core packages by concern (`chat`, `protocol.aisdk`, `protocol.agui`, `provider.*`, `http`, `agent`, `mcp`, `skills`, `auth`, `config`) | ✅ 98 unit tests + 11 live tests green after the move |

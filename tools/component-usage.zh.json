@@ -1,0 +1,371 @@
+{
+  "categories": {
+    "conversation": [
+      "对话组件",
+      "消息列表、单条消息、输入框及对话周边控件。"
+    ],
+    "content": [
+      "消息内容",
+      "Markdown、代码、数学公式、图表、思考摘要与引用。"
+    ],
+    "tools": [
+      "工具与工作面板",
+      "工具调用、子 Agent，以及执行过程中的截图、终端与文件视图。"
+    ],
+    "human-in-the-loop": [
+      "人工确认",
+      "工具审批、选择题与信息收集表单。"
+    ],
+    "agent-structure": [
+      "Agent 执行结构",
+      "计划、任务、步骤摘要与结构化数据。"
+    ],
+    "generative-ui": [
+      "生成式界面",
+      "原生 JSX、A2UI、生成产物与网页预览。"
+    ],
+    "attachments-and-media": [
+      "附件与媒体",
+      "图片、视频、文档、音频及附件列表。"
+    ],
+    "voice": [
+      "语音交互",
+      "语音对话、状态形象、语音输入和设备选择。"
+    ],
+    "developer-tools": [
+      "开发者工具",
+      "终端、堆栈、测试、文件、提交与依赖信息。"
+    ],
+    "workflow": [
+      "工作流",
+      "用图形展示执行步骤及其关系。"
+    ]
+  },
+  "items": {
+    "conversation": {
+      "title": "对话列表",
+      "summary": "展示消息列表：流式生成时跟随底部，向上滚动后暂停跟随。",
+      "note": "把 controller 放在 ViewModel 中。Conversation 只渲染消息列表；输入框由 PromptInput 提供，也可以直接用 Chat。审批和表单回答都需要接回 controller。"
+    },
+    "messages": {
+      "title": "单条消息",
+      "summary": "渲染用户或助手消息，以及复制、朗读、重新生成等操作。",
+      "note": "适合单条消息或非懒加载布局。较长的历史记录请使用 Conversation，它会按回复内容块进行懒加载。"
+    },
+    "prompt-input": {
+      "title": "消息输入框",
+      "summary": "支持文本、附件、语音输入、发送、停止与排队。",
+      "note": "文本和附件由调用方持有。只有 send 接受消息后才清空输入；controller 支持排队时可启用 allowQueue。"
+    },
+    "suggestions": {
+      "title": "建议提问",
+      "summary": "让用户点击预设问题开始对话。",
+      "note": "选择建议只会触发 onSelect，由应用决定填入输入框还是立即发送。"
+    },
+    "empty-state": {
+      "title": "空对话欢迎页",
+      "summary": "用欢迎语和建议问题引导第一次对话。",
+      "note": "在消息历史为空时显示。窗口高度较小时可以设置 showHero=false。"
+    },
+    "branch": {
+      "title": "回复版本切换",
+      "summary": "在重新生成的多个回复版本之间切换。",
+      "note": "index 从 0 开始。调用方需要更新当前消息；这个控件本身不会修改历史。"
+    },
+    "checkpoint": {
+      "title": "对话检查点",
+      "summary": "确认后恢复到之前的对话位置。",
+      "note": "组件会先要求确认，再调用 onRestore。恢复 controller 的消息历史不会撤销工具已经修改的文件。"
+    },
+    "queue": {
+      "title": "待发送队列",
+      "summary": "展示 Agent 忙碌期间等待发送的消息。",
+      "note": "队列顺序由 controller 管理。停止或出错会暂停自动发送；将“立即发送”接到 sendQueuedNow。"
+    },
+    "open-in-chat": {
+      "title": "在其他聊天应用打开",
+      "summary": "把当前问题带到用户选择的聊天应用。",
+      "note": "问题会放入外部应用的 URL。让用户主动选择目标，不要传入隐藏上下文或凭据。"
+    },
+    "model-selector": {
+      "title": "模型选择器",
+      "summary": "按提供方、能力与上下文窗口选择模型。",
+      "note": "选择器只更新界面状态。backend 工厂应在下一轮读取模型选择，并保留当前 controller 和消息历史。"
+    },
+    "context": {
+      "title": "Token 使用量",
+      "summary": "展示已用 token 与模型上下文窗口的关系。",
+      "note": "传入实际统计和所选模型的窗口大小。该组件不负责分词或裁剪历史。"
+    },
+    "loading": {
+      "title": "加载指示器",
+      "summary": "等待首段输出时显示 Material 3 Expressive 加载动画。",
+      "note": "这些组件来自 Material 3 依赖。调用时需要声明 ExperimentalMaterial3ExpressiveApi 的 opt-in。"
+    },
+    "shimmer": {
+      "title": "流动高亮文字",
+      "summary": "用流动高亮提示任务仍在进行。",
+      "note": "任务结束后将 active 设为 false。较长的内容更适合使用普通状态文字。"
+    },
+    "markdown": {
+      "title": "流式 Markdown",
+      "summary": "随着内容生成渲染 GitHub 风格的 Markdown。",
+      "note": "传入累计文本，而不是最后一个 token。streaming 会延后处理尚未完整的复杂内容。"
+    },
+    "code-block": {
+      "title": "代码块",
+      "summary": "带语法高亮、语言标签与复制按钮的代码块。",
+      "note": "language 控制高亮。组件提供复制功能，不会执行代码。"
+    },
+    "math": {
+      "title": "数学公式",
+      "summary": "使用离线 KaTeX 渲染公式。",
+      "note": "MathBlock 接收不带 Markdown 围栏的 TeX。正文和公式混排时使用 MarkdownContent 与美元符号分隔；KaTeX 资源已随库打包。"
+    },
+    "mermaid-flowchart": {
+      "title": "Mermaid 流程图",
+      "summary": "离线展示流程图和步骤关系。",
+      "note": "传入完整 Mermaid 源码。默认 WebView 渲染器支持离线；原生渲染器需要可选模块及实验性 opt-in。"
+    },
+    "mermaid-sequence": {
+      "title": "Mermaid 时序图",
+      "summary": "展示参与方之间的请求与响应。",
+      "note": "传入完整 Mermaid 源码。默认 WebView 渲染器支持离线；原生渲染器需要可选模块及实验性 opt-in。"
+    },
+    "mermaid-class": {
+      "title": "Mermaid 类图",
+      "summary": "展示类及其关系。",
+      "note": "传入完整 Mermaid 源码。默认 WebView 渲染器支持离线；原生渲染器需要可选模块及实验性 opt-in。"
+    },
+    "mermaid-pie": {
+      "title": "Mermaid 饼图",
+      "summary": "展示分类占比。",
+      "note": "传入完整 Mermaid 源码。默认 WebView 渲染器支持离线；原生渲染器需要可选模块及实验性 opt-in。"
+    },
+    "mermaid-streaming": {
+      "title": "流式 Mermaid",
+      "summary": "图表尚未生成完毕时先展示源码。",
+      "note": "在图表闭合前保持 complete=false，避免反复解析不完整的图表。"
+    },
+    "reasoning": {
+      "title": "思考摘要",
+      "summary": "用可展开的简洁条目展示模型返回的思考内容。",
+      "note": "保持 part id 稳定。生成时设置 isStreaming；durationMs 的单位为毫秒。"
+    },
+    "sources": {
+      "title": "信息来源",
+      "summary": "展示回复引用的来源与链接。",
+      "note": "来源 id 应保持稳定。链接通过 LocalUriHandler 打开，应用可替换为自己的路由。"
+    },
+    "inline-citation": {
+      "title": "正文引用标记",
+      "summary": "把正文中的引用编号关联到来源。",
+      "note": "正文与引用应使用同一份来源列表。组件负责关联来源，不会核实模型生成内容的真实性。"
+    },
+    "tool-calls": {
+      "title": "工具调用",
+      "summary": "展示工具输入、输出、错误、进度和来源。",
+      "note": "用相同的 part id 更新输入、进度与输出。onDecision 可携带理由、编辑后的参数及记住决定；不提供回调时只读展示。"
+    },
+    "sub-agents": {
+      "title": "子 Agent",
+      "summary": "展示委派任务及其嵌套执行过程。",
+      "note": "在上游设置 ToolKind.Delegation 和 subagent。ToolPartView 会选择委派视图并应用自定义 renderer；嵌套审批共用回调。"
+    },
+    "agent-computer": {
+      "title": "Agent 工作面板",
+      "summary": "按步骤查看截图、终端、差异与文件，支持时间线和回放。",
+      "note": "将面板状态与页面一起保存。Auto 按容器宽度选择侧栏或底部抽屉；已有自适应布局时可使用 Hosted。"
+    },
+    "agent-computer-reply": {
+      "title": "回复中的工作预览",
+      "summary": "在涉及电脑操作的回复下方自动展示工作预览。",
+      "note": "Chat 已包含预览卡和工作面板。工具分类、位置及文件内容应在上游设置；普通工具名称本身不构成 UI 语义。"
+    },
+    "step-views": {
+      "title": "执行步骤视图",
+      "summary": "按工具分类展示浏览器、终端或差异内容。",
+      "note": "截图通过 AgentStep.files 传入。工具分类决定展示方式；请为视图提供有界布局区域。"
+    },
+    "agent": {
+      "title": "Agent 信息卡",
+      "summary": "展示 Agent 的模型、指令、工具与输出结构。",
+      "note": "这是说明卡片，不是 Agent 运行时。数据应来自 backend 配置或远端 Agent Card。"
+    },
+    "confirmation": {
+      "title": "工具审批",
+      "summary": "允许用户批准、拒绝、说明理由或编辑参数。",
+      "note": "遵循 approvalAnswers，只提供后端能接收的理由或参数编辑功能。审批应恢复等待中的工具，而不是发送一条新用户消息。"
+    },
+    "question": {
+      "title": "选择题",
+      "summary": "让 Agent 向用户提出单选或多选问题。",
+      "note": "保存返回的选项 id 和文字，再传给 Agent。answered 表示已经作答，可防止重复提交。"
+    },
+    "input-request": {
+      "title": "信息收集表单",
+      "summary": "根据 JSON Schema 展示 Agent 请求填写的表单或确认。",
+      "note": "回答时必须使用原请求 id。表单验证支持的 schema 字段；URL 请求需要用户完成外部流程。"
+    },
+    "plan": {
+      "title": "任务计划",
+      "summary": "展示 Agent 的计划与当前步骤。",
+      "note": "进度由调用方维护，状态为 COMPLETE、ACTIVE、PENDING。展示计划不等于安排或执行任务。"
+    },
+    "task": {
+      "title": "任务条目",
+      "summary": "展示任务步骤及涉及的文件。",
+      "note": "items 描述任务进展和文件标记；该组件不会修改文件。"
+    },
+    "chain-of-thought": {
+      "title": "推理步骤",
+      "summary": "展示步骤摘要及其来源。",
+      "note": "只展示实际提供的步骤与来源。组件本身不会请求或提取模型未返回的推理过程。"
+    },
+    "data-parts": {
+      "title": "结构化数据片段",
+      "summary": "把已知计划、任务或自定义数据渲染到对话中。",
+      "note": "已知 plan/task 结构会使用对应组件。自定义名称可注册到 AiElementsRenderers.data；未知结构仍会以数据视图显示。"
+    },
+    "jsx-typography": {
+      "title": "JSX 文本与布局",
+      "summary": "把生成的 JSX 标题、段落与布局渲染为原生组件。",
+      "note": "需要 ai-elements-genui，minSdk 26。受支持的 JSX 会编译为原生 A2UI 组件，不执行任意 JavaScript。"
+    },
+    "jsx-form": {
+      "title": "JSX 表单与操作",
+      "summary": "用数据绑定和 action 连接表单输入与提交。",
+      "note": "onAction 接收操作名称和当前数据模型。应用负责校验和处理，渲染器不会自动执行服务端写入。"
+    },
+    "jsx-controls": {
+      "title": "JSX 选择控件",
+      "summary": "展示选项、滑块、日期和标签页等控件。",
+      "note": "需要 ai-elements-genui，minSdk 26。受支持的 JSX 会编译为原生 A2UI 组件，不执行任意 JavaScript。"
+    },
+    "jsx-cards": {
+      "title": "JSX 数据卡片",
+      "summary": "将绑定数据展示为一组卡片。",
+      "note": "需要 ai-elements-genui，minSdk 26。受支持的 JSX 会编译为原生 A2UI 组件，不执行任意 JavaScript。"
+    },
+    "jsx-streaming": {
+      "title": "流式 JSX",
+      "summary": "边生成边渲染 JSX，并保留用户已填写的内容。",
+      "note": "传入累计 JSX，并保持 composable 在布局中的位置稳定。不完整标签会等待后续内容；初始 bindings 保持稳定以保留编辑状态。"
+    },
+    "a2ui": {
+      "title": "A2UI 界面",
+      "summary": "原生渲染符合 A2UI v1.0 的界面。",
+      "note": "先让 A2uiState 处理标准事件，再取得 surface。接入聊天时使用 a2uiRenderer，并按传输协议的绑定方式发送 action。"
+    },
+    "artifact": {
+      "title": "生成产物",
+      "summary": "展示文件或生成内容及相关操作。",
+      "note": "操作按钮通过 actions 插槽提供。保存、分享以及所需权限由应用负责。"
+    },
+    "web-preview": {
+      "title": "网页预览",
+      "summary": "在受限 WebView 中预览生成的 HTML 或 URL。",
+      "note": "预览内容不能当作可信应用界面；需要标准服务端交互桥接时使用 MCP Apps。"
+    },
+    "image": {
+      "title": "图片",
+      "summary": "按 EXIF 方向展示图片，点击后支持缩放、平移和旋转。",
+      "note": "设置实际 mediaType 和 url，可提供 filename。通过 LocalFileLoader 自定义下载和鉴权；点击图片会打开内置查看器。"
+    },
+    "attachments": {
+      "title": "附件列表",
+      "summary": "展示输入中的附件，并允许移除或查看。",
+      "note": "列表与文件选择器由应用管理。移除只改变附件列表，不会删除实际文件。"
+    },
+    "video": {
+      "title": "视频",
+      "summary": "展示首帧与时长，点击后全屏播放。",
+      "note": "使用实际媒体类型，例如 video/mp4。平台编解码器必须支持该格式，来源也需要可读取。"
+    },
+    "document": {
+      "title": "PDF 与文档",
+      "summary": "PDF 可预览首页并逐页查看，其他文档交给外部应用。",
+      "note": "PDF 使用 PdfRenderer。其他格式需要设备安装相应查看器；文件通过库内 FileProvider 分享。"
+    },
+    "audio": {
+      "title": "音频播放器与转写",
+      "summary": "播放音频，并让转写文本随时间高亮和定位。",
+      "note": "rememberAudioPlayerState 随 composition 创建和释放播放器。保持 source 稳定；转写时间与 seek 参数均以毫秒计。"
+    },
+    "voice-mode": {
+      "title": "语音对话模式",
+      "summary": "通过同一个 controller 完成免手持语音对话。",
+      "note": "声明 RECORD_AUDIO 并完成权限流程，需要可用的识别与 TTS 服务。onClose 应关闭外层对话框或页面。"
+    },
+    "persona": {
+      "title": "语音状态形象",
+      "summary": "展示待机、倾听、思考与说话状态。",
+      "note": "只负责视觉状态，不会录音或朗读。倾听和说话时可把音量传入 level。"
+    },
+    "speech-input": {
+      "title": "语音输入",
+      "summary": "使用平台语音识别把讲话转为输入文本。",
+      "note": "声明 RECORD_AUDIO。state 管理识别器生命周期；失败时展示 speech.error，并在 onTranscript 中区分中间结果与最终结果。"
+    },
+    "voice-selectors": {
+      "title": "麦克风与音色选择",
+      "summary": "选择输入设备和朗读音色。",
+      "note": "选择器只报告选项；请另行更新音频引擎或 SpeechSettings。可用设备与音色依赖当前系统。"
+    },
+    "terminal": {
+      "title": "终端输出",
+      "summary": "展示命令输出的颜色、进度重绘和链接。",
+      "note": "传入累计输出。支持 ANSI 样式和有界滚动历史；这是输出视图，不是可交互终端。"
+    },
+    "stack-trace": {
+      "title": "异常堆栈",
+      "summary": "区分应用与依赖的堆栈帧，支持折叠。",
+      "note": "传入原始堆栈文字。组件只展示信息，不会上报崩溃报告。"
+    },
+    "test-results": {
+      "title": "测试结果",
+      "summary": "展示测试套件中的成功、失败与跳过项目。",
+      "note": "提供实际结果和毫秒耗时；组件本身不会运行测试。"
+    },
+    "file-tree": {
+      "title": "文件树",
+      "summary": "展示项目目录、选中文件和变更标记。",
+      "note": "节点由调用方提供，选择节点不会读取文件。需要初始展开状态时传入 expanded 路径集合。"
+    },
+    "commit": {
+      "title": "提交信息",
+      "summary": "展示 Git 提交说明和文件变更。",
+      "note": "哈希、说明与文件列表来自你的源码管理工具；该卡片不会执行 Git 操作。"
+    },
+    "schema-display": {
+      "title": "接口结构",
+      "summary": "展示接口参数、请求体和响应示例。",
+      "note": "这是结构说明，不会验证或调用接口。requestBody 与 responseBody 是示例文字。"
+    },
+    "package-info": {
+      "title": "依赖信息",
+      "summary": "展示依赖版本变化与大小。",
+      "note": "变更分类和大小由应用提供；组件不执行依赖解析或升级。"
+    },
+    "environment-variables": {
+      "title": "环境变量",
+      "summary": "展示环境变量，并默认遮挡敏感值。",
+      "note": "secret 只影响视觉遮挡，不提供加密。示例和截图中不要放真实凭据。"
+    },
+    "sandbox": {
+      "title": "代码与运行结果",
+      "summary": "通过标签页展示代码及其输出。",
+      "note": "该组件只提供展示。实际执行由 harness-shell 或你的 backend 完成。"
+    },
+    "snippet": {
+      "title": "可复制命令",
+      "summary": "展示一行便于复制的命令。",
+      "note": "点击复制不会执行命令。"
+    },
+    "workflow-canvas": {
+      "title": "工作流画布",
+      "summary": "通过节点与连线展示 Agent 执行过程，支持平移与缩放。",
+      "note": "使用稳定的节点 id，连线应引用已有节点，位置单位为 dp。为画布设置有界大小；可通过 nodeContent、nodeToolbar、panel 自定义展示。"
+    }
+  }
+}

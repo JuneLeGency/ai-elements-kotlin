@@ -1,56 +1,59 @@
+<div align="center">
+
+<img src="docs/assets/logo.svg" width="64" height="64" alt="AI Elements logo">
+
 # AI Elements for Kotlin
+
+**Native Compose components for AI conversations and agents.**
+
+[English](README.md) · [简体中文](README.zh-CN.md)
 
 [![CI](https://github.com/JuneLeGency/ai-elements-kotlin/actions/workflows/ci.yml/badge.svg)](https://github.com/JuneLeGency/ai-elements-kotlin/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-![minSdk](https://img.shields.io/badge/minSdk-24-green.svg)
-![Kotlin](https://img.shields.io/badge/Kotlin-2.4-7F52FF.svg)
+![Android](https://img.shields.io/badge/Android-minSdk%2024%20%2F%2026-3DDC84)
+![UI](https://img.shields.io/badge/UI-Material%203%20Expressive-6750A4)
 
-**Material 3 Expressive** Jetpack Compose components and agent tooling for AI apps on Android: the
-Compose counterpart of [Vercel AI Elements](https://elements.ai-sdk.dev). It connects only through
-open protocols: AI SDK, AG-UI, MCP, MCP Apps, A2A, Agent Client Protocol, A2UI and Agent Skills.
+[Documentation](https://junelegency.github.io/ai-elements-kotlin/) ·
+[Components](https://junelegency.github.io/ai-elements-kotlin/components/) ·
+[Quick start](docs/getting-started/pure-client.md) ·
+[API reference](https://junelegency.github.io/ai-elements-kotlin/api/)
 
-<p>
-  <img src="docs/assets/screenshots/phone-light-en.webp" width="260" alt="A conversation with a plan, a tool call, Markdown and a Mermaid diagram">
-  <img src="docs/assets/screenshots/phone-dark-en.webp" width="260" alt="The same conversation in the dark theme">
-</p>
+<img src="docs/assets/screenshots/landing-light-en.webp" width="280" alt="Light theme: chat, a plan, code and tool approval">
+<img src="docs/assets/screenshots/landing-dark-en.webp" width="280" alt="The same native Compose example in the dark theme">
+
+</div>
+
+Build a complete chat screen or use just the elements you need. Streaming Markdown, reasoning,
+tool approvals, sub-agents, plans, attachments and generated interfaces share one chat model.
+Connect your own backend, or run the agent loop inside the app.
+
+Screenshots are rendered from real Android components on an emulator with curated example data.
+The [catalog](docs/components/index.md) includes **65 illustrated scenarios**, compiled examples and API links.
+This is the Compose counterpart of [Vercel AI Elements](https://elements.ai-sdk.dev), on public protocols.
+
+## Start with a screen
 
 ```kotlin
 AiElementsTheme {
-    Chat(rememberChat { approver -> AgUiBackend("https://agents.example.com/api/agui", approver = approver) })
+    Chat(rememberChat { approver ->
+        AgUiBackend("https://agents.example.com/api/agui", approver = approver)
+    })
 }
 ```
 
-That is a complete chat: streaming Markdown, reasoning, tool calls with approvals, sub-agents, plans
-and sources, and a live view of the agent's computer (screenshots, terminal, diffs) with a timeline
-and replay. Swap the backend to talk to another protocol; the UI stays the same.
+Follow the [quick start](docs/getting-started/pure-client.md) for imports, Android permissions,
+a runnable reference server and ViewModel ownership. The reference server's scripted model needs no API key.
 
-**[Documentation](https://junelegency.github.io/ai-elements-kotlin/)** ([repository copy](docs/index.md)): [install](docs/getting-started/installation.md) ·
-[pure client](docs/getting-started/pure-client.md) · [in-app agent](docs/getting-started/in-app-agent.md) ·
-[protocols](docs/protocols/index.md) · [elements](docs/guides/elements.md) ·
-[human in the loop](docs/guides/human-in-the-loop.md) · [steps and replay](docs/guides/steps-and-replay.md) · [architecture](docs/concepts/architecture.md).
-Build the site with `tools/build-docs.sh`, or preview it with `uvx zensical serve`.
+## Choose where the agent runs
 
-## Two ways to use it
-
-| Mode | Where the agent runs | You add |
+| Mode | Your app adds | Start here |
 |---|---|---|
-| **Pure client** | On your server (Pydantic AI, LangGraph, Mastra, any AI SDK / AG-UI server), a remote A2A agent, or a coding agent over ACP | `ai-elements-ui` + a protocol backend |
-| **In-app agent** | On the device, over any model API | `ai-elements-ui` + `harness-*` capabilities: files, a Linux sandbox, memory, planning, a browser, device tools, speech, scheduled tasks, sub-agents, skills, MCP |
+| Server agent | UI + an AI SDK, AG-UI, A2A or ACP backend | [Pure client](docs/getting-started/pure-client.md) |
+| In-app agent | UI + a model API and optional harness capabilities | [In-app agent](docs/getting-started/in-app-agent.md) |
+| Your own implementation | Individual elements, or a custom ChatBackend | [Custom backend](docs/guides/custom-backend.md) |
 
-## Protocols
-
-| Backend | Spec | Artifact |
-|---|---|---|
-| `UiMessageStreamBackend` | Vercel AI SDK 6 UI Message Stream (v5, v4 Data Stream) | `ai-elements-core` |
-| `AgUiBackend` | AG-UI 1.x, official `kotlin-core` types | `ai-elements-core` |
-| `A2aBackend` | A2A 1.0 (0.3 compatible), official `a2a-java-sdk` | `ai-elements-a2a` |
-| `AcpBackend` | Agent Client Protocol, official ACP Kotlin SDK | `ai-elements-acp` |
-| OpenAI, Anthropic, Gemini, Ollama | model APIs, with the agent loop on the device | `ai-elements-core` |
-| `McpClient` / `McpToolset` | MCP 2026-07-28 (2025-xx sessions), MCP Apps 2026-01-26 | `ai-elements-core`, `ai-elements-mcp-apps` |
-| A2UI renderer, `JsxPreview` | A2UI v1.0 | `ai-elements-genui` |
-
-The rules for protocol work (spec extension points only, no private wire formats, official SDKs,
-recorded fixtures) are in [AGENTS.md](AGENTS.md).
+The UI depends only on `ai-elements-chat`, not the networking modules. Customize the theme, tool/data
+renderers and attachment loading without forking the components.
 
 ## Install
 
@@ -62,44 +65,41 @@ dependencies {
 }
 ```
 
-`0.3.0` is not released yet: `./gradlew publishToMavenLocal` and add `mavenLocal()`. Every artifact
-and its minSdk is listed in [Installation](docs/getting-started/installation.md). Stable public APIs are preserved from the first public release, including 0.x; see the
-[compatibility policy](docs/develop/api-compatibility.md). The [CHANGELOG](CHANGELOG.md) lists changes.
+`0.3.0` is not released yet. Build with `./gradlew publishToMavenLocal` and add `mavenLocal()`.
+See [Installation](docs/getting-started/installation.md) for all artifacts, minSdk, desugaring and the
+exact tested toolchain. Compose and Material 3 Expressive currently include alpha dependencies.
+Stable public APIs are preserved from the first public release, including 0.x; see the
+[compatibility policy](docs/develop/api-compatibility.md).
 
-## Try it
+## Explore the elements
+
+| Tools and approvals | Native generated UI | Developer tools |
+|:---:|:---:|:---:|
+| ![Tool calls](docs/assets/components/tool-calls.webp) | ![A2UI form](docs/assets/components/a2ui.webp) | ![Terminal](docs/assets/components/terminal.webp) |
+| [Tools](docs/components/tools.md) | [Generative UI](docs/components/generative-ui.md) | [Developer tools](docs/components/developer-tools.md) |
+
+Also included: [conversation controls](docs/components/conversation.md), [Markdown and diagrams](docs/components/content.md),
+[media](docs/components/attachments-and-media.md), [voice](docs/components/voice.md) and [workflow canvas](docs/components/workflow.md).
+
+Protocols: AI SDK v5/v6 + v4 compatibility · AG-UI 1.x · MCP · MCP Apps · A2A · ACP · A2UI · Agent Skills.
+Optional capabilities include files, planning, memory, shell/sandbox, browser, device integration,
+speech and scheduled tasks. [Compare backends](docs/getting-started/choose.md).
+
+## Run and verify
 
 ```bash
-./gradlew :demo:installDebug                                        # the demo app (works offline)
-cd server && uv sync && uv run uvicorn main:app --host 0.0.0.0 --port 8788   # the reference server
+./gradlew :demo:installDebug
+./gradlew apiCheck testDebugUnitTest lintDebug
+tools/check-published-consumer.sh
+tools/build-docs.sh
 ```
 
-The [reference server](docs/develop/reference-server.md) is a Pydantic AI + Pydantic AI Harness
-agent served over AI SDK, AG-UI, A2A, ACP and MCP, with a scripted model that needs no key. The
-[demo app](docs/develop/demo-app.md) connects to it and to real providers.
+The same repository contains the library, demo, samples and bilingual GitHub Pages site.
+See [Testing](docs/develop/testing.md), [Contributing](CONTRIBUTING.md), [Releasing](docs/develop/releasing.md),
+[CHANGELOG](CHANGELOG.md) and [Roadmap](docs/project/roadmap.md).
 
-## Develop
+## License and security
 
-```bash
-./gradlew testDebugUnitTest lintDebug          # unit and recorded-fixture tests
-./gradlew :demo:connectedDebugAndroidTest      # UI end to end
-```
-
-Live tests, fixtures and device notes are in [Testing](docs/develop/testing.md). Read
-[AGENTS.md](AGENTS.md) and [Contributing](docs/develop/contributing.md) before changing code; the
-workstreams are in the [roadmap](docs/project/roadmap.md) and changes in the [CHANGELOG](CHANGELOG.md).
-
-Toolchain: AGP 9.4 (built-in Kotlin) · Gradle 9.8 · Kotlin 2.4 · Compose 1.13 · Material 3 1.5
-(Expressive).
-
-## Contributing
-
-Issues and pull requests are welcome: read [CONTRIBUTING.md](CONTRIBUTING.md) and
-[AGENTS.md](AGENTS.md) (the protocol rules) first. Please follow the
-[Code of Conduct](CODE_OF_CONDUCT.md), and report vulnerabilities privately as described in
-[SECURITY.md](SECURITY.md).
-
-## License
-
-Apache License 2.0, see [LICENSE](LICENSE). Bundled third-party code, fonts and executables are
-listed in [NOTICE](NOTICE); `harness-sandbox-proot` bundles PRoot (GPL-2.0) as a separate executable,
-see its [NOTICE](harness/harness-sandbox-proot/NOTICE).
+Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). `harness-sandbox-proot` packages PRoot
+(GPL-2.0) as a separate executable with its own [NOTICE](harness/harness-sandbox-proot/NOTICE).
+Report vulnerabilities as described in [SECURITY.md](SECURITY.md).

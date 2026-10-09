@@ -25,7 +25,7 @@ def validate_docs(version: str, documents: dict[str, str]) -> None:
         coordinates = re.findall(r'io\.github\.junelegency:ai-elements-bom:([^"\s)]+)', text)
         if not coordinates or set(coordinates) != {version}:
             raise ValueError(f"{name}: BOM coordinates must use release {version}")
-        if "not released yet" in text.lower():
+        if "not released yet" in text.lower() or "尚未公开发布" in text:
             raise ValueError(f"{name}: remove the unreleased installation notice")
 
 
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     try:
         version = validate(sys.argv[1], Path("gradle.properties").read_text(), Path("CHANGELOG.md").read_text())
         validate_docs(version, {name: Path(name).read_text() for name in (
-            "README.md", "docs/getting-started/installation.md",
+            "README.md", "README.zh-CN.md", "docs/getting-started/installation.md", "docs/zh/getting-started/installation.md",
         )})
     except (IndexError, ValueError) as error:
         sys.exit(str(error))
