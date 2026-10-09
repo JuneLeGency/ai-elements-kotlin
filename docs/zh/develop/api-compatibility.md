@@ -1,26 +1,35 @@
-# 版本与 API 兼容性
+# API 稳定性与兼容性
 
-从首个公开版本起，发布模块中未标记实验性的 public Kotlin 声明就是受支持的接口，**0.x 版本也遵守这个承诺**。
-patch/minor 不删除或重命名稳定接口。旧入口通过 Deprecated 提示和转发实现保留，major 版本也不是自动删除接口的许可。
+首个公开 release 起，发布模块中未标记的 public Kotlin 声明均为受支持的 API，包括 0.x。升级需保留既有调用源码、已编译客户端和文档行为。Patch / minor 不删除或重命名 API。废弃入口保留转发实现；major 也不是自动删除的许可。实验性 API 必须在发布前用 `RequiresOptIn` 标记，不能在用户采用后追溯降级。
 
-## 稳定接口与实验性接口
+## 稳定范围
 
-chat、core、ui、可选集成和 harness 的公开接口遵循同一政策。
-原生 Mermaid 使用 ExperimentalNativeMermaidApi 显式 opt-in，布局和接口可以在 minor 中演进。
-internal、private、Demo 和参考服务的实现细节不构成库的兼容承诺。
+| 范围 | 契约 |
+|---|---|
+| `ai-elements-chat` | 消息与 part 模型、controller、backend、事件、审批 |
+| `ai-elements-core` | 协议客户端、provider backend、能力、工具、认证、配置 |
+| `ai-elements-ui` | 公开组件、state factory、主题、renderer 扩展点 |
+| 可选集成和 harness | 公开声明遵循相同政策；外部服务行为遵循其版本化协议 |
+| `@ExperimentalNativeMermaidApi` | 原生 Mermaid 需 opt-in，API 和布局可在 minor 改变 |
+| `internal`、private、Demo / server 实现 | 不属于受支持的库接口 |
 
-## 数据模型同样需要兼容
+Compose / Material 3 的 alpha 依赖不豁免本库的兼容审核。支持的消费工具链见 [安装](../getting-started/installation.md)，提高工具链或 minSdk 需发布审核。本库仅支持 Android，不是 Kotlin Multiplatform。
 
-保留 Message、ToolPart、ChatState 等 data class 的现有构造参数顺序、默认调用、copy 和 componentN。
-即使添加带默认值的参数，也可能破坏已编译调用者。
-公开 sealed 层级与 enum 的新分支会影响用户的穷尽 when，也必须经过兼容性设计。
-本地持久化要继续读取旧字段名、SerialName 和默认值；应用仍负责自己的存储版本与迁移。
+## 已审核的模型决策
 
-## 发布检查
+保留 `Message`、`ToolPart`、`ChatState` 等公开 data class，用于不可变快照和便捷 `copy`。构造参数顺序、默认调用签名、`copy`、`componentN` 均属于契约。不能假定新增一个带默认值的构造属性就是兼容变更；应设计独立扩展类型或方法，或保留所有旧签名并验证旧编译客户端。
 
-20 个库都保存官方 Binary Compatibility Validator 生成的 API 基线。`./gradlew apiCheck` 拦截未经审核的差异。
-有意新增接口时，先审核源码、二进制与行为兼容性，再更新基线及 CHANGELOG。
-仅仅重新 apiDump 不代表破坏性更改可以接受。
+公开 sealed event / part 层级和 enum 同样冻结：新增分支会破坏用户穷尽 `when`。协议新增功能应按语义映射到现有中立模型和 `DataPart` / metadata 扩展点。新的基础模型需明确 API 设计与迁移审核，不自动新增 sealed subtype。不能把这些映射作为自定义 wire protocol。
 
-自动检查不能证明全部行为或源码兼容性，仍需消费工程和实际交互测试。
-详细维护流程见[英文兼容政策](/ai-elements-kotlin/develop/api-compatibility/)。
+序列化 `Message` 适合应用自有本地存储。保留旧字段名、`SerialName` 和默认值的可读性。应用负责存储 schema 版本与迁移，Kotlin serializer 不承诺公开网络格式。修改持久化模型需添加旧记录 fixture。
+
+## 变更审核
+
+1. 运行 `./gradlew apiCheck`；各库有 `api/<artifact>.api` baseline。
+2. 有意新增时审核 diff、named argument、默认值、返回类型、overload resolution 和接口实现者兼容性；更新 CHANGELOG 与指南，再运行 `./gradlew apiDump` 并审核 diff。
+3. 替换的函数保留 WARNING 级别的 `@Deprecated(message, replaceWith = ...)` 并转发。不能自动升级到 ERROR / HIDDEN，即使 binary symbol 存在也会破坏源码兼容。
+4. 运行 `tools/check-published-consumer.sh` 和行为测试。变更已发布签名时，还需用新 artifact 运行旧编译客户端。只更新 baseline 不代表破坏性变更可接受。
+
+检查使用 JetBrains 官方 Binary Compatibility Validator，对 AGP 公开 release AAR 中提取的 `classes.jar` 检查所有发布模块，包括可选模块。它适配 AGP 9 内置 Kotlin 的发现机制，不自定义 ABI parser；不能证明行为或全部 Kotlin 源码兼容，因此仍需人工审核。
+
+[JetBrains 兼容性指南](https://kotlinlang.org/docs/api-guidelines-backward-compatibility.html) 解释默认参数、data class、返回类型和废弃策略。

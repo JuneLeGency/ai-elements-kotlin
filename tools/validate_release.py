@@ -32,7 +32,8 @@ def validate_docs(version: str, documents: dict[str, str]) -> None:
 if __name__ == "__main__":
     try:
         version = validate(sys.argv[1], Path("gradle.properties").read_text(), Path("CHANGELOG.md").read_text())
-        validate_docs(version, {name: Path(name).read_text() for name in (
+        validate_docs(version, {name: re.sub(r'--8<-- "(tools/doc-snippets/[^"]+)"',
+                         lambda match: Path(match[1]).read_text(), Path(name).read_text()) for name in (
             "README.md", "README.zh-CN.md", "docs/getting-started/installation.md", "docs/zh/getting-started/installation.md",
         )})
     except (IndexError, ValueError) as error:

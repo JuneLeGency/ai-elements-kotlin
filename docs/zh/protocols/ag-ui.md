@@ -1,29 +1,28 @@
 # AG-UI
 
-AgUiBackend 使用官方 kotlin-core 类型处理 AG-UI 1.x，POST RunAgentInput 并接收 SSE 事件。
-参考服务端点为 /api/agui，也可以连接兼容的 Pydantic AI、LangGraph 等服务。
+`AgUiBackend` 基于官方 AG-UI `kotlin-core` 类型实现 [AG-UI](https://docs.ag-ui.com) 1.x 客户端：以 `POST` 发送 `RunAgentInput`，通过 SSE 接收运行事件。Pydantic AI、LangGraph、CrewAI 和 Mastra 均可提供该协议；[参考服务](../develop/reference-server.md) 的入口为 `/api/agui`。
 
-## 前端工具与人工确认
+```kotlin
+ChatController(backend = { approver ->
+    AgUiBackend(
+        "https://agents.example.com/api/agui",
+        approver = approver,
+        tools = listOf(myDeviceTool),                      // frontend tools, run on the device
+        context = listOf("Client capabilities" to "…"),   // RunAgentInput.context
+    )
+}, scope = viewModelScope)
+```
 
-工具通过 RunAgentInput.tools 声明。服务端把调用留为 pending 后，设备执行工具，再用后续 run 回传 tool 消息。
-需要审批时，先等待用户决定。
+## 支持范围
 
-RUN_FINISHED 的 outcome=interrupt 可请求审批或表单：有 toolCallId 时处理工具决定，
-有 responseSchema 时展示表单；通过 RunAgentInput.resume 返回 resolved 或 cancelled。
-过期的 expiresAt 请求不会展示。
+- **前端工具**：在 `RunAgentInput.tools` 中声明 `tools`。Agent 调用时，本次运行以待执行工具结束；设备执行工具（需要时先审批），下一次运行携带 `tool` 消息。
+- **中断与人工参与**：运行以 `outcome: interrupt` 结束时向用户提问。有 `toolCallId` 时可批准、附理由拒绝或修改参数；恢复 payload 为 `{approved, reason?, editedArgs?}`，对应 AG-UI 的 approve-with-edits 模式和 Pydantic AI schema。没有工具 ID 而有 `responseSchema` 时，按 schema 生成表单并用回答恢复运行。恢复通过 `RunAgentInput.resume`（携带 payload 的 `resolved` 或 `cancelled`）；超过 `expiresAt` 的中断不再显示。
+- **子 Agent**：`SUBAGENT_STARTED` 及携带 `subagentRunId` 的事件归入委派工具的嵌套运行，由 `Subagent` 显示。
+- **共享状态**：`STATE_SNAPSHOT` / `STATE_DELTA`（JSON Patch）映射为 `state` 数据 part，下一轮作为 `RunAgentInput.state` 返回。状态中的 `plan` 或 `task` 显示为 Plan / Task 组件。
+- **活动**：`ACTIVITY_SNAPSHOT` / `ACTIVITY_DELTA` 映射为以 `activityType` 命名的数据 part；`a2ui-surface` 活动通过 [生成式 UI](../guides/generative-ui.md) 渲染。
+- **步骤** 显示为 chain of thought；`RUN_FINISHED` 的 **用量** 用于 `ContextUsage`。
+- **模型上下文**：MCP Apps 的 `ui/update-model-context` 进入 `RunAgentInput.context`。
 
-## 其他映射
+## 扩展
 
-| 事件或数据 | 在聊天中的表现 |
-|---|---|
-| SUBAGENT_* / subagentRunId | 嵌套子 Agent 运行 |
-| STATE_SNAPSHOT / STATE_DELTA | 共享 state，delta 使用 JSON Patch |
-| state.plan / state.task | Plan / Task 组件 |
-| ACTIVITY_* | 按 activityType 命名的数据片段 |
-| a2ui-surface activity | 生成式界面 |
-| steps | 步骤摘要 |
-| RUN_FINISHED.usage | token 使用量 |
-| RunAgentInput.context | 客户端或 MCP Apps 提供的模型上下文 |
-
-扩展时优先使用状态、活动、子 Agent、中断等标准机制，CUSTOM 作为最后选择。
-[步骤与回放](../guides/steps-and-replay.md)说明事件日志的保存和回放。
+使用协议自身的状态（JSON Patch）、活动、子 Agent、中断等扩展点，最后才考虑 `CUSTOM` 事件。

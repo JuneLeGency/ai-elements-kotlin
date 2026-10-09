@@ -1,4 +1,69 @@
-# 构建与验证
+# 测试
+
+```bash
+./gradlew testDebugUnitTest lintDebug                 # unit and recorded-fixture tests, lint
+./gradlew :demo:connectedDebugAndroidTest            # UI end to end on an emulator or device
+```
+
+## 录制 fixture
+
+协议行为使用真实实现录制的响应验证，见 [录制 fixture](reference-server.md#recording-fixtures)：Pydantic AI adapter 的 AI SDK / AG-UI 流、官方 `mcp` SDK 的 elicitation、经官方 `a2ui-core` processor 校验的 A2UI surface，以及重放给官方 ACP Kotlin SDK 的 session。
+
+## Live test
+
+Live test 连接真实服务，未传入地址时跳过：
+
+```bash
+cd server && uv run uvicorn main:app --port 8788     # in another terminal
+
+./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveHarnessServerTest*' -PliveAgentServer=http://localhost:8788
+./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveMcpTest*' -PliveMcp=http://localhost:8788/mcp -PliveMcpLegacy=http://localhost:8790/mcp
+./gradlew :ai-elements-core:testDebugUnitTest --tests '*LiveMcpOAuthTest*' -PliveMcpOAuth=http://127.0.0.1:8791/mcp
+./gradlew :ai-elements-a2a:testDebugUnitTest -PliveA2a=http://localhost:8788
+./gradlew :ai-elements-acp:testDebugUnitTest --tests '*LiveAcpTest*' \
+    -PliveAcpCommand="uv run --directory server python acp_agent.py" -PliveAcp=ws://localhost:8788/acp
+```
+
+## 端到端测试
+
+`demo/src/androidTest` 驱动 Demo。需要参考服务的用例在不可达时跳过；通过 `-e agentServer http://<host>:8788` 指定地址，默认模拟器 `10.0.2.2`。`ScreenshotMatrixTest` 使用 `-e screenshots true` 捕获同一会话在各语言、浅色和深色下的截图。
+
+!!! tip "Xiaomi / HyperOS 设备"
+    后台启动 instrumentation 需要 `adb shell appops set dev.ai.elements.demo 10021 allow`，结束后以 `… 10021 default` 恢复；测试期间设备保持唤醒和竖屏。
+
+## 性能
+
+`:benchmark` 在 release build 上用 [Macrobenchmark](https://developer.android.com/topic/performance/benchmarking/macrobenchmark-overview) 测量聊天关键路径：
+
+| Benchmark | 测量内容 |
+|---|---|
+| `startup` | 冷启动 `StartupTimingMetric` |
+| `scrollLongConversation` | 快速上下滚动长回复 |
+| `streamLongAnswer` | 流式输出 24 节 Markdown |
+| `openHistoryAndSwitchConversation` | 打开历史抽屉并切换到另一长会话 |
+
+各运行两种模式：不使用 ahead-of-time compilation（全新安装），以及使用 Baseline Profile（用户实际配置）。查看 `frameDurationCpuMs` 的 P50 / P90 / P99 和 `frameOverrunMs`，后者大于 0 表示 missed frame。应在真机运行，模拟器数据不具代表性。
+
+```bash
+ANDROID_SERIAL=<device> ./gradlew :benchmark:connectedBenchmarkReleaseAndroidTest \
+    -Pandroid.testInstrumentationRunnerArguments.class=dev.ai.elements.benchmark.ChatBenchmarks
+```
+
+Demo 附带 [Baseline Profile](https://developer.android.com/topic/performance/baselineprofiles/overview)，位于 `demo/src/release/generated/baselineProfiles/`，由 `BaselineProfileGenerator` 通过相同路径生成。重大 UI 变更后重新生成：
+
+```bash
+ANDROID_SERIAL=<device> ./gradlew :demo:generateReleaseBaselineProfile
+```
+
+消费应用应针对自己的页面生成 profile，路径经过的本库代码也会包含在内。
+
+## API 参考
+
+```bash
+./gradlew :dokkaGenerate      # build/dokka/html
+```
+
+## 首次发布及升级检查
 
 ```bash
 ./gradlew apiCheck testDebugUnitTest lintDebug :demo:assembleRelease
@@ -7,34 +72,26 @@ tools/build-docs.sh
 python3 -m unittest discover -s tools -p 'test_*.py'
 ```
 
-API 检查覆盖 20 个库。独立消费工程验证 Maven 坐标、传递依赖和 R8，并编译两种语言共用的 65 个组件示例。
-站点检查验证语言、链接、图片和实际 Dokka 符号页，防止只有空索引却构建成功。
+消费工程使用独立 Gradle settings 和 exclusive file Maven 仓库。导出的组件示例使用与网站完全相同的 imports 编译。网站检查验证每个库都有 Dokka symbol 页面，而不仅是索引。主动调整 baseline 前参见 [API 兼容性](api-compatibility.md)。
 
-## 模拟器与 live 测试
+连接多个设备时，设置 `ANDROID_SERIAL=emulator-...` 只使用目标模拟器。Gradle task 成功不代表 live test 实际执行：检查 skipped 数量，并在协议 E2E 前启动参考服务。云端模型测试仍需 opt-in 和独立证据。
 
-```bash
-ANDROID_SERIAL=emulator-5582 ./gradlew :demo:connectedDebugAndroidTest
-```
-
-设备 id 以 adb devices 的实际输出为准。先启动参考服务；需要真实模型或额外 OAuth 服务的测试为 opt-in，
-Gradle 成功不代表这些测试没有跳过。应检查测试数量、失败与 skipped 统计。
-发布工作流会执行完整验证；文档改动不应被表述为重新验证了所有模型能力。
-
-## 截图
-
-首页与 README 的四张中英文、明暗主题截图可以通过以下命令重新生成：
+## 双语首页截图
 
 ```bash
 tools/capture-release-screenshots.sh emulator-5582
 ```
 
-脚本直接运行 instrumentation 后取回图片，避免 Gradle 测试结束卸载 App 时删除截图。
-ComponentCatalogScreenshots 接收 catalog=true，ReleaseScreenshotsTest 接收 releaseScreenshots=true。
-图片由实际组件渲染，检查布局后才更新到 docs/assets。
-详细基准测试、完整 fixture/live 参数和设备说明见[英文测试指南](/ai-elements-kotlin/develop/testing/)。
+使用 `adb devices` 中的模拟器 ID。脚本运行 `ReleaseScreenshotsTest`，以受控消息和真实 Compose 组件捕获中英文、浅深色四张 WebP。不调用模型，也不修改系统语言或夜间模式。直接 instrumentation 避免 Gradle 测试后卸载应用导致截图丢失。提交前逐张检查。
 
-`SharedFoldersTest` 根据系统文件选择器当前目录导航，支持直接打开存储根目录且不显示设备名的界面。
-测试仍通过 App 选择目录，使用 SAF 读取和修改真实文件，并核对共享存储中的最终内容。
+## 双语文档
 
-选择器测试仅在模拟器注册 UI Automator watcher，处理 CI 中实际观察到的 Pixel Launcher ANR 弹窗，
-用例结束后注销。Demo 自身的 ANR 或崩溃弹窗不会被关闭，仍作为失败信号保留。
+英文位于 `docs/`，中文位于 `docs/zh/`。两份 Zensical 配置分别构建 `site/` 和 `site/zh/`，共用组件图、可编译 Kotlin 示例和英文 Dokka。`tools/check-docs.py` 检查语言标签、链接、截图以及每篇英文指南的中文对应页。组件翻译在 `tools/component-usage.zh.json` 修改，不直接改生成页。
+
+`SharedFoldersTest` 从系统 picker 的当前目录导航，支持不显示设备名称的存储根目录。仍通过应用选取目录、读写真实 SAF 文件，并验证共享存储字节。
+
+Picker 测试在模拟器上注册 UI Automator watcher，仅关闭 CI 中观察到的精确 Pixel Launcher ANR 对话框，测试后取消注册；不会关闭 Demo 的 ANR 或 crash 对话框。
+
+中英文安装示例共用 `tools/doc-snippets/installation-*.gradle.kts`。
+`tools/check-doc-parity.py` 在网站构建前检查全部 45 对页面的 fenced example 一致性。
+在代码块之外翻译说明，共享依赖只修改一次。

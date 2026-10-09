@@ -124,3 +124,7 @@ reads and edits the real SAF files, and checks the resulting shared-storage byte
 The picker test registers an emulator-only UI Automator watcher for the exact Pixel Launcher
 ANR dialog found in CI. It closes that unrelated launcher overlay and unregisters after the case;
 it does not dismiss the demo app's ANR or crash dialogs.
+
+The English and Chinese installation examples share `tools/doc-snippets/installation-*.gradle.kts`.
+`tools/check-doc-parity.py` rejects differing fenced examples in all 45 page pairs and runs before
+the site build. Translate explanations outside those examples; update shared dependencies once.

@@ -23,7 +23,9 @@ class Page(HTMLParser):
             self.language = attrs.get("lang")
         if "id" in attrs:
             self.ids.add(attrs["id"])
-        key = "href" if tag == "a" else "src" if tag == "img" else None
+        if tag == "video" and "poster" in attrs:
+            self.targets.append(attrs["poster"])
+        key = "href" if tag == "a" else "src" if tag in ("img", "source", "video") else None
         if key and key in attrs:
             self.targets.append(attrs[key])
 

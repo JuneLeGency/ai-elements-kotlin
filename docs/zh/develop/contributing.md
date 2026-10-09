@@ -1,11 +1,14 @@
-# 参与贡献
+# 贡献
 
-先阅读仓库 AGENTS.md、GOAL.md 和 CONTRIBUTING.md。UI 只依赖聊天模型，协议和模型 API 不得反向耦合到 Compose。
+先阅读 [开放协议](../concepts/open-protocols.md)，严格遵循公开规范，不创造 wire format。根目录 `AGENTS.md` 是对人类和 AI Agent 均生效的规则。
 
-- 公开接口变更更新 CHANGELOG、文档和经过审核的 API 基线。
-- 协议变更附官方实现录制的 fixture，能运行 live 测试时同时验证。
-- UI 使用主题颜色、间距、触控尺寸和无障碍语义；库内字符串提供所有已支持语言。
-- 中英文组件说明在 tools/component-usage*.json 维护，示例共用 DocsSamples.kt，不手工修改生成页。
-- 不提交密钥、token、机器专用配置或用户数据。
+## 约定
 
-提交前执行[验证命令](testing.md)。安全问题按[安全政策](../project/security.md)私下报告。
+- Push 前构建测试：`./gradlew testDebugUnitTest lintDebug`，并在模拟器或设备上运行 `./gradlew :demo:connectedDebugAndroidTest`，见 [测试](testing.md)。
+- 组件遵循 Material 3 Expressive，仅使用主题颜色和 shape、48 dp 点击区域（`Modifier.compactIconButton()`）、`AiSpacing` / `AiType` token、图标 content description、`@Immutable` 模型。只渲染聊天模型，见 [架构](../concepts/architecture.md#ui-elements-are-protocol-independent)。
+- 图标使用 Material Symbols Rounded 的 `AiIcons.X`，通过 `python3 tools/generate-icons.py` 生成使用中的图标。
+- 字符串位于 `ai-elements-ui`，使用 `ai_` 前缀，在 `values`、`values-zh-rCN`、`values-zh-rTW`、`values-ja` 翻译。
+- 公开 API 变更记录到 CHANGELOG，尽可能保持默认参数源码兼容。
+- 协议变更附真实录制 fixture，参考服务可验证时附 live test。
+- 文档代码通过 `--8<--` 引用 `demo/src/main/kotlin/…/samples/DocsSamples.kt`，随 Demo 编译；用 `uvx zensical serve` 预览。
+- Secret 不出现在日志、异常或测试输出。

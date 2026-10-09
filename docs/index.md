@@ -28,6 +28,21 @@ hide:
 </div>
 </div>
 
+## Watch a complete run
+
+<div class="aie-workflow" markdown>
+<video controls muted loop playsinline preload="none" poster="assets/workflows/agent-flow-en.webp" aria-label="Watch a complete run">
+<source src="assets/workflows/agent-flow-en.mp4" type="video/mp4">
+</video>
+<div markdown>
+
+Prompt → plan and reasoning → tool approval → on-device execution → streamed reply. Recorded from the real Android app with a deterministic offline demo agent; no model key is needed.
+
+[Open the animated GIF](assets/workflows/agent-flow-en.gif)
+
+</div>
+</div>
+
 ## Start with one screen
 
 ```kotlin

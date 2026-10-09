@@ -1,36 +1,33 @@
 # 常见问题
 
-## 能不能只使用 UI？
+## 可以只使用 UI 吗？
 
-可以。ai-elements-ui 只依赖 ai-elements-chat，不依赖网络或 Agent 模块。可以渲染单个组件，也可以自己实现 ChatBackend。
+可以。`ai-elements-ui` 只依赖 `ai-elements-chat`，不依赖网络或 Agent 模块。可显示单个组件，或提供自己的 `ChatBackend`。
 
-## 必须使用 Pydantic AI 吗？
+## 必须使用参考服务或 Pydantic AI 吗？
 
-不需要。仓库中的 Pydantic AI 服务是参考实现与测试基础设施。兼容 AI SDK、AG-UI、A2A、ACP 的服务或你自己的 backend 都可以接入。
+不需要。它们是示例及测试基础设施。兼容的 AI SDK / AG-UI / A2A / ACP 服务、模型 API、自定义 backend 都能提供消息。参见 [选择接入方式](choose.md)。
 
-## 为什么连不上本地服务？
+## 为什么本地端点连接失败？
 
-检查 INTERNET 权限、debug 明文 HTTP 配置、服务监听地址和防火墙。模拟器通过 10.0.2.2 访问电脑，不是通过自己的 localhost。
-请先测试服务的 /health，再检查聊天接口。
+声明 `INTERNET`；测试 HTTP 服务时仅在 debug manifest 放开明文流量。模拟器通过 `10.0.2.2` 访问电脑，不是自己的 `localhost`。检查 `/health`、服务 bind address 和防火墙，见 [App 配置](pure-client.md#app-setup)。
 
-## 工具为什么一直等待审批？
+## 为什么工具一直等待审批？
 
-使用 Chat(controller)，或把 Conversation.onToolDecision 接到 controller.respondToApproval。
-表单还需转发 onInputResponse。只展示卡片而不接回调，无法恢复后端等待中的工具。
+使用 `Chat(controller)`，或把 `Conversation.onToolDecision` 转发到 `controller.respondToApproval`，表单还需转发 `onInputResponse`。只显示工具卡片不能回答 backend。
 
-## ViewModel 能处理进程回收吗？
+## ViewModel 会在进程死亡后恢复会话吗？
 
-不能。它保留配置变化期间的状态；进程重建后的消息持久化与恢复由应用负责，通过 initialMessages 传入。
+不会。它只保留配置变化中的状态。应用需持久化消息，在进程重建后通过 `initialMessages` 初始化 controller。
 
-## 为什么有的模块要求 API 26？
+## 为什么有些模块 minSdk 26？
 
-可选能力使用较新的平台 API，具体见安装页的逐模块表格。构建工具链要求与运行时 minSdk 是两回事。
+可选集成和能力使用较新的平台 API。参见 [逐模块安装表](installation.md)。构建工具链要求与运行时 minSdk 是两回事。
 
-## 依赖都是稳定版本吗？
+## 依赖全部是稳定版吗？
 
-不是。当前 Compose 和 Material 3 Expressive 使用 alpha 版本，安装页列出了实测版本。本库自己的稳定 API 仍遵守兼容性政策。
+不是。当前 Material 3 Expressive 和 Compose 包含 alpha 版本，安装页列出确切版本。这不影响本库稳定公开 API 的 [兼容性策略](../develop/api-compatibility.md)。
 
-## 图册里的代码可以直接使用吗？
+## 能直接复制组件示例吗？
 
-添加对应模块与 imports，在 AiElementsTheme 下调用，并提供示例函数参数要求的状态与回调。
-所有 65 个场景的代码都会导出到独立工程，用 Maven 包编译。截图来自真实 Android Demo，不是网页模拟图。
+可以。添加对应模块及页面打印的 imports，包入 `AiElementsTheme`，提供参数中的状态和回调。同一示例在独立 Maven 消费工程中编译；截图展示 Demo 场景，不是独立 Web 实现。

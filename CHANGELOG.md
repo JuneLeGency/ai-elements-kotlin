@@ -2,6 +2,13 @@
 
 ## 0.3.1 (unreleased)
 
+- Complete Chinese onboarding, protocol, harness, rendering and compatibility guides with the same
+  executable examples as English. Installation Gradle snippets have one shared source; all 45
+  page pairs are checked for example drift before the site builds.
+- Real Compose screenshots preserve rounded cards, transparent gutters and shadows. English and
+  Chinese Android workflow recordings show planning, tool approval, execution and streamed replies
+  in the READMEs and site; website video playback is user-controlled.
+
 - Shared-folder E2E navigation handles the system picker opening directly in storage or restoring
   a directory, while retaining the real SAF read/write assertions. An emulator-only UI Automator
   watcher closes the identified Pixel Launcher ANR overlay; target-app errors remain visible.

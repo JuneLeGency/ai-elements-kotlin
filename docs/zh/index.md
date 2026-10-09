@@ -28,6 +28,21 @@ hide:
 </div>
 </div>
 
+## 完整交互流程
+
+<div class="aie-workflow" markdown>
+<video controls muted loop playsinline preload="none" poster="../assets/workflows/agent-flow-zh-CN.webp" aria-label="完整交互流程">
+<source src="../assets/workflows/agent-flow-zh-CN.mp4" type="video/mp4">
+</video>
+<div markdown>
+
+输入 → 计划与推理 → 工具审批 → 设备端执行 → 流式回复。来自 Android 模拟器的真实录屏，使用确定性的离线演示 Agent；不需要模型密钥。
+
+[播放 GIF 动画](../assets/workflows/agent-flow-zh-CN.gif)
+
+</div>
+</div>
+
 ## 从一个界面开始
 
 ```kotlin

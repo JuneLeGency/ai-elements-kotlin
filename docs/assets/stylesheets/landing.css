@@ -4,7 +4,7 @@
 .aie-hero .aie-eyebrow { color:var(--md-primary-fg-color); font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
 .aie-hero .aie-lead { font-size:1rem; line-height:1.75; color:var(--md-default-fg-color--light); }
 .aie-shots { display:flex; align-items:center; justify-content:center; gap:1rem; }
-.aie-shots img { width:46%; height:auto; max-height:560px; object-fit:contain; border-radius:1.2rem; box-shadow:0 12px 35px #0002; }
+.aie-shots img { width:46%; height:auto; max-height:560px; object-fit:contain; }
 .aie-shots img:nth-child(2) { transform:translateY(1.5rem); }
 .aie-facts { display:flex; flex-wrap:wrap; gap:.45rem; margin:1rem 0; }
 .aie-facts span { border:1px solid var(--md-default-fg-color--lightest); border-radius:1rem; padding:.25rem .7rem; font-size:.65rem; }
@@ -12,8 +12,12 @@
 .aie-card { border:1px solid var(--md-default-fg-color--lightest); border-radius:1rem; padding:1.25rem; background:var(--md-code-bg-color); }
 .aie-card h3 { margin-top:0; }
 .aie-gallery { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin:1.4rem 0; }
-.aie-gallery figure { margin:0; padding:.6rem; border:1px solid var(--md-default-fg-color--lightest); border-radius:.8rem; }
+.aie-gallery figure { margin:0; padding:.2rem; }
 .aie-gallery img { width:100%; height:190px; object-fit:contain; }
 .aie-gallery figcaption { font-size:.7rem; text-align:center; padding:.6rem 0 .2rem; }
 @media(max-width:800px) { .aie-hero { grid-template-columns:1fr; gap:1rem; padding-top:.5rem; } .aie-shots img { max-height:390px; } .aie-gallery { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:480px) { .aie-cards { grid-template-columns:1fr; } .aie-gallery img { height:135px; } }
+
+.aie-workflow { display:grid; grid-template-columns:minmax(220px,320px) 1fr; align-items:center; gap:2rem; margin:1.5rem 0 2.5rem; }
+.aie-workflow video { display:block; width:100%; max-height:580px; object-fit:contain; border-radius:24px; box-shadow:0 8px 28px #28223718; background:var(--md-code-bg-color); }
+@media(max-width:600px) { .aie-workflow { grid-template-columns:1fr; gap:1rem; } .aie-workflow video { width:min(100%,280px); margin:auto; } }

@@ -6,30 +6,11 @@ resolves to the same version, then add the artifacts you use.
 Declare dependency repositories in your settings file:
 
 ```kotlin title="settings.gradle.kts"
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+--8<-- "tools/doc-snippets/installation-repositories.gradle.kts"
 ```
 
 ```kotlin title="build.gradle.kts"
-dependencies {
-    implementation(platform("io.github.junelegency:ai-elements-bom:0.3.0"))
-    implementation("io.github.junelegency:ai-elements-ui")          // elements (protocol-independent)
-    implementation("io.github.junelegency:ai-elements-core")        // AI SDK / AG-UI / model-API backends, agent loop, MCP
-
-    // Optional, as needed:
-    implementation("io.github.junelegency:ai-elements-genui")       // generative UI: A2UI surfaces, JsxPreview
-    implementation("io.github.junelegency:ai-elements-mcp-apps")    // MCP Apps: interactive views of MCP tools
-    implementation("io.github.junelegency:ai-elements-a2a")         // A2A agents (official a2a-java-sdk)
-    implementation("io.github.junelegency:ai-elements-acp")         // Agent Client Protocol (official ACP Kotlin SDK)
-    implementation("io.github.junelegency:ai-elements-koog")        // JetBrains Koog as the agent runtime
-    implementation("io.github.junelegency.harness:harness-core")    // in-app agent
-    implementation("io.github.junelegency.harness:harness-filesystem")
-    implementation("io.github.junelegency.harness:harness-sandbox-proot") // + harness-shell
-}
+--8<-- "tools/doc-snippets/installation-dependencies.gradle.kts"
 ```
 
 ## Artifacts
@@ -88,20 +69,7 @@ The ViewModel example also uses `androidx.lifecycle:lifecycle-viewmodel-compose:
 ### A2A consumer configuration
 
 ```kotlin
-android {
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-        isCoreLibraryDesugaringEnabled = true
-    }
-    packaging.resources.excludes += listOf(
-        "META-INF/NOTICE.md", "META-INF/LICENSE.md", "META-INF/INDEX.LIST",
-        "META-INF/DEPENDENCIES", "META-INF/beans.xml",
-    )
-}
-dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.1.5")
-}
+--8<-- "tools/doc-snippets/installation-a2a.gradle.kts"
 ```
 
 Keep the dependencies' license notices in your distribution when resolving duplicate metadata.

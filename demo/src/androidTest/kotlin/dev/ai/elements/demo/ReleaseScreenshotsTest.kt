@@ -7,14 +7,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -43,6 +43,7 @@ class ReleaseScreenshotsTest {
         val out = File(InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(null), "release-screens").apply { mkdirs() }
         var language by mutableStateOf("en")
         var dark by mutableStateOf(false)
+        lateinit var captureLayer: GraphicsLayer
         compose.setContent {
             val base = LocalContext.current
             val configuration = Configuration(LocalConfiguration.current).apply { setLocale(Locale.forLanguageTag(language)) }
@@ -54,7 +55,11 @@ class ReleaseScreenshotsTest {
                 AiElementsTheme(dynamicColor = false, darkTheme = dark) {
                     val zh = language == "zh-CN"
                     val messages = remember(zh) { conversation(zh) }
-                    Column(Modifier.width(400.dp).height(800.dp).background(MaterialTheme.colorScheme.background).testTag("release-preview")) {
+                    val layer = rememberGraphicsLayer()
+                    captureLayer = layer
+                    Box(Modifier.testTag("release-preview").recordDocumentationLayer(layer).padding(24.dp)) {
+                    Surface(shape = RoundedCornerShape(28.dp), color = MaterialTheme.colorScheme.background, shadowElevation = 6.dp) {
+                    Column(Modifier.width(400.dp).height(800.dp)) {
                         Row(Modifier.fillMaxWidth().padding(20.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             Icon(AiIcons.AutoAwesome, null, tint = MaterialTheme.colorScheme.primary)
                             Column {
@@ -66,6 +71,8 @@ class ReleaseScreenshotsTest {
                         Conversation(ChatState(messages = messages), modifier = Modifier.weight(1f), onToolDecision = { _, _ -> })
                         PromptInput("", {}, {}, {}, busy = false, modifier = Modifier.padding(12.dp), placeholder = if (zh) "继续对话…" else "Continue the conversation…")
                     }
+                    }
+                    }
                 }
             }
         }
@@ -74,7 +81,7 @@ class ReleaseScreenshotsTest {
             compose.runOnIdle { language = lang; dark = night }
             compose.mainClock.advanceTimeBy(3_000)
             compose.waitForIdle()
-            val bitmap = compose.onNodeWithTag("release-preview").captureToImage().asAndroidBitmap()
+            val bitmap = documentationBitmap(captureLayer)
             File(out, "landing-${if (night) "dark" else "light"}-$lang.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         }
         assertEquals(4, out.listFiles()!!.count { it.extension == "png" })

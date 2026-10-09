@@ -2,7 +2,8 @@ package dev.ai.elements.demo
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import androidx.compose.foundation.background
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -13,14 +14,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -53,6 +54,7 @@ class ComponentCatalogScreenshots {
         assumeTrue("Pass -e catalog true", InstrumentationRegistry.getArguments().getString("catalog") == "true")
         val out = File(InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(null), "catalog").apply { mkdirs() }
         var current by mutableStateOf<GallerySample?>(null)
+        lateinit var captureLayer: GraphicsLayer
         compose.setContent {
             // In English, like the docs site, whatever the device's language.
             val base = LocalContext.current
@@ -66,8 +68,14 @@ class ComponentCatalogScreenshots {
             CompositionLocalProvider(LocalContext provides context, LocalConfiguration provides english, LocalResources provides context.resources) {
             AiElementsTheme(dynamicColor = false, darkTheme = false) {
                 current?.let { sample ->
-                    Box(Modifier.background(MaterialTheme.colorScheme.surfaceContainer).padding(12.dp).testTag("catalog-card")) {
-                        GalleryCard(sample.title, Modifier.width(400.dp)) { sample.content() }
+                    val layer = rememberGraphicsLayer()
+                    captureLayer = layer
+                    // Scroll measurement gives tall samples their complete natural height.
+                    // The recorded child layer includes both rounded ends, not just the viewport.
+                    Box(Modifier.verticalScroll(rememberScrollState())) {
+                        Box(Modifier.testTag("catalog-card").recordDocumentationLayer(layer).padding(24.dp)) {
+                            GalleryCard(sample.title, Modifier.width(400.dp).shadow(4.dp, MaterialTheme.shapes.extraLarge)) { sample.content() }
+                        }
                     }
                 }
             }
@@ -80,7 +88,7 @@ class ComponentCatalogScreenshots {
             compose.mainClock.advanceTimeBy(2_500)
             Thread.sleep(if (sample.id.startsWith("mermaid") || sample.id in SLOW) 3_000 else 600) // WebViews, decoders
             compose.mainClock.advanceTimeBy(500)
-            val image = compose.onNodeWithTag("catalog-card").captureToImage().asAndroidBitmap()
+            val image = documentationBitmap(captureLayer)
             File(out, "${sample.id}.png").outputStream().use { image.compress(Bitmap.CompressFormat.PNG, 100, it) }
         }
         File(out, "catalog.json").writeText(

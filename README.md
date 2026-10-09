@@ -32,6 +32,15 @@ Screenshots are rendered from real Android components on an emulator with curate
 The [catalog](https://junelegency.github.io/ai-elements-kotlin/components/) includes **65 illustrated scenarios**, compiled examples and API links.
 This is the Compose counterpart of [Vercel AI Elements](https://elements.ai-sdk.dev), on public protocols.
 
+
+## Watch a complete run
+
+Prompt → plan and reasoning → tool approval → on-device execution → streamed reply. Recorded from the real Android app with a deterministic offline demo agent; no model key is needed.
+
+<p align="center">
+<img src="docs/assets/workflows/agent-flow-en.gif" width="320" alt="Watch a complete run">
+</p>
+
 ## Start with a screen
 
 ```kotlin

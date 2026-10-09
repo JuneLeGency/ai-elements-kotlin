@@ -31,6 +31,15 @@
 [组件图册](https://junelegency.github.io/ai-elements-kotlin/zh/components/)提供 **65 个带实图的场景**、可编译代码和 API 链接。
 项目是 [Vercel AI Elements](https://elements.ai-sdk.dev) 的 Compose 对应实现，使用公开协议。
 
+
+## 完整交互流程
+
+输入 → 计划与推理 → 工具审批 → 设备端执行 → 流式回复。来自 Android 模拟器的真实录屏，使用确定性的离线演示 Agent；不需要模型密钥。
+
+<p align="center">
+<img src="docs/assets/workflows/agent-flow-zh-CN.gif" width="320" alt="完整交互流程">
+</p>
+
 ## 从一个界面开始
 
 ```kotlin

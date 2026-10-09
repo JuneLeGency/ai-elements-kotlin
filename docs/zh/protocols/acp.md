@@ -1,37 +1,51 @@
 # Agent Client Protocol（ACP）
 
-ai-elements-acp 基于官方 ACP Kotlin SDK，让 App 像编辑器一样连接编码 Agent。
-Claude Code、Codex、Gemini CLI 等需要使用各自的 ACP adapter；支持 ACP SDK 的其他 Agent 也可以接入。
+`ai-elements-acp` 将应用作为 [Agent Client Protocol](https://agentclientprotocol.com) 客户端，类似 Zed 或 JetBrains 编辑器。Claude Code、Codex、Gemini CLI 的 ACP adapter，以及基于 ACP SDK 的 Agent（例如 Pydantic AI Harness `run_acp_stdio`）均可作为聊天 provider。此模块使用官方 [ACP Kotlin SDK](https://github.com/agentclientprotocol/kotlin-sdk)。
 
 ```kotlin
 --8<-- "demo/src/main/kotlin/dev/ai/elements/demo/samples/DocsSamples.kt:acp-chat"
 ```
 
-## 连接方式
+## 连接
 
 ```kotlin
 --8<-- "demo/src/main/kotlin/dev/ai/elements/demo/samples/DocsSamples.kt:acp-agents"
 ```
 
-stdio 是 ACP 定义的传输，可启动子进程。设备需要具备运行该 Agent 的环境。
-WebSocket 使用官方 Kotlin SDK 的实现，连接其他机器；标准远程传输仍在演进，不能把它表述为已经定案的 ACP HTTP 传输。
-cwd 是 Agent 所在机器上的绝对路径。使用结束后关闭 AcpAgent。
+- **stdio** 是 ACP 规范定义的传输。`AcpAgent.process` 启动子进程，适合桌面 JVM 或能运行 Agent 的设备，例如 harness 沙箱。
+- **WebSocket** 连接其他机器。ACP 的远程传输 Streamable HTTP 仍是草案，因此使用 Kotlin SDK 的 WebSocket 传输：每个 text frame 一条 JSON-RPC 消息，与 stdio 相同。[参考服务](../develop/reference-server.md) 位于 `ws://…/acp`。
 
-## 会话、权限与映射
+!!! warning "安全"
+    ACP Agent 能读写其运行机器上的文件并执行命令。只连接可信 Agent；在自己的网络之外使用带认证的 `wss://`。
 
-每个会话对应一个 ACP session。session id 保存在 metadata.acp，下一轮只发送新的用户消息。
-断线后在支持时使用 session/load 恢复，否则以旧消息作为上下文创建新 session。
+`cwd` 是 Agent 机器上的工作目录，按 ACP `session/new` 要求必须为绝对路径。同一 Agent 的会话共享连接，失败后重新连接；使用完毕时关闭 Agent。
 
-| ACP | 聊天表现 |
+## Session
+
+每个聊天会话对应一个 ACP session。ID 保存在回复 `Message.metadata` 的 `acp` 字段，下一轮只发送新用户消息，由 Agent 保持历史。应用重启等原因使 session 丢失时，若 Agent 支持则使用 `session/load` 恢复，否则以之前的对话为上下文新建 session。
+
+## 映射
+
+| ACP | 聊天中的表示 |
 |---|---|
-| agent_message_chunk | 文本、图片文件或来源链接 |
-| agent_thought_chunk | 思考片段 |
-| tool_call / tool_call_update | 工具标题、输入、文本、差异或终端输出 |
-| plan | 计划 |
-| session/request_permission | 允许一次、持续允许或拒绝 |
-| session/cancel | 停止当前任务 |
-| PromptResponse | usage 与完成状态 |
+| `agent_message_chunk` | 文本；图片映射为文件，resource link 映射为来源 |
+| `agent_thought_chunk` | 推理 |
+| `tool_call`、`tool_call_update` | `title` 作为工具名、`rawInput` 作为输入；`content` 的文本、unified diff、terminal 或 `rawOutput` 作为输出；`failed` 为错误 |
+| `plan` | Plan 组件 |
+| `session/request_permission` | 批准选择 allow-once，始终允许选择 allow-always，拒绝选择 reject-once |
+| 停止 | `session/cancel` |
+| `PromptResponse` | 用量；`refusal`、`max_tokens`、`max_turn_requests` 以错误结束本轮 |
 
-ACP 权限回答选择代理提供的选项，不传拒绝理由或编辑参数。
-默认不向代理开放客户端文件系统；需要时提供 AcpFileSystem。当前不声明 terminals 和尚不稳定的 ACP elicitation。
-只连接可信 Agent；跨网络部署需要 wss 与鉴权，因为 Agent 可以修改它运行机器上的文件。
+ACP 权限回答只携带选中的 option，因此提供批准、拒绝和始终允许，不支持理由或修改参数。见 [人工参与](../guides/human-in-the-loop.md)。
+
+## 提供文件
+
+客户端默认不声明文件系统。传入 `AcpFileSystem` 可处理 `fs/read_text_file`，非只读时也处理 `fs/write_text_file`，例如访问 harness 工作区或用户分享的文件夹：
+
+```kotlin
+AcpAgent.webSocket(url, files = object : AcpFileSystem {
+    override suspend fun read(path: String, line: Int?, limit: Int?) = workspaceFile(path).readText()
+})
+```
+
+不提供 terminal 和仍不稳定的 ACP elicitation。

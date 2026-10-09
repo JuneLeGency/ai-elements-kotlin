@@ -3,6 +3,7 @@
 # API reference under site/api/. Preview the pages alone with `uvx zensical serve`.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+python3 tools/check-doc-parity.py
 python3 tools/build-component-docs.py --check
 ./gradlew -q :demo:compileDebugKotlin :dokkaGenerate
 uvx zensical build --clean
