@@ -35,3 +35,6 @@ ComponentCatalogScreenshots 接收 catalog=true，ReleaseScreenshotsTest 接收 
 
 `SharedFoldersTest` 根据系统文件选择器当前目录导航，支持直接打开存储根目录且不显示设备名的界面。
 测试仍通过 App 选择目录，使用 SAF 读取和修改真实文件，并核对共享存储中的最终内容。
+
+选择器测试仅在模拟器注册 UI Automator watcher，处理 CI 中实际观察到的 Pixel Launcher ANR 弹窗，
+用例结束后注销。Demo 自身的 ANR 或崩溃弹窗不会被关闭，仍作为失败信号保留。

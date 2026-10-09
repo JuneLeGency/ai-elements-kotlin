@@ -3,7 +3,8 @@
 ## 0.3.1 (unreleased)
 
 - Shared-folder E2E navigation handles the system picker opening directly in storage or restoring
-  a directory, while retaining the real SAF read/write assertions.
+  a directory, while retaining the real SAF read/write assertions. An emulator-only UI Automator
+  watcher closes the identified Pixel Launcher ANR overlay; target-app errors remain visible.
 
 - Chinese documentation image paths work in GitHub Markdown previews as well as the hosted site;
   documentation checks reject source image links that traverse a directory symlink.

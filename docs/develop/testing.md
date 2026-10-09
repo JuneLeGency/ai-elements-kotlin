@@ -120,3 +120,7 @@ English guide. Component translations belong in `tools/component-usage.zh.json`,
 `SharedFoldersTest` navigates the system picker from its current directory, including a direct
 storage-root view without a device-name entry. It still selects the folder through the app,
 reads and edits the real SAF files, and checks the resulting shared-storage bytes.
+
+The picker test registers an emulator-only UI Automator watcher for the exact Pixel Launcher
+ANR dialog found in CI. It closes that unrelated launcher overlay and unregisters after the case;
+it does not dismiss the demo app's ANR or crash dialogs.

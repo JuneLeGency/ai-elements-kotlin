@@ -19,6 +19,7 @@ import dev.ai.elements.harness.filesystem.FileSystem
 import dev.ai.elements.core.config.ProviderKind
 import dev.ai.elements.core.config.ProviderProfile
 import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -27,7 +28,6 @@ import org.junit.Rule
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.regex.Pattern
 
@@ -50,8 +50,24 @@ class SharedFoldersTest {
         return android.os.ParcelFileDescriptor.AutoCloseInputStream(stdout).use { String(it.readBytes()) }
     }
 
+    /** CI can leave a Pixel Launcher ANR above DocumentsUI; only that identified emulator overlay is handled. */
+    @Before
+    fun handleEmulatorLauncherOverlay() {
+        if (Build.HARDWARE.contains("ranchu")) {
+            device.registerWatcher("saf-pixel-launcher-anr") {
+                val title = device.findObject(By.res("android", "alertTitle"))
+                if (title?.text != "Pixel Launcher isn't responding") return@registerWatcher false
+                val close = device.findObject(By.res("android", "aerr_close"))
+                    ?: return@registerWatcher false
+                close.click()
+                true
+            }
+        }
+    }
+
     @After
     fun cleanUp() {
+        device.removeWatcher("saf-pixel-launcher-anr")
         folders.folders.value.forEach { folders.remove(it.name) }
         shell("rm -rf /sdcard/Documents/agent-share")
     }
@@ -129,17 +145,7 @@ class SharedFoldersTest {
         repeat(3) {
             val node = device.wait(Until.findObject(selector), timeoutMs)
             if (node == null) {
-                if (required) {
-                    val hierarchy = if (Build.HARDWARE.contains("ranchu")) {
-                        runCatching {
-                            ByteArrayOutputStream().use { output ->
-                                device.dumpWindowHierarchy(output)
-                                output.toString("UTF-8")
-                            }
-                        }.getOrElse { "Hierarchy unavailable: ${it.javaClass.simpleName}" }
-                    } else "Hierarchy collection is limited to emulators"
-                    assertNotNull("Not found in the picker: $selector\n[DEBUG-saf-picker] $hierarchy", node)
-                }
+                if (required) assertNotNull("Not found in the picker: $selector", node)
                 return
             }
             try {
