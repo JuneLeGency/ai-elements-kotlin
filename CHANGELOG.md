@@ -5,7 +5,8 @@
 - Complete Chinese onboarding, protocol, harness, rendering and compatibility guides with the same
   executable examples as English. Installation Gradle snippets have one shared source; all 45
   page pairs are checked for example drift before the site builds.
-- Real Compose screenshots preserve rounded cards, transparent gutters and shadows. English and
+- Real Compose screenshots preserve rounded cards, transparent gutters and shadows, including
+  Mermaid WebViews after their asynchronous layout settles. Full-edge assertions reject cropped captures. English and
   Chinese Android workflow recordings show planning, tool approval, execution and streamed replies
   in the READMEs and site; website video playback is user-controlled.
 

@@ -83,11 +83,18 @@ class ComponentCatalogScreenshots {
         }
         // Samples animate forever (persona, streaming JSX): the clock moves only when told.
         compose.mainClock.autoAdvance = false
-        GalleryCatalog.forEach { sample ->
+        val filter = InstrumentationRegistry.getArguments().getString("catalogFilter")
+        val samples = GalleryCatalog.filter { filter == null || it.id in filter.split(",") }
+        samples.forEach { sample ->
             current = sample
             compose.mainClock.advanceTimeBy(2_500)
             Thread.sleep(if (sample.id.startsWith("mermaid") || sample.id in SLOW) 3_000 else 600) // WebViews, decoders
             compose.mainClock.advanceTimeBy(500)
+            compose.waitForIdle()
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            Thread.sleep(250) // Allow AndroidView layout/draw after async WebView resizing.
+            compose.mainClock.advanceTimeBy(32)
+            compose.waitForIdle()
             val image = documentationBitmap(captureLayer)
             File(out, "${sample.id}.png").outputStream().use { image.compress(Bitmap.CompressFormat.PNG, 100, it) }
         }
@@ -101,7 +108,7 @@ class ComponentCatalogScreenshots {
                 }
             }.toString(),
         )
-        assertTrue(out.listFiles()!!.count { it.extension == "png" } == GalleryCatalog.size)
+        assertTrue(samples.isNotEmpty() && samples.all { File(out, "${it.id}.png").isFile })
     }
 
     private companion object {
