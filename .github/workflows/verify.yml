@@ -21,7 +21,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v5
+      - uses: gradle/actions/setup-gradle@v6
       - name: Release version (reusable workflow)
         if: inputs.version != ''
         env:
@@ -65,7 +65,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v5
+      - uses: gradle/actions/setup-gradle@v6
       # The reference server (Pydantic AI + Harness, scripted model: no keys) for the live E2E tests;
       # the emulator reaches it at 10.0.2.2:8788.
       - uses: astral-sh/setup-uv@v7
