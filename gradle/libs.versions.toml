@@ -4,7 +4,7 @@ compileSdk = "37"
 compileSdkMinor = "2"
 androidxCore = "1.19.1"
 agp = "9.4.1"
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 # Material 3 Expressive (MaterialExpressiveTheme, LoadingIndicator, MaterialShapes,
 # ButtonGroup, MotionScheme.expressive) only ships in the 1.5 alpha line; it pulls
 # Compose 1.13.0-alpha01, which we pin explicitly so resolution is predictable.
